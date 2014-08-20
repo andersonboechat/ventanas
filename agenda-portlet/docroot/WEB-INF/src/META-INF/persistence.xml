@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<persistence version="2.0" xmlns="http://java.sun.com/xml/ns/persistence" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://java.sun.com/xml/ns/persistence http://java.sun.com/xml/ns/persistence/persistence_2_0.xsd">
+	<persistence-unit name="agenda-portlet" transaction-type="RESOURCE_LOCAL">
+		<provider>org.hibernate.ejb.HibernatePersistence</provider>
+		<non-jta-data-source>java:comp/env/jdbc/vtnDS</non-jta-data-source>
+		<class>br.com.abware.agenda.persistence.entity.BaseEntity</class>
+		<class>br.com.abware.agenda.persistence.entity.Booking</class>
+		<class>br.com.abware.agenda.persistence.entity.BookingPK</class>
+		<class>br.com.abware.agenda.persistence.entity.Room</class>
+		<properties>
+			<property name="hibernate.dialect" value="org.hibernate.dialect.MySQLDialect"/>  
+			<property name="hibernate.transaction.factory_class" value="org.hibernate.transaction.JDBCTransactionFactory" />  
+			<property name="hibernate.cache.provider_class" value="org.hibernate.cache.HashtableCacheProvider"/> 		
+			<property name="hibernate.query.substitutions" value="true 1,false 0"/>
+			<property name="hibernate.hbm2ddl.auto" value="validate"/>
+		</properties>
+	</persistence-unit>
+</persistence>

@@ -1,0 +1,96 @@
+.ui-growl {
+  top: 40% !important;
+  left: 40% !important; }
+
+.fc-border-separate .ui-widget-header {
+  font-size: 16px; }
+
+.agenda .fc-event-skin {
+  background: none; }
+
+.agenda .fc-day-number {
+  font-family: Georgia;
+  font-weight: bold;
+  font-size: 34px; }
+
+.agenda label {
+  margin: 45px 5px 45px 5px;
+  padding: 40px 0px 40px 40px; }
+
+.agenda .fc-event-skin {
+  border: none;
+  width: 30px !important;
+  height: 40px;
+  float: right; }
+
+.agenda .fc-event-time {
+  display: none; }
+
+.agenda .barbecure1 {
+  background: url("../images/icon_churrasqueira1.png") no-repeat left; }
+
+.agenda .barbecure2 {
+  background: url("../images/icon_churrasqueira2.png") no-repeat left; }
+
+.agenda .movie {
+  background: url("../images/icon_cinema.png") no-repeat left; }
+
+.agenda .gourmet {
+  background: url("../images/icon_gourmet.png") no-repeat left; }
+
+.agenda .party {
+  background: url("../images/icon_festa.png") no-repeat left; }
+
+.agenda .left {
+  width: 74%;
+  text-align: left;
+  border: 0px solid black;
+  padding: 0px 20px 0px 0px;
+  padding-bottom: 12px; }
+
+.agenda .right {
+  text-align: left;
+  border: 0px solid black;
+  margin: 0 !important;
+  padding-bottom: 12px;
+  vertical-align: top; }
+
+.agenda textarea {
+  margin: 25px 5px 25px 5px;
+  width: 700px; }
+
+.agenda .ui-inputmask {
+  display: none; }
+
+.agenda .icon {
+  margin: 0px 0px 0px 0px;
+  padding: 0px 0px 0px 40px;
+  line-height: 14px; }
+
+.ui-scrollpanel {
+  padding: 0px 0px 0px 0px !important;
+  margin: 0px 0px 0px 0px !important; }
+
+.rooms {
+  width: 100%;
+  border: 0px solid black;
+  font-family: Georgia;
+  font-size: 13px; }
+
+.rooms .left {
+  width: 80%;
+  height: 20px;
+  text-align: left;
+  border: 0px solid black;
+  padding: 10px 0px 10px 0px;
+  font-size: 15px; }
+
+.rooms .right {
+  text-align: right;
+  padding: 10px 0px 10px 0px;
+  border: 0px solid black;
+  font-weight: bold; }
+
+.ui-icon {
+  background-image: url("/agenda-portlet/images/icon_churrasqueira1.png"); }
+

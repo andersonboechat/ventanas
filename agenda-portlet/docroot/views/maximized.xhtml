@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+
+<f:view xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:c="http://java.sun.com/jsp/jstl/core"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:ui="http://java.sun.com/jsf/facelets">
+	<h:head>
+		<script type="text/javascript">
+		 /*<![CDATA[*/
+			function teste(date) {	
+				var today = Date.today();
+				var theDate = Date.parseExact(date.getValue(), "dd/MM/yyyy");
+				return (theDate < today ? false : true);
+			} /*]]>*/
+		</script>
+	</h:head>
+	<h:body>
+		#{scheduleBean.onLoad()}
+
+		<f:loadBundle basename="Language_pt_BR" var="msg"/>
+		<p:blockUI block="tab:grid" trigger="tab:agenda-form:calendar" />
+
+		<p:ajaxStatus id="agenda-status" style="text-align: center; position: fixed; width: 250px; margin-left: 40%; border: 0px solid black; z-index: 99999999999999">
+			<f:facet name="start">
+				<div id="loaderImage" style="margin-left: 60px;border: 0px solid red;"/>
+				<h:outputScript library="js" name="loading.js"/>
+				<p:spacer style="width: 100%; height: 12px;"/>
+				<h:messages id="statusStartMsg" for="agenda-status" infoStyle="background: none; width: 250px; text-align: center; font-family: Georgia; font-size: 16px; font-weight: bold; text-shadow: 0 3px 3px #f7f7f7; border: none; margin: 0; padding: 0;" style="margin: 0;"/>
+			</f:facet>
+			<f:facet name="complete">
+				<p:messages for="registerBtn" id="statusCompleteMsg" showDetail="true" showSummary="true"/>
+			</f:facet>
+		</p:ajaxStatus>
+<h:form id="tab">
+		<h:panelGrid id="grid" columns="2" style="width: 100%" styleClass="agenda" columnClasses="left,right">
+			<p:column style="border: none !important">
+				<h:form id="agenda-form">
+					<p:inputMask id="selectedDate" value="#{scheduleBean.bookingDate}" mask="99/99/9999" widgetVar="selectedDate">
+						<f:convertDateTime pattern="dd/MM/yyyy" />
+					</p:inputMask>
+					<p:schedule id="calendar" value="#{scheduleBean.model}" editable="true" widgetVar="calendar" 
+								locale="pt" draggable="false" resizable="false" styleClass="agenda" aspectRatio="0.9" 
+								leftHeaderTemplate="prev" centerHeaderTemplate="title" rightHeaderTemplate="next">
+						<p:ajax event="dateSelect" listener="#{scheduleBean.onDateSelect}" 
+								update=":booking-dialog-form:bookingDetails,selectedDate" oncomplete="if (teste(selectedDate)) bookingDialog.show()"/>
+					</p:schedule>
+				</h:form>
+			</p:column>
+			<p:column>
+				<p:fieldset legend="Espaços" styleClass="agenda">
+					<ui:include src="rooms.xhtml"/>
+				</p:fieldset>
+				<br/><br/>
+				<p:fieldset legend="Meus Alugueis" styleClass="agenda">
+					<ui:include src="bookings.xhtml"></ui:include>
+				</p:fieldset>
+			</p:column>
+		</h:panelGrid>
+</h:form>
+		<ui:include src="booking_dialog.xhtml"></ui:include>
+		<ui:include src="rooms_dialog.xhtml"></ui:include>	
+	</h:body>
+</f:view>

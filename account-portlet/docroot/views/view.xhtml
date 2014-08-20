@@ -1,0 +1,218 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+
+<f:view
+	xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:c="http://java.sun.com/jsp/jstl/core"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:ui="http://java.sun.com/jsf/facelets">
+	<h:head>
+		<style>
+			.menu-cmds {
+				width: 100%; border: none !important; margin: 5px 0px 5px 0px;
+			}
+			.menu-cmds-col1 {
+				width: 20%;border: none !important; padding: 0px 5px 0px 0px;
+			}
+			.menu-cmds-col2 {
+				width: 20%;border: none !important; 
+			}
+			.menu-cmds-col3 {
+				width: 60%;border: none !important;
+			}
+			
+			.user {
+				border: 1px solid white;
+			}
+			
+			.user, .left, .right  {
+				font-family: Arial;
+				font-size: 12px;
+			}
+
+			.left {
+				width: 50px;border: 1px solid white; vertical-align: top;
+			}
+			
+			.right {
+				border: 1px solid white;
+			}
+			
+			.my-account, .my-account-col1, .my-account-col2, .my-account-col3 {
+				font-family: Arial;
+				font-size: 12px;
+			}
+			
+			.my-account-col1, .my-account-col2, .my-account-col3 {
+				white-space: nowrap;
+				vertical-align: top;
+
+				
+			}
+			
+			.my-account-col1 {
+				width: 5%;				
+			}
+			
+			.my-account-col2 {
+				width: 55%;
+				padding: 0px 10px 0px 0px;
+			}
+
+			.my-account-col3 {
+				width: 40%;
+			}
+			
+			input[type='text'] {
+				width: 200px;
+				margin: 0px 0px 10px 0px;
+			}
+			
+			select {
+				width: 200px;
+			}
+			
+			label {
+				margin: 0px 10px 0px 0px;
+			}
+
+			img {
+				margin: 0px 10px 0px 0px;
+				border: 1px solid #ccc; 
+				width: 100px; 
+				height: 150px;
+			}
+		</style>
+	</h:head>
+	<h:body>
+		<p:growl id="outputMsg"/>
+		<p:tabView id="tab" styleClass="account" style="font-style: normal;  height: 360px; width: 680px" activeIndex="0" cache="false" >
+			<p:tab title="Minha Conta"><br/>
+				<h:form>
+					<h:outputText value="#{accountMgmBean.user.fullName} - Proprietario" style="font-family: Arial; font-size: 14px;"/>
+					<p:separator style="border: 1px solid #ccc;"/> <br/>
+					<h:panelGrid columns="3" columnClasses="my-account-col1,my-account-col2,my-account-col3" styleClass="my-account" style="margin: 10px 0px 20px 0px;" cellpadding="10">
+						<p:column>
+					        <p:graphicImage id="portrait" value="#{accountMgmBean.user.portraitPath}"/><br/>
+							<p:commandLink value="Alterar Foto" onclick="uploadDialog.show()"/>
+						</p:column>
+						<p:column>
+							<h:panelGrid columns="2">
+								<p:outputLabel for="email" value="Email"/>
+								<p:inputText id="email" value="#{accountMgmBean.user.emailAddress}"/>
+								<p:outputLabel for="firstName" value="Primeiro nome"/>
+								<p:inputText id="firstName" value="#{accountMgmBean.user.firstName}"/>
+								<p:outputLabel for="lastName" value="Último nome"/>
+								<p:inputText id="lastName" value="#{accountMgmBean.user.lastName}"/>
+								<p:outputLabel for="birthday" value="Nascimento"/>
+								<p:calendar id="birthday" mode="popup" value="#{accountMgmBean.user.contact.birthday}" pattern="dd/MM/yyyy" 
+											navigator="true" yearRange="c-100:c+100" showButtonPanel="true" lang="pt"/>
+								<p:outputLabel for="male" value="Sexo"/>
+								<p:selectOneMenu id="male" value="#{accountMgmBean.user.contact.male}">
+									<f:selectItem itemLabel="Masculino" itemValue="true" />
+									<f:selectItem itemLabel="Feminino" itemValue="false" />
+								</p:selectOneMenu>
+							</h:panelGrid>
+						</p:column>
+						<p:column>
+							<p:fieldset legend="Troca de Senha" style="margin-top: 0px; margin-bottom: 10px;">
+								<h:panelGrid columns="2">
+									<p:outputLabel for="pwd" value="Senha Atual" styleClass="my-account"/>
+									<p:password id="pwd" style=" width: 70px; margin-bottom: 10px"/>
+									<p:outputLabel for="newpwd" value="Nova Senha" styleClass="my-account"/>
+									<p:password id="newpwd" style=" width: 70px; margin-bottom: 10px"/>
+									<p:outputLabel for="pwdconf" value="Confirma Nova Senha" styleClass="my-account"/>
+									<p:password id="pwdconf" style="width: 70px; margin-bottom: 10px"/>
+								</h:panelGrid>
+							</p:fieldset>
+						</p:column>
+					</h:panelGrid>
+	
+					<p:commandButton value="Salvar" actionListener="#{accountMgmBean.onSaveUser}" update=":outputMsg" style="float: right; width: 70px; margin: 0px 0px 10px 5px;"/>
+				</h:form>
+			</p:tab>
+			<p:tab title="Apartamentos">
+				<h:form>
+					<h:panelGrid columns="3" styleClass="menu-cmds" columnClasses="menu-cmds-col1,menu-cmds-col2,menu-cmds-col3">
+						<p:commandButton value="Adicionar Usuário" actionListener="#{accountMgmBean.onNewUser}" 
+										partialSubmit="true" process="@this" update=":userForm:userGrid" oncomplete="userDialog.show()"/>
+						<p:commandButton value="Excluir Usuários" actionListener="#{accountMgmBean.onDeleteUser}" 
+										partialSubmit="true" process="@this,dataTable" update="dataTable,:outputMsg"/>
+						<p:selectOneMenu id="flat" value="#{accountMgmBean.flatIndex}" style="float: right">
+							<c:forEach var="flat" varStatus="counter" items="#{accountMgmBean.flats}">
+								<f:selectItem itemLabel="#{flat.name}" itemValue="#{counter.index}"/>
+							</c:forEach>  
+						    <p:ajax listener="#{accountMgmBean.onSelectFlat}" update="dataTable"/>
+						</p:selectOneMenu>
+					</h:panelGrid>
+					<p:dataTable id="dataTable" var="user" value="#{accountMgmBean.model}"  
+					             paginator="true" rows="5" paginatorPosition="bottom" 
+					             paginatorTemplate="{CurrentPageReport} {PreviousPageLink} {PageLinks} {NextPageLink}" 
+					             selection="#{accountMgmBean.selectedUsers}" rowKey="#{user.userId}" >
+					    <p:ajax event="page" partialSubmit="true" process="name"/>
+					    
+					    <f:facet name="header">Usuarios</f:facet>
+
+						<p:column selectionMode="multiple" style="width:2%" disabledSelection="#{accountMgmBean.hasPermission(user) == false}"/>
+
+					    <p:column id="name" headerText="Nome" style="width:76%" >
+					        <h:outputText value="#{user.fullName}" />
+					    </p:column>
+
+					    <p:column id="role" headerText="Tipo" style="width:20%">
+							<p:selectOneMenu id="sel1" value="#{user.userGroupRole.roleId}" style="width:100%" disabled="#{accountMgmBean.hasPermission(user) == false}">  
+								<f:selectItems value="#{accountMgmBean.roles}" 
+												var="role" itemLabel="#{role.getTitle(locale)}" itemValue="#{role.roleId}" />
+								<p:ajax event="valueChange" update=":outputMsg"/>
+							</p:selectOneMenu>
+					    </p:column>
+
+						<p:column headerText="Editar" style="width:2%">
+							<p:commandLink value="Editar" actionListener="#{accountMgmBean.onEditUser(user.userId)}" 
+											update=":userForm:userGrid" disabled="#{accountMgmBean.hasPermission(user) == false}"
+											oncomplete="userDialog.show();" partialSubmit="true" process="@this"/>
+						</p:column>
+					</p:dataTable>
+				</h:form>
+			</p:tab>
+			<p:tab title="Ajuda">
+			</p:tab>
+		</p:tabView>
+		<h:form id="userForm">
+			<p:dialog header="Novo Usuário" widgetVar="userDialog" draggable="false" resizable="false" modal="true" closable="true" visible="false">
+				<h:panelGrid id="userGrid" columns="2" columnClasses="left,right" styleClass="user" style="margin: 10px 0px 20px 0px;">
+					<p:column>
+				        <p:graphicImage id="portrait" value="#{accountMgmBean.user.portraitPath}"/>
+						<p:commandLink value="Alterar Foto" onclick="uploadDialog.show()"/>
+					</p:column>
+					<p:column>
+						<h:panelGrid columns="2">
+							<p:outputLabel for="email" value="Email"/>
+							<p:inputText id="email" value="#{accountMgmBean.user.emailAddress}"/>
+							<p:outputLabel for="firstName" value="Primeiro nome"/>
+							<p:inputText id="firstName" value="#{accountMgmBean.user.firstName}"/>
+							<p:outputLabel for="lastName" value="Último Nome"/>
+							<p:inputText id="lastName" value="#{accountMgmBean.user.lastName}"/>
+							<p:outputLabel for="birthday" value="Data de Nascimento"/>
+							<p:calendar id="birthday" mode="popup" value="#{accountMgmBean.user.contact.birthday}" pattern="dd/MM/yyyy" 
+										navigator="true" yearRange="c-100:c+100" showButtonPanel="true" lang="pt"/>
+							<p:outputLabel for="male" value="Sexo"/>
+							<p:selectOneMenu id="male" value="#{accountMgmBean.user.contact.male}">  
+								<f:selectItem itemLabel="Masculino" itemValue="true" />
+								<f:selectItem itemLabel="Feminino" itemValue="false" />
+							</p:selectOneMenu>
+						</h:panelGrid>
+					</p:column>
+				</h:panelGrid>
+				<p:commandButton value="Salvar" actionListener="#{accountMgmBean.onSaveUser}" update=":outputMsg" oncomplete="userDialog.hide()" style="float: right; width: 70px; margin: 0px 0px 10px 5px;"/>
+				<p:commandButton value="Cancelar" actionListener="#{accountMgmBean.onCancelUser}" oncomplete="userDialog.hide()" style="float: right; width: 70px; margin: 0px 0px 10px 5px;"/>
+			</p:dialog>
+			<p:dialog widgetVar="uploadDialog">
+					<p:fileUpload fileUploadListener="#{accountMgmBean.onUpload}" 
+						allowTypes="/(\.|\/)(gif|jpe?g|png)$/" mode="advanced" showButtons="false" 
+						label="Selecionar Foto" update="portrait,:outputMsg" process="@this" style="width:550px" oncomplete="uploadDialog.hide()"/>			
+			</p:dialog>
+		</h:form>
+	</h:body>
+</f:view>

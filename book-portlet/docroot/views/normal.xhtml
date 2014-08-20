@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+
+<f:view xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:c="http://java.sun.com/jsp/jstl/core"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:fn="http://java.sun.com/jsp/jstl/functions"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:ui="http://java.sun.com/jsf/facelets">
+	<h:head></h:head>
+	<h:body>
+		#{bookBean.onLoad()}
+
+		<f:loadBundle basename="Language_pt_BR" var="msg"/>
+		
+		<h:form id="form" >
+			<p:ajaxStatus id="status" style="text-align: center; position: fixed; width: 250px; margin-left: 40%; border: 0px solid black; z-index: 99999999999999">
+				<f:facet name="start">
+					<div id="loaderImage" style="margin-left: 60px;border: 0px solid red;"/>
+					<h:outputScript library="js" name="loading.js"/>
+					<p:spacer style="width: 100%; height: 12px;"/>
+					<h:messages id="statusStartMsg" for="status" infoStyle="background: none; width: 250px; text-align: center; font-family: Georgia; font-size: 16px; font-weight: bold; text-shadow: 0 3px 3px #f7f7f7; border: none; margin: 0; padding: 0;" style="margin: 0;"/>
+				</f:facet>
+				<f:facet name="complete">
+					<p:messages for="registerBtn" id="statusCompleteMsg" showDetail="true" showSummary="true"/>
+				</f:facet>
+			</p:ajaxStatus>
+
+			<p:growl id="globalMsgs" severity="warn,error,fatal"/>
+
+			<p:panel styleClass="complaint-book">
+				<f:facet name="header">
+					<h:outputText value="Registrar Ocorrência" style="font-style: normal; font-size: 13px;"></h:outputText>
+				</f:facet>
+
+				<h:panelGrid columns="1" styleClass="book-view-header" columnClasses="left,right" style="font-style: normal; height: 310px">
+					<c:set var="occurrence" value="#{bookBean.occurrences.get(0)}" />
+
+					<h:panelGrid columns="2" columnClasses="left,left" style="margin-bottom: 8px;">
+						<p:commandButton id="complainBtn" value="#{msg['new.complaint']}" actionListener="#{bookBean.onNewComplain}" update="@all" disabled="#{occurrence.id == 0}" global="false" partialSubmit="true" process="@this" />
+						<p:commandButton id="suggetionBtn" value="#{msg['new.suggestion']}" actionListener="#{bookBean.onNewSuggestion}" update="@all" disabled="#{occurrence.id == 0}" global="false" partialSubmit="true" process="@this" />
+					</h:panelGrid>
+
+					<h:outputLabel id="occurrenceTitle" for="occurrenceText" styleClass="normal-header" value="#{occurrence.type.label} #{occurrence.code}" />
+
+					<div style="height: 5px">
+						<h:outputText id="occurrenceDate" value="#{occurrence.date}" styleClass="record-time-normal" >
+							<f:convertDateTime pattern="'registrada em' dd 'de' MMMM 'de' yyyy 'às' HH:mm" />
+						</h:outputText>
+					</div>
+
+					<p:inputTextarea autoResize="false" value="#{occurrence.text}" styleClass="textarea-normal" style="display:inline; float: none; background-color: rgb(238, 238, 238);" rendered="${occurrence.id != 0}" readonly="true" />
+					<p:inputTextarea id="occurrenceText" required="true" requiredMessage="O texto da ${fn:toLowerCase(occurrence.type.label)} não foi informado" 
+									counter="remaining-chars" counterTemplate="#{msg['text.counter']} {0}" 
+									maxlength="1000"
+									styleClass="textarea-normal" 
+									value="#{bookBean.text}" style="display:inline; float: none;" rendered="#{occurrence.id == 0}"/>
+					<h:outputLabel id="remaining-chars" rendered="#{occurrence.id == 0}"/>
+
+					<h:panelGrid columns="2" columnClasses="right,right" style="margin-top: 8px !important;">
+						<p:commandButton id="cancelBtn" value="#{msg.cancel}" actionListener="#{bookBean.onCancel}" update="@all" disabled="#{occurrence.id != 0}" global="false" partialSubmit="true" process="@this"/>
+						<p:commandButton id="registerBtn" value="#{msg.register}" actionListener="#{bookBean.onSave}" update="@all" disabled="#{occurrence.id != 0}" global="true"/>
+					</h:panelGrid>
+				</h:panelGrid>
+			</p:panel>
+		</h:form>
+	</h:body>
+</f:view>

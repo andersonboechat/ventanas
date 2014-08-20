@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+
+<f:view xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:c="http://java.sun.com/jsp/jstl/core"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:ui="http://java.sun.com/jsf/facelets">
+	<h:form id="rooms-form">
+		<h:panelGrid columns="2" style="border: 0px solid black; width: 100%" styleClass="rooms" columnClasses="left,right">
+			<c:forEach var="room" items="#{scheduleBean.rooms}" varStatus="counter">
+				<h:outputText value="${room.name}" styleClass="icon #{scheduleBean.getRoomStyleClass(room.getId())}" style="border: 0px solid black; padding: 10px 0px 10px 40px;" rendered="${room.available}"/>
+				<p:commandLink value="#{msg['rooms.details']}" update=":rooms-dialog-form:gallery" oncomplete="roomDialog.show()" partialSubmit="true" process="@this" style="text-decoration: none;" rendered="${room.available}">
+					<f:setPropertyActionListener target="#{scheduleBean.room}" value="#{scheduleBean.rooms.get(counter.index)}" />
+				</p:commandLink>
+			</c:forEach>
+		</h:panelGrid>
+	</h:form>
+</f:view>

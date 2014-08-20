@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+
+<f:view xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:c="http://java.sun.com/jsp/jstl/core"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:ui="http://java.sun.com/jsf/facelets">
+	<h:head>
+		<script type="text/javascript">
+		 /*<![CDATA[*/
+			function teste(date) {
+				var today = Date.today();
+				var theDate = date;
+				return (theDate < today ? false : true);
+			} /*]]>*/
+		</script> 	
+	</h:head>
+	<h:body>
+		#{scheduleBean.onLoad()}
+
+		<f:loadBundle basename="Language_pt_BR" var="msg"/>
+
+		<p:ajaxStatus id="agenda-status" style="text-align: center; position: fixed; width: 250px; margin-right: 40%; border: 0px solid black; z-index: 99999999999999">
+			<f:facet name="start">
+				<div id="loaderImage" style="margin-left: 60px;border: 0px solid red;"/>
+				<h:outputScript library="js" name="loading.js"/>
+				<p:spacer style="width: 100%; height: 12px;"/>
+				<h:messages id="statusStartMsg" for="agenda-status" infoStyle="background: none; width: 250px; text-align: center; font-family: Georgia; font-size: 16px; font-weight: bold; text-shadow: 0 3px 3px #f7f7f7; border: none; margin: 0; padding: 0;" style="margin: 0;"/>
+			</f:facet>
+			<f:facet name="complete">
+				<p:messages for="bookingBtn" id="statusCompleteMsg" showDetail="true" showSummary="true"/>
+			</f:facet>
+		</p:ajaxStatus>
+				
+
+		<p:tabView id="tab" styleClass="agenda" style="font-style: normal;  height: 360px;" activeIndex="0" cache="false" >
+			<p:tab title="Reservar">
+				<p:outputPanel layout="block" style="font-family: Georgia; color: #6e6e6e; font-size: 13px; margin: 5px 0px 15px 0px;">
+					<h:outputText value="Clique no dia que deseja alugar um espaço."/>
+				</p:outputPanel>
+				<h:form id="agenda-form">
+					<p:calendar id="calendar" mode="inline" locale="pt" style="margin: 15px 0px 15px 0px;" widgetVar="calendar">
+						<p:ajax event="dateSelect" listener="#{scheduleBean.onDateSelect}" partialSubmit="true"
+								update=":booking-dialog-form:bookingDetails" 
+								oncomplete="if (teste(calendar.getDate())) bookingDialog.show()"/>
+					</p:calendar>
+				</h:form>
+			</p:tab>
+			<p:tab title="Meus Aluguéis">
+				<ui:include src="bookings.xhtml"/>
+			</p:tab>
+			<p:tab title="Espaços">
+				<ui:include src="rooms.xhtml"/>
+			</p:tab>
+		</p:tabView>
+		<ui:include src="booking_dialog.xhtml"/>
+		<ui:include src="rooms_dialog.xhtml"/>
+	</h:body>
+</f:view>

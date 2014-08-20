@@ -1,0 +1,181 @@
+.complaint-book {
+	background: url('../resources/images/book.png') no-repeat;
+	font-family: Georgia;
+	font-style: italic;
+	color: #6e6e6e;
+}
+
+.book-view-header {
+	width: 100%; 
+	margin-bottom: 10px;
+}
+
+.book-view-header .left {
+	width: 50%; 
+	text-align: left;
+} 
+
+.book-view-header .right {
+	width: 100%;
+	text-align: right;
+}
+
+.book-page-footer {
+	border: none !important;
+	width: 450px !important;
+	padding: 0;
+	height: 15px;
+	background: none;
+	margin-top: 0px !important;
+}
+
+.book-page-footer-left {
+	margin-left: 100px;
+}
+
+.book-page-footer-right {
+	margin-left: 30px;
+}
+
+.book-page-footer .left {
+	width: 35%;
+	margin-top: 0px !important;
+	padding: 0;
+	border: none !important;
+}	
+
+.book-page-footer .right {
+	text-align: right; 
+	padding: 0;
+	font-size: 14px; 
+	height: 22px;
+	margin-top: 0px !important;
+	border: none !important;
+}
+
+.complaint-book .book-page-header {
+	text-align: left;
+	font-size: 13px;
+	font-weight: bold;
+	text-shadow: 0 1px 1px #f7f7f7;
+	margin-top: 0px;
+	width: 400px;
+	border: 0px solid red;
+}
+
+.complaint-book .book-page-header-left {
+	margin-left: 100px;
+}
+
+.complaint-book .book-page-header-right {
+	margin-left: 30px;
+}
+
+.normal-header {
+	font-family: Georgia;
+	color: #6e6e6e;	
+	text-align: left;
+	font-size: 13px;
+	font-weight: bold;
+	text-shadow: 0 1px 1px #f7f7f7;
+	margin-top: 0px;
+	width: 100%;
+	border: 0px solid red;
+}
+
+.record-time-normal {
+	font-family: Georgia;
+	color: #6e6e6e;	
+	font-size: 12px;
+	font-style: normal;
+	padding-top: 0px !important;
+	height: 25px !important;
+	line-height: 25px !important;
+	border: 0px solid yellow;	
+}
+
+.complaint-book .record-time {
+	font-size: 12px;
+	font-style: normal;
+	margin: 0px 0px 0px 100px !important;
+	padding-top: 0px !important;
+	height: 25px !important;
+	line-height: 25px !important;
+	border: 0px solid yellow;
+}
+
+.complaint-book .textarea {
+	-moz-box-shadow: none !important;
+	-webkit-box-shadow: none !important;
+	box-shadow: none !important;
+	border: 1px solid rgb(238, 238, 238) !important; 
+	border-spacing: none !important;
+	border-radius: 0px;
+	width: 430px !important;
+	height: 430px !important;
+	overflow-y: auto;
+	padding: 10px 10px 5px 10px !important; 
+	background: none !important; 
+	font-size: 15px !important;
+	font-family: Georgia !important; 
+	font-style: italic !important;
+	margin-left: 100px;
+	margin-bottom: 0px !important;
+	margin-top: 0px !important;
+}
+
+.complaint-book .textarea-right {
+	-moz-box-shadow: none !important;
+	-webkit-box-shadow: none !important;
+	box-shadow: none !important;
+	border: 1px solid rgb(238, 238, 238) !important; 
+	width: 430px !important;
+	height: 430px !important;
+	overflow-y: auto;
+	padding: 10px 10px 5px 10px !important; 
+	background: none !important; 
+	font-size: 15px !important;
+	font-family: Georgia !important; 
+	font-style: italic !important;
+	margin-left: 30px;
+	margin-right: 90px;
+	margin-bottom: 0px !important;
+	margin-top:  0px !important;
+}
+
+.textarea-normal {
+	width: 93% !important;
+	height: 160px !important;
+	overflow-y: auto;
+	padding: 10px 10px 5px 10px !important; 
+	font-size: 15px !important;
+	font-family: Georgia !important; 
+	font-style: italic !important;
+}
+
+.ui-datatable {
+	background-position: center bottom;
+	height: 680px;
+}
+
+.ui-datatable-data {
+	padding-top: 50px;
+	background: none !important;
+	border: none !important;
+}
+
+.ui-datatable-even, .ui-datatable-odd {
+	background: none !important;
+	border: none !important;
+	margin-top: 50px;
+	height: 180px !important;
+	padding-right: 0px !important;
+}
+
+.ui-messages-warn-icon {
+	background-position:0 -264px !important;
+}
+
+.ui-growl-image-warn {
+	background-position:0 -264px !important;
+}
