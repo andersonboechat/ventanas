@@ -1,11 +1,14 @@
 package br.com.abware.complaintbook.persistence.entity;
 
-import java.io.Serializable;
-import javax.persistence.*;
-
 import org.hibernate.validator.constraints.NotEmpty;
 
 import java.util.Date;
+
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.Table;
+import javax.persistence.Temporal;
+import javax.persistence.TemporalType;
 
 
 /**
@@ -14,18 +17,17 @@ import java.util.Date;
  */
 @Entity
 @Table(name="cb_answer")
-public class Answer implements Serializable {
+public class Answer extends BaseEntity {
 	private static final long serialVersionUID = 1L;
-
-	@Id
-	@GeneratedValue
-	private int id;
 
 	@Temporal(TemporalType.TIMESTAMP)
 	private Date date;
 
 	@NotEmpty
 	private String text;
+
+	@Column(columnDefinition="bit")
+	private boolean draft;
 
 	private long userId;
 
@@ -37,14 +39,6 @@ public class Answer implements Serializable {
 
 	public Answer() {
 		// TODO Auto-generated constructor stub
-	}
-
-	public int getId() {
-		return this.id;
-	}
-
-	public void setId(int id) {
-		this.id = id;
 	}
 
 	public Date getDate() {
@@ -61,6 +55,14 @@ public class Answer implements Serializable {
 
 	public void setText(String text) {
 		this.text = text;
+	}
+
+	public boolean getDraft() {
+		return draft;
+	}
+
+	public void setDraft(boolean draft) {
+		this.draft = draft;
 	}
 
 	public long getUserId() {

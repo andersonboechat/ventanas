@@ -11,13 +11,20 @@ import javax.faces.bean.ManagedBean;
 import javax.faces.bean.ViewScoped;
 import javax.faces.context.FacesContext;
 import javax.faces.event.ActionEvent;
+import javax.mail.internet.InternetAddress;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.log4j.Logger;
 import org.primefaces.event.data.PageEvent;
 
+import com.liferay.mail.service.MailServiceUtil;
+import com.liferay.portal.kernel.io.unsync.UnsyncStringWriter;
+import com.liferay.portal.kernel.mail.MailMessage;
 import com.liferay.portal.kernel.util.ResourceBundleUtil;
+import com.liferay.portal.kernel.velocity.VelocityContext;
+import com.liferay.portal.kernel.velocity.VelocityEngineUtil;
 import com.liferay.portal.model.User;
+import com.liferay.util.ContentUtil;
 
 import br.com.abware.complaintbook.AnswerModel;
 import br.com.abware.complaintbook.OccurrenceModel;
@@ -46,10 +53,11 @@ public class BookBean {
 
 		try {
 			this.occurrence = new OccurrenceModel();
-			this.occurrences = OccurrenceModel.getUserOccurrences(UserHelper.getLoggedUser().getUserId());
+			this.occurrences = occurrence.getUserOccurrences(UserHelper.getLoggedUser().getUserId());
 			logger.debug("Amount of occurrence found: " + occurrences.size());
 			if (CollectionUtils.isEmpty(occurrences)) {
 				OccurrenceModel occurrence = new OccurrenceModel();
+				occurrences = new ArrayList<OccurrenceModel>();
 				occurrence.setId(-1);
 				occurrences.add(0, occurrence);
 			}
@@ -146,6 +154,65 @@ public class BookBean {
 
 		logger.trace("Method out");	
 	}
+	
+	public void sendNotification(OccurrenceModel occurrence) {
+		try {
+			logger.info("Enviando notificacao da ocorrencia " + occurrence.getId());
+
+			String mailBodyTemplate = ContentUtil.get("occurrence-created-notify.vm");
+			logger.debug(mailBodyTemplate);
+
+			VelocityContext variables = VelocityEngineUtil.getStandardToolsContext();
+			variables.put("occurrence", occurrence.getText());
+			variables.put("resident", getOccurrenceFooter(String.valueOf(occurrence.getId())));
+			UnsyncStringWriter writer = new UnsyncStringWriter();
+			VelocityEngineUtil.mergeTemplate("OCN", mailBodyTemplate, variables, writer);
+
+			String mailBody = writer.toString();
+			logger.debug(mailBody);
+			
+			String mailFrom = "administracao@ventanasresidencial.com.br";
+			String mailTo = "suporte@ventanasresidencial.com.br";
+
+			MailMessage mailMessage = new MailMessage();
+			mailMessage.setFrom(new InternetAddress(mailFrom));
+			mailMessage.setTo(new InternetAddress(mailTo));
+			//mailMessage.setCC(new InternetAddress("sindico@ventanasresidencial.com.br"));
+			mailMessage.setSubject("[Ventanas Portal] Nova ocorrência");		
+			mailMessage.setBody(mailBody);
+			mailMessage.setHTMLFormat(true);
+			MailServiceUtil.sendEmail(mailMessage);
+
+			logger.info("Sucesso no envio da notificacao da ocorrencia " + occurrence.getId());
+			
+			logger.info("Enviando confirmacao de registro da ocorrencia " + occurrence.getId());
+
+			mailBodyTemplate = ContentUtil.get("occurrence-created-confirm.vm");
+			logger.debug(mailBodyTemplate);
+
+			variables = VelocityEngineUtil.getStandardToolsContext();
+			variables.put("occurrence", occurrence);
+			writer = new UnsyncStringWriter();
+			VelocityEngineUtil.mergeTemplate("OCC", mailBodyTemplate, variables, writer);
+
+			mailBody = writer.toString();
+			logger.debug(mailBody);
+			
+			mailTo = occurrence.getUser().getEmailAddress();
+
+			mailMessage = new MailMessage();
+			mailMessage.setFrom(new InternetAddress(mailFrom));
+			mailMessage.setTo(new InternetAddress(mailTo));
+			mailMessage.setSubject("[Ventanas Portal] " +  occurrence.getType().getLabel() + " registrada com sucesso");		
+			mailMessage.setBody(mailBody);
+			mailMessage.setHTMLFormat(true);
+			MailServiceUtil.sendEmail(mailMessage);
+
+			logger.info("Sucesso no envio da confirmacao de registro da ocorrencia " + occurrence.getId());
+		} catch (Exception e) {
+			logger.error("Falha no envio da confirmacao de registro da ocorrencia " + occurrence.getId(), e);
+		} 
+	}
 
 	public void onSave(ActionEvent event) {
 		logger.trace("Method in");
@@ -156,7 +223,8 @@ public class BookBean {
 			try {
 				occurrence.setText(text);
 	
-				OccurrenceModel.doOccurrence(occurrence);
+				new OccurrenceModel().doOccurrence(occurrence);
+				sendNotification(occurrence);
 				setMessages(FacesMessage.SEVERITY_WARN, event.getComponent().getClientId(), 
 							"register.success", occurrence.getType().getLabel().toLowerCase());
 
@@ -222,7 +290,7 @@ public class BookBean {
 			if (id == 0) {
 				occurrence = occurrences.get(0);
 			} else {
-				occurrence = OccurrenceModel.getOccurrence(id);
+				occurrence = new OccurrenceModel().getOccurrence(id);
 			}
 
 			logger.debug("occurrenceId: " + occurrenceId + "; Occurrence: " + occurrence.toString());			

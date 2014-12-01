@@ -40,7 +40,7 @@
 				</h:panelGrid>
 			</h:panelGrid>
 
-			<p:dataTable widgetVar="thebook" id="book" var="occurrence" value="#{bookBean.occurrences}" rows="1" paginator="true" paginatorPosition="top" emptyMessage="#{msg['book.empty']}" styleClass="complaint-book">
+			<p:dataTable widgetVar="thebook" id="book" var="occurrence" value="#{bookBean.occurrences}" rows="1" paginator="true" paginatorPosition="top" emptyMessage="#{msg['empty.book']}" styleClass="complaint-book">
 				<p:ajax event="page" listener="#{bookBean.onPaging}" update=":form:statusStartMsg" disabled="${bookBean.occurrences.get(0).id == 0}"/>
 				<p:column style="border: 0px solid red; padding-top: 20px; background: none; width: 50%; margin: 0;" layout="block" styleClass="complaint-book">
 					<h:outputLabel for="occurrenceText" styleClass="book-page-header book-page-header-left" value="#{occurrence.type.label} #{occurrence.code}"/>

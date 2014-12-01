@@ -1,7 +1,6 @@
-<?xml version="1.0"?>
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<?xml version="1.0" encoding="ISO-8859-1"?>
 
-<f:view
+<f:view xmlns="http://www.w3.org/1999/xhtml"
 	xmlns:c="http://java.sun.com/jsp/jstl/core"
 	xmlns:f="http://java.sun.com/jsf/core"
 	xmlns:fn="http://java.sun.com/jsp/jstl/functions"
@@ -12,45 +11,79 @@
 <h:body>
 	<f:loadBundle basename="Language_pt_BR" var="msg"/>
 	
-	<h:panelGrid columns="2">
-		<h:column id="column1">
-			<p:panelGrid columns="2">
-				<p:column>
-					<p:outputText value="#{bookAdmin.occurrence.type.label} - #{bookAdmin.occurrence.code}"/>
-					<c:if test="#{bookAdmin.occurrence.user}">
-					<br/><p:outputText value="#{bookAdmin.occurrence.user.fullName}"/>
-					</c:if>
-				</p:column>
-				<p:column>
-					<h:outputText value="#{occurrence.date}" styleClass="record-time" rendered="true">
-						<f:convertDateTime pattern="'registrada em' dd 'de' MMMM 'de' yyyy 'Ã s' HH:mm" />
-					</h:outputText>
-				</p:column>
-			</p:panelGrid>
-			<p:outputPanel id="occurrenceText" layout="block" styleClass="textarea">#{bookAdmin.occurrence.text}</p:outputPanel>
-			<p:separator></p:separator>
-			<p:inputTextarea id="answerText" requiredMessage="O texto da resposta nÃ£o foi informado" 
-							counter="remaining-chars" counterTemplate="#{msg['text.counter']} {0}" 
-							maxlength="1000"
-							styleClass="textarea" 
-							value="#{bookAdmin.text}" style="display:inline; float: none;"/>
-			<h:outputLabel id="remaining-chars"/>
-		</h:column>
-		<h:column>
-			<p:dataTable widgetVar="thebook" id="book" var="occurrence" value="#{bookAdmin.occurrences}" rows="10" 
-				paginator="true" paginatorPosition="top" emptyMessage="#{msg['book.empty']}" styleClass="complaint-book"
-				selectionMode="single">
-				<p:panelGrid columns="2">
-					<p:column>#{occurrence.type.label} #{occurrence.code}</p:column>
-					<p:column>
-						<h:outputText value="#{occurrence.date}" styleClass="record-time">
-							<f:convertDateTime pattern="'registrada em' dd 'de' MMMM 'de' yyyy 'Ã s' HH:mm" />
-						</h:outputText>
-					</p:column>
-				</p:panelGrid>
-				<p:commandLink actionListener="onSelect" value="#{occurrence.text}" update="column1"/>
-			</p:dataTable>
-		</h:column>
-	</h:panelGrid>
+	<h:form id="adm-book-form">
+		<p:ajaxStatus id="status" style="text-align: center; position: fixed; width: 250px; margin-left: 40%; border: 0px solid black; z-index: 99999999999999">
+			<f:facet name="start">
+				<div id="loaderImage" style="margin-left: 60px;border: 0px solid red;"/>
+				<h:outputScript library="js" name="loading.js"/>
+				<p:spacer style="width: 100%; height: 12px;"/>
+				<h:messages id="statusStartMsg" for="status" infoStyle="background: none; width: 250px; text-align: center; font-family: Georgia; font-size: 16px; font-weight: bold; text-shadow: 0 3px 3px #f7f7f7; border: none; margin: 0; padding: 0;" style="margin: 0;"/>
+			</f:facet>
+			<f:facet name="complete">
+				<p:messages for="registerBtn" id="statusCompleteMsg" showDetail="true" showSummary="true"/>
+			</f:facet>
+		</p:ajaxStatus>
+
+		<p:growl id="globalMsgs" severity="warn,error,fatal"/>
+			
+		<p>
+			<h:outputText id="occurrTitle" value="#{bookAdmin.occurrence.type.label} - #{bookAdmin.occurrence.code}" style="font-size: 15px; font-weight: bold;"/><br/>
+			<h:outputText id="occurrDate" value="#{bookAdmin.occurrence.date}" styleClass="record-time" rendered="true">
+				<f:convertDateTime pattern="'registrada em' dd 'de' MMMM 'de' yyyy 'às' HH:mm" />
+			</h:outputText>
+		</p>
+		<h:panelGrid columns="2" styleClass="adm-book-grid" columnClasses="adm-book-grid-left-column,adm-book-grid-right-column">
+			<p:column>
+				<p:graphicImage id="portrait" value="/../image/user_portrait?img_id=#{bookAdmin.occurrence.user.portraitId}"/>
+				<br/><h:outputText id="user" value="#{bookAdmin.getOccurrenceFooter(bookAdmin.occurrence.id)}" escape="false"/>
+			</p:column>
+			<p:column>
+				<p:outputPanel id="occurrenceText" layout="block" styleClass="textarea">#{bookAdmin.occurrence.text}</p:outputPanel>
+			</p:column>
+		</h:panelGrid>
+		<p>
+			<h:outputText value="Resposta:" style="font-size: 15px; font-weight: bold;"/><br/>
+			<h:outputText id="answerDate" value="#{bookAdmin.occurrence.answer.date}" styleClass="record-time" rendered="true">
+				<f:convertDateTime pattern="'registrada em' dd 'de' MMMM 'de' yyyy 'às' HH:mm" />
+			</h:outputText>
+		</p>
+		<h:panelGrid columns="2" styleClass="adm-book-grid" columnClasses="adm-book-grid-left-column,adm-book-grid-right-column">
+			<h:column id="column1">
+				<p:graphicImage id="portrait2" value="/../image/user_portrait?img_id=#{bookAdmin.occurrence.user.portraitId}"/>
+				<br/><h:outputText id="user2" value="#{bookAdmin.getOccurrenceFooter(bookAdmin.occurrence.id)}" escape="false"/>
+			</h:column>
+			<h:column>
+				<p:inputTextarea id="answerText" required="true" requiredMessage="#{msg['empty.answer']}"
+				 counter="remaining-chars" counterTemplate="#{msg['text.counter']} {0}" maxlength="1000"
+				 styleClass="textarea" value="#{bookAdmin.occurrence.answer.text}" style="display:inline; float: none;"/>
+				<h:outputLabel id="remaining-chars" style="float:right; margin: 0px 25px;"/>
+			</h:column>
+		</h:panelGrid>
+		<h:panelGrid columns="2" style="float:right; margin: 20px 25px;">
+			<p:commandButton id="draftBtn" value="#{msg['save.draft']}" actionListener="#{bookAdmin.onAnswer(false)}" style="margin: 0px 15px;" disabled="#{!bookAdmin.occurrence.answer.draft}"/>
+			<p:commandButton id="registerBtn" value="#{msg['save.answer']}" actionListener="#{bookAdmin.onAnswer(true)}" partialSubmit="true" process=":adm-book-form:answerText" disabled="#{!bookAdmin.occurrence.answer.draft}"/>
+		</h:panelGrid>
+		<p:dataTable widgetVar="thebook" id="book" var="occurrence" value="#{bookAdmin.model}" rows="10" 
+			paginator="true" paginatorPosition="top" emptyMessage="#{msg['empty.list']}" sortBy="#{occurrence.date}" sortOrder="descending" 
+			selectionMode="single" selection="#{bookAdmin.occurrence}" rowKey="#{occurrence.id}" first="0" styleClass="adm-book-table">
+			<p:ajax event="rowSelect" listener="#{bookAdmin.onRowSelect}" update="@all" />
+			<p:column headerText="Tipo">
+				<h:outputText value="#{occurrence.type.label}"/>
+			</p:column>
+			<p:column headerText="Número">
+				<h:outputText value="#{occurrence.code}"/>	
+			</p:column>
+			<p:column headerText="Criada em">
+				<h:outputText value="#{occurrence.date}" styleClass="record-time">
+					<f:convertDateTime pattern="dd/MM/yyyy 'às' HH:mm" />
+				</h:outputText>
+			</p:column>
+			<p:column headerText="Respondida em">
+				<h:outputText value="#{occurrence.answer.date}" styleClass="record-time" rendered="#{!bookAdmin.occurrence.answer.draft}">
+					<f:convertDateTime pattern="dd/MM/yyyy 'às' HH:mm" />
+				</h:outputText>
+			</p:column>
+		</p:dataTable>
+	</h:form>
 </h:body>
 </f:view>

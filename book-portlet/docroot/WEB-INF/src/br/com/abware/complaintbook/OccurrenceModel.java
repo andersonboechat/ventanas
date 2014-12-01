@@ -22,9 +22,9 @@ public class OccurrenceModel {
 
 	private static Logger logger = Logger.getLogger(OccurrenceModel.class);
 	
-	private static OccurrenceManager manager = new OccurrenceManager();
+	private OccurrenceManager manager = new OccurrenceManager();
 	
-	private int id;
+	private long id;
 	
 	private String code;
 
@@ -46,13 +46,15 @@ public class OccurrenceModel {
 		this.user = user;
 	}
 	
-	public static OccurrenceModel getOccurrence(int id) throws BusinessException {
+	public OccurrenceModel getOccurrence(long id) throws BusinessException {
 		logger.trace("Method in");
+		String owner = String.valueOf("OccurrenceModel.getUserOccurrence");
 
 		OccurrenceModel occurrenceModel = null;
 		Occurrence occurrence = null;
 
 		try {
+			manager.openManager(owner);
 			occurrence = manager.findById(id);
 			occurrenceModel = new OccurrenceModel();
 			BeanUtils.copyProperties(occurrenceModel, occurrence);
@@ -63,6 +65,8 @@ public class OccurrenceModel {
 		} catch (Exception e) {
 			logger.error(e.getMessage(), e);
 			throw new BusinessException("Unknown Exception. Check log files");
+		} finally {
+			manager.closeManager(owner);
 		}
 
 		logger.info("Id: " + id + "; Occurrence: " + occurrence);
@@ -72,13 +76,15 @@ public class OccurrenceModel {
 		return occurrenceModel;
 	}
 	
-	public static List<OccurrenceModel> getOccurrences() throws BusinessException {
+	public List<OccurrenceModel> getOccurrences() throws BusinessException {
 		logger.trace("Method in");
+		String owner = String.valueOf("OccurrenceModel.getOccurrences");
 
 		List<OccurrenceModel> occurrences = new ArrayList<OccurrenceModel>();
 		OccurrenceModel occurrenceModel;
 
 		try {
+			manager.openManager(owner);
 			for (Occurrence occurrence : manager.findAll()) {
 				logger.debug("OccurrenceEntity: " + occurrence);
 
@@ -95,6 +101,8 @@ public class OccurrenceModel {
 		} catch (Exception e) {
 			logger.error(e.getMessage(), e);
 			throw new BusinessException("Unknown Exception. Check log files");
+		} finally {
+			manager.closeManager(owner);
 		}
 
 		logger.trace("Method out");
@@ -102,13 +110,15 @@ public class OccurrenceModel {
 		return occurrences;
 	}
 	
-	public static List<OccurrenceModel> getUserOccurrences(long userId) throws BusinessException {
+	public List<OccurrenceModel> getUserOccurrences(long userId) throws BusinessException {
 		logger.trace("Method in");
+		String owner = String.valueOf("OccurrenceModel.getUserOccurrences");
 
 		List<OccurrenceModel> occurrences = new ArrayList<OccurrenceModel>();
 		OccurrenceModel occurrenceModel;
 
 		try {
+			manager.openManager(owner);
 			for (Occurrence occurrence : manager.findOccurrencesByUserId(userId)) {
 				logger.debug("OccurrenceEntity: " + occurrence);
 
@@ -125,6 +135,8 @@ public class OccurrenceModel {
 		} catch (Exception e) {
 			logger.error(e.getMessage(), e);
 			throw new BusinessException("Unknown Exception. Check log files");
+		} finally {
+			manager.closeManager(owner);
 		}
 
 		logger.info("User: " + userId + "; Occurrences: " + occurrences.size());
@@ -134,8 +146,9 @@ public class OccurrenceModel {
 		return occurrences;
 	}
 	
-	public static void doOccurrence(OccurrenceModel occurrenceModel) throws BusinessException {
+	public void doOccurrence(OccurrenceModel occurrenceModel) throws BusinessException {
 		logger.trace("Method in");
+		String owner = String.valueOf("OccurrenceModel.doOccurrence");
 
 		logger.debug("Checking whether id is not zero");
 		if (occurrenceModel.getId() != 0) {
@@ -144,11 +157,12 @@ public class OccurrenceModel {
 		}
 
 		try {
+			manager.openManager(owner);
 			Occurrence occurrence = new Occurrence(occurrenceModel.getUser().getUserId());
 			occurrenceModel.setCode(generateCode());
 			occurrenceModel.setDate(new Date());
 			BeanUtils.copyProperties(occurrence, occurrenceModel);
-			occurrence = manager.save(occurrence);
+			occurrence = manager.save(occurrence, UserHelper.getLoggedUser().getUserId());
 			BeanUtils.copyProperties(occurrenceModel, occurrence);
 
 		} catch (ConstraintViolationException e) {
@@ -157,22 +171,49 @@ public class OccurrenceModel {
 		} catch (Exception e) {
 			logger.error(e.getMessage(), e);
 			throw new BusinessException(e.getMessage());
+		} finally {
+			manager.closeManager(owner);
 		}
 
-		logger.info("Occurrence done");
+		logger.info("Occurrence done: " + occurrenceModel.getCode());
 
 		logger.trace("Method out");
 	}
 
+	public void doAnswer(OccurrenceModel occurrenceModel) throws BusinessException {
+		logger.trace("Method in");
+		String owner = String.valueOf("OccurrenceModel.doAnswer");
+
+		try {
+			manager.openManager(owner);
+			Occurrence occurrence = new Occurrence(occurrenceModel.getUser().getUserId());
+			BeanUtils.copyProperties(occurrence, occurrenceModel);
+			occurrence = manager.save(occurrence, UserHelper.getLoggedUser().getUserId());
+			BeanUtils.copyProperties(occurrenceModel, occurrence);
+		} catch (ConstraintViolationException e) {
+			logger.warn(e.getMessage(), e);
+			throw new EmptyPropertyException(e.getMessage());
+		} catch (Exception e) {
+			logger.error(e.getMessage(), e);
+			throw new BusinessException(e.getMessage());
+		} finally {
+			manager.closeManager(owner);
+		}
+
+		logger.info("Answer done: " + occurrenceModel.getCode());
+
+		logger.trace("Method out");
+	}	
+	
 	private static String generateCode() {
 		return String.valueOf(Calendar.getInstance().getTimeInMillis());
 	}
 
-	public int getId() {
+	public long getId() {
 		return id;
 	}
 
-	public void setId(int id) {
+	public void setId(long id) {
 		this.id = id;
 	}
 

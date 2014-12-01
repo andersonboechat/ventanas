@@ -3,7 +3,7 @@ var cWidth=128;
 var cHeight=128;
 var cTotalFrames=12;
 var cFrameWidth=128;
-var cImageSrc='/ComplaintBook-portlet/resources/images/sprites.gif';
+var cImageSrc='/book-portlet/resources/images/sprites.gif';
 
 var cImageTimeout=false;
 var cIndex=0;

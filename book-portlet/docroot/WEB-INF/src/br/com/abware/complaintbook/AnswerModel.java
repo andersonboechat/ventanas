@@ -2,11 +2,14 @@ package br.com.abware.complaintbook;
 
 import java.util.Date;
 
+import javax.validation.ConstraintViolationException;
+
 import org.apache.log4j.Logger;
 
 import com.liferay.portal.model.User;
 
 import br.com.abware.complaintbook.exception.BusinessException;
+import br.com.abware.complaintbook.exception.EmptyPropertyException;
 import br.com.abware.complaintbook.persistence.entity.Answer;
 import br.com.abware.complaintbook.persistence.manager.AnswerManager;
 import br.com.abware.complaintbook.util.BeanUtils;
@@ -17,18 +20,21 @@ public class AnswerModel {
 	
 	private static AnswerManager manager = new AnswerManager();
 	
-	private int id;
+	private long id;
 
 	private Date date;
 
 	private String text;
 
 	private User user;
+	
+	private boolean draft;
 
 	public AnswerModel() {
+		this.draft = true;
 	}
 	
-	public static AnswerModel getAnswer(int id) throws BusinessException {
+	public static AnswerModel getAnswer(long id) throws BusinessException {
 		logger.trace("Method in");
 
 		AnswerModel answerModel = null;
@@ -54,11 +60,38 @@ public class AnswerModel {
 		return answerModel;
 	}
 	
-	public int getId() {
+	public void doAnswer(AnswerModel answerModel) throws BusinessException {
+		logger.trace("Method in");
+		String owner = String.valueOf("OccurrenceModel.doAnswer");
+		long userId = UserHelper.getLoggedUser().getUserId();
+
+		try {
+			manager.openManager(owner);
+			Answer answer = new Answer();
+			answer.setUserId(userId);
+			BeanUtils.copyProperties(answer, answerModel);
+			answer = manager.save(answer, userId);
+			BeanUtils.copyProperties(answerModel, answer);
+		} catch (ConstraintViolationException e) {
+			logger.warn(e.getMessage(), e);
+			throw new EmptyPropertyException(e.getMessage());
+		} catch (Exception e) {
+			logger.error(e.getMessage(), e);
+			throw new BusinessException(e.getMessage());
+		} finally {
+			manager.closeManager(owner);
+		}
+
+		logger.info("Answer done: " + answerModel.getId());
+
+		logger.trace("Method out");
+	}	
+	
+	public long getId() {
 		return id;
 	}
 
-	public void setId(int id) {
+	public void setId(long id) {
 		this.id = id;
 	}
 
@@ -84,5 +117,13 @@ public class AnswerModel {
 
 	public void setUser(User user) {
 		this.user = user;
+	}
+
+	public boolean isDraft() {
+		return draft;
+	}
+
+	public void setDraft(boolean draft) {
+		this.draft = draft;
 	}
 }
