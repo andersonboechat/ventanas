@@ -1,0 +1,4 @@
+eclipse.preferences.version=1
+encoding//docroot/WEB-INF/src/occurrence-answered-notify.vm=UTF-8
+encoding//docroot/WEB-INF/src/occurrence-created-confirm.vm=UTF-8
+encoding//docroot/WEB-INF/src/occurrence-created-notify.vm=UTF-8
