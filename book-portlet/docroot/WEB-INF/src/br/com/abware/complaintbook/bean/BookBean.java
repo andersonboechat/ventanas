@@ -172,7 +172,7 @@ public class BookBean {
 			logger.debug(mailBody);
 			
 			String mailFrom = "administracao@ventanasresidencial.com.br";
-			String mailTo = "suporte@ventanasresidencial.com.br";
+			String mailTo = "reidvan@rjbarbosa.com.br";
 
 			MailMessage mailMessage = new MailMessage();
 			mailMessage.setFrom(new InternetAddress(mailFrom));
@@ -324,7 +324,7 @@ public class BookBean {
 		String footer = null;
 		
 		try {
-			AnswerModel answer = AnswerModel.getAnswer(Integer.parseInt(answerId));
+			AnswerModel answer = new AnswerModel().getAnswer(Integer.parseInt(answerId));
 			
 			logger.trace("AnswerId: " + answerId + "; Answer: " + answer);
 

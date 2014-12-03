@@ -46,7 +46,7 @@ public abstract class BaseManager<Entity extends BaseEntity> {
 
 			if (findById(entity.getId()) != null) {
 				entity.setModifiedDate(currentDate);
-				em.merge(entity);
+				entity = em.merge(entity);
 			} else {
 				entity.setCreateDate(currentDate);
 				entity.setModifiedDate(currentDate);

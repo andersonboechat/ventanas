@@ -64,11 +64,13 @@
 				<p:column style="border: 0px solid green; padding-top: 20px; background: none;" layout="block" styleClass="complaint-book">
 					<h:outputLabel for="answerText" styleClass="book-page-header book-page-header-right" value="Resposta"/>
 					<p:spacer style="width: 100%; height: 15px; border: 0px solid black; margin: 0;"/>
-					<h:outputText value="#{occurrence.answer.date}" styleClass="record-time" rendered="true">
+					<h:outputText value="#{occurrence.answer.date}" styleClass="record-time" rendered="#{!occurrence.answer.draft}">
 						<f:convertDateTime pattern="'registrada em' dd 'de' MMMM 'de' yyyy 'às' HH:mm" />
 					</h:outputText>						
-					<p:outputPanel id="answerText" layout="block" styleClass="textarea-right">#{occurrence.answer.text}</p:outputPanel>
-					<h:panelGrid columns="1" styleClass="book-page-footer book-page-footer-right" columnClasses="right">
+					<p:outputPanel id="answerText" layout="block" styleClass="textarea-right">
+						<h:outputText value="#{occurrence.answer.text}" rendered="#{!occurrence.answer.draft}"/>
+					</p:outputPanel>
+					<h:panelGrid columns="1" styleClass="book-page-footer book-page-footer-right" columnClasses="right" rendered="#{!occurrence.answer.draft}">
 						<h:outputText value="#{bookBean.getAnswerFooter(occurrence.answer.id)}"/>
 					</h:panelGrid>
 				</p:column>

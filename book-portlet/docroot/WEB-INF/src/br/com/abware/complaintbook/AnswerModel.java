@@ -18,7 +18,7 @@ public class AnswerModel {
 
 	private static Logger logger = Logger.getLogger(AnswerModel.class);
 	
-	private static AnswerManager manager = new AnswerManager();
+	private AnswerManager manager = new AnswerManager();
 	
 	private long id;
 
@@ -34,12 +34,14 @@ public class AnswerModel {
 		this.draft = true;
 	}
 	
-	public static AnswerModel getAnswer(long id) throws BusinessException {
+	public AnswerModel getAnswer(long id) throws BusinessException {
 		logger.trace("Method in");
+		String owner = String.valueOf("AnswerModel.getAnswer");
 
 		AnswerModel answerModel = null;
 
 		try {
+			manager.openManager(owner);
 			logger.debug("Id: " + id);
 			Answer answer = manager.findById(id);
 
@@ -51,6 +53,8 @@ public class AnswerModel {
 		} catch (Exception e) {
 			logger.error(e.getMessage(), e);
 			throw new BusinessException(e.getMessage());
+		} finally {
+			manager.closeManager(owner);
 		}
 
 		logger.info("Id: " + id + "; Answer: " + answerModel);
@@ -62,7 +66,7 @@ public class AnswerModel {
 	
 	public void doAnswer(AnswerModel answerModel) throws BusinessException {
 		logger.trace("Method in");
-		String owner = String.valueOf("OccurrenceModel.doAnswer");
+		String owner = String.valueOf("AnswerModel.doAnswer");
 		long userId = UserHelper.getLoggedUser().getUserId();
 
 		try {
@@ -72,6 +76,7 @@ public class AnswerModel {
 			BeanUtils.copyProperties(answer, answerModel);
 			answer = manager.save(answer, userId);
 			BeanUtils.copyProperties(answerModel, answer);
+			answerModel.setUser(UserHelper.getUserById(answer.getUserId()));
 		} catch (ConstraintViolationException e) {
 			logger.warn(e.getMessage(), e);
 			throw new EmptyPropertyException(e.getMessage());

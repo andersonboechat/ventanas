@@ -29,9 +29,8 @@
 }
 
 .adm-book-table table {
-
 	height: 100px !important;
-	border: 3px solid blue;
+	margin-bottom: 50px;
 }
 
 .adm-book-table table td {
@@ -230,6 +229,17 @@
 	margin-top: 50px;
 	height: 180px !important;
 	padding-right: 0px !important;
+}
+
+.ui-messages {
+}
+
+.ui-dialog-buttonpane {
+	padding: 0px 37% !important;
+}
+.ui-dialog-buttonpane button {
+	padding: 0px 5px !important;
+	margin: 6px 5px !important;
 }
 
 .ui-messages-warn-icon {
