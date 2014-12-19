@@ -19,9 +19,15 @@
 
 .agenda .fc-event-skin {
   border: none;
-  width: 30px !important;
+  width: 100px !important;
   height: 40px;
-  float: right; }
+  float: right;
+  padding: 0px 0px 0px 35px;
+  font-weight: bold;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: grey; }
 
 .agenda .fc-event-time {
   display: none; }
@@ -54,6 +60,49 @@
   margin: 0 !important;
   padding-bottom: 12px;
   vertical-align: top; }
+
+.left2 {
+  width: 60%;
+  text-align: left;
+  border: 0px solid black; }
+
+.right2 {
+  width: 20%;
+  text-align: right;
+  border: 0px solid black;
+  margin: 0 !important;
+  vertical-align: top; }
+
+.middle {
+  width: 20%;
+  text-align: right;
+  border: 0px solid black;
+  margin: 0 !important;
+  vertical-align: top; }
+
+.left3 {
+  width: 40%;
+  text-align: left;
+  padding: 2px 2px; }
+
+.right3 {
+  width: 60%;
+  text-align: left;
+  padding: 2px 2px; }
+
+.agenda .ui-chkbox {
+  display: inline !important;
+  float: left; }
+
+.agenda .ui-chkbox-box, .agenda .ui-chkbox-icon {
+  float: left !important;
+  position: relative !important; }
+
+.agenda .ui-chkbox-label {
+  float: left !important;
+  display: inline;
+  outline: none;
+  margin: 0px 0px 0px 0px !important; }
 
 .agenda textarea {
   margin: 25px 5px 25px 5px;
@@ -93,4 +142,7 @@
 
 .ui-icon {
   background-image: url("/agenda-portlet/images/icon_churrasqueira1.png"); }
+
+.ui-datagrid-data {
+  width: 240px; }
 

@@ -26,7 +26,7 @@
 				<div id="loaderImage" style="margin-left: 60px;border: 0px solid red;"/>
 				<h:outputScript library="js" name="loading.js"/>
 				<p:spacer style="width: 100%; height: 12px;"/>
-				<h:messages id="statusStartMsg" for="agenda-status" infoStyle="background: none; width: 250px; text-align: center; font-family: Georgia; font-size: 16px; font-weight: bold; text-shadow: 0 3px 3px #f7f7f7; border: none; margin: 0; padding: 0;" style="margin: 0;"/>
+				<h:messages id="statusStartMsg" for="agenda-status" infoStyle="background: none; width: 250px; text-align: center; font-family: Georgia; font-size: 16px; font-weight: bold; text-shadow: 0 3px 3px #f7f7f7; border: none; margin: 0; padding: 0; box-shadow: none;" style="margin: 0;"/>
 			</f:facet>
 			<f:facet name="complete">
 				<p:messages for="bookingBtn" id="statusCompleteMsg" showDetail="true" showSummary="true"/>
@@ -34,18 +34,20 @@
 		</p:ajaxStatus>
 				
 
-		<p:tabView id="tab" styleClass="agenda" style="font-style: normal;  height: 360px;" activeIndex="0" cache="false" >
+		<p:tabView id="tab" styleClass="agenda" style="font-style: normal;  height: 360px;" activeIndex="0" cache="false">
 			<p:tab title="Reservar">
-				<p:outputPanel layout="block" style="font-family: Georgia; color: #6e6e6e; font-size: 13px; margin: 5px 0px 15px 0px;">
-					<h:outputText value="Clique no dia que deseja alugar um espaço."/>
-				</p:outputPanel>
-				<h:form id="agenda-form">
-					<p:calendar id="calendar" mode="inline" locale="pt" style="margin: 15px 0px 15px 0px;" widgetVar="calendar">
-						<p:ajax event="dateSelect" listener="#{scheduleBean.onDateSelect}" partialSubmit="true"
-								update=":booking-dialog-form:bookingDetails" 
-								oncomplete="if (teste(calendar.getDate())) bookingDialog.show()"/>
-					</p:calendar>
-				</h:form>
+				<h:panelGrid style="width: 100%; height:300px;">
+					<p:outputPanel layout="block" style="font-family: Georgia; color: #6e6e6e; font-size: 13px; margin: 5px 0px 15px 0px;">
+						<h:outputText value="Clique no dia que deseja alugar um espaço."/>
+					</p:outputPanel>
+					<h:form id="agenda-form">
+						<p:calendar id="calendar" mode="inline" locale="pt" style="margin: 15px 0px 15px 0px;" widgetVar="calendar">
+							<p:ajax event="dateSelect" listener="#{scheduleBean.onDateSelect}" partialSubmit="true"
+									update=":booking-dialog-form:bookingDetails" 
+									oncomplete="if (teste(calendar.getDate())) bookingDialog.show()"/>
+						</p:calendar>
+					</h:form>
+				</h:panelGrid>
 			</p:tab>
 			<p:tab title="Meus Aluguéis">
 				<ui:include src="bookings.xhtml"/>

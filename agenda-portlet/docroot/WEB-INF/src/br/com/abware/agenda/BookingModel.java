@@ -1,6 +1,7 @@
 package br.com.abware.agenda;
 
 import java.lang.reflect.InvocationTargetException;
+
 import java.sql.Time;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -61,7 +62,7 @@ public class BookingModel {
 			bm.openManager(owner);
 
 			if (!bookingExists(date, room)) {
-				Booking b = bm.save(new Booking(room, date, userId), userId);
+				Booking b = bm.save(new Booking(room, date, userId), UserHelper.getLoggedUser().getUserId());
 				booking = new BookingModel();
 				BeanUtils.copyProperties(booking, b);
 			} else {
@@ -173,14 +174,8 @@ public class BookingModel {
 				throw new Exception();
 			}
 
-			bm.save(b, UserHelper.getLoggedUserId());
-
 			b.setStatus(status);
-
-			if (status == BookingStatus.CANCELLED) {
-				//TODO implementar regra para cancelamento de algueis
-			}
-
+			bm.save(b, UserHelper.getLoggedUserId());
 			booking.setStatus(status);
 		} catch (Exception e) {
 			// TODO: handle exception

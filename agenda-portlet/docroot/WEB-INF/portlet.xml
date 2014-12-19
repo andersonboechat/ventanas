@@ -37,7 +37,7 @@
         <portlet-class>javax.portlet.faces.GenericFacesPortlet</portlet-class>
         <init-param>
             <name>javax.portlet.faces.defaultViewId.view</name>
-            <value>/views/admin/view.xhtml</value>
+            <value>/views/admin/main.xhtml</value>
         </init-param>
 		<expiration-cache>0</expiration-cache>
         <supports>
