@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+
+<f:view xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:c="http://java.sun.com/jsp/jstl/core"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:ui="http://java.sun.com/jsf/facelets">
+	<h:form id="agenda-form">
+		<p:inputMask id="selectedDate" value="#{scheduleBean.bookingDate}" mask="99/99/9999" widgetVar="selectedDate">
+			<f:convertDateTime pattern="dd/MM/yyyy" />
+		</p:inputMask>
+		<p:schedule id="calendar" value="#{scheduleBean.model}" editable="true" widgetVar="calendar" 
+					locale="pt" draggable="false" resizable="false" styleClass="agenda" aspectRatio="0.9" 
+					leftHeaderTemplate="title" centerHeaderTemplate="prev" rightHeaderTemplate="next">  <!-- timeZone="America/Sao_Paulo"-->
+			<p:ajax event="dateSelect" listener="#{scheduleBean.onDateSelect}" update=":booking-dialog-form:bookingDetails,selectedDate" oncomplete="PF('bookingDialog').show();"/>
+			<p:ajax event="eventSelect" listener="#{scheduleBean.onSelectBooking}" update=":event-dialog-form:eventDetails" oncomplete="PF('eventDialog').show();"/>
+		</p:schedule>
+	</h:form>
+</f:view>

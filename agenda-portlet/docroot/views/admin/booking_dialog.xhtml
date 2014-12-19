@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+
+<f:view xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:c="http://java.sun.com/jsp/jstl/core"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:ui="http://java.sun.com/jsf/facelets">
+	<h:form id="booking-dialog-form">
+		<p:dialog widgetVar="bookingDialog" header="#{msg['booking.dialog.header']}" styleClass="agenda" modal="true" resizable="false" showEffect="fade" hideEffect="fade">
+			<p:growl id="growl" severity="warn,error,fatal" sticky="true"/> 
+			<h:panelGrid id="bookingDetails" columns="1">
+				<p:selectOneRadio id="roomId" value="#{scheduleBean.roomId}" layout="custom" required="true" 
+								requiredMessage="#{msg['room.not.selected']}">
+					<f:selectItems var="selectedRoom" value="#{scheduleBean.rooms}" itemValue="${selectedRoom.id}" />
+					<p:ajax event="change" update="bookingDetails" />
+				</p:selectOneRadio>
+	
+				<h:panelGrid columns="#{scheduleBean.rooms.size() * 2}" style="width: 850px; height: 100px;">
+					<c:forEach var="aRoom" items="#{scheduleBean.rooms}" varStatus="i">
+						<p:radioButton id="opt${i.index}" for="roomId" itemIndex="${i.index}" disabled="#{scheduleBean.bookingExists(aRoom.getId())}"/>
+						<h:outputLabel for="opt${i.index}" value="${aRoom.name}" styleClass="#{scheduleBean.getRoomStyleClass(aRoom.getId())}"/>								
+					</c:forEach>
+				</h:panelGrid>
+	
+				<h:outputLabel for="agreement" value="#{msg['agreement.term']}" style="padding-left: 35%; font-size: 18px;"/>
+				<p:media id="agreement" width="900px" height="350px" style="margin-bottom: 10px;" value="#{scheduleBean.agreement}" player="pdf">  
+					<h:outputText value="#{msg['media.not.supported']}" escape="false"/>
+					<f:param name="id" value="#{scheduleBean.roomId}" />
+				</p:media>
+
+				<h:panelGrid columns="3" style="width: 900px; overflow: hidden; margin: 0px 0px 0px 0px; " styleClass="agenda" columnClasses="left2,middle,right2">
+					<p:selectBooleanCheckbox id="deal" value="#{scheduleBean.deal}" 
+						itemLabel="#{msg['agreement.user.deal']}" 
+						validator="#{scheduleBean.validateCheckbox}"
+						validatorMessage="#{msg['agreement.deal.unchecked']}"/>
+
+					<h:selectOneMenu validator="#{scheduleBean.validateFlat}" validatorMessage="#{msg['flat.not.selected']}">
+						<f:selectItem itemValue="-1" itemLabel="Apartamento"/>
+						<f:selectItems value="#{scheduleBean.flats}" var="flat" itemLabel="#{flat.name}" itemValue="#{flat.id}"/>
+						<p:ajax event="change" listener="#{scheduleBean.onSelectFlat}" update="residents"></p:ajax>
+					</h:selectOneMenu>
+	
+					<h:selectOneMenu id="residents" validator="#{scheduleBean.validateResident}" validatorMessage="#{msg['resident.not.selected']}" style="width: 250px;">
+						<f:selectItem itemValue="-1" itemLabel="Proprietário/Morador"/>
+						<f:selectItems value="#{scheduleBean.flat.users}" var="user" itemLabel="#{user.fullName}" itemValue="#{user.userId}"/>
+						<p:ajax event="change" listener="#{scheduleBean.onSelectResident}"></p:ajax>
+					</h:selectOneMenu>
+				</h:panelGrid>
+				<h:panelGrid columns="2" style="float: right; height: 30px; overflow: hidden; margin: 10px 0px 10px 0px;">
+					<p:commandButton id="bookingConfirmBtn" value="#{msg.book}" actionListener="#{scheduleBean.onDoBooking}" style="margin: 0px 5px; width: 85px" rendered="#{not(scheduleBean.isCancelEnable())}" oncomplete="PF('bookingDialog').hide();">
+						<p:confirm header="Atenção" message="#{msg['register.deadline']}" icon="ui-icon-alert"/>
+					</p:commandButton>
+					<p:commandButton id="bookingBtn" value="#{msg.book}" actionListener="#{scheduleBean.onDoBooking}" style="margin: 0px 5px; width: 85px" rendered="#{scheduleBean.isCancelEnable()}" oncomplete="PF('bookingDialog').hide();"/>
+					<p:commandButton id="cancelBookingBtn" value="#{msg.cancel}" type="button" onclick="PF('bookingDialog').hide();" global="false" style="margin: 0px 0px 0px 5px; width: 85px"/>
+				</h:panelGrid>
+			</h:panelGrid>
+		</p:dialog>
+		<p:confirmDialog global="true" width="600" style="padding: 0px" showEffect="fade" hideEffect="fade" visible="false">
+			<p:commandButton value="Não, prefiro não alugar" type="button" styleClass="ui-confirmdialog-no" icon="ui-icon-close" style="float: left; width: 200px; margin-left: 14%" />
+			<p:commandButton value="Sim, quero alugar" type="button" styleClass="ui-confirmdialog-yes" icon="ui-icon-check" style="float: right; width: 200px; margin-right: 14%"/>
+		</p:confirmDialog>
+	</h:form>
+</f:view>
