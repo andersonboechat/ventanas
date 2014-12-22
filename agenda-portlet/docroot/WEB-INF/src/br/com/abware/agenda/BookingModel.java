@@ -19,6 +19,7 @@ import com.liferay.portal.service.UserLocalServiceUtil;
 
 import br.com.abware.agenda.persistence.entity.Booking;
 import br.com.abware.agenda.persistence.entity.BookingPK;
+import br.com.abware.agenda.persistence.entity.Room;
 import br.com.abware.agenda.persistence.manager.BookingManager;
 import br.com.abware.agenda.util.BeanUtils;
 
@@ -78,15 +79,17 @@ public class BookingModel {
 		return booking;
 	}
 	
-	public List<BookingModel> getBookings(Date fromDate, Date toDate) {
+	public List<BookingModel> getBookings(RoomModel room, Date fromDate, Date toDate) {
 		String owner = String.valueOf("BookingModel.getBookings");
 		BookingModel booking;
 		ArrayList<BookingModel> bookings = new ArrayList<BookingModel>();
 
 		try {
 			bm.openManager(owner);
-
-			for (Booking b : bm.findActiveBookingsByPeriod(fromDate, toDate)) {
+			Room r = new Room();
+			BeanUtils.copyProperties(r, room);
+			
+			for (Booking b : bm.findActiveBookingsByPeriod(r, fromDate, toDate)) {
 				booking = new BookingModel();
 				BeanUtils.copyProperties(booking, b);
 				bookings.add(booking);
@@ -115,13 +118,13 @@ public class BookingModel {
 		calendar.set(Calendar.DAY_OF_MONTH, calendar.getActualMaximum(Calendar.DAY_OF_MONTH));
 		Date toDate = calendar.getTime();
 
-		return getBookings(fromDate, toDate);
+		return getBookings(null, fromDate, toDate);
 	}
 
 	public List<BookingModel> getBookings() {
 		Date today = new Date();
 		Date lastDate = DateUtils.addDays(today, 90);
-		return getBookings(today, lastDate);
+		return getBookings(null, today, lastDate);
 	}
 	
 	public boolean bookingExists(Date date, int room) {
@@ -257,6 +260,5 @@ public class BookingModel {
 	public void setReceipt(String receipt) {
 		this.receipt = receipt;
 	}
-
 
 }

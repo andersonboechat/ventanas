@@ -1,6 +1,7 @@
 package br.com.abware.agenda.bean;
 
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
@@ -20,9 +21,10 @@ import javax.faces.validator.ValidatorException;
 import org.apache.commons.lang.time.DateFormatUtils;
 import org.apache.commons.lang.time.DateUtils;
 import org.apache.log4j.Logger;
+import org.primefaces.component.tabview.TabView;
 import org.primefaces.event.SelectEvent;
+import org.primefaces.event.TabChangeEvent;
 import org.primefaces.model.DefaultScheduleEvent;
-import org.primefaces.model.DefaultScheduleModel;
 import org.primefaces.model.DefaultStreamedContent;
 import org.primefaces.model.LazyScheduleModel;
 import org.primefaces.model.ScheduleEvent;
@@ -47,8 +49,10 @@ public class ScheduleBean extends BaseBean {
 
 	private static final Logger LOGGER = Logger.getLogger(ScheduleBean.class);
 
-	private static ScheduleModel model = initModel();
+	private static ScheduleModel model;
 
+	private static List<ScheduleModel> models;
+	
 	private Date bookingDate;
 
 	private Integer roomId;
@@ -78,43 +82,15 @@ public class ScheduleBean extends BaseBean {
 		resident = UserHelper.getLoggedUser();
 		flats = Flat.getFlats();
 		Collections.sort(flats);
+
+		models = new ArrayList<ScheduleModel>();
+		for (RoomModel r : rooms) {
+			models.add(new CalendarModel(r));
+		}
+		model = models.get(0);
 	}
 
-	private static ScheduleModel initModel() {
-		ScheduleModel aModel = new DefaultScheduleModel();
-
-		aModel = new LazyScheduleModel() {
-
-			private static final long serialVersionUID = 1L;
-
-			@Override
-            public void loadEvents(Date start, Date end) {
-            	clear();
-            	BookingModel model = new BookingModel();
-        		for (BookingModel b : model.getBookings(start, end)) {
-        			try {
-        				DefaultScheduleEvent event; 
-        				event = new DefaultScheduleEvent(b.getUser().getFullName(), 
-														  b.getDate(), 
-														  b.getDate(), 
-														  getRoomStyleClass(b.getRoom()));
-        				event.setData(b);
-						addEvent(event);
-					} catch (PortalException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					} catch (SystemException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					}
-        		}
-            }   
-        };		
-
-		return aModel;
-	}
-
-	public void onDoBooking() {
+	public void onDoBooking(int modelIndex) {
 		LOGGER.trace("Method in");
 
 		try {
@@ -122,14 +98,14 @@ public class ScheduleBean extends BaseBean {
 				BookingModel bm = new BookingModel().doBooking(bookingDate, roomId, resident.getUserId());
 
 				if (bm != null) {
-					model.addEvent(new DefaultScheduleEvent(resident.getFirstName(), 
+					models.get(modelIndex).addEvent(new DefaultScheduleEvent(resident.getFirstName(), 
 															bookingDate, 
 															bookingDate, 
 															getRoomStyleClass(bm.getRoom())));
 				}
 
 				Date deadline = DateUtils.addDays(bookingDate, -7);
-				setMessages(FacesMessage.SEVERITY_WARN, getClientId(":booking-dialog-form:bookingBtn"), 
+				setMessages(FacesMessage.SEVERITY_WARN, getClientId(":tab:tabs:booking-dialog-form-" + modelIndex + ":bookingBtn"), 
 							"register.success", DateFormatUtils.format(deadline, "dd/MM/yyyy"));
 
 				roomId = null;
@@ -235,6 +211,14 @@ public class ScheduleBean extends BaseBean {
 			resident = null;
 		}
 	}	
+	
+	public void onTabChange(TabChangeEvent event) {
+		TabView tv = (TabView) event.getSource();
+		int i = tv.getChildren().indexOf(event.getTab());
+		room = ((CalendarModel) models.get(i)).getRoomModel();
+		roomId = room.getId();
+		model = models.get(i);
+	}
 
     public StreamedContent getAgreement() {
         try {
@@ -411,5 +395,62 @@ public class ScheduleBean extends BaseBean {
 	public void setBooking(BookingModel booking) {
 		this.booking = booking;
 	}
+
+	public static List<ScheduleModel> getModels() {
+		return models;
+	}
+
+	public static void setModels(List<ScheduleModel> models) {
+		ScheduleBean.models = models;
+	}
+	
+	public static ScheduleModel getModel(int index) {
+		return models.get(index);
+	}
+
+	public class CalendarModel extends LazyScheduleModel {
+
+		private static final long serialVersionUID = 1L;
+		
+		private RoomModel roomModel;
+		 
+		public CalendarModel(RoomModel roomModel) {
+			super();
+			this.roomModel = roomModel;
+		}
+		
+		@Override
+        public void loadEvents(Date start, Date end) {
+        	clear();
+        	BookingModel model = new BookingModel();
+    		for (BookingModel b : model.getBookings(roomModel, start, end)) {
+    			try {
+    				DefaultScheduleEvent event; 
+    				event = new DefaultScheduleEvent(ScheduleBean.getUserFlatName(b.getUser()), 
+													 b.getDate(), 
+													 b.getDate(), 
+													 ScheduleBean.getRoomStyleClass(b.getRoom()));
+    				event.setData(b);
+					addEvent(event);
+				} catch (PortalException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				} catch (SystemException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+    		}
+		}
+		
+		public RoomModel getRoomModel() {
+			return roomModel;
+		}
+		
+		@Override
+		public boolean equals(Object arg0) {
+			// TODO Auto-generated method stub
+			return super.equals(arg0);
+		}
+	}	
 
 }

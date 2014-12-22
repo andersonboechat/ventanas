@@ -10,7 +10,10 @@ import javax.faces.context.FacesContext;
 
 import org.apache.log4j.Logger;
 
+import com.liferay.portal.kernel.exception.PortalException;
+import com.liferay.portal.kernel.exception.SystemException;
 import com.liferay.portal.kernel.util.ResourceBundleUtil;
+import com.liferay.portal.model.User;
 
 import br.com.abware.agenda.RoomModel;
 
@@ -31,7 +34,11 @@ public abstract class BaseBean {
 	
 	public String getRoomStyleClass(String roomId) {
 		return getRoomStyleClass(new RoomModel(Integer.parseInt(roomId)));
-	}	
+	}
+	
+	public static String getUserFlatName(User user) throws PortalException, SystemException {
+		return !user.getOrganizations().isEmpty() ?	user.getOrganizations().get(0).getName() : ""; 
+	}
 
 	protected void setMessages(Severity severity, String clientId, String messageKey, String ... args) {
 		LOGGER.trace("Method in");

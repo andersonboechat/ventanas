@@ -3,18 +3,19 @@ package br.com.abware.agenda.persistence.manager;
 import java.util.Date;
 import java.util.List;
 
-import javax.persistence.EntityManager;
 import javax.persistence.Query;
 
 import br.com.abware.agenda.persistence.entity.Booking;
+import br.com.abware.agenda.persistence.entity.Room;
 
 public class BookingManager extends BaseManager<Booking>{
 
 	@SuppressWarnings("unchecked")
-	public List<Booking> findActiveBookingsByPeriod(Date startDate, Date endDate) {
-		String queryString = "FROM Booking WHERE status <> '2' AND date BETWEEN :startDate AND :endDate";
+	public List<Booking> findActiveBookingsByPeriod(Room room, Date startDate, Date endDate) {
+		String queryString = "FROM Booking WHERE status <> '2' AND room = :room AND date BETWEEN :startDate AND :endDate";
 		Query query = em.createQuery(queryString);
 
+		query.setParameter("room", room);
 		query.setParameter("startDate", startDate);
 		query.setParameter("endDate", endDate);
 
