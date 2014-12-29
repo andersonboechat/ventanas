@@ -11,12 +11,14 @@ import java.util.List;
 import org.apache.commons.lang.time.DateFormatUtils;
 import org.apache.commons.lang.time.DateUtils;
 import org.apache.log4j.Logger;
+import org.joda.time.Interval;
 
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.exception.SystemException;
 import com.liferay.portal.model.User;
 import com.liferay.portal.service.UserLocalServiceUtil;
 
+import br.com.abware.agenda.exception.BusinessException;
 import br.com.abware.agenda.persistence.entity.Booking;
 import br.com.abware.agenda.persistence.entity.BookingPK;
 import br.com.abware.agenda.persistence.entity.Room;
@@ -27,8 +29,20 @@ public class BookingModel {
 
 	private static Logger logger = Logger.getLogger(BookingModel.class);
 
+	public static final int BKG_MIN_HOUR = 9;
+	
+	public static final int BKG_MAX_HOUR = 22;
+	
+	public static final int BKG_RANGE_HOUR = 4;
+	
+	public static final int BKG_CANCEL_DEADLINE = 7;
+
+	public static final int BKG_MAX_DAYS = 90;
+	
 	private final BookingManager bm = new BookingManager();
 
+	private long flatId;
+	
 	private long userId;
 
 	private RoomModel room;
@@ -52,31 +66,116 @@ public class BookingModel {
 		return UserLocalServiceUtil.getUser(userId);
 	}
 	
-	public synchronized BookingModel doBooking(Date date, int room, long userId) {
+	public synchronized void doBooking() throws Exception {
 		String owner = String.valueOf("BookingModel.doBooking");
-		BookingModel booking = null;
-		String log = "Sala: " + room + ", Data: " + DateFormatUtils.format(date, "dd/MM/yyyy");
+		Date today = new Date();
 
 		logger.info("Logged in user: " + userId);
 
+		if (date == null || date.before(today)) {
+			throw new BusinessException("register.past.date", DateFormatUtils.format(date, "dd/MM/yyyy"),
+										DateFormatUtils.format(today, "dd/MM/yyyy"));
+		}
+		
+		if (date.after(DateUtils.addDays(today, BKG_MAX_DAYS))) {
+			throw new BusinessException("register.over.date", DateFormatUtils.format(date, "dd/MM/yyyy"), BKG_MAX_DAYS, 
+										DateFormatUtils.format(DateUtils.addDays(date, -BKG_MAX_DAYS), "dd/MM/yyyy"));
+		}
+
+		Time minTime = Time.valueOf(BKG_MIN_HOUR + ":00:00");
+		Time maxTime = Time.valueOf(BKG_MAX_HOUR + ":00:00");
+		
+		if (RoomModel.CINEMA == room.getId()) {
+			if (startTime == null || endTime == null) {
+				throw new BusinessException("register.time.unknown");
+			}
+		} else {
+			if (startTime == null) {
+				startTime = minTime;
+			}
+			
+			if (endTime == null) {
+				endTime = maxTime;
+			}
+		}
+		
+		if (startTime.after(endTime)) {
+			throw new BusinessException("register.time.invalid.range", DateFormatUtils.format(startTime, "HH:mm'h'"), 
+										DateFormatUtils.format(endTime, "HH:mm'h'"));
+		}
+
+		if (startTime.before(minTime)) {
+			throw new BusinessException("register.time.bound.low", DateFormatUtils.format(startTime, "HH:mm'h'"), 
+										DateFormatUtils.format(minTime, "HH:mm'h'"));
+		}
+
+		if (endTime.after(maxTime)) {
+			throw new BusinessException("register.time.bound.high", DateFormatUtils.format(startTime, "HH:mm'h'"), 
+										DateFormatUtils.format(maxTime, "HH:mm'h'"));
+		}
+
+		if (RoomModel.CINEMA == room.getId()) {
+			if (endTime.after(DateUtils.addHours(startTime, BKG_RANGE_HOUR))) {
+				throw new BusinessException("register.time.exceeded.range", room.getName(), BKG_RANGE_HOUR + " horas");
+			}
+		}
+
 		try {
 			bm.openManager(owner);
-
-			if (!bookingExists(date, room)) {
-				Booking b = bm.save(new Booking(room, date, userId), UserHelper.getLoggedUser().getUserId());
-				booking = new BookingModel();
-				BeanUtils.copyProperties(booking, b);
-			} else {
-				logger.info("Sala ja esta reservada. " + log);
-			}
-		} catch (Exception e) {
-			logger.error("Falha ao realizar reserva de sala: " + log, e);
+			Booking b = getBooking();
+			BeanUtils.copyProperties(b, this);
+			bm.save(b, UserHelper.getLoggedUser().getUserId());
+			BeanUtils.copyProperties(this, b);
 		} finally {
 			bm.closeManager(owner);
 		}
 
+	}
+	
+	private Booking getBooking() throws Exception {
+		Booking b = null;
 
-		return booking;
+		if (RoomModel.CINEMA == room.getId()) {
+			List<BookingModel> overlapCancelledBkgs = new ArrayList<BookingModel>();
+			List<BookingModel> bookings = getBookings(room, date, date);
+			Interval interval = new Interval(startTime.getTime(), endTime.getTime());
+
+			for (BookingModel booking : bookings) {
+				Interval i = new Interval(booking.getStartTime().getTime(), booking.getEndTime().getTime());
+
+				if (interval.overlaps(i)) {
+					if (!BookingStatus.CANCELLED.equals(booking.getStatus())) {
+						throw new BusinessException("register.already.done.failure", room.getName(), 
+													DateFormatUtils.format(booking.getDate(), "dd/MM/yyyy"),
+													DateFormatUtils.format(booking.getStartTime(), "HH:mm'h'"), 
+													DateFormatUtils.format(booking.getEndTime(), "HH:mm'h'"));
+					} else {
+						overlapCancelledBkgs.add(booking);
+					}
+				}
+			}
+
+			if (overlapCancelledBkgs.size() > 0) {
+				for(BookingModel booking: overlapCancelledBkgs) {
+					delete(booking);
+				}
+			}
+
+			b = new Booking();
+		} else {
+			b = bm.findById(new BookingPK(room.getId(), date, startTime, endTime));
+
+			if (b == null) {
+				b = new Booking();
+			} else if (!BookingStatus.CANCELLED.equals(b.getStatus())) {
+				throw new BusinessException("register.already.done.failure", room.getName(), 
+											DateFormatUtils.format(date, "dd/MM/yyyy"),
+											DateFormatUtils.format(startTime, "HH:mm'h'"), 
+											DateFormatUtils.format(endTime, "HH:mm'h'"));
+			}
+		}
+
+		return b;
 	}
 	
 	public List<BookingModel> getBookings(RoomModel room, Date fromDate, Date toDate) {
@@ -89,7 +188,7 @@ public class BookingModel {
 			Room r = new Room();
 			BeanUtils.copyProperties(r, room);
 			
-			for (Booking b : bm.findActiveBookingsByPeriod(r, fromDate, toDate)) {
+			for (Booking b : bm.findBookingsByPeriod(r, fromDate, toDate)) {
 				booking = new BookingModel();
 				BeanUtils.copyProperties(booking, b);
 				bookings.add(booking);
@@ -127,12 +226,13 @@ public class BookingModel {
 		return getBookings(null, today, lastDate);
 	}
 	
-	public boolean bookingExists(Date date, int room) {
+	public boolean bookingExists(BookingModel booking) {
 		String owner = String.valueOf("BookingModel.bookingExists");
 		bm.openManager(owner);
-		Booking b = bm.findById(new BookingPK(room, date));
+		Booking b = bm.findById(new BookingPK(booking.getRoom().getId(), booking.getDate(),
+											  booking.getStartTime(), booking.getEndTime()));
 		bm.closeManager(owner);
-		return b != null && !BookingStatus.CANCELLED.equals(b.getStatus()) ? true : false;
+		return b != null && !BookingStatus.CANCELLED.equals(b.getStatus());
 	}
 
 	public List<BookingModel> getUserBookings(long userId) {
@@ -171,7 +271,8 @@ public class BookingModel {
 
 		try {
 			bm.openManager(owner);
-			Booking b = bm.findById(new BookingPK(booking.getRoom().getId(), booking.getDate()));
+			Booking b = bm.findById(new BookingPK(booking.getRoom().getId(), booking.getDate(),
+												  booking.getStartTime(), booking.getEndTime()));
 
 			if (b == null) {
 				throw new Exception();
@@ -187,14 +288,24 @@ public class BookingModel {
 		}
 	}
 	
-	private void delete(Booking booking) {
+	private void delete(BookingModel booking) throws Exception {
 		String owner = String.valueOf("BookingModel.delete");
 		try {
 			bm.openManager(owner);
-			bm.delete(booking, UserHelper.getLoggedUserId());
+			Booking b = new Booking();
+			BeanUtils.copyProperties(b, booking);
+			bm.delete(b, UserHelper.getLoggedUserId());
 		} finally {
 			bm.closeManager(owner);
 		}
+	}
+
+	public long getFlatId() {
+		return flatId;
+	}
+
+	public void setFlatId(long flatId) {
+		this.flatId = flatId;
 	}
 
 	public long getUserId() {

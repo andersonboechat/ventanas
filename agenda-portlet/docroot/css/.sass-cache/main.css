@@ -17,26 +17,28 @@
   margin: 45px 5px 45px 5px;
   padding: 40px 0px 40px 40px; }
 
-.agenda .fc-event-skin {
+.agenda .fc-event {
   border: none;
-  width: 100px !important;
+  width: 120px !important; }
+
+.agenda .fc-event-inner {
+  border: 0px solid black;
+  width: 80px !important;
   height: 40px;
-  float: right;
-  padding: 0px 0px 0px 35px;
+  padding: 0px 0px 0px 42px;
   font-weight: bold;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  font-size: 13px;
+  overflow: visible;
   color: grey; }
 
 .agenda .fc-event-time {
   display: none; }
 
 .agenda .barbecure1 {
-  background: url("../images/icon_churrasqueira1.png") no-repeat left; }
+  background: url("../images/barbecue.png") no-repeat left; }
 
 .agenda .barbecure2 {
-  background: url("../images/icon_churrasqueira2.png") no-repeat left; }
+  background: url("../images/oven.png") no-repeat left; }
 
 .agenda .movie {
   background: url("../images/icon_cinema.png") no-repeat left; }
@@ -46,6 +48,9 @@
 
 .agenda .party {
   background: url("../images/icon_festa.png") no-repeat left; }
+
+.agenda .sound {
+  background: url("../images/sound.png") no-repeat left; }
 
 .agenda .left {
   width: 74%;
@@ -61,29 +66,43 @@
   padding-bottom: 12px;
   vertical-align: top; }
 
-.left2 {
-  width: 60%;
-  text-align: left;
-  border: 0px solid black; }
+.colTitle {
+  width: 60%; }
 
-.right2 {
+.colDate {
+  width: 20%;
+  text-align: right;
+  border: 0px solid black;
+  font-size: 14px; }
+
+.colHour {
   width: 20%;
   text-align: right;
   border: 0px solid black;
   margin: 0 !important;
-  vertical-align: top; }
+  padding-left: 0px; }
 
-.middle {
+.colFlat {
+  text-align: right;
+  border: 0px solid black;
+  margin: 0 !important;
+  padding-left: 15px; }
+
+.colResident {
   width: 20%;
   text-align: right;
   border: 0px solid black;
   margin: 0 !important;
-  vertical-align: top; }
+  padding-left: 15px; }
 
 .left3 {
   width: 40%;
   text-align: left;
-  padding: 2px 2px; }
+  padding: 2px 2px 0px 0px;
+  border: 0px solid black; }
+
+.left3 label {
+  padding: 0; }
 
 .right3 {
   width: 60%;
@@ -100,9 +119,7 @@
 
 .agenda .ui-chkbox-label {
   float: left !important;
-  display: inline;
-  outline: none;
-  margin: 0px 0px 0px 0px !important; }
+  margin: 0px 0px 0px 5px !important; }
 
 .agenda textarea {
   margin: 25px 5px 25px 5px;

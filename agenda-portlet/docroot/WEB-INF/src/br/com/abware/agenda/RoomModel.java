@@ -14,6 +14,8 @@ public class RoomModel {
 
 	private static final Logger LOGGER = Logger.getLogger(RoomModel.class);
 	
+	public static final int CINEMA = 3;
+	
 	private final RoomManager manager = new RoomManager();
 	
 	private int id;

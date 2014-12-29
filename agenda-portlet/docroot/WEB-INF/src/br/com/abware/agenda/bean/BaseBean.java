@@ -25,7 +25,7 @@ public abstract class BaseBean {
 
 	protected static ResourceBundle rb = ResourceBundle.getBundle("Language", new Locale("pt", "BR"));
 
-	protected static String getRoomStyleClass(RoomModel room) {
+	public static String getRoomStyleClass(RoomModel room) {
 		return ResourceBundleUtil.getString(rb, "room.style.class." + room.getId());
 	}
 
@@ -40,7 +40,7 @@ public abstract class BaseBean {
 		return !user.getOrganizations().isEmpty() ?	user.getOrganizations().get(0).getName() : ""; 
 	}
 
-	protected void setMessages(Severity severity, String clientId, String messageKey, String ... args) {
+	protected void setMessages(Severity severity, String clientId, String messageKey, Object ... args) {
 		LOGGER.trace("Method in");
 
 		FacesContext context = FacesContext.getCurrentInstance();

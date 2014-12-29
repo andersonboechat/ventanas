@@ -1,14 +1,17 @@
 package br.com.abware.agenda.persistence.entity;
 
-import javax.persistence.*;
-
-import org.apache.commons.lang.time.DateUtils;
-
 import br.com.abware.agenda.BookingStatus;
 
 import java.sql.Time;
-import java.text.ParseException;
 import java.util.Date;
+
+import javax.persistence.EmbeddedId;
+import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+import javax.persistence.Table;
 
 
 /**
@@ -24,10 +27,6 @@ public class Booking extends BaseEntity {
 	@EmbeddedId
 	private BookingPK id;
 
-	private Time endTime;
-
-	private Time startTime;
-
 	@Enumerated(EnumType.ORDINAL)
 	private BookingStatus status;
 
@@ -35,26 +34,13 @@ public class Booking extends BaseEntity {
 	@JoinColumn(name="roomId", insertable=false, updatable=false)
 	private Room room;
 
+	private long flatId;
+	
 	private long userId;
 
 	public Booking() {
-		this.status = BookingStatus.OPENED;
-		
-		String[] parsePatterns = new String[] {"HH:mm:ss"};
-		try {
-			this.startTime = new Time(DateUtils.parseDate("10:00:00", parsePatterns).getTime());
-			this.endTime = new Time(DateUtils.parseDate("22:00:00", parsePatterns).getTime());
-		} catch (ParseException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+		this.id = new BookingPK();
 	}
-
-	public Booking(int roomId, Date date, long userId) {
-		this();
-		this.id = new BookingPK(roomId, date);
-		this.userId = userId;
-	}	
 
 	public BookingPK getId() {
 		return this.id;
@@ -62,22 +48,6 @@ public class Booking extends BaseEntity {
 
 	public void setId(BookingPK id) {
 		this.id = id;
-	}
-
-	public Time getEndTime() {
-		return this.endTime;
-	}
-
-	public void setEndTime(Time endTime) {
-		this.endTime = endTime;
-	}
-
-	public Time getStartTime() {
-		return this.startTime;
-	}
-
-	public void setStartTime(Time startTime) {
-		this.startTime = startTime;
 	}
 
 	public BookingStatus getStatus() {
@@ -94,13 +64,22 @@ public class Booking extends BaseEntity {
 
 	public void setRoom(Room room) {
 		this.room = room;
+		this.id.setRoomId(room.getId());
+	}
+
+	public long getFlatId() {
+		return flatId;
+	}
+
+	public void setFlatId(long flatId) {
+		this.flatId = flatId;
 	}
 
 	public long getUserId() {
 		return this.userId;
 	}
 
-	public void setUser(long userId) {
+	public void setUserId(long userId) {
 		this.userId = userId;
 	}
 
@@ -111,4 +90,20 @@ public class Booking extends BaseEntity {
 	public void setDate(Date date) {
 		this.id.setDate(date);
 	}
+	
+	public Time getStartTime() {
+		return id.getStartTime();
+	}
+
+	public void setStartTime(Time startTime) {
+		this.id.setStartTime(startTime);
+	}
+
+	public Time getEndTime() {
+		return id.getEndTime();
+	}
+
+	public void setEndTime(Time endTime) {
+		this.id.setEndTime(endTime);
+	}	
 }

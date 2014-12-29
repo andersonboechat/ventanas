@@ -1,20 +1,21 @@
 package br.com.abware.agenda.bean;
 
-import java.net.URL;
+import java.sql.Time;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
+import javax.annotation.PostConstruct;
 import javax.faces.application.FacesMessage;
 import javax.faces.bean.ManagedBean;
-import javax.faces.bean.SessionScoped;
+import javax.faces.bean.ViewScoped;
 import javax.faces.component.UIComponent;
 import javax.faces.component.UIInput;
 import javax.faces.component.html.HtmlSelectOneMenu;
 import javax.faces.context.FacesContext;
 import javax.faces.event.AjaxBehaviorEvent;
-import javax.faces.event.PhaseId;
 import javax.faces.event.ValueChangeEvent;
 import javax.faces.validator.ValidatorException;
 
@@ -22,39 +23,38 @@ import org.apache.commons.lang.time.DateFormatUtils;
 import org.apache.commons.lang.time.DateUtils;
 import org.apache.log4j.Logger;
 import org.primefaces.component.tabview.TabView;
+import org.primefaces.context.RequestContext;
 import org.primefaces.event.SelectEvent;
 import org.primefaces.event.TabChangeEvent;
-import org.primefaces.model.DefaultScheduleEvent;
-import org.primefaces.model.DefaultStreamedContent;
-import org.primefaces.model.LazyScheduleModel;
 import org.primefaces.model.ScheduleEvent;
 import org.primefaces.model.ScheduleModel;
-import org.primefaces.model.StreamedContent;
 
-import com.liferay.portal.kernel.exception.PortalException;
-import com.liferay.portal.kernel.exception.SystemException;
 import com.liferay.portal.model.User;
 import com.liferay.portal.service.UserLocalServiceUtil;
 import com.sun.faces.util.MessageFactory;
 
 import br.com.abware.agenda.BookingModel;
 import br.com.abware.agenda.BookingStatus;
+import br.com.abware.agenda.CalendarModel;
 import br.com.abware.agenda.Flat;
 import br.com.abware.agenda.RoomModel;
 import br.com.abware.agenda.UserHelper;
+import br.com.abware.agenda.exception.BusinessException;
 
 @ManagedBean
-@SessionScoped
+@ViewScoped
 public class ScheduleBean extends BaseBean {
 
 	private static final Logger LOGGER = Logger.getLogger(ScheduleBean.class);
 
-	private static ScheduleModel model;
-
-	private static List<ScheduleModel> models;
+	private static List<CalendarModel> models = initModels();
 	
 	private Date bookingDate;
+	
+	private int bkgStartTime;
 
+	private int bkgEndTime;
+	
 	private Integer roomId;
 
 	private RoomModel room;
@@ -62,8 +62,6 @@ public class ScheduleBean extends BaseBean {
 	private String password;	
 
 	private boolean deal;
-
-	private StreamedContent agreement;
 
 	private List<BookingModel> userBookings;
 	
@@ -75,40 +73,60 @@ public class ScheduleBean extends BaseBean {
 	
 	private BookingModel booking;
 	
-	public ScheduleBean() {
+	private List<Integer> bookingHours;
+
+	@PostConstruct
+	public void init() {
 		bookingDate = new Date();
 		room = rooms.get(0);
 		roomId = room.getId();
 		resident = UserHelper.getLoggedUser();
 		flats = Flat.getFlats();
 		Collections.sort(flats);
+		
+		bookingHours = new ArrayList<Integer>();
+		for (int h = BookingModel.BKG_MIN_HOUR; h <= BookingModel.BKG_MAX_HOUR - BookingModel.BKG_RANGE_HOUR; h++) {
+			bookingHours.add(h);
+		}
+	}
 
-		models = new ArrayList<ScheduleModel>();
+	private static List<CalendarModel> initModels() {
+		List<CalendarModel> models = new ArrayList<CalendarModel>();
 		for (RoomModel r : rooms) {
 			models.add(new CalendarModel(r));
 		}
-		model = models.get(0);
+		return models;
 	}
-
+	
 	public void onDoBooking(int modelIndex) {
 		LOGGER.trace("Method in");
 
 		try {
 			if (deal) {
-				BookingModel bm = new BookingModel().doBooking(bookingDate, roomId, resident.getUserId());
-
-				if (bm != null) {
-					models.get(modelIndex).addEvent(new DefaultScheduleEvent(resident.getFirstName(), 
-															bookingDate, 
-															bookingDate, 
-															getRoomStyleClass(bm.getRoom())));
+				BookingModel bm = new BookingModel();
+				bm.setRoom(room);
+				bm.setDate(bookingDate);
+				if (RoomModel.CINEMA == room.getId()) {
+					bm.setStartTime(Time.valueOf(bkgStartTime + ":00:00"));
+					bm.setEndTime(Time.valueOf(bkgEndTime + ":00:00"));
 				}
+				bm.setFlatId(flat.getId());
+				bm.setUserId(resident.getUserId());
+				bm.setStatus(BookingStatus.OPENED);
 
-				Date deadline = DateUtils.addDays(bookingDate, -7);
+				bm.doBooking();
+
+				models.get(modelIndex).addEvent(models.get(modelIndex).createEvent(bm));
+
 				setMessages(FacesMessage.SEVERITY_WARN, getClientId(":tab:tabs:booking-dialog-form-" + modelIndex + ":bookingBtn"), 
-							"register.success", DateFormatUtils.format(deadline, "dd/MM/yyyy"));
+							"register.success");
 
-				roomId = null;
+				if (isCancelEnable()) {
+					Date deadline = DateUtils.addDays(bookingDate, -BookingModel.BKG_CANCEL_DEADLINE);
+					setMessages(FacesMessage.SEVERITY_WARN, getClientId(":tab:tabs:booking-dialog-form-" + modelIndex + ":bookingBtn"), 
+								"register.cancel.notify", DateFormatUtils.format(deadline, "dd/MM/yyyy"));
+				}
+				
 				bookingDate = null;
 				deal = false;
 			} else {
@@ -116,6 +134,10 @@ public class ScheduleBean extends BaseBean {
 			}
 
 			setMessages(FacesMessage.SEVERITY_INFO, getClientId("agenda-status"), "request.search");
+		} catch (BusinessException e) {
+			LOGGER.warn(e.getMessage(), e);
+			setMessages(FacesMessage.SEVERITY_WARN, null, e.getMessage(), e.getArgs());
+			RequestContext.getCurrentInstance().addCallbackParam("exception", true);
 		} catch (Exception e) {
 			LOGGER.fatal(e.getMessage(), e);
 			setMessages(FacesMessage.SEVERITY_FATAL, null, "register.runtime.failure");
@@ -124,11 +146,11 @@ public class ScheduleBean extends BaseBean {
 		LOGGER.trace("Method out");
 	}
 
-	public void onDoCancel() {
+	public void onDoCancel(int modelIndex) {
 		try { 
 			if (booking != null) {
 				booking.updateStatus(booking, BookingStatus.CANCELLED);
-				setMessages(FacesMessage.SEVERITY_WARN, getClientId(":event-dialog-form:cancelBookingBtn"), "register.cancel.success");
+				setMessages(FacesMessage.SEVERITY_WARN, getClientId(":tab:tabs:event-dialog-form-" + modelIndex + ":cancelBkgBtn"), "register.cancel.success");
 			}
 		} catch (Exception e) {
 			LOGGER.error(e.getMessage(), e);
@@ -137,8 +159,14 @@ public class ScheduleBean extends BaseBean {
 	}
 	
 	public void onDateSelect(SelectEvent e) {
+		Date today = DateUtils.truncate(new Date(), Calendar.DAY_OF_MONTH);
 		bookingDate = (Date) e.getObject();
-		setMessages(FacesMessage.SEVERITY_INFO, getClientId("agenda-status"), "request.register");
+
+		if (bookingDate.before(today)) {
+			setMessages(FacesMessage.SEVERITY_INFO, getClientId("growl2"), "register.past.date", 
+						DateFormatUtils.format(bookingDate, "dd/MM/yyyy"), DateFormatUtils.format(today, "dd/MM/yyyy"));
+			RequestContext.getCurrentInstance().addCallbackParam("exception", true);
+		}
 	}
 	
 	public void onCalendarDateSelect(SelectEvent e) {
@@ -177,7 +205,7 @@ public class ScheduleBean extends BaseBean {
 		room = rooms.get(roomsIndex);
 	}
 
-	public void onSelectFlat(AjaxBehaviorEvent event) {
+	public void onFlatSelect(AjaxBehaviorEvent event) {
 		HtmlSelectOneMenu selectOneMenu = (HtmlSelectOneMenu) event.getSource();
 		Integer id = Integer.valueOf((String) selectOneMenu.getValue());
 		Flat f = Flat.getFlat(id);
@@ -188,19 +216,13 @@ public class ScheduleBean extends BaseBean {
 		}
 	}
 
-	public void onSelectBooking(SelectEvent event) {
+	public void onBookingSelect(SelectEvent event) {
 		ScheduleEvent e = (ScheduleEvent) event.getObject();
 		booking = (BookingModel) e.getData();
 		bookingDate = booking.getDate();
 	}
 	
-	
-//	public void onSelectBooking(ScheduleEntrySelectEvent event) {
-//		ScheduleEvent e = (ScheduleEvent) event.getScheduleEvent();
-//		booking = (BookingModel) e.getData();
-//	}
-	
-	public void onSelectResident(AjaxBehaviorEvent event) {
+	public void onResidentSelect(AjaxBehaviorEvent event) {
 		HtmlSelectOneMenu selectOneMenu = (HtmlSelectOneMenu) event.getSource();
 		Integer id = Integer.valueOf((String) selectOneMenu.getValue());
 
@@ -217,34 +239,13 @@ public class ScheduleBean extends BaseBean {
 		int i = tv.getChildren().indexOf(event.getTab());
 		room = ((CalendarModel) models.get(i)).getRoomModel();
 		roomId = room.getId();
-		model = models.get(i);
 	}
-
-    public StreamedContent getAgreement() {
-        try {
-	    	FacesContext context = FacesContext.getCurrentInstance();
-	
-	        if (context.getCurrentPhaseId() == PhaseId.RENDER_RESPONSE) {
-	            return new DefaultStreamedContent();
-	        } else {
-	            String id = context.getExternalContext().getRequestParameterMap().get("id");
-	            room = rooms.get(rooms.indexOf(new RoomModel(Integer.valueOf(id))));
-	            String agreement = "http://" + context.getExternalContext().getRequestServerName() + room.getAgreement();
-				return new DefaultStreamedContent(new URL(agreement).openStream(), "application/pdf");
-	        }
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-
-        return null;
-    }	
-
+   
 	public boolean bookingExists(String roomId) {
 		boolean exists = false;
 
 		try {
-			exists = new BookingModel().bookingExists(bookingDate, Integer.parseInt(roomId));
+			exists = true; //new BookingModel().bookingExists(bookingDate, Integer.parseInt(roomId));
 		} catch (NumberFormatException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -272,28 +273,6 @@ public class ScheduleBean extends BaseBean {
 		}
 	}
 
-	public void validateFlat(FacesContext context, UIComponent component, Object value) {  
-		if (value instanceof String) {
-			String flatId = (String) value;
-			if (Integer.valueOf(flatId) == -1) {
-				String clientId = component.getClientId(context);
-				FacesMessage message = MessageFactory.getMessage(UIInput.REQUIRED_MESSAGE_ID, clientId);
-				throw new ValidatorException(message);  
-			}
-		}
-	}
-
-	public void validateResident(FacesContext context, UIComponent component, Object value) {  
-		if (value instanceof String) {
-			String residentId = (String) value;
-			if (Integer.valueOf(residentId) == -1) {
-				String clientId = component.getClientId(context);
-				FacesMessage message = MessageFactory.getMessage(UIInput.REQUIRED_MESSAGE_ID, clientId);
-				throw new ValidatorException(message);  
-			}
-		}
-	}	
-
 	public boolean test() {
 		return false;
 	}
@@ -301,14 +280,23 @@ public class ScheduleBean extends BaseBean {
 	public boolean isCancelEnable() {
 		if (bookingDate != null) {
 			Date today = new Date();
-			Date deadline = DateUtils.addDays(bookingDate, -7);
+			Date deadline = DateUtils.addDays(bookingDate, -BookingModel.BKG_CANCEL_DEADLINE);
 			return deadline.after(today);
 		}
+
 		return false;
 	}
 	
-	public ScheduleModel getModel() {
-		return model;
+	public boolean isTimeSelectionEnabled() {
+		return room.getId() == RoomModel.CINEMA;
+	}
+	
+	public List<Integer> getBookingHours() {
+		return bookingHours;
+	}
+
+	public void setBookingHours(List<Integer> bookingHours) {
+		this.bookingHours = bookingHours;
 	}
 
 	public Date getBookingDate() {
@@ -325,6 +313,22 @@ public class ScheduleBean extends BaseBean {
 
 	public void setRoomId(Integer roomId) {
 		this.roomId = roomId;
+	}
+
+	public int getBkgStartTime() {
+		return bkgStartTime;
+	}
+
+	public void setBkgStartTime(int bkgStartTime) {
+		this.bkgStartTime = bkgStartTime;
+	}
+
+	public int getBkgEndTime() {
+		return bkgEndTime;
+	}
+
+	public void setBkgEndTime(int bkgEndTime) {
+		this.bkgEndTime = bkgEndTime;
 	}
 
 	public RoomModel getRoom() {
@@ -349,10 +353,6 @@ public class ScheduleBean extends BaseBean {
 
 	public void setDeal(boolean deal) {
 		this.deal = deal;
-	}
-
-	public void setAgreement(StreamedContent agreement) {
-		this.agreement = agreement;
 	}
 
 	public List<BookingModel> getUserBookings() {
@@ -396,61 +396,16 @@ public class ScheduleBean extends BaseBean {
 		this.booking = booking;
 	}
 
-	public static List<ScheduleModel> getModels() {
+	public static List<CalendarModel> getModels() {
 		return models;
 	}
 
-	public static void setModels(List<ScheduleModel> models) {
+	public static void setModels(List<CalendarModel> models) {
 		ScheduleBean.models = models;
 	}
 	
 	public static ScheduleModel getModel(int index) {
 		return models.get(index);
 	}
-
-	public class CalendarModel extends LazyScheduleModel {
-
-		private static final long serialVersionUID = 1L;
-		
-		private RoomModel roomModel;
-		 
-		public CalendarModel(RoomModel roomModel) {
-			super();
-			this.roomModel = roomModel;
-		}
-		
-		@Override
-        public void loadEvents(Date start, Date end) {
-        	clear();
-        	BookingModel model = new BookingModel();
-    		for (BookingModel b : model.getBookings(roomModel, start, end)) {
-    			try {
-    				DefaultScheduleEvent event; 
-    				event = new DefaultScheduleEvent(ScheduleBean.getUserFlatName(b.getUser()), 
-													 b.getDate(), 
-													 b.getDate(), 
-													 ScheduleBean.getRoomStyleClass(b.getRoom()));
-    				event.setData(b);
-					addEvent(event);
-				} catch (PortalException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				} catch (SystemException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-    		}
-		}
-		
-		public RoomModel getRoomModel() {
-			return roomModel;
-		}
-		
-		@Override
-		public boolean equals(Object arg0) {
-			// TODO Auto-generated method stub
-			return super.equals(arg0);
-		}
-	}	
 
 }

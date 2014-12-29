@@ -6,18 +6,10 @@
 	xmlns:h="http://java.sun.com/jsf/html"
 	xmlns:p="http://primefaces.org/ui"
 	xmlns:ui="http://java.sun.com/jsf/facelets">
-	<h:head>
-		<script type="text/javascript">
-		 /*<![CDATA[*/
-			function teste(date) {
-				var today = Date.today();
-				var theDate = date;
-				return (theDate < today ? false : true);
-			} /*]]>*/
-		</script> 	
-	</h:head>
+	<h:head></h:head>
 	<h:body>
 		<f:loadBundle basename="Language_pt_BR" var="msg"/>
+		<p:growl id="growl2" widgetVar="growl2" />
 
 		<p:ajaxStatus id="agenda-status" style="text-align: center; position: fixed; margin: 10% 30%;  border: 0px solid black; z-index: 99999999999999">
 			<f:facet name="start">
@@ -38,14 +30,11 @@
 					<c:forEach var="room" items="#{scheduleBean.rooms}" varStatus="i">
 						<p:tab id="tab_${i.index}" title="${room.name}">
 							<h:form id="agenda-form-#{i.index}">
-								<p:inputMask id="selectedDate" value="#{scheduleBean.bookingDate}" mask="99/99/9999" widgetVar="selectedDate">
-									<f:convertDateTime pattern="dd/MM/yyyy" />
-								</p:inputMask>
 								<p:schedule id="calendar-#{i.index}" value="#{scheduleBean.getModel(i.index)}" editable="true" widgetVar="calendar-#{i.index}" 
 											locale="pt" draggable="false" resizable="false" styleClass="agenda" aspectRatio="0.9" 
-											leftHeaderTemplate="title" centerHeaderTemplate="prev" rightHeaderTemplate="next">  <!-- timeZone="America/Sao_Paulo"-->
-									<p:ajax event="dateSelect" listener="#{scheduleBean.onDateSelect}" update=":tab:tabs:booking-dialog-form-#{i.index}:bookingDetails-#{i.index}, selectedDate" oncomplete="PF('bookingDialog-#{i.index}').show();"/>
-									<p:ajax event="eventSelect" listener="#{scheduleBean.onSelectBooking}" update=":tab:tabs:event-dialog-form-#{i.index}:eventDetails-#{i.index}" oncomplete="PF('eventDialog-#{i.index}').show();"/>
+											leftHeaderTemplate="title" centerHeaderTemplate="prev" rightHeaderTemplate="next"> <!-- timeZone="America/Sao_Paulo"-->
+									<p:ajax event="dateSelect" listener="#{scheduleBean.onDateSelect}" update=":tab:tabs:booking-dialog-form-#{i.index}:bookingDetails-#{i.index}, :growl2" oncomplete="if (!args.exception) {PF('bookingDialog-#{i.index}').show();}"/>
+									<p:ajax event="eventSelect" listener="#{scheduleBean.onBookingSelect}" update=":tab:tabs:event-dialog-form-#{i.index}:eventDetails-#{i.index}" oncomplete="PF('eventDialog-#{i.index}').show();"/>
 								</p:schedule>
 							</h:form>
 							<ui:include src="booking_dialog.xhtml">
@@ -59,20 +48,35 @@
 										<h:panelGrid columns="2" style="width: 100%; border: 0px solid black" columnClasses="left3,right3">
 											<h:outputLabel value="Espaço"/>
 											<h:outputText value="#{scheduleBean.booking.room.name}"/>
-											<h:outputLabel value="Data do Aluguel"/>
+											<h:outputLabel value="Data"/>
 											<h:outputText value="#{scheduleBean.booking.date}"><f:convertDateTime pattern="EEEEE, dd/MM/yyyy" /></h:outputText>
+											<h:outputLabel value="Horário"/>
+											<p:outputPanel>
+												<h:outputText value="#{scheduleBean.booking.startTime}"><f:convertDateTime pattern="'das' HH:mm'h'" /></h:outputText>
+												<h:outputText value="#{scheduleBean.booking.endTime}"><f:convertDateTime pattern=" 'às' HH:mm'h'" /></h:outputText>
+											</p:outputPanel>
 											<h:outputLabel value="Apartamento"/>
 											<h:outputText value="#{scheduleBean.booking.user.organizations.get(0).name}"/>
-											<h:outputLabel value="Proprietário/Morador"/>
+											<h:outputLabel value="Condômino"/>
 											<h:outputText value="#{scheduleBean.booking.user.fullName}"/>
+											<h:outputLabel value="Situação"/>
+											<h:outputText value="#{scheduleBean.booking.status.label}"/>
 										</h:panelGrid>
 										<h:panelGrid columns="2" style="width: 100%; overflow: hidden; margin: 20px 0px 20px 0px;">
-											<h:outputText value="#{msg['register.cancel.deadline']}" escape="false" style="float:left; font-size: 10px; font-weight: bold; margin: 0px 5px 5px;" rendered="#{not(scheduleBean.isCancelEnable())}"/>
-											<p:commandButton id="cancelBookingBtn" value="#{msg['book.cancel']}" actionListener="#{scheduleBean.onDoCancel}" oncomplete="if (!args.validationFailed) {if(PF('calendar-#{i.index}').update) {PF('calendar-#{i.index}').update();} PF('eventDialog-#{i.index}').hide();}" update="growl" style="float: right; margin: 0px 5px 5px; width: 145px" rendered="#{scheduleBean.isCancelEnable()}"/>
+											<c:if test="#{scheduleBean.booking.status != 'CANCELLED'}">
+												<p:commandButton id="cancelBkgConfirmBtn" value="#{msg['book.cancel']}" actionListener="#{scheduleBean.onDoCancel(i.index)}" oncomplete="if (!args.validationFailed) {if(PF('calendar-#{i.index}').update) {PF('calendar-#{i.index}').update();} PF('eventDialog-#{i.index}').hide();}" update="growl" style="float: right; margin: 0px 5px 5px; width: 145px" rendered="#{not(scheduleBean.isCancelEnable())}">
+													<p:confirm header="Atenção" message="#{msg['register.cancel.deadline']}" icon="ui-icon-alert"/>
+												</p:commandButton>
+												<p:commandButton id="cancelBkgBtn" value="#{msg['book.cancel']}" actionListener="#{scheduleBean.onDoCancel(i.index)}" oncomplete="if (!args.validationFailed) {if(PF('calendar-#{i.index}').update) {PF('calendar-#{i.index}').update();} PF('eventDialog-#{i.index}').hide();}" update="growl" style="float: right; margin: 0px 5px 5px; width: 145px" rendered="#{scheduleBean.isCancelEnable()}"/>
+											</c:if>
 											<p:commandButton id="closeBtn" type="button" value="#{msg['close']}" onclick="PF('eventDialog-#{i.index}').hide();" style="float: left; margin: 0px 0px 5px 5px; width: 145px" global="false" />
 										</h:panelGrid>
 									</h:panelGrid>
 								</p:dialog>
+								<p:confirmDialog global="true" width="600" style="padding: 0px" showEffect="fade" hideEffect="fade" visible="false">
+									<p:commandButton value="Não" type="button" styleClass="ui-confirmdialog-no" icon="ui-icon-close" style="float: left; width: 200px; margin-left: 14%" />
+									<p:commandButton value="Sim" type="button" styleClass="ui-confirmdialog-yes" icon="ui-icon-check" style="float: right; width: 200px; margin-right: 14%"/>
+								</p:confirmDialog>
 							</h:form>
 						</p:tab>
 

@@ -82,22 +82,33 @@
 	vertical-align: top;
 }
 
-.left2 {
-	width: 60%; 
-	text-align: left;
+.colTitle {
+	width: 60%;
+}
+
+.colDate {
+	width: 20%;
+	text-align: right;
 	border: 0px solid black;
-	
+	font-size: 14px;
 } 
 
-.right2 {
+.colHour {
 	width: 20%;
 	text-align: right;
 	border: 0px solid black;
 	margin: 0 !important;
-	padding-left: 10px; 	
+	padding-left: 0px;
 }
 
-.middle {
+.colFlat {
+	text-align: right;
+	border: 0px solid black;
+	margin: 0 !important;
+	padding-left: 15px;
+}
+
+.colResident {
 	width: 20%;
 	text-align: right;
 	border: 0px solid black;
