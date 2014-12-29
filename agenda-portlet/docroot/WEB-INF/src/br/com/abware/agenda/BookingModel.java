@@ -15,7 +15,11 @@ import org.joda.time.Interval;
 
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.exception.SystemException;
+import com.liferay.portal.model.Role;
+import com.liferay.portal.model.RoleConstants;
 import com.liferay.portal.model.User;
+import com.liferay.portal.service.RoleLocalServiceUtil;
+import com.liferay.portal.service.UserGroupGroupRoleLocalServiceUtil;
 import com.liferay.portal.service.UserLocalServiceUtil;
 
 import br.com.abware.agenda.exception.BusinessException;
@@ -65,6 +69,10 @@ public class BookingModel {
 	public User getUser() throws PortalException, SystemException {
 		return UserLocalServiceUtil.getUser(userId);
 	}
+
+	public Flat getFlat() throws Exception {
+		return Flat.getFlatById(flatId);
+	}
 	
 	public synchronized void doBooking() throws Exception {
 		String owner = String.valueOf("BookingModel.doBooking");
@@ -99,7 +107,7 @@ public class BookingModel {
 			}
 		}
 		
-		if (startTime.after(endTime)) {
+		if (startTime.equals(endTime) || startTime.after(endTime)) {
 			throw new BusinessException("register.time.invalid.range", DateFormatUtils.format(startTime, "HH:mm'h'"), 
 										DateFormatUtils.format(endTime, "HH:mm'h'"));
 		}
@@ -157,7 +165,7 @@ public class BookingModel {
 
 			if (overlapCancelledBkgs.size() > 0) {
 				for(BookingModel booking: overlapCancelledBkgs) {
-					delete(booking);
+					delete(booking, false);
 				}
 			}
 
@@ -258,8 +266,7 @@ public class BookingModel {
 			bm.closeManager(owner);
 		}
 
-
-		return bookings;		
+		return bookings;
 	}
 	
 	public void updateStatus(BookingModel booking, BookingStatus status) throws Exception {
@@ -288,9 +295,32 @@ public class BookingModel {
 		}
 	}
 	
-	private void delete(BookingModel booking) throws Exception {
+	public void delete(BookingModel booking) throws Exception {
+		delete(booking, true);
+	}
+
+	private void delete(BookingModel booking, boolean checkPermission) throws Exception {
 		String owner = String.valueOf("BookingModel.delete");
 		try {
+			if (checkPermission) {
+				boolean hasPermission = false;
+				User user = UserHelper.getLoggedUser();
+				Role admin = RoleLocalServiceUtil.getRole(user.getCompanyId(), RoleConstants.ADMINISTRATOR);
+				Role powerUser = RoleLocalServiceUtil.getRole(user.getCompanyId(), RoleConstants.POWER_USER);
+				Role manager = RoleLocalServiceUtil.getRole(user.getCompanyId(), "Manager");
+
+				hasPermission = RoleLocalServiceUtil.hasUserRole(user.getUserId(), admin.getRoleId()) ||
+									RoleLocalServiceUtil.hasUserRole(user.getUserId(), manager.getRoleId()) ||
+									RoleLocalServiceUtil.hasUserRole(user.getUserId(), powerUser.getRoleId());
+
+				for (long userGroupId : user.getUserGroupIds()) {
+					hasPermission = hasPermission || UserGroupGroupRoleLocalServiceUtil.hasUserGroupGroupRole(userGroupId, user.getGroupId(), powerUser.getRoleId());
+				}
+
+				if(!hasPermission) {
+					throw new BusinessException("register.delete.denied");
+				}
+			}
 			bm.openManager(owner);
 			Booking b = new Booking();
 			BeanUtils.copyProperties(b, booking);
@@ -299,7 +329,8 @@ public class BookingModel {
 			bm.closeManager(owner);
 		}
 	}
-
+	
+	
 	public long getFlatId() {
 		return flatId;
 	}

@@ -7,10 +7,6 @@
 	font-size: 16px;
 }
 
-.agenda .fc-event-skin {
-	background: none;
-}
-	
 .agenda .fc-day-number {
 	font-family: Georgia;
 	font-weight: bold;
@@ -22,6 +18,12 @@
 	padding: 40px 0px 40px 40px;
 }
 
+/* ---------- Bookings ---------- */
+
+.agenda .fc-event-skin {
+	background: none;
+}
+	
 .agenda .fc-event {
 	border: none;
 	width: 120px !important;
@@ -42,29 +44,58 @@
 	display: none;
 }
 
-.agenda	.barbecure1 {
-	background: url("../images/barbecue.png") no-repeat left;
+/* ---------- Booking Styles ---------- */
+
+.agenda	.barbe {
+	background: url("../images/icon/barbe.png") no-repeat 30px 30px left;
 }
 
-.agenda	.barbecure2 {
-	background: url("../images/oven.png") no-repeat left;
+.agenda	.oven {
+	background: url("../images/icon/oven.png") no-repeat 30px 30px left;
 }
 
-.agenda	.movie {
-	background: url("../images/icon_cinema.png") no-repeat left;
+.agenda	.cinema {
+	background: url("../images/icon/cinema.png") no-repeat 30px 30px left;
 }
 
 .agenda	.gourmet {
-	background: url("../images/icon_gourmet.png") no-repeat left;
+	background: url("../images/icon/gourmet.png") no-repeat 30px 30px left;
 }
 
 .agenda	.party {
-	background: url("../images/icon_festa.png") no-repeat left;	
+	background: url("../images/icon/party.png") no-repeat 30px 30px left;	
 }
 
 .agenda	.sound {
-	background: url("../images/sound.png") no-repeat left;	
+	background: url("../images/icon/sound.png") no-repeat 30px 30px left;	
 }
+
+/* ---------- Cancelled Booking Styles ---------- */
+
+.agenda	.cld-barbe {
+	background: url("../images/icon/barbe.png") no-repeat 30px 60px left;
+}
+
+.agenda	.cld-oven {
+	background: url("../images/icon/oven.png") no-repeat 30px 60px left;
+}
+
+.agenda	.cld-cinema {
+	background: url("../images/icon/cinema.png") no-repeat 30px 60px left;
+}
+
+.agenda	.cld-gourmet {
+	background: url("../images/icon/gourmet.png") no-repeat 30px 60px left;
+}
+
+.agenda	.cld-party {
+	background: url("../images/icon/party.png") no-repeat 30px 60px left;	
+}
+
+.agenda	.cld-sound {
+	background: url("../images/icon/sound.png") no-repeat 30px 60px left;	
+}
+
 
 .agenda .left {
 	width: 74%; 

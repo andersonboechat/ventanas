@@ -10,11 +10,10 @@ import javax.faces.context.FacesContext;
 
 import org.apache.log4j.Logger;
 
-import com.liferay.portal.kernel.exception.PortalException;
-import com.liferay.portal.kernel.exception.SystemException;
 import com.liferay.portal.kernel.util.ResourceBundleUtil;
-import com.liferay.portal.model.User;
 
+import br.com.abware.agenda.BookingModel;
+import br.com.abware.agenda.BookingStatus;
 import br.com.abware.agenda.RoomModel;
 
 public abstract class BaseBean {
@@ -25,19 +24,17 @@ public abstract class BaseBean {
 
 	protected static ResourceBundle rb = ResourceBundle.getBundle("Language", new Locale("pt", "BR"));
 
-	public static String getRoomStyleClass(RoomModel room) {
-		return ResourceBundleUtil.getString(rb, "room.style.class." + room.getId());
-	}
-
 	public BaseBean() {
 	}
-	
-	public String getRoomStyleClass(String roomId) {
-		return getRoomStyleClass(new RoomModel(Integer.parseInt(roomId)));
-	}
-	
-	public static String getUserFlatName(User user) throws PortalException, SystemException {
-		return !user.getOrganizations().isEmpty() ?	user.getOrganizations().get(0).getName() : ""; 
+
+	public static String getBookingStyleClass(BookingModel booking) {
+		String style = "bkg.style.room.";
+
+		if (BookingStatus.CANCELLED.equals(booking.getStatus())) {
+			style = "cld" + "bkg.style.room.";
+		}
+
+		return ResourceBundleUtil.getString(rb, style + booking.getRoom().getId());
 	}
 
 	protected void setMessages(Severity severity, String clientId, String messageKey, Object ... args) {

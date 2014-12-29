@@ -43,6 +43,10 @@ public class Flat implements Comparable<Flat>{
 		return new Flat(OrganizationLocalServiceUtil.createOrganization(id));
 	}
 
+	public static Flat getFlatById(long id) throws Exception {
+		return new Flat(OrganizationLocalServiceUtil.getOrganization(id));
+	}	
+
 	public static List<Flat> getFlats() {
 		List<Flat> flats = new ArrayList<Flat>();
 

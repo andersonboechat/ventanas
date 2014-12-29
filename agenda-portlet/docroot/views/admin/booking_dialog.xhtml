@@ -11,17 +11,17 @@
 			<p:growl id="growl" severity="warn,error,fatal" sticky="true"/>
 			<h:panelGrid id="bookingDetails-#{tabId}" columns="1">
 				<h:panelGrid columns="3" style="width: 900px; overflow: hidden; margin: 5px 0px 5px 0px; " styleClass="agenda" columnClasses="colTitle,colDate,colHour">				
-					<h:outputText value="Espaço: #{scheduleBean.room.name} " style="font-size: 14px; margin-top: 15px;"/>
+					<h:outputText value="#{msg['room']}: #{scheduleBean.room.name} " style="font-size: 14px; margin-top: 15px;"/>
 
 					<h:outputText value="#{scheduleBean.bookingDate}">
-						<f:convertDateTime pattern="'Dia:' dd/MM/yyyy" />
+						<f:convertDateTime pattern="'#{msg['day']}:' dd/MM/yyyy" />
 					</h:outputText>
 	
 					<h:panelGrid columns="4" style="margin: 5px 0px 5px 0px;" rendered="#{scheduleBean.isTimeSelectionEnabled()}">
 						<h:outputText value="das" style="margin: 0px 5px"/>
 						
 						<h:selectOneMenu id="startTime" value="#{scheduleBean.bkgStartTime}" required="true" requiredMessage="#{msg['hour.begin.not.selected']}">
-							<f:selectItem itemLabel="Inicio" noSelectionOption="true"/>
+							<f:selectItem itemLabel="#{msg['start']}" noSelectionOption="true"/>
 							<c:forEach var="i" begin="9" end="21">
 								<f:selectItem itemLabel="${i}" itemValue="${i}"/>
 							</c:forEach>								
@@ -30,7 +30,7 @@
 						<h:outputText value="às" style="margin: 0px 5px"/>
 		
 						<h:selectOneMenu id="endTime" value="#{scheduleBean.bkgEndTime}" required="true" requiredMessage="#{msg['hour.end.not.selected']}">
-							<f:selectItem itemLabel="Término" noSelectionOption="true"/>
+							<f:selectItem itemLabel="#{msg['end']}" noSelectionOption="true"/>
 							<c:forEach var="i" begin="10" end="22">
 								<f:selectItem itemLabel="${i}" itemValue="${i}"/>
 							</c:forEach>					
@@ -40,13 +40,13 @@
 
 				<h:panelGrid columns="2" style="width: 900px; overflow: hidden; margin: 5px 0px 5px 0px; " styleClass="agenda" columnClasses="colFlat,colResident">
 					<h:selectOneMenu required="true" requiredMessage="#{msg['flat.not.selected']}">
-						<f:selectItem itemLabel="Apartamento" noSelectionOption="true"/>
+						<f:selectItem itemLabel="#{msg['flat']}" noSelectionOption="true"/>
 						<f:selectItems value="#{scheduleBean.flats}" var="flat" itemLabel="#{flat.name}" itemValue="#{flat.id}"/>
 						<p:ajax event="change" listener="#{scheduleBean.onFlatSelect}" update="residents"></p:ajax>
 					</h:selectOneMenu>
 	
 					<h:selectOneMenu id="residents" required="true" requiredMessage="#{msg['resident.not.selected']}" style="width: 250px;">
-						<f:selectItem itemLabel="Proprietário/Morador" noSelectionOption="true"/>
+						<f:selectItem itemLabel="#{msg['resident']}" noSelectionOption="true"/>
 						<f:selectItems value="#{scheduleBean.flat.users}" var="user" itemLabel="#{user.fullName}" itemValue="#{user.userId}"/>
 						<p:ajax event="change" listener="#{scheduleBean.onResidentSelect}"></p:ajax>
 					</h:selectOneMenu>
@@ -62,17 +62,17 @@
 				<p:selectBooleanCheckbox id="deal" value="#{scheduleBean.deal}" itemLabel="#{msg['agreement.user.deal']}" validator="#{scheduleBean.validateCheckbox}" validatorMessage="#{msg['agreement.deal.unchecked']}"/>
 
 				<h:panelGrid columns="2" style="float: right; height: 30px; overflow: hidden; margin: 20px 0px 10px 0px;">
-					<p:commandButton id="bookingConfirmBtn" value="#{msg.book}" actionListener="#{scheduleBean.onDoBooking(tabId)}" rendered="#{not(scheduleBean.isCancelEnable())}" oncomplete="if (!args.validationFailed &amp;&amp; !args.exception) {if(PF('calendar-#{tabId}').update) {PF('calendar-#{tabId}').update()} PF('bookingDialog-#{tabId}').hide();}" style="margin: 0px 5px; width: 85px" update="growl">
-						<p:confirm header="Atenção" message="#{msg['register.deadline']}" icon="ui-icon-alert"/>
+					<p:commandButton id="bookingConfirmBtn" value="#{msg.book}" actionListener="#{scheduleBean.onBookingRequest(tabId)}" rendered="#{not(scheduleBean.isCancelEnable())}" oncomplete="if (!args.validationFailed &amp;&amp; !args.exception) {if(PF('calendar-#{tabId}').update) {PF('calendar-#{tabId}').update()} PF('bookingDialog-#{tabId}').hide();}" style="margin: 0px 5px; width: 85px" update="growl">
+						<p:confirm header="#{msg['confirm.dialog.header']}" message="#{msg['register.deadline']}" icon="ui-icon-alert"/>
 					</p:commandButton>
-					<p:commandButton id="bookingBtn" value="#{msg.book}" actionListener="#{scheduleBean.onDoBooking(tabId)}" rendered="#{scheduleBean.isCancelEnable()}" oncomplete="if (!args.validationFailed &amp;&amp; !args.exception) {if(PF('calendar-#{tabId}').update) {PF('calendar-#{tabId}').update()} PF('bookingDialog-#{tabId}').hide();}" style="margin: 0px 5px; width: 85px" update="growl"/>
+					<p:commandButton id="bookingBtn" value="#{msg.book}" actionListener="#{scheduleBean.onBookingRequest(tabId)}" rendered="#{scheduleBean.isCancelEnable()}" oncomplete="if (!args.validationFailed &amp;&amp; !args.exception) {if(PF('calendar-#{tabId}').update) {PF('calendar-#{tabId}').update()} PF('bookingDialog-#{tabId}').hide();}" style="margin: 0px 5px; width: 85px" update="growl"/>
 					<p:commandButton id="cancelBookingBtn" value="#{msg.cancel}" type="button" onclick="PF('bookingDialog-#{tabId}').hide();" global="false" style="margin: 0px 0px 0px 5px; width: 85px"/>
 				</h:panelGrid>
 			</h:panelGrid>
 		</p:dialog>
 		<p:confirmDialog global="true" width="600" style="padding: 0px" showEffect="fade" hideEffect="fade" visible="false">
-			<p:commandButton value="Não, prefiro não alugar" type="button" styleClass="ui-confirmdialog-no" icon="ui-icon-close" style="float: left; width: 200px; margin-left: 14%" />
-			<p:commandButton value="Sim, quero alugar" type="button" styleClass="ui-confirmdialog-yes" icon="ui-icon-check" style="float: right; width: 200px; margin-right: 14%"/>
+			<p:commandButton value="#{msg['no']}" type="button" styleClass="ui-confirmdialog-no" icon="ui-icon-close" style="float: left; width: 200px; margin-left: 14%" />
+			<p:commandButton value="#{msg['yes']}" type="button" styleClass="ui-confirmdialog-yes" icon="ui-icon-check" style="float: right; width: 200px; margin-right: 14%"/>
 		</p:confirmDialog>
 	</h:form>
 </f:view>

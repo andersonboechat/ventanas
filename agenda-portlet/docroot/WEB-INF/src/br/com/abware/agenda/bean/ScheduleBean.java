@@ -73,8 +73,6 @@ public class ScheduleBean extends BaseBean {
 	
 	private BookingModel booking;
 	
-	private List<Integer> bookingHours;
-
 	@PostConstruct
 	public void init() {
 		bookingDate = new Date();
@@ -83,11 +81,6 @@ public class ScheduleBean extends BaseBean {
 		resident = UserHelper.getLoggedUser();
 		flats = Flat.getFlats();
 		Collections.sort(flats);
-		
-		bookingHours = new ArrayList<Integer>();
-		for (int h = BookingModel.BKG_MIN_HOUR; h <= BookingModel.BKG_MAX_HOUR - BookingModel.BKG_RANGE_HOUR; h++) {
-			bookingHours.add(h);
-		}
 	}
 
 	private static List<CalendarModel> initModels() {
@@ -97,8 +90,8 @@ public class ScheduleBean extends BaseBean {
 		}
 		return models;
 	}
-	
-	public void onDoBooking(int modelIndex) {
+
+	public void onBookingRequest(int modelIndex) {
 		LOGGER.trace("Method in");
 
 		try {
@@ -118,19 +111,19 @@ public class ScheduleBean extends BaseBean {
 
 				models.get(modelIndex).addEvent(models.get(modelIndex).createEvent(bm));
 
-				setMessages(FacesMessage.SEVERITY_WARN, getClientId(":tab:tabs:booking-dialog-form-" + modelIndex + ":bookingBtn"), 
+				setMessages(FacesMessage.SEVERITY_INFO, getClientId(":tab:tabs:booking-dialog-form-" + modelIndex + ":bookingBtn"), 
 							"register.success");
 
 				if (isCancelEnable()) {
 					Date deadline = DateUtils.addDays(bookingDate, -BookingModel.BKG_CANCEL_DEADLINE);
-					setMessages(FacesMessage.SEVERITY_WARN, getClientId(":tab:tabs:booking-dialog-form-" + modelIndex + ":bookingBtn"), 
+					setMessages(FacesMessage.SEVERITY_INFO, getClientId(":tab:tabs:booking-dialog-form-" + modelIndex + ":bookingBtn"), 
 								"register.cancel.notify", DateFormatUtils.format(deadline, "dd/MM/yyyy"));
 				}
-				
+
 				bookingDate = null;
 				deal = false;
 			} else {
-				setMessages(FacesMessage.SEVERITY_WARN, getClientId(":booking-dialog-form:bookingBtn"), "agreement.deal.unchecked");
+				setMessages(FacesMessage.SEVERITY_WARN, getClientId(":tab:tabs:booking-dialog-form-" + modelIndex + ":bookingBtn"), "agreement.deal.unchecked");
 			}
 
 			setMessages(FacesMessage.SEVERITY_INFO, getClientId("agenda-status"), "request.search");
@@ -146,38 +139,61 @@ public class ScheduleBean extends BaseBean {
 		LOGGER.trace("Method out");
 	}
 
-	public void onDoCancel(int modelIndex) {
+	public void onBookingCancel(int modelIndex) {
 		try { 
 			if (booking != null) {
 				booking.updateStatus(booking, BookingStatus.CANCELLED);
-				setMessages(FacesMessage.SEVERITY_WARN, getClientId(":tab:tabs:event-dialog-form-" + modelIndex + ":cancelBkgBtn"), "register.cancel.success");
+				setMessages(FacesMessage.SEVERITY_INFO, getClientId(":tab:tabs:event-dialog-form-" + modelIndex + ":cancelBkgBtn"), "register.cancel.success");
 			}
 		} catch (Exception e) {
 			LOGGER.error(e.getMessage(), e);
 			setMessages(FacesMessage.SEVERITY_FATAL, null, "register.cancel.failure");
 		}
 	}
-	
+
+	public void onBookingDelete() {
+		try {
+			booking.delete(booking);
+		} catch (BusinessException e) {
+			LOGGER.warn(e.getMessage(), e);
+			setMessages(FacesMessage.SEVERITY_WARN, null, e.getMessage(), e.getArgs());
+			RequestContext.getCurrentInstance().addCallbackParam("exception", true);
+		} catch (Exception e) {
+			LOGGER.error(e.getMessage(), e);
+			setMessages(FacesMessage.SEVERITY_FATAL, null, "register.runtime.failure");
+		}
+		
+	}
+
+	public void onBookingSelect(SelectEvent event) {
+		ScheduleEvent e = (ScheduleEvent) event.getObject();
+		booking = (BookingModel) e.getData();
+		bookingDate = booking.getDate();
+	}
+
 	public void onDateSelect(SelectEvent e) {
 		Date today = DateUtils.truncate(new Date(), Calendar.DAY_OF_MONTH);
 		bookingDate = (Date) e.getObject();
 
 		if (bookingDate.before(today)) {
-			setMessages(FacesMessage.SEVERITY_INFO, getClientId("growl2"), "register.past.date", 
+			setMessages(FacesMessage.SEVERITY_WARN, getClientId("growl2"), "register.past.date", 
 						DateFormatUtils.format(bookingDate, "dd/MM/yyyy"), DateFormatUtils.format(today, "dd/MM/yyyy"));
 			RequestContext.getCurrentInstance().addCallbackParam("exception", true);
 		}
 	}
-	
+
+	@Deprecated
 	public void onCalendarDateSelect(SelectEvent e) {
 		bookingDate = (Date) e.getObject();
 		setMessages(FacesMessage.SEVERITY_INFO, getClientId("agenda-status"), "request.register");
 	}	
 
+	@Deprecated	
 	public void onLoad() {
 		setMessages(FacesMessage.SEVERITY_INFO, getClientId("agenda-status"), "request.search");
 	}
 	
+	@Deprecated
 	public void onCancel() {
 		LOGGER.trace("Method in");
 
@@ -191,6 +207,7 @@ public class ScheduleBean extends BaseBean {
 		LOGGER.trace("Method out");
 	}
 
+	@Deprecated
 	public void onCancelBooking(Integer index) {
 		try {
 			BookingModel bm = userBookings.get(index.intValue());
@@ -199,7 +216,8 @@ public class ScheduleBean extends BaseBean {
 			// TODO: handle exception
 		}
 	}
-	
+
+	@Deprecated
 	public void onSelectRoom(ValueChangeEvent event) {
 		Integer roomsIndex = (Integer) event.getNewValue() - 1;
 		room = rooms.get(roomsIndex);
@@ -214,12 +232,6 @@ public class ScheduleBean extends BaseBean {
 		} else {
 			flat = f;
 		}
-	}
-
-	public void onBookingSelect(SelectEvent event) {
-		ScheduleEvent e = (ScheduleEvent) event.getObject();
-		booking = (BookingModel) e.getData();
-		bookingDate = booking.getDate();
 	}
 	
 	public void onResidentSelect(AjaxBehaviorEvent event) {
@@ -272,10 +284,6 @@ public class ScheduleBean extends BaseBean {
 			}
 		}
 	}
-
-	public boolean test() {
-		return false;
-	}
 	
 	public boolean isCancelEnable() {
 		if (bookingDate != null) {
@@ -289,14 +297,6 @@ public class ScheduleBean extends BaseBean {
 	
 	public boolean isTimeSelectionEnabled() {
 		return room.getId() == RoomModel.CINEMA;
-	}
-	
-	public List<Integer> getBookingHours() {
-		return bookingHours;
-	}
-
-	public void setBookingHours(List<Integer> bookingHours) {
-		this.bookingHours = bookingHours;
 	}
 
 	public Date getBookingDate() {
