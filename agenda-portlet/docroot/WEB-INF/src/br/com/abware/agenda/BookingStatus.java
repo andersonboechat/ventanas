@@ -2,7 +2,7 @@ package br.com.abware.agenda;
 
 public enum BookingStatus {
 
-	OPENED("Reservado"),
+	OPENED("Alugado"),
 	PAID("Pago"),
 	CANCELLED("Cancelado");
 

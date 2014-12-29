@@ -66,7 +66,6 @@ public abstract class BaseManager<Entity extends BaseEntity> {
 	}
 
 	public Entity findById(Object id) {
-		em = emf.createEntityManager();
 		return em.find(getEntityClass(), id);
 	}
 

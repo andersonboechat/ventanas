@@ -1,9 +1,12 @@
 package br.com.abware.agenda.persistence.entity;
 
 import java.io.Serializable;
+import java.sql.Time;
 import java.util.Date;
 
-import javax.persistence.*;
+import javax.persistence.Embeddable;
+import javax.persistence.Temporal;
+import javax.persistence.TemporalType;
 
 /**
  * The primary key class for the rb_booking database table.
@@ -14,31 +17,55 @@ public class BookingPK implements Serializable {
 	//default serial version id, required for serializable classes.
 	private static final long serialVersionUID = 1L;
 
+	private int roomId;
+
 	@Temporal(TemporalType.DATE)
 	private Date date;
 
-	private int roomId;
+	private Time startTime;	
+
+	private Time endTime;
 
 	public BookingPK() {
 	}
 	
-	public BookingPK(int roomId, Date date) {
+	public BookingPK(int roomId, Date date, Time startTime, Time endTime) {
 		this.roomId = roomId;
 		this.date = date;
+		this.startTime = startTime;
+		this.endTime = endTime;
 	}
 	
-	
-	public java.util.Date getDate() {
-		return this.date;
-	}
-	public void setDate(java.util.Date date) {
-		this.date = date;
-	}
 	public int getRoomId() {
-		return this.roomId;
+		return roomId;
 	}
+
 	public void setRoomId(int roomId) {
 		this.roomId = roomId;
+	}
+
+	public Date getDate() {
+		return date;
+	}
+
+	public void setDate(Date date) {
+		this.date = date;
+	}
+
+	public Time getStartTime() {
+		return startTime;
+	}
+
+	public void setStartTime(Time startTime) {
+		this.startTime = startTime;
+	}
+
+	public Time getEndTime() {
+		return endTime;
+	}
+
+	public void setEndTime(Time endTime) {
+		this.endTime = endTime;
 	}
 
 	public boolean equals(Object other) {
@@ -62,4 +89,6 @@ public class BookingPK implements Serializable {
 		
 		return hash;
 	}
+	
+
 }
