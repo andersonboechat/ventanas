@@ -28,10 +28,12 @@ public abstract class BaseBean {
 	}
 
 	public static String getBookingStyleClass(BookingModel booking) {
-		String style = "bkg.style.room.";
+		String style;
 
 		if (BookingStatus.CANCELLED.equals(booking.getStatus())) {
-			style = "cld" + "bkg.style.room.";
+			style = "cld.bkg.style.room.";
+		} else {
+			style = "bkg.style.room.";
 		}
 
 		return ResourceBundleUtil.getString(rb, style + booking.getRoom().getId());

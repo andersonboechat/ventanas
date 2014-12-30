@@ -253,6 +253,7 @@ public class ScheduleBean extends BaseBean {
 		roomId = room.getId();
 	}
    
+	@Deprecated
 	public boolean bookingExists(String roomId) {
 		boolean exists = false;
 

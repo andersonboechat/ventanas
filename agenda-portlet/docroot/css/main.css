@@ -47,55 +47,54 @@
 /* ---------- Booking Styles ---------- */
 
 .agenda	.barbe {
-	background: url("../images/icon/barbe.png") no-repeat 30px 30px left;
-}
-
-.agenda	.oven {
-	background: url("../images/icon/oven.png") no-repeat 30px 30px left;
+	background: url("../images/barbe.png") no-repeat 0px 0px;
 }
 
 .agenda	.cinema {
-	background: url("../images/icon/cinema.png") no-repeat 30px 30px left;
+	background: url("../images/cinema.png") no-repeat 0px 0px;
+}
+
+.agenda	.oven {
+	background: url("../images/oven.png") no-repeat  0px 0px;
 }
 
 .agenda	.gourmet {
-	background: url("../images/icon/gourmet.png") no-repeat 30px 30px left;
+	background: url("../images/gourmet.png") no-repeat  0px 0px;
 }
 
 .agenda	.party {
-	background: url("../images/icon/party.png") no-repeat 30px 30px left;	
+	background: url("../images/party.png") no-repeat  0px 0px;	
 }
 
 .agenda	.sound {
-	background: url("../images/icon/sound.png") no-repeat 30px 30px left;	
+	background: url("../images/sound.png") no-repeat  0px 0px;	
 }
 
 /* ---------- Cancelled Booking Styles ---------- */
 
 .agenda	.cld-barbe {
-	background: url("../images/icon/barbe.png") no-repeat 30px 60px left;
+	background: url("../images/barbe.png") no-repeat 0px -34px;
 }
 
 .agenda	.cld-oven {
-	background: url("../images/icon/oven.png") no-repeat 30px 60px left;
+	background: url("../images/oven.png") no-repeat 0px -34px;
 }
 
 .agenda	.cld-cinema {
-	background: url("../images/icon/cinema.png") no-repeat 30px 60px left;
+	background: url("../images/cinema.png") no-repeat 0px -34px;
 }
 
 .agenda	.cld-gourmet {
-	background: url("../images/icon/gourmet.png") no-repeat 30px 60px left;
+	background: url("../images/gourmet.png") no-repeat 0px -34px;
 }
 
 .agenda	.cld-party {
-	background: url("../images/icon/party.png") no-repeat 30px 60px left;	
+	background: url("../images/party.png") no-repeat 0px -34px;	
 }
 
 .agenda	.cld-sound {
-	background: url("../images/icon/sound.png") no-repeat 30px 60px left;	
+	background: url("../images/sound.png") no-repeat 0px -34px;	
 }
-
 
 .agenda .left {
 	width: 74%; 
