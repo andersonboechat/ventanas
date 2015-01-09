@@ -1,4 +1,4 @@
-package br.com.abware.accountmgm;
+package br.com.abware.accountmgm.model;
 
 import java.io.Serializable;
 import java.util.Date;

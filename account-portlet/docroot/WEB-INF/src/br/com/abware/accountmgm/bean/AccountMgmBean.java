@@ -22,10 +22,10 @@ import org.apache.log4j.Logger;
 import org.primefaces.event.FileUploadEvent;
 import org.primefaces.model.UploadedFile;
 
-import br.com.abware.accountmgm.Flat;
-import br.com.abware.accountmgm.FlatUser;
-import br.com.abware.accountmgm.FlatUserDataModel;
 import br.com.abware.accountmgm.UserHelper;
+import br.com.abware.accountmgm.bean.model.FlatUserDataModel;
+import br.com.abware.accountmgm.model.Flat;
+import br.com.abware.accountmgm.model.FlatUser;
 
 import com.liferay.portal.kernel.util.ResourceBundleUtil;
 import com.liferay.portal.model.Role;

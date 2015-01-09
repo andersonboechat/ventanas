@@ -1,4 +1,4 @@
-package br.com.abware.accountmgm;
+package br.com.abware.accountmgm.model;
 
 import java.io.File;
 import java.io.IOException;
@@ -9,6 +9,8 @@ import java.util.List;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
+
+import br.com.abware.accountmgm.UserHelper;
 
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.exception.SystemException;

@@ -1,10 +1,12 @@
-package br.com.abware.accountmgm;
+package br.com.abware.accountmgm.bean.model;
 
 import java.util.List;
 
 import javax.faces.model.ListDataModel;
 
 import org.primefaces.model.SelectableDataModel;
+
+import br.com.abware.accountmgm.model.FlatUser;
 
 public class FlatUserDataModel extends ListDataModel<FlatUser> implements SelectableDataModel<FlatUser> {
 

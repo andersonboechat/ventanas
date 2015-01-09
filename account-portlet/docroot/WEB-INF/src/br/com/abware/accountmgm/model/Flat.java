@@ -1,7 +1,8 @@
-package br.com.abware.accountmgm;
+package br.com.abware.accountmgm.model;
 
 import java.util.ArrayList;
 import java.util.List;
+
 
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.exception.SystemException;

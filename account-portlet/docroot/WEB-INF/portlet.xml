@@ -3,7 +3,7 @@
 <portlet-app xmlns="http://java.sun.com/xml/ns/portlet/portlet-app_2_0.xsd" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://java.sun.com/xml/ns/portlet/portlet-app_2_0.xsd http://java.sun.com/xml/ns/portlet/portlet-app_2_0.xsd" version="2.0">
 	<portlet>
 		<portlet-name>acount-management</portlet-name>
-		<display-name>Acount Management</display-name>
+		<display-name>Account Management</display-name>
 		<portlet-class>javax.portlet.faces.GenericFacesPortlet</portlet-class>
 		<init-param>
 			<name>javax.portlet.faces.defaultViewId.view</name>
@@ -14,21 +14,30 @@
 			<mime-type>text/html</mime-type>
 		</supports>
 		<portlet-info>
-			<title>Acount Management</title>
-			<short-title>Acount Management</short-title>
-			<keywords>Acount Management</keywords>
+			<title>Account Management</title>
+			<short-title>Account Management</short-title>
+			<keywords>Account Management</keywords>
 		</portlet-info>
 		<security-role-ref>
 			<role-name>administrator</role-name>
 		</security-role-ref>
 		<security-role-ref>
-			<role-name>guest</role-name>
+			<role-name>flat-owner</role-name>
 		</security-role-ref>
 		<security-role-ref>
-			<role-name>power-user</role-name>
+			<role-name>flat-renter</role-name>
 		</security-role-ref>
 		<security-role-ref>
-			<role-name>user</role-name>
+			<role-name>flat-resident</role-name>
+		</security-role-ref>
+		<security-role-ref>
+			<role-name>flat-dependent</role-name>
+		</security-role-ref>
+		<security-role-ref>
+			<role-name>flat-guest</role-name>
+		</security-role-ref>
+		<security-role-ref>
+			<role-name>flat-visitor</role-name>
 		</security-role-ref>
 	</portlet>
 </portlet-app>
