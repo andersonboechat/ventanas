@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+
+<f:view
+	xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:c="http://java.sun.com/jsp/jstl/core"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:ui="http://java.sun.com/jsf/facelets">
+	<h:head></h:head>
+	<h:body>
+		<h:form id="system-form">
+			<h:panelGrid columns="3" styleClass="menu-cmds" columnClasses="menu-cmds-col1,menu-cmds-col2,menu-cmds-col3">
+				<p:commandButton value="Cadastrar Usuário" actionListener="#{systemBean.onUserCreate}" 
+								partialSubmit="true" process="@this" update=":userForm:userGrid" oncomplete="PF('userDialog').show();"/>
+				<p:commandButton value="Desativar Usuários" actionListener="#{systemBean.onUserDelete}" 
+								partialSubmit="true" process="@this,dataTable" update="dataTable,:outputMsg"/>
+				<p:inputText id="search" alt="Busca..."/>
+			</h:panelGrid>
+			<p:dataTable id="dataTable" var="user" value="#{systemBean.model}" 
+			             paginator="true" rows="5" paginatorPosition="bottom" 
+			             paginatorTemplate="{CurrentPageReport} {PreviousPageLink} {PageLinks} {NextPageLink}" 
+			             selection="#{accountMgmBean.selectedUsers}" rowKey="#{user.id}" >
+			    <p:ajax event="page" partialSubmit="true" process="name"/>
+			    
+			    <p:column id="name" headerText="Nome" style="width:76%" >
+			        <h:outputText value="#{user.name}" />
+			    </p:column>
+
+			    <p:column id="phone" headerText="E-mail" style="width:20%">
+			    	<h:outputText value="#{user.email}" />
+			    </p:column>
+
+				<p:column headerText="Editar" style="width:2%">
+					<p:commandLink value="Editar" actionListener="#{systemBean.onEditUser(user.userId)}" 
+									update=":userForm:userGrid" disabled="#{accountMgmBean.hasPermission(user) == false}"
+									oncomplete="PF('userDialog').show();" partialSubmit="true" process="@this"/>
+				</p:column>
+			</p:dataTable>
+		</h:form>
+	</h:body>
+</f:view>

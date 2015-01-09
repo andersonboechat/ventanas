@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+
+<f:view
+	xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:c="http://java.sun.com/jsp/jstl/core"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:ui="http://java.sun.com/jsf/facelets">
+	<h:head></h:head>
+	<h:body>
+		<h:form id="vehicle-form">
+			<h:panelGrid columns="3" styleClass="menu-cmds" columnClasses="menu-cmds-col1,menu-cmds-col2,menu-cmds-col3">
+				<p:commandButton value="#{msg['vehicle.btn.add']}" actionListener="#{vehicleBean.onVehicleCreate}" 
+								partialSubmit="true" process="@this" update=":userForm:userGrid" oncomplete="userDialog.show()"/>
+				<p:commandButton value="#{msg['vehicle.btn.delete']}" actionListener="#{vehicleBean.onVehicleDelete}" 
+								partialSubmit="true" process="@this,dataTable" update="dataTable,:outputMsg"/>
+
+				<p:selectOneMenu id="type" value="#{vehicleBean.type}" style="float: right">
+					<f:selectItem itemLabel="-- #{msg['vehicle.lbl.type']} --" noSelectionOption="true"/>
+					<f:selectItems var="type" value="#{vehicleBean.types}" itemLabel="#{type}" itemValue="#{type}"/>
+				    <p:ajax listener="#{vehicleBean.onTypeSelect}" update="dataTable"/>
+				</p:selectOneMenu>
+
+				<p:selectOneMenu id="flat" value="#{vehicleBean.flat}" style="float: right">
+					<f:selectItem itemLabel="-- #{msg['vehicle.lbl.flat']} --" noSelectionOption="true"/>
+					<f:selectItems var="flat" value="#{flatBean.flats}" itemLabel="#{flat.name}" itemValue="#{flat}"/>
+				    <p:ajax listener="#{vehicleBean.onFlatSelect}" update="dataTable"/>
+				</p:selectOneMenu>
+			</h:panelGrid>
+
+			<p:dataTable id="dataTable" var="vehicle" value="#{vehicleBean.model}"  
+			             paginator="true" rows="5" paginatorPosition="bottom" 
+			             paginatorTemplate="{CurrentPageReport} {PreviousPageLink} {PageLinks} {NextPageLink}" 
+			             selection="#{vehicleBean.selectedFlats}" rowKey="#{vehicle.id}" >
+			    <p:ajax event="page" partialSubmit="true" process="name"/>
+
+			    <p:column id="license" headerText="#{msg['vehicle.lbl.license']}" style="width:20%">
+			    	<h:outputText value="#{vehicle.license}" />
+			    </p:column>
+			    
+			    <p:column id="flat" headerText="#{msg['vehicle.lbl.flat']}" style="width:20%">
+			    	<h:outputText value="#{vehicle.flat.name}" />
+			    </p:column>
+	
+				<p:column headerText="#{msg['flat.lbl.edit']}" style="width:2%">
+					<p:commandLink value="#{msg['flat.lbl.edit']}" actionListener="#{vehicleBean.onVehicleEdit(vehicle)}" 
+									update=":userForm:userGrid" disabled="#{not (vehicleBean.hasPermission())}"
+									oncomplete="PF('flatDialog').show();" partialSubmit="true" process="@this"/>
+				</p:column>
+			</p:dataTable>
+		</h:form>
+	</h:body>
+</f:view>

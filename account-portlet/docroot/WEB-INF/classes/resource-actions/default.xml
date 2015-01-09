@@ -1,0 +1,4 @@
+<?xml version="1.0"?>
+<resource-action-mapping>
+	<resource file="resource-actions/agenda.xml" />
+</resource-action-mapping>
