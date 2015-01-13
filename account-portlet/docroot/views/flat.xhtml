@@ -18,7 +18,7 @@
 				<p:selectOneMenu id="block" style="float: right">
 					<f:selectItem itemLabel="-- #{msg['flat.lbl.block']} --" noSelectionOption="true"/>
 					<f:selectItems var="block" value="#{flatBean.flatBlocks}" itemLabel="#{block}" itemValue="#{block}"/>
-				    <p:ajax listener="#{flatBean.onFlatBlockSelect}" update="dataTable"/>
+				    <p:ajax event="change" listener="#{flatBean.onFlatBlockSelect}" update="dataTable"/>
 				</p:selectOneMenu>
 				<p:selectOneMenu id="number" style="float: right">
 					<f:selectItem itemLabel="-- #{msg['flat.lbl.number']} --" noSelectionOption="true"/>
@@ -27,16 +27,32 @@
 				</p:selectOneMenu>
 			</h:panelGrid>
 
-			<p:dataTable id="dataTable" var="flat" value="#{flatBean.model}"  
+			<p:dataTable id="dataTable" var="flat" widgetVar="flatTable" value="#{flatBean.model}"  
 			             paginator="true" rows="5" paginatorPosition="bottom" 
 			             paginatorTemplate="{CurrentPageReport} {PreviousPageLink} {PageLinks} {NextPageLink}" 
 			             selection="#{flatBean.selectedFlats}" rowKey="#{flat.id}" >
 			    <p:ajax event="page" partialSubmit="true" process="name"/>
-			    
-			    <p:column id="name" headerText="#{msg['flat.lbl.flat']}" style="width:20%">
-			    	<h:outputText value="#{flat.name}" />
+
+			    <p:column id="block" headerText="#{msg['flat.lbl.block']}" filterBy="#{flat.block}" style="width:20%" >
+					<f:facet name="filter">
+						<p:selectOneMenu onchange="PF('flatTable').filter()" >
+							<f:selectItem itemLabel="-- #{msg['flat.lbl.everyone']} --" noSelectionOption="true"/>
+							<f:selectItems value="#{flatBean.flatBlocks}" />
+						</p:selectOneMenu>
+					</f:facet>
+			    	<h:outputText value="#{flat.block}" />
 			    </p:column>
-	
+
+			    <p:column id="number" headerText="#{msg['flat.lbl.number']}" filterBy="#{flat.number}" style="width:20%" >
+					<f:facet name="filter">
+						<p:selectOneMenu onchange="PF('flatTable').filter()" >
+							<f:selectItem itemLabel="-- #{msg['flat.lbl.everyone']} --" noSelectionOption="true"/>
+							<f:selectItems value="#{flatBean.flatNumbers}" />
+						</p:selectOneMenu>
+					</f:facet>
+			    	<h:outputText value="#{flat.number}" />
+			    </p:column>
+			    
 			    <p:column id="owners" headerText="#{msg['flat.lbl.owner']}" style="width:20%">
 			    	<c:forEach var="owner" items="#{flatBean.getOwners(flat)}">
 			    		<p:commandLink value="#{owner.name}" oncomplete="PF('userDialog').show();">
@@ -54,9 +70,11 @@
 			    </p:column>
 	
 				<p:column headerText="#{msg['flat.lbl.edit']}" style="width:2%">
-					<p:commandLink value="#{msg['flat.lbl.edit']}" actionListener="#{flatBean.onFlatEdit(flat)}" 
-									update=":userForm:userGrid" disabled="#{not (flatBean.hasPermission())}"
-									oncomplete="PF('flatDialog').show();" partialSubmit="true" process="@this"/>
+					<p:commandLink value="#{msg['flat.lbl.edit']}" update=":dialog-user-form:userGrid" 
+									disabled="#{not (flatBean.hasPermission())}" oncomplete="PF('flatDialog').show();" 
+									partialSubmit="true" process="@this">
+						<f:setPropertyActionListener target="#{flatBean.flat}" value="#{flat}"/>
+					</p:commandLink>
 				</p:column>
 			</p:dataTable>
 		</h:form>

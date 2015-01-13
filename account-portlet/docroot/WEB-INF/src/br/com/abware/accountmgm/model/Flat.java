@@ -42,6 +42,22 @@ public class Flat {
 		return flats;
 	}
 
+	public static List<Flat> getFlats() {
+		List<Flat> flats = new ArrayList<Flat>();
+
+		try {
+			for (Organization organization : OrganizationLocalServiceUtil.getOrganizations(-1, -1)) {
+				flats.add(new Flat(organization));
+			}
+		} catch (SystemException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+		return flats;
+	}
+	
+	
 	public static List<Role> getRoles(Organization organization) {
 		List<Role> roles;
 
