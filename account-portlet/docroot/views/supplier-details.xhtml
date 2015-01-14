@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+
+<f:view
+	xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:c="http://java.sun.com/jsp/jstl/core"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:ui="http://java.sun.com/jsf/facelets">
+	<h:head></h:head>
+	<h:body>
+		<h:form id="supplier-details-form">
+			<h:outputText value="#{supplierBean.person.fullName} - #{supplierBean.person.type.label}" style="font-family: Arial; font-size: 14px;"/>
+			<p:separator style="border: 1px solid #ccc;"/> <br/>
+			<h:panelGrid columns="3" columnClasses="my-account-col1,my-account-col2,my-account-col3" styleClass="my-account" style="margin: 10px 0px 20px 0px;" cellpadding="10">
+				<p:column>
+			        <p:graphicImage id="portrait" value="#{supplierBean.user.portraitPath}"/><br/>
+					<p:commandLink value="Alterar Foto" onclick="uploadDialog.show()"/>
+				</p:column>
+				<p:column>
+					<h:panelGrid columns="2">
+						<p:outputLabel for="email" value="Email"/>
+						<p:inputText id="email" value="#{supplierBean.person.emailAddress}"/>
+						<p:outputLabel for="firstName" value="Primeiro nome"/>
+						<p:inputText id="firstName" value="#{supplierBean.person.firstName}"/>
+						<p:outputLabel for="lastName" value="Último nome"/>
+						<p:inputText id="lastName" value="#{supplierBean.person.lastName}"/>
+						<p:outputLabel for="phone" value="Telefone"/>
+						<p:inputText id="phone" value="#{supplierBean.person.phone}"/>
+						<p:outputLabel for="male" value="Sexo"/>
+						<p:selectOneMenu id="male" value="#{supplierBean.person.gender}">
+							<f:selectItem itemLabel="Masculino" itemValue="true" />
+							<f:selectItem itemLabel="Feminino" itemValue="false" />
+						</p:selectOneMenu>
+					</h:panelGrid>
+				</p:column>
+			</h:panelGrid>
+			<p:commandButton value="Salvar" actionListener="#{supplierBean.onSupplierSave}" update=":outputMsg" style="float: right; width: 70px; margin: 0px 0px 10px 5px;"/>
+		</h:form>
+	</h:body>
+</f:view>
