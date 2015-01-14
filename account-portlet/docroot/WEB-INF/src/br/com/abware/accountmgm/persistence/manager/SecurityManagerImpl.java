@@ -2,7 +2,6 @@ package br.com.abware.accountmgm.persistence.manager;
 
 import com.liferay.faces.portal.context.LiferayPortletHelper;
 import com.liferay.faces.portal.context.LiferayPortletHelperImpl;
-import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.security.permission.ActionKeys;
 import com.liferay.portal.security.permission.PermissionChecker;
 import com.liferay.portal.security.permission.PermissionCheckerFactoryUtil;

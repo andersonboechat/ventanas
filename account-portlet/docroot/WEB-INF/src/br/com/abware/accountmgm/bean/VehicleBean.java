@@ -20,27 +20,23 @@ public class VehicleBean {
 	private static final VehicleDataModel model = null;
 	
 	private String type;
-	
+
 	private List<String> types;
-	
+
 	private Flat flat;
-	
+
 	private List<Flat> selectedFlats;
-	
+
 	@PostConstruct
 	public void init() {
 		
 	}
 	
-	public void onVehicleCreate() {
+	public void onVehicleSave() {
 		
 	}
 	
 	public void onVehicleDelete() {
-		
-	}
-	
-	public void onVehicleEdit() {
 		
 	}
 	

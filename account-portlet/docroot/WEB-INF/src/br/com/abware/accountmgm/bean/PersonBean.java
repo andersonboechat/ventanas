@@ -1,15 +1,18 @@
 package br.com.abware.accountmgm.bean;
 
+import java.util.Arrays;
 import java.util.List;
 
 import javax.annotation.PostConstruct;
 import javax.faces.bean.ManagedBean;
+import javax.faces.bean.ManagedProperty;
 import javax.faces.bean.ViewScoped;
 
 import org.apache.log4j.Logger;
 
 import br.com.abware.accountmgm.bean.model.ModelDataModel;
 import br.com.abware.accountmgm.service.core.PersonServiceImpl;
+import br.com.abware.jcondo.core.PersonType;
 import br.com.abware.jcondo.core.model.Flat;
 import br.com.abware.jcondo.core.model.Person;
 import br.com.abware.jcondo.core.service.PersonService;
@@ -20,44 +23,39 @@ import br.com.abware.jcondo.exception.ApplicationException;
 public class PersonBean {
 
 	private static Logger LOGGER = Logger.getLogger(PersonBean.class);
-	
+
 	private static final PersonService personService = new PersonServiceImpl();
-	
-	private static final ModelDataModel<Person> model = initModel();
-	
-	/** Tipos: Apartamento, Fornecedor, Condominio */
-	private List<String> groups;
-	
-	private String group;
-	
-	private Object supplier;
+
+	@ManagedProperty(name="flatBean", value="#{flatBean}")
+	private FlatBean flatBean;
+
+	private ModelDataModel<Person> model;
 	
 	private Flat flat;
-	
+
 	private Person person;
-	
+
 	private Person[] selectedPeople;
 
-	private static ModelDataModel<Person> initModel() {
-		try {
-			//return new ModelDataModel<Flat>(personService.);
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		return null;
-	}	
+	private List<PersonType> types;
 
 	@PostConstruct
 	public void init() {
-		
+		try {
+			flat = flatBean.getFlat();
+			model = new ModelDataModel<Person>(personService.getPeople(flat));
+			person = model.getRowData();
+			types = Arrays.asList(PersonType.values());
+		} catch (Exception e) {
+			LOGGER.error("", e);
+		}
 	}
-	
+
 	public void onPersonSave() {
 		try {
 			personService.register(person);
 		} catch (ApplicationException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			LOGGER.error("", e);
 		}
 	}
 	
@@ -71,18 +69,6 @@ public class PersonBean {
 		
 	}
 	
-	public void onGroupSelect() {
-		
-	}
-	
-	public void onSupplierSelect() {
-		
-	}
-	
-	public void onFlatSelect() {
-		
-	}
-
 	public List<Flat> getPersonFlats(Person person) {
 		return null;
 	}
@@ -97,30 +83,6 @@ public class PersonBean {
 	
 	public ModelDataModel<Person> getModel() {
 		return model;
-	}
-
-	public List<String> getGroups() {
-		return groups;
-	}
-
-	public void setGroups(List<String> groups) {
-		this.groups = groups;
-	}
-
-	public String getGroup() {
-		return group;
-	}
-
-	public void setGroup(String group) {
-		this.group = group;
-	}
-
-	public Object getSupplier() {
-		return supplier;
-	}
-
-	public void setSupplier(Object supplier) {
-		this.supplier = supplier;
 	}
 
 	public Flat getFlat() {
@@ -145,6 +107,14 @@ public class PersonBean {
 
 	public void setSelectedPeople(Person[] selectedPeople) {
 		this.selectedPeople = selectedPeople;
+	}
+
+	public List<PersonType> getTypes() {
+		return types;
+	}
+
+	public void setTypes(List<PersonType> types) {
+		this.types = types;
 	}
 
 }

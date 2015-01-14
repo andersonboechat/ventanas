@@ -92,15 +92,13 @@
 
 		<p:tabView id="tab" styleClass="account" style="font-style: normal;  height: 360px; width: 680px" activeIndex="0" cache="false">
 			<p:tab title="#{msg['main.my.account']}"><ui:include src="account.xhtml"/></p:tab>
-			<p:tab title="#{msg['main.users']}"><ui:include src="user.xhtml"/></p:tab>
-			<p:tab title="#{msg['main.vehicles']}"><ui:include src="vehicle.xhtml"/></p:tab>
-			<p:tab title="#{msg['main.flats']}" rendered="#{supplierBean.hasPermission()}"><ui:include src="flat.xhtml"/></p:tab>
+			<p:tab title="#{msg['main.flats']}"><ui:include src="flat.xhtml"/></p:tab>
 			<p:tab title="#{msg['main.suppliers']}" rendered="#{supplierBean.hasPermission()}"><ui:include src="supplier.xhtml"/></p:tab>
 			<p:tab title="#{msg['main.system']}" rendered="#{supplierBean.hasPermission()}"><ui:include src="system.xhtml"/></p:tab>
 		</p:tabView>
 		<h:form id="dialog-user-form">
 			<p:dialog header="#{msg['dlg.user.signon']}" widgetVar="userDialog" draggable="false" resizable="false" modal="true" closable="true" visible="false">
-				<ui:include src="account.xhtml"/>
+				<ui:include src="person-details.xhtml"/>
 			</p:dialog>
 			<p:dialog widgetVar="uploadDialog">
 				<p:fileUpload fileUploadListener="#{userBean.onPictureUpload}" 
@@ -108,15 +106,14 @@
 					label="Selecionar Foto" update="portrait,:outputMsg" process="@this" style="width:550px" oncomplete="PF('uploadDialog').hide();"/>			
 			</p:dialog>
 		</h:form>
-		<h:form id="dialog-flat-form">
-			<p:dialog header="#{msg['dlg.flat.signon']}" widgetVar="flatDialog" draggable="false" resizable="false" modal="true" closable="true" visible="false">
-				<ui:include src="account.xhtml"/>
-			</p:dialog>
-		</h:form>
 		<h:form id="dialog-supplier-form">
 			<p:dialog header="#{msg['dlg.supplier.signon']}" widgetVar="supplierDialog" draggable="false" resizable="false" modal="true" closable="true" visible="false">
-				<ui:include src="account.xhtml"/>
+				<ui:include src="supplier-details.xhtml"/>
 			</p:dialog>
 		</h:form>
+		<p:confirmDialog global="true" width="600" style="padding: 0px" showEffect="fade" hideEffect="fade" visible="false">
+			<p:commandButton value="#{msg['no']}" type="button" styleClass="ui-confirmdialog-no" icon="ui-icon-close" style="float: left; width: 200px; margin-left: 14%" />
+			<p:commandButton value="#{msg['yes']}" type="button" styleClass="ui-confirmdialog-yes" icon="ui-icon-check" style="float: right; width: 200px; margin-right: 14%"/>
+		</p:confirmDialog>
 	</h:body>
 </f:view>

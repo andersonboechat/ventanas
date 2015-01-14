@@ -1,17 +1,27 @@
 package br.com.abware.accountmgm.persistence.manager;
 
+import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
 
 import org.apache.commons.beanutils.BeanUtils;
+import org.apache.commons.lang.StringUtils;
 
+import br.com.abware.jcondo.core.PersonType;
 import br.com.abware.jcondo.core.model.Flat;
+import br.com.abware.jcondo.core.model.Group;
 import br.com.abware.jcondo.core.model.Person;
 import br.com.abware.jcondo.exception.PersistenceException;
 
 import com.liferay.faces.portal.context.LiferayPortletHelper;
 import com.liferay.faces.portal.context.LiferayPortletHelperImpl;
+import com.liferay.portal.NoSuchUserException;
+import com.liferay.portal.NoSuchUserGroupRoleException;
 import com.liferay.portal.model.User;
+import com.liferay.portal.service.ServiceContext;
+import com.liferay.portal.service.UserGroupRoleLocalServiceUtil;
 import com.liferay.portal.service.UserLocalServiceUtil;
+import com.liferay.portal.service.persistence.UserGroupRolePK;
 import com.liferay.portlet.expando.model.ExpandoTableConstants;
 import com.liferay.portlet.expando.model.ExpandoValue;
 import com.liferay.portlet.expando.service.ExpandoValueLocalServiceUtil;
@@ -56,21 +66,21 @@ public class PersonManagerImpl extends AbstractManager<User, Person> {
 
 	@Override
 	protected User getEntity(Person person) throws PersistenceException {
-		try {
-			User user;
+		User user;
 
-			if (person.getId() == 0) {
-				user = UserLocalServiceUtil.createUser(person.getId());
-			} else {
+		try {
+			try {
 				user = UserLocalServiceUtil.getUserById(person.getId());
+			} catch (NoSuchUserException e) {
+				user = UserLocalServiceUtil.createUser(person.getId());
 			}
 
 			BeanUtils.copyProperties(user, person);
-
-			return user;
 		} catch (Exception e) {
 			throw new PersistenceException("");
 		}
+
+		return user;
 	}
 
 	@Override
@@ -78,6 +88,50 @@ public class PersonManagerImpl extends AbstractManager<User, Person> {
 		return Person.class;
 	}
 
+	
+	public Person persist(Person person) throws PersistenceException {
+		try {		
+			User user;
+
+			user = getEntity(person);
+			user.persist();
+			user.getContact().persist();
+			
+			for (Group group : person.getGroups()) {
+				UserGroupRolePK pk;
+				UserGroupRoleLocalServiceUtil.getUserGroupRoles(user.getUserId());
+				
+				if (group instanceof Flat) {
+					if (PersonType.OWNER == person.getType()) {
+						pk = new UserGroupRolePK(user.getUserId(), group.getId(), 0);
+						try {
+							UserGroupRoleLocalServiceUtil.getUserGroupRole(pk);	
+						} catch (NoSuchUserGroupRoleException e) {
+							UserGroupRoleLocalServiceUtil.addUserGroupRole(UserGroupRoleLocalServiceUtil.createUserGroupRole(pk));
+						}
+						
+					}
+
+				}
+				
+				//UserGroupRoleLocalServiceUtil.getu
+				
+				//UserGroupRoleLocalServiceUtil.addUserGroupRole(userGroupRole);
+			}
+			
+			if (PersonType.EMPLOYEE != person.getType()) {
+				// fazer associação condominos-apartamentos
+			} else {
+				// fazer associação funcionarios-fornecedores
+			}
+
+		} catch (Exception e) {
+			
+		}
+		
+		return null;
+	}
+	
 	public Person save(Person person) throws PersistenceException {
 		try {
 			User user;
@@ -144,9 +198,16 @@ public class PersonManagerImpl extends AbstractManager<User, Person> {
 		}
 	}
 
-	public List<Person> findPeople(Flat flat) throws PersistenceException {
+	public List<Person> findPeople(Group group) throws PersistenceException {
 		try {
-			List<User> users = UserLocalServiceUtil.getOrganizationUsers(flat.getId());
+			List<User> users;
+
+			if (group instanceof Flat) {
+				users = UserLocalServiceUtil.getOrganizationUsers(group.getId());
+			} else {
+				users = new ArrayList<User>();
+			}
+
 			return getModels(users);
 		} catch (Exception e) {
 			throw new PersistenceException("");

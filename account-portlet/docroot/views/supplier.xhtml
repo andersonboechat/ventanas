@@ -11,41 +11,49 @@
 	<h:body>
 		<h:form id="supplier-form">
 			<h:panelGrid columns="3" styleClass="menu-cmds" columnClasses="menu-cmds-col1,menu-cmds-col2,menu-cmds-col3">
-				<p:commandButton value="Cadastrar Fornecedor" actionListener="#{supplierBean.onSupplierCreate}" 
-								partialSubmit="true" process="@this" update=":userForm:userGrid" oncomplete="userDialog.show()"/>
+				<p:commandButton value="Cadastrar Fornecedor" partialSubmit="true" process="@this" 
+								 update=":dialog-supplier-form:userGrid" oncomplete="PF('supplierDialog').show();">
+					<f:setPropertyActionListener target="#{supplierBean.supplier}" value=""/>
+				</p:commandButton>
 				<p:commandButton value="Excluir Fornecedores" actionListener="#{supplierBean.onSupplierDelete}" 
-								partialSubmit="true" process="@this,dataTable" update="dataTable,:outputMsg"/>
+								 partialSubmit="true" process="@this,supplierTable" update="supplierTable,:outputMsg">
+					<p:confirm header="#{msg['main.delete.confirm']}" message="#{msg['supplier.delete.message']}" icon="ui-icon-alert"/>
+				</p:commandButton>
 				<p:inputText id="search" alt="Busca..."/>
 			</h:panelGrid>
-			<p:dataTable id="dataTable" var="supplier" value="#{supplierBean.model}"  
+			<p:dataTable id="supplierTable" var="supplier" value="#{supplierBean.model}"  
 			             paginator="true" rows="5" paginatorPosition="bottom" 
 			             paginatorTemplate="{CurrentPageReport} {PreviousPageLink} {PageLinks} {NextPageLink}" 
 			             selection="#{accountMgmBean.selectedUsers}" rowKey="#{supplier.id}" >
 			    <p:ajax event="page" partialSubmit="true" process="name"/>
-			    
-			    <p:column id="name" headerText="Fornecedor" style="width:76%" >
+				<p:column selectionMode="multiple" style="width:2%"/>
+				<p:column style="width:16px">
+					<p:rowToggler />
+				</p:column>
+			    <p:column id="name" headerText="Fornecedor" filterBy="#{supplier.name}" sortBy="#{supplier.name}" style="width:76%">
 			        <h:outputText value="#{supplier.name}" />
 			    </p:column>
-		
-			    <p:column id="manager" headerText="Responsável" style="width:20%">
-		    		<p:commandLink value="#{supplier.manager}" oncomplete="PF('userDialog').show();">
-		    			<f:setPropertyActionListener target="#{supplierBean.selectedUser}" value="#{supplier.manager}"/>
-		    		</p:commandLink>
+			    <p:column id="status" headerText="Situação" filterBy="#{supplier.status}" sortBy="#{supplier.status}" style="width:76%">
+					<f:facet name="filter">
+						<p:selectOneMenu onchange="PF('supplierTable').filter()" >
+							<f:selectItem itemLabel="-- #{msg['supplier.lbl.everyone']} --" noSelectionOption="true"/>
+							<f:selectItems var="status" itemLabel="#{status.label}" itemValue="#{status}" value="#{supplierBean.status}" />
+						</p:selectOneMenu>
+					</f:facet>
+			        <h:outputText value="#{supplier.status}" />
 			    </p:column>
-		
-			    <p:column id="phone" headerText="Telefone" style="width:20%">
-			    	<h:outputText value="#{supplierBean.getMainPhone(supplier)}" />
-			    </p:column>
-		
-			    <p:column id="email" headerText="E-mail" style="width:20%">
-		    		<p:commandLink value="mailto:#{supplierBean.getMainEmail(supplier)}"/>
-			    </p:column>
-		
-				<p:column headerText="Editar" style="width:2%">
-					<p:commandLink value="Editar" actionListener="#{supplierBean.onSupplierEdit(supplier)}" 
-									update=":userForm:userGrid" disabled="#{supplierBean.hasPermission(user) == false}"
-									oncomplete="PF('supplierDialog').show();" partialSubmit="true" process="@this"/>
+				<p:column headerText="Opções" style="width:2%">
+					<p:commandLink value="Editar" update=":dialog-supplier-form:userGrid" oncomplete="PF('supplierDialog').show();" partialSubmit="true" process="@this">
+						<f:setPropertyActionListener target="#{supplierBean.supplier}" value="#{supplier}"/>
+					</p:commandLink>
+					<p:commandLink value="#{msg['supplier.lbl.delete']}" actionListener="#{supplierBean.onSupplierDelete(supplier)}" oncomplete="if (!args.validationFailed &amp;&amp; !args.exception) {PF('supplierTable').update();}" partialSubmit="true" process="@this">
+						<p:confirm header="#{msg['main.delete.confirm']}" message="#{msg['supplier.delete.message']}" icon="ui-icon-alert"/>
+					</p:commandLink>
 				</p:column>
+				<p:rowExpansion>
+					<ui:include src="user.xhtml"><ui:param name="group" value="#{supplier}"/></ui:include>
+					<ui:include src="vehicle.xhtml"><ui:param name="group" value="#{supplier}"/></ui:include>
+				</p:rowExpansion>
 			</p:dataTable>
 		</h:form>
 	</h:body>

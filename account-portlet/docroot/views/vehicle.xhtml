@@ -11,42 +11,42 @@
 	<h:body>
 		<h:form id="vehicle-form">
 			<h:panelGrid columns="3" styleClass="menu-cmds" columnClasses="menu-cmds-col1,menu-cmds-col2,menu-cmds-col3">
-				<p:commandButton value="#{msg['vehicle.btn.add']}" actionListener="#{vehicleBean.onVehicleCreate}" 
-								partialSubmit="true" process="@this" update=":userForm:userGrid" oncomplete="userDialog.show()"/>
+				<p:commandButton value="#{msg['vehicle.btn.add']}" partialSubmit="true" process="@this" 
+								 update=":dialog-vehicle-form:userGrid" oncomplete="PF('vehicleDialog').show();">
+					<f:setPropertyActionListener target="#{vehicleBean.vehicle}" value=""/>
+				</p:commandButton>
 				<p:commandButton value="#{msg['vehicle.btn.delete']}" actionListener="#{vehicleBean.onVehicleDelete}" 
-								partialSubmit="true" process="@this,dataTable" update="dataTable,:outputMsg"/>
-
-				<p:selectOneMenu id="type" value="#{vehicleBean.type}" style="float: right">
-					<f:selectItem itemLabel="-- #{msg['vehicle.lbl.type']} --" noSelectionOption="true"/>
-					<f:selectItems var="type" value="#{vehicleBean.types}" itemLabel="#{type}" itemValue="#{type}"/>
-				    <p:ajax listener="#{vehicleBean.onTypeSelect}" update="dataTable"/>
-				</p:selectOneMenu>
-
-				<p:selectOneMenu id="flat" value="#{vehicleBean.flat}" style="float: right">
-					<f:selectItem itemLabel="-- #{msg['vehicle.lbl.flat']} --" noSelectionOption="true"/>
-					<f:selectItems var="flat" value="#{flatBean.flats}" itemLabel="#{flat.name}" itemValue="#{flat}"/>
-				    <p:ajax listener="#{vehicleBean.onFlatSelect}" update="dataTable"/>
-				</p:selectOneMenu>
+								 partialSubmit="true" process="@this,vehicleTable" update="vehicleTable,:outputMsg">
+					<p:confirm header="#{msg['main.delete.confirm']}" message="#{msg['vehicle.delete.message']}" icon="ui-icon-alert"/>
+				</p:commandButton>
 			</h:panelGrid>
 
-			<p:dataTable id="dataTable" var="vehicle" value="#{vehicleBean.model}"  
+			<p:dataTable id="vehicleTable" var="vehicle" value="#{vehicleBean.getModel(group)}"  
 			             paginator="true" rows="5" paginatorPosition="bottom" 
 			             paginatorTemplate="{CurrentPageReport} {PreviousPageLink} {PageLinks} {NextPageLink}" 
 			             selection="#{vehicleBean.selectedFlats}" rowKey="#{vehicle.id}" >
 			    <p:ajax event="page" partialSubmit="true" process="name"/>
 
-			    <p:column id="license" headerText="#{msg['vehicle.lbl.license']}" style="width:20%">
+			    <p:column id="picture" headerText="#{msg['vehicle.lbl.picture']}" style="width:20%">
+			    	<h:outputText value="#{vehicle.picture}" />
+			    </p:column>
+			    <p:column id="license" headerText="#{msg['vehicle.lbl.license']}" filterBy="#{vehicle.license}" sortBy="#{vehicle.license}" style="width:20%">
 			    	<h:outputText value="#{vehicle.license}" />
 			    </p:column>
-			    
-			    <p:column id="flat" headerText="#{msg['vehicle.lbl.flat']}" style="width:20%">
-			    	<h:outputText value="#{vehicle.flat.name}" />
+			    <p:column id="type" headerText="#{msg['vehicle.lbl.type']}" filterBy="#{vehicle.type}" sortBy="#{vehicle.type}" style="width:20%">
+					<f:facet name="filter">
+						<p:selectOneMenu onchange="PF('vehicleTable').filter()" >
+							<f:selectItem itemLabel="-- #{msg['vehicle.lbl.everyone']} --" noSelectionOption="true"/>
+							<f:selectItems var="type" itemLabel="#{type.label}" itemValue="#{type}" value="#{vehicleBean.types}" />
+						</p:selectOneMenu>
+					</f:facet>
+			    	<h:outputText value="#{vehicle.type.label}" />
 			    </p:column>
-	
 				<p:column headerText="#{msg['flat.lbl.edit']}" style="width:2%">
-					<p:commandLink value="#{msg['flat.lbl.edit']}" actionListener="#{vehicleBean.onVehicleEdit(vehicle)}" 
-									update=":userForm:userGrid" disabled="#{not (vehicleBean.hasPermission())}"
-									oncomplete="PF('flatDialog').show();" partialSubmit="true" process="@this"/>
+					<p:commandLink value="#{msg['flat.lbl.edit']}" update=":dialog-vehicle-form:userGrid"
+									oncomplete="PF('vehicleDialog').show();" partialSubmit="true" process="@this">
+						<f:setPropertyActionListener target="#{vehicleBean.vehicle}" value="#{vehicle}"/>
+					</p:commandLink>
 				</p:column>
 			</p:dataTable>
 		</h:form>

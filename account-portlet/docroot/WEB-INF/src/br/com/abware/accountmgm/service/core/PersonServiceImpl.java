@@ -7,6 +7,7 @@ import br.com.abware.accountmgm.persistence.manager.PersonManagerImpl;
 import br.com.abware.accountmgm.persistence.manager.SecurityManagerImpl;
 import br.com.abware.jcondo.core.Permission;
 import br.com.abware.jcondo.core.model.Flat;
+import br.com.abware.jcondo.core.model.Group;
 import br.com.abware.jcondo.core.model.Person;
 import br.com.abware.jcondo.core.service.PersonService;
 import br.com.abware.jcondo.exception.ApplicationException;
@@ -18,9 +19,9 @@ public class PersonServiceImpl implements PersonService {
 	private SecurityManagerImpl securityManager = new SecurityManagerImpl();
 
 	@Override
-	public List<Person> getPeople(Flat flat) throws ApplicationException {
-		if (securityManager.hasPermission(flat, Permission.ADD_USER)) {
-			return personManager.findPeople(flat);
+	public List<Person> getPeople(Group group) throws ApplicationException {
+		if (securityManager.hasPermission(group, Permission.ADD_USER)) {
+			return personManager.findPeople(group);
 		}
 		
 		return null;
@@ -48,8 +49,15 @@ public class PersonServiceImpl implements PersonService {
 
 		if (securityManager.hasPermission(person, Permission.ADD_USER)) {
 			p = personManager.save(person);
+
+			// Configurando papeis de acordo com o tipo de usuário
+			for (Group group : person.getGroups()) {
+				if (group instanceof Flat) {
+					
+				}
+			}
 		}
-		
+
 		return p;
 	}
 

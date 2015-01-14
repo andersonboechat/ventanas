@@ -11,80 +11,43 @@
 	<h:body>
 		<h:form id="user-form">
 			<h:panelGrid columns="3" styleClass="menu-cmds" columnClasses="menu-cmds-col1,menu-cmds-col2,menu-cmds-col3">
-				<p:commandButton value="#{msg['person.btn.add']}"	partialSubmit="true" process="@this" update=":dialog-user-form:userGrid" oncomplete="PF('userDialog').show();">
+				<p:commandButton value="#{msg['person.btn.add']}" partialSubmit="true" process="@this" 
+								 update=":dialog-user-form:userGrid" oncomplete="PF('userDialog').show();">
 					<f:setPropertyActionListener target="#{personBean.person}" value=""/>
 				</p:commandButton>
 				<p:commandButton value="#{msg['person.btn.delete']}" actionListener="#{personBean.onPersonDelete()}" 
-								partialSubmit="true" process="@this,dataTable" update="dataTable,:outputMsg"/>
-
-				<p:selectOneMenu id="group" value="#{personBean.group}" rendered="#{not empty personBean.groups}" style="float: right" >
-					<f:selectItem itemLabel="-- #{msg['person.lbl.everyone']} --" noSelectionOption="true"/>
-					<f:selectItems var="group" value="#{personBean.groups}" itemLabel="#{group}" itemValue="#{group}"/>
-				    <p:ajax event="change" listener="#{personBean.onGroupSelect}" update="dataTable"/>
-				</p:selectOneMenu>
-
-				<p:selectOneMenu id="supplier" value="#{personBean.supplier}" rendered="#{not empty personBean.groups}" disabled="#{not (personBean.group == 'SUPPLIER')}" style="float: right" >
-					<f:selectItem itemLabel="-- #{msg['person.lbl.everyone']} --" noSelectionOption="true"/>
-					<f:selectItems  var="supplier" value="#{supplierBean.suppliers}" itemLabel="#{supplier.name}" itemValue="#{supplier}"/>
-				    <p:ajax event="change" listener="#{personBean.onSupplierSelect}" update="dataTable"/>
-				</p:selectOneMenu>
-
-				<p:selectOneMenu id="flat" value="#{personBean.flat}" disabled="#{not (personBean.group == 'FLAT')}" style="float: right" >
-					<f:selectItem itemLabel="-- #{msg['person.lbl.everyone']} --" noSelectionOption="true"/>
-					<c:forEach var="flat" varStatus="iterator" items="#{flatBean.flats}">
-						<f:selectItem itemLabel="#{flat.name}" itemValue="#{iterator.index}"/>
-					</c:forEach>
-				    <p:ajax event="change" listener="#{personBean.onFlatSelect}" update="dataTable"/>
-				</p:selectOneMenu>
+								partialSubmit="true" process="@this,personTable" update="personTable,:outputMsg">
+					<p:confirm header="#{msg['main.delete.confirm']}" message="#{msg['person.delete.message']}" icon="ui-icon-alert"/>
+				</p:commandButton>
 			</h:panelGrid>
-			<p:dataTable id="dataTable" var="person" value="#{personBean.model}"  
+			<p:dataTable id="personTable" var="person" value="#{personBean.getModel(group)}"  
 			             paginator="true" rows="5" paginatorPosition="bottom" 
 			             paginatorTemplate="{CurrentPageReport} {PreviousPageLink} {PageLinks} {NextPageLink}" 
 			             selection="#{personBean.selectedPeople}" rowKey="#{person.id}" >
 			    <p:ajax event="page" partialSubmit="true" process="name"/>
 
 				<p:column selectionMode="multiple" style="width:2%"/>
-
-			    <p:column id="name" headerText="#{msg['person.lbl.name']}" style="width:76%" >
+			    <p:column id="name" headerText="#{msg['person.lbl.name']}" filterBy="#{person.fullName}" sortBy="#{person.fullName}" style="width:76%" >
 			        <h:outputText value="#{person.fullName}" />
 			    </p:column>
-
-			    <p:column id="type" headerText="#{msg['person.lbl.type']}" style="width:76%" >
+			    <p:column id="type" headerText="#{msg['person.lbl.type']}" filterBy="#{person.type}" sortBy="#{person.type}" style="width:76%" >
+					<f:facet name="filter">
+						<p:selectOneMenu onchange="PF('personTable').filter()" >
+							<f:selectItem itemLabel="-- #{msg['person.lbl.everyone']} --" noSelectionOption="true"/>
+							<f:selectItems var="type" itemLabel="#{type.label}" itemValue="#{type}" value="#{personBean.types}" />
+						</p:selectOneMenu>
+					</f:facet>
 			        <h:outputText value="#{person.type.label}" />
 			    </p:column>
-
-			    <p:column id="flat" headerText="#{msg['person.lbl.flat']}" style="width:76%" rendered="#{personBean.supplier == null}">
-			        <c:forEach var="flat" items="#{personBean.getPersonFlats(person)}">
-			        	<h:outputText value="Bloco #{flat.block} - Apt. #{flat.number}"/>			        
-			        </c:forEach>
-			    </p:column>
-
-			    <p:column id="supplier" headerText="#{msg['person.lbl.supplier']}" style="width:76%" rendered="#{personBean.flat == null}">
-			        <c:forEach var="supplier" items="#{personBean.getPersonSuppliers(person)}">
-			        	<h:outputText value="#{supplier}"/>			        
-			        </c:forEach>
-			    </p:column>
-
-			    <p:column id="role" headerText="#{msg['person.lbl.type']}" style="width:20%">
-					<p:selectOneMenu id="sel1" value="#{person.type}" style="width:100%">
-						<f:selectItems var="type" value="#{personBean.getUserTypes()}" itemLabel="#{type.label}" itemValue="#{type}" />
-						<p:ajax event="valueChange" update=":outputMsg"/>
-					</p:selectOneMenu>
-			    </p:column>
-
 				<p:column headerText="Opções" style="width:2%">
 					<p:commandLink value="#{msg['person.lbl.edit']}" update=":dialog-user-form:userGrid" oncomplete="PF('userDialog').show();" partialSubmit="true" process="@this">
 						<f:setPropertyActionListener target="#{personBean.person}" value="#{person}"/>
 					</p:commandLink>
-					<p:commandLink value="#{msg['person.lbl.delete']}" actionListener="#{personBean.onPersonDelete(person)}" oncomplete="if (!args.validationFailed &amp;&amp; !args.exception) {PF('dataTable').update();}" partialSubmit="true" process="@this">
+					<p:commandLink value="#{msg['person.lbl.delete']}" actionListener="#{personBean.onPersonDelete(person)}" oncomplete="if (!args.validationFailed &amp;&amp; !args.exception) {PF('personTable').update();}" partialSubmit="true" process="@this">
 						<p:confirm header="#{msg['person.delete.confirm']}" message="#{msg['person.delete.message']}" icon="ui-icon-alert"/>
 					</p:commandLink>
 				</p:column>
 			</p:dataTable>
-			<p:confirmDialog global="true" width="600" style="padding: 0px" showEffect="fade" hideEffect="fade" visible="false">
-				<p:commandButton value="#{msg['no']}" type="button" styleClass="ui-confirmdialog-no" icon="ui-icon-close" style="float: left; width: 200px; margin-left: 14%" />
-				<p:commandButton value="#{msg['yes']}" type="button" styleClass="ui-confirmdialog-yes" icon="ui-icon-check" style="float: right; width: 200px; margin-right: 14%"/>
-			</p:confirmDialog>			
 		</h:form>
 	</h:body>
 </f:view>
