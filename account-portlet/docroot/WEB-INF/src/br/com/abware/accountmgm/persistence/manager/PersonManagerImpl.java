@@ -5,12 +5,17 @@ import java.util.Calendar;
 import java.util.List;
 
 import org.apache.commons.beanutils.BeanUtils;
+import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
 
+import br.com.abware.jcondo.core.Gender;
 import br.com.abware.jcondo.core.PersonType;
 import br.com.abware.jcondo.core.model.Flat;
 import br.com.abware.jcondo.core.model.Group;
+import br.com.abware.jcondo.core.model.GroupType;
+import br.com.abware.jcondo.core.model.Membership;
 import br.com.abware.jcondo.core.model.Person;
+import br.com.abware.jcondo.core.model.Role;
 import br.com.abware.jcondo.exception.PersistenceException;
 
 import com.liferay.faces.portal.context.LiferayPortletHelper;
@@ -97,32 +102,28 @@ public class PersonManagerImpl extends AbstractManager<User, Person> {
 			user.persist();
 			user.getContact().persist();
 			
-			for (Group group : person.getGroups()) {
-				UserGroupRolePK pk;
-				UserGroupRoleLocalServiceUtil.getUserGroupRoles(user.getUserId());
-				
-				if (group instanceof Flat) {
-					if (PersonType.OWNER == person.getType()) {
-						pk = new UserGroupRolePK(user.getUserId(), group.getId(), 0);
-						try {
-							UserGroupRoleLocalServiceUtil.getUserGroupRole(pk);	
-						} catch (NoSuchUserGroupRoleException e) {
-							UserGroupRoleLocalServiceUtil.addUserGroupRole(UserGroupRoleLocalServiceUtil.createUserGroupRole(pk));
-						}
-						
-					}
+			ServiceContext sc = new ServiceContext();
+			boolean habitant = false;
+			long[] newOrganizationIds = new long[0];
 
+			for (Membership m : person.getMemberships()) {
+				if (m.getGroup() instanceof Flat) {
+					newOrganizationIds = ArrayUtils.add(newOrganizationIds, m.getGroup().getId());
 				}
-				
-				//UserGroupRoleLocalServiceUtil.getu
-				
-				//UserGroupRoleLocalServiceUtil.addUserGroupRole(userGroupRole);
+
+				if (m.getRole().getType() == GroupType.FLAT || m.getRole() == Role.EMPLOYEE) {
+					habitant = true;
+				}
 			}
-			
-			if (PersonType.EMPLOYEE != person.getType()) {
-				// fazer associação condominos-apartamentos
+
+			UserLocalServiceUtil.updateOrganizations(user.getUserId(), newOrganizationIds, sc);
+
+			/* Visitantes, convidados e terceirizados devem ter suas contas travadas para não acessarem o site */
+			if (!habitant) {
+				UserLocalServiceUtil.updateLockout(user, true);
 			} else {
-				// fazer associação funcionarios-fornecedores
+				UserLocalServiceUtil.sendPassword(user.getCompanyId(), user.getEmailAddress(), StringUtils.EMPTY, 
+												  StringUtils.EMPTY, StringUtils.EMPTY, StringUtils.EMPTY, sc);
 			}
 
 		} catch (Exception e) {

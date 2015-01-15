@@ -5,19 +5,59 @@ import com.liferay.faces.portal.context.LiferayPortletHelperImpl;
 import com.liferay.portal.security.permission.ActionKeys;
 import com.liferay.portal.security.permission.PermissionChecker;
 import com.liferay.portal.security.permission.PermissionCheckerFactoryUtil;
+import com.liferay.portal.service.UserGroupRoleLocalServiceUtil;
 import com.liferay.portal.service.permission.OrganizationPermissionUtil;
 import com.liferay.portal.service.permission.UserPermissionUtil;
 
 import br.com.abware.jcondo.core.Permission;
 import br.com.abware.jcondo.core.model.BaseModel;
 import br.com.abware.jcondo.core.model.Flat;
+import br.com.abware.jcondo.core.model.Group;
+import br.com.abware.jcondo.core.model.GroupType;
 import br.com.abware.jcondo.core.model.Person;
+import br.com.abware.jcondo.core.model.Role;
 import br.com.abware.jcondo.exception.ApplicationException;
 import br.com.abware.jcondo.exception.SystemException;
 
 public class SecurityManagerImpl {
 
-	private LiferayPortletHelper helper = new LiferayPortletHelperImpl();	
+	private LiferayPortletHelper helper = new LiferayPortletHelperImpl();
+	
+	public void addRole(Person person, Group group, Role role) throws ApplicationException {
+		try {
+			if (group instanceof Flat) {
+				if (role.getType() != GroupType.FLAT) {
+					throw new Exception();
+				}
+	
+				UserGroupRoleLocalServiceUtil.addUserGroupRoles(person.getId(), group.getId(), new long[] {0});
+			}
+		} catch (Exception e) {
+			throw new ApplicationException(e, "");
+		}
+	}
+
+	public void removeRole(Person person, Group group, Role role) throws ApplicationException {
+		try {
+			if (group instanceof Flat) {
+				if (role.getType() != GroupType.FLAT) {
+					throw new Exception();
+				}
+
+				UserGroupRoleLocalServiceUtil.deleteUserGroupRoles(person.getId(), group.getId(), new long[] {0});	
+			}		
+		} catch (Exception e) {
+			throw new ApplicationException(e, "");
+		}
+	}
+
+	public boolean hasRole(Person person, Group group, Role role) {
+		return hasRole(person, new Group[] {group}, role);
+	}	
+
+	public boolean hasRole(Person person, Group[] group, Role role) {
+		return false;
+	}
 
 	public boolean hasPermission(BaseModel model, Permission permission) throws ApplicationException {
 		try {
