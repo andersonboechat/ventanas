@@ -1,10 +1,13 @@
 package br.com.abware.accountmgm.persistence.manager;
 
+import java.io.File;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 
 import org.apache.commons.beanutils.BeanUtils;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
 
@@ -23,6 +26,8 @@ import com.liferay.faces.portal.context.LiferayPortletHelperImpl;
 import com.liferay.portal.NoSuchUserException;
 import com.liferay.portal.NoSuchUserGroupRoleException;
 import com.liferay.portal.model.User;
+import com.liferay.portal.model.UserGroupRole;
+import com.liferay.portal.service.RoleLocalServiceUtil;
 import com.liferay.portal.service.ServiceContext;
 import com.liferay.portal.service.UserGroupRoleLocalServiceUtil;
 import com.liferay.portal.service.UserLocalServiceUtil;
@@ -32,8 +37,6 @@ import com.liferay.portlet.expando.model.ExpandoValue;
 import com.liferay.portlet.expando.service.ExpandoValueLocalServiceUtil;
 
 public class PersonManagerImpl extends AbstractManager<User, Person> {
-	
-	private static final long GUEST_ROLE_ID = 0;
 	
 	private static final String HOME = "RESIDENCIA";
 	
@@ -77,7 +80,7 @@ public class PersonManagerImpl extends AbstractManager<User, Person> {
 			try {
 				user = UserLocalServiceUtil.getUserById(person.getId());
 			} catch (NoSuchUserException e) {
-				user = UserLocalServiceUtil.createUser(person.getId());
+				return null;
 			}
 
 			BeanUtils.copyProperties(user, person);
@@ -94,97 +97,83 @@ public class PersonManagerImpl extends AbstractManager<User, Person> {
 	}
 
 	
-	public Person persist(Person person) throws PersistenceException {
-		try {		
-			User user;
+	public Person save(Person person) throws PersistenceException {
+		try {	
+			User user = getEntity(person);
+			Calendar c = Calendar.getInstance();
+			c.setTime(person.getBirthday());
 
-			user = getEntity(person);
-			user.persist();
-			user.getContact().persist();
-			
-			ServiceContext sc = new ServiceContext();
-			boolean habitant = false;
-			long[] newOrganizationIds = new long[0];
+			int birthdayDay = c.get(Calendar.DAY_OF_MONTH);
+			int birthdayMonth = c.get(Calendar.MONTH);
+			int birthdayYear = c.get(Calendar.YEAR);
+
+			boolean isMale = person.getGender().equals(Gender.MALE);
+			boolean isMember = false;
+			long[] organizationIds = new long[0];
+			long[] groupIds = new long[0];
+			List<UserGroupRole> userGroupRoles = new ArrayList<UserGroupRole>();
 
 			for (Membership m : person.getMemberships()) {
 				if (m.getGroup() instanceof Flat) {
-					newOrganizationIds = ArrayUtils.add(newOrganizationIds, m.getGroup().getId());
+					organizationIds = ArrayUtils.add(organizationIds, m.getGroup().getId());
+					long roleId = RoleLocalServiceUtil.getRole(user.getCompanyId(), m.getRole().getLabel()).getRoleId();  
+					userGroupRoles.add(UserGroupRoleLocalServiceUtil.createUserGroupRole(new UserGroupRolePK(user.getUserId(), 
+																											 m.getGroup().getId(), 
+																											 roleId)));
+				} else {
+					groupIds = ArrayUtils.add(groupIds, m.getGroup().getId());
 				}
 
 				if (m.getRole().getType() == GroupType.FLAT || m.getRole() == Role.EMPLOYEE) {
-					habitant = true;
+					isMember = true;
 				}
-			}
+			}				
 
-			UserLocalServiceUtil.updateOrganizations(user.getUserId(), newOrganizationIds, sc);
-
-			/* Visitantes, convidados e terceirizados devem ter suas contas travadas para não acessarem o site */
-			if (!habitant) {
-				UserLocalServiceUtil.updateLockout(user, true);
-			} else {
-				UserLocalServiceUtil.sendPassword(user.getCompanyId(), user.getEmailAddress(), StringUtils.EMPTY, 
-												  StringUtils.EMPTY, StringUtils.EMPTY, StringUtils.EMPTY, sc);
-			}
-
-		} catch (Exception e) {
-			
-		}
-		
-		return null;
-	}
-	
-	public Person save(Person person) throws PersistenceException {
-		try {
-			User user;
-			Person p;
-
-			if (person.getId() == 0) {
+			if (user == null) {
 				User creatorUser = helper.getUser();
-				Calendar c = Calendar.getInstance();
-				c.setTime(person.getBirthday());
-
-				int birthdayDay = c.get(Calendar.DAY_OF_MONTH);
-				int birthdayMonth = c.get(Calendar.MONTH);
-				int birthdayYear = c.get(Calendar.YEAR);
-
-				boolean isMale = person.getGender().equals(Gender.MALE);
-
-				long[] flatIds = new long[person.getFlats().size()];
-
-				for (int i = 0; person.getFlats().iterator().hasNext(); i++) {
-					flatIds[i] = person.getFlats().iterator().next().getId();
-				}
-
 				user = UserLocalServiceUtil.addUser(creatorUser.getUserId(), creatorUser.getCompanyId(), true, 
 											 		StringUtils.EMPTY, StringUtils.EMPTY, true, StringUtils.EMPTY, 
 											 		person.getEmailAddress(), 0, StringUtils.EMPTY, creatorUser.getLocale(), 
 											 		person.getFirstName(), StringUtils.EMPTY, person.getLastName(), 0, 0, 
 											 		isMale, birthdayMonth, birthdayDay, birthdayYear, 
-											 		StringUtils.EMPTY, creatorUser.getGroupIds(), 
-											 		flatIds, creatorUser.getRoleIds(), 
-											 		new long[] {GUEST_ROLE_ID}, true, new ServiceContext());
+											 		StringUtils.EMPTY, groupIds, organizationIds, null, 
+											 		null, isMember, new ServiceContext());
 
-				p = getModel(user);
+				if (!isMember) {
+					UserLocalServiceUtil.updateLockout(user, true);
+				}
 			} else {
-				p = person;
-				user = getEntity(person);
-				user.persist();
-				user.getContact().persist();
+				boolean wasMember = user.isLockout();
+				user = UserLocalServiceUtil.updateUser(person.getId(), user.getPassword(), StringUtils.EMPTY, StringUtils.EMPTY, false, 
+													   user.getReminderQueryQuestion(), user.getReminderQueryAnswer(), user.getScreenName(), 
+													   person.getEmailAddress(), user.getFacebookId(), user.getOpenId(), user.getLanguageId(), 
+													   user.getTimeZoneId(), user.getGreeting(), user.getComments(), person.getFirstName(), 
+													   StringUtils.EMPTY, person.getLastName(), 0, 0, isMale, birthdayMonth, birthdayDay, 
+													   birthdayYear, StringUtils.EMPTY, StringUtils.EMPTY, StringUtils.EMPTY, StringUtils.EMPTY, 
+													   StringUtils.EMPTY, StringUtils.EMPTY, StringUtils.EMPTY, StringUtils.EMPTY, 
+													   StringUtils.EMPTY, StringUtils.EMPTY, user.getJobTitle(), groupIds, organizationIds, 
+													   null, userGroupRoles, null, new ServiceContext());
+				if (!isMember) {
+					UserLocalServiceUtil.updateLockout(user, true);
+				} else if (!wasMember) {
+					UserLocalServiceUtil.updateLockout(user, false);
+					UserLocalServiceUtil.sendPassword(user.getCompanyId(), user.getEmailAddress(), StringUtils.EMPTY, StringUtils.EMPTY, 
+													  StringUtils.EMPTY, StringUtils.EMPTY, new ServiceContext());
+				}
+
 			}
 
-			//user.getExpandoBridge().setAttribute(HOME, person.getHome().getId());
-			
 			if (person.getPicture() != null && person.getPicture().getId() == 0) {
 				File file = new File(new URL(person.getPicture().getPath()).toURI());
-				UserLocalServiceUtil.updatePortrait(person.getId(),	FileUtils.readFileToByteArray(file));
+				user = UserLocalServiceUtil.updatePortrait(person.getId(),	FileUtils.readFileToByteArray(file));
 			}
 
-			return p;
+			return getModel(user);
 		} catch (Exception e) {
-			throw new PersistenceException(e, "");
+			throw new PersistenceException("");
 		}
 	}
-
+	
 	public void delete(Person person) {
 		try {
 			if (person.getId() != 0) {
