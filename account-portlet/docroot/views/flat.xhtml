@@ -14,7 +14,7 @@
 			             paginator="true" rows="5" paginatorPosition="bottom" 
 			             paginatorTemplate="{CurrentPageReport} {PreviousPageLink} {PageLinks} {NextPageLink}" 
 			             rowKey="#{flat.id}" >
-			    <p:ajax event="page" partialSubmit="true" process="name"/>
+			    <p:ajax event="page" partialSubmit="true"/>
 				<p:column style="width:16px">
 					<p:rowToggler />
 				</p:column>
@@ -37,8 +37,7 @@
 			    	<h:outputText value="#{flat.number}" />
 			    </p:column>
 				<p:rowExpansion>
-					<ui:include src="user.xhtml"><ui:param name="group" value="#{flat}"/></ui:include>
-					<ui:include src="vehicle.xhtml"><ui:param name="group" value="#{flat}"/></ui:include>
+					<ui:include src="user.xhtml"><ui:param name="domain" value="#{flat}"/></ui:include>
 				</p:rowExpansion>	
 			</p:dataTable>
 		</h:form>

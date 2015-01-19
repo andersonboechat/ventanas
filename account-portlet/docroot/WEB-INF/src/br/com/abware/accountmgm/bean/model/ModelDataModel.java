@@ -41,8 +41,7 @@ public class ModelDataModel<Model extends BaseModel> extends LazyDataModel<Model
         return model.getId();
     }
 
-	@Override
-	public List<Model> load(int first, int pageSize, String sortField, SortOrder sortOrder, Map<String, String> filters) {
+	public List<Model> load(int first, int pageSize, String sortField, SortOrder sortOrder, Map<String, Object> filters) {
 		List<Model> data = new ArrayList<Model>();
 
 		//filter

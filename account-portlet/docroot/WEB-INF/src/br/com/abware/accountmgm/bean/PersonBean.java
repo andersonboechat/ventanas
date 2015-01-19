@@ -11,20 +11,16 @@ import javax.faces.bean.ViewScoped;
 import org.apache.log4j.Logger;
 
 import br.com.abware.accountmgm.bean.model.ModelDataModel;
-import br.com.abware.accountmgm.service.core.PersonServiceImpl;
-import br.com.abware.jcondo.core.PersonType;
 import br.com.abware.jcondo.core.model.Flat;
 import br.com.abware.jcondo.core.model.Person;
-import br.com.abware.jcondo.core.service.PersonService;
+import br.com.abware.jcondo.core.model.RoleName;
 import br.com.abware.jcondo.exception.ApplicationException;
 
 @ManagedBean
 @ViewScoped
-public class PersonBean {
+public class PersonBean extends BaseBean {
 
 	private static Logger LOGGER = Logger.getLogger(PersonBean.class);
-
-	private static final PersonService personService = new PersonServiceImpl();
 
 	@ManagedProperty(name="flatBean", value="#{flatBean}")
 	private FlatBean flatBean;
@@ -37,7 +33,7 @@ public class PersonBean {
 
 	private Person[] selectedPeople;
 
-	private List<PersonType> types;
+	private List<RoleName> roles;
 
 	@PostConstruct
 	public void init() {
@@ -45,7 +41,7 @@ public class PersonBean {
 			flat = flatBean.getFlat();
 			model = new ModelDataModel<Person>(personService.getPeople(flat));
 			person = model.getRowData();
-			types = Arrays.asList(PersonType.values());
+			roles = Arrays.asList(RoleName.values());
 		} catch (Exception e) {
 			LOGGER.error("", e);
 		}
@@ -53,7 +49,7 @@ public class PersonBean {
 
 	public void onPersonSave() {
 		try {
-			personService.register(person);
+			person = personService.register(person);
 		} catch (ApplicationException e) {
 			LOGGER.error("", e);
 		}
@@ -109,12 +105,12 @@ public class PersonBean {
 		this.selectedPeople = selectedPeople;
 	}
 
-	public List<PersonType> getTypes() {
-		return types;
+	public List<RoleName> getRoles() {
+		return roles;
 	}
 
-	public void setTypes(List<PersonType> types) {
-		this.types = types;
+	public void setRoles(List<RoleName> roles) {
+		this.roles = roles;
 	}
 
 }

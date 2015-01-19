@@ -12,22 +12,28 @@ import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
 
 import br.com.abware.jcondo.core.Gender;
-import br.com.abware.jcondo.core.PersonType;
+import br.com.abware.jcondo.core.PersonStatus;
+import br.com.abware.jcondo.core.model.Condominium;
+import br.com.abware.jcondo.core.model.Domain;
 import br.com.abware.jcondo.core.model.Flat;
-import br.com.abware.jcondo.core.model.Group;
-import br.com.abware.jcondo.core.model.GroupType;
 import br.com.abware.jcondo.core.model.Membership;
 import br.com.abware.jcondo.core.model.Person;
 import br.com.abware.jcondo.core.model.Role;
+import br.com.abware.jcondo.core.model.RoleName;
+import br.com.abware.jcondo.core.model.Supplier;
 import br.com.abware.jcondo.exception.PersistenceException;
+import br.com.abware.jcondo.exception.SystemException;
 
 import com.liferay.faces.portal.context.LiferayPortletHelper;
 import com.liferay.faces.portal.context.LiferayPortletHelperImpl;
 import com.liferay.portal.NoSuchUserException;
-import com.liferay.portal.NoSuchUserGroupRoleException;
+import com.liferay.portal.kernel.workflow.WorkflowConstants;
+import com.liferay.portal.model.Group;
+import com.liferay.portal.model.Organization;
 import com.liferay.portal.model.User;
 import com.liferay.portal.model.UserGroupRole;
-import com.liferay.portal.service.RoleLocalServiceUtil;
+import com.liferay.portal.service.GroupLocalServiceUtil;
+import com.liferay.portal.service.OrganizationLocalServiceUtil;
 import com.liferay.portal.service.ServiceContext;
 import com.liferay.portal.service.UserGroupRoleLocalServiceUtil;
 import com.liferay.portal.service.UserLocalServiceUtil;
@@ -37,8 +43,6 @@ import com.liferay.portlet.expando.model.ExpandoValue;
 import com.liferay.portlet.expando.service.ExpandoValueLocalServiceUtil;
 
 public class PersonManagerImpl extends AbstractManager<User, Person> {
-	
-	private static final String HOME = "RESIDENCIA";
 	
 	private static final String PERSON_TYPE = "TYPE";
 	
@@ -83,7 +87,7 @@ public class PersonManagerImpl extends AbstractManager<User, Person> {
 				return null;
 			}
 
-			BeanUtils.copyProperties(user, person);
+			//BeanUtils.copyProperties(user, person);
 		} catch (Exception e) {
 			throw new PersistenceException("");
 		}
@@ -96,7 +100,6 @@ public class PersonManagerImpl extends AbstractManager<User, Person> {
 		return Person.class;
 	}
 
-	
 	public Person save(Person person) throws PersistenceException {
 		try {	
 			User user = getEntity(person);
@@ -114,20 +117,21 @@ public class PersonManagerImpl extends AbstractManager<User, Person> {
 			List<UserGroupRole> userGroupRoles = new ArrayList<UserGroupRole>();
 
 			for (Membership m : person.getMemberships()) {
-				if (m.getGroup() instanceof Flat) {
-					organizationIds = ArrayUtils.add(organizationIds, m.getGroup().getId());
-					long roleId = RoleLocalServiceUtil.getRole(user.getCompanyId(), m.getRole().getLabel()).getRoleId();  
-					userGroupRoles.add(UserGroupRoleLocalServiceUtil.createUserGroupRole(new UserGroupRolePK(user.getUserId(), 
-																											 m.getGroup().getId(), 
-																											 roleId)));
+				if (m.getDomain() instanceof Condominium) {
+					groupIds = ArrayUtils.add(groupIds, m.getDomain().getId());
 				} else {
-					groupIds = ArrayUtils.add(groupIds, m.getGroup().getId());
+					organizationIds = ArrayUtils.add(organizationIds, m.getDomain().getId());
+					userGroupRoles.add(UserGroupRoleLocalServiceUtil.createUserGroupRole(new UserGroupRolePK(user.getUserId(), 
+																											 m.getDomain().getId(), 
+																											 m.getRole().getId())));
 				}
 
-				if (m.getRole().getType() == GroupType.FLAT || m.getRole() == Role.EMPLOYEE) {
+				if (m.getRole().getName() != RoleName.GUEST ||
+						m.getRole().getName() != RoleName.VISITOR ||
+						m.getRole().getName() != RoleName.THIRD_PARTY) {
 					isMember = true;
 				}
-			}				
+			}
 
 			if (user == null) {
 				User creatorUser = helper.getUser();
@@ -163,9 +167,13 @@ public class PersonManagerImpl extends AbstractManager<User, Person> {
 
 			}
 
-			if (person.getPicture() != null && person.getPicture().getId() == 0) {
-				File file = new File(new URL(person.getPicture().getPath()).toURI());
-				user = UserLocalServiceUtil.updatePortrait(person.getId(),	FileUtils.readFileToByteArray(file));
+			try {
+				if (person.getPicture() != null) {
+					File file = new File(new URL(person.getPicture()).toURI());
+					user = UserLocalServiceUtil.updatePortrait(person.getId(),	FileUtils.readFileToByteArray(file));
+				}
+			} catch (Exception e) {
+				// TODO Log it!
 			}
 
 			return getModel(user);
@@ -173,29 +181,50 @@ public class PersonManagerImpl extends AbstractManager<User, Person> {
 			throw new PersistenceException("");
 		}
 	}
+
+	public void updatePersonDomains(Person person, List<Domain> domains) {
+		long[] organizationIds = new long[0];
+		long[] groupIds = new long[0];
+		try {
+			for (Domain domain : domains) {
+				if (domain instanceof Flat || domain instanceof Supplier) {
+					List<Organization> orgs = OrganizationLocalServiceUtil.getGroupOrganizations(domain.getId());
+					organizationIds = ArrayUtils.add(organizationIds, domain.getId());
+				} else {
+					groupIds = ArrayUtils.add(groupIds, domain.getId());
+				}
+			}
 	
-	public void delete(Person person) {
+			if (organizationIds.length > 0) {
+				UserLocalServiceUtil.updateOrganizations(person.getId(), organizationIds, new ServiceContext());
+			}
+	
+			if (groupIds.length > 0) {
+				UserLocalServiceUtil.updateGroups(person.getId(), groupIds, new ServiceContext());
+			}
+		} catch (Exception e) {
+			// TODO log it!
+		}
+	}	
+	
+	public void delete(Person person) throws PersistenceException {
 		try {
 			if (person.getId() != 0) {
 				UserLocalServiceUtil.updateStatus(person.getId(), WorkflowConstants.STATUS_INACTIVE);
 			}
-		} catch (PortalException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (SystemException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+		} catch (Exception e) {
+			throw new PersistenceException("");
 		}
 	}
 
-	public List<Person> findPeople(Group group) throws PersistenceException {
+	public List<Person> findPeople(Domain domain) throws PersistenceException {
 		try {
 			List<User> users;
 
-			if (group instanceof Flat) {
-				users = UserLocalServiceUtil.getOrganizationUsers(group.getId());
+			if (domain instanceof Condominium) {
+				users = UserLocalServiceUtil.getGroupUsers(domain.getId());
 			} else {
-				users = new ArrayList<User>();
+				users = UserLocalServiceUtil.getOrganizationUsers(domain.getId()); 
 			}
 
 			return getModels(users);
@@ -213,35 +242,51 @@ public class PersonManagerImpl extends AbstractManager<User, Person> {
 	}
 
 	@Override
-	public Person getModel(User user) throws PersistenceException {
-		Person person = super.getModel(user);
-
+	protected Person getModel(User user) throws PersistenceException {
 		try {
-			if (!CollectionUtils.isEmpty(person.getFlats())) {
-				Flat home = person.getFlats().get(0);
-				if (person.getFlats().size() > 1) {
-					Long id = (Long) user.getExpandoBridge().getAttribute(HOME);
-					if (id > 0) {
-						home = new Flat();
-						home.setId(id);
-						int index = person.getFlats().indexOf(home);
-						if (index > -1) {
-							home = person.getFlats().get(index);
-						}
-					}
+			Person person = super.getModel(user);
+
+			List<Membership> memberships = new ArrayList<Membership>();
+			List<Organization> organizations = OrganizationLocalServiceUtil.getUserOrganizations(user.getUserId());
+
+			for (Organization organization : organizations) {
+				Domain domain;
+				if (organization.getType().equalsIgnoreCase("regular-organization")) {
+					String[] name = organization.getName().split("/");
+					domain = new Flat(organization.getOrganizationId(), Long.parseLong(name[0]), Long.parseLong(name[1]));
+				} else if (organization.getType().equalsIgnoreCase("supplier")) {
+					domain = new Supplier(organization.getOrganizationId(), organization.getName());
+				} else {
+					throw new SystemException("Organization not supported");
 				}
 
-				person.setHome(home);
+				List<UserGroupRole> roles =  UserGroupRoleLocalServiceUtil.getUserGroupRoles(user.getUserId(), organization.getGroupId());
+				for (UserGroupRole ugr : roles) {
+					Role role = new Role(ugr.getRoleId(), RoleName.parse(ugr.getRole().getName()), ugr.getRole().getTitle());
+					memberships.add(new Membership(role, domain));
+				}
 			}
 
+			List<Group> groups = GroupLocalServiceUtil.getUserGroups(user.getUserId());
+			
+			for (Group group : groups) {
+				if (group.getSite()) {
+					List<UserGroupRole> roles =  UserGroupRoleLocalServiceUtil.getUserGroupRoles(user.getUserId(), group.getGroupId());
+					for (UserGroupRole ugr : roles) {
+						Role role = new Role(ugr.getRoleId(), RoleName.parse(ugr.getRole().getName()), ugr.getRole().getTitle());
+						memberships.add(new Membership(role, new Condominium(group.getGroupId(), group.getDescriptiveName())));
+					}
+				}
+			}
+			
 			person.setStatus(PersonStatus.parseStatus(user.getStatus()));
-
+			person.setGender(user.isMale() ? Gender.MALE : Gender.FEMALE);
 			person.setPicture(user.getPortraitURL(helper.getThemeDisplay()));
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
 
-		return person;
+			return person;
+		} catch (Exception e) {
+			throw new PersistenceException(e, "");
+		}
 	}
 	
 	public Person findById(Object id) throws PersistenceException {
@@ -251,31 +296,17 @@ public class PersonManagerImpl extends AbstractManager<User, Person> {
 			throw new PersistenceException("");
 		}
 	}
+	
+	public boolean exists(Person person) throws PersistenceException {
+		return getEntity(person) != null;
+	}
 
 	public List<Person> findAll() throws PersistenceException {
 		try {
 			List<User> users = UserLocalServiceUtil.getUsers(-1, -1);
-			
-			
 			return getModels(users);
 		} catch (Exception e) {
 			throw new PersistenceException("");
-		}
-	}
-
-	public boolean hasPermission(Person person, Permission permission) {
-		try {
-			PermissionChecker permissionChecker = PermissionCheckerFactoryUtil.create(helper.getUser());
-
-			if (permission == Permission.UPDATE_PERSON) {
-				return UserPermissionUtil.contains(permissionChecker, person.getId(), ActionKeys.UPDATE);
-			} else if (permission == Permission.ADD_USER) { 
-				return UserPermissionUtil.contains(permissionChecker, person.getId(), ActionKeys.ADD_USER);
-			} else {
-				throw new br.com.abware.jcondo.exception.SystemException("Permission not supported");
-			}
-		} catch (Exception e) {
-			throw new br.com.abware.jcondo.exception.SystemException("Permission not supported");
 		}
 	}
 

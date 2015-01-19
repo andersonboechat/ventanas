@@ -8,8 +8,9 @@ import javax.faces.bean.ViewScoped;
 
 import org.apache.log4j.Logger;
 
-import br.com.abware.accountmgm.bean.model.VehicleDataModel;
+import br.com.abware.accountmgm.bean.model.ModelDataModel;
 import br.com.abware.accountmgm.model.Flat;
+import br.com.abware.accountmgm.model.Vehicle;
 
 @ManagedBean
 @ViewScoped
@@ -17,7 +18,7 @@ public class VehicleBean {
 
 	private static Logger LOGGER = Logger.getLogger(VehicleBean.class);
 	
-	private static final VehicleDataModel model = null;
+	private static final ModelDataModel<Vehicle> model = null;
 	
 	private String type;
 
@@ -48,7 +49,7 @@ public class VehicleBean {
 		
 	}
 
-	public VehicleDataModel getModel() {
+	public ModelDataModel<Vehicle> getModel() {
 		return model;
 	}
 

@@ -20,7 +20,7 @@
 					<p:confirm header="#{msg['main.delete.confirm']}" message="#{msg['person.delete.message']}" icon="ui-icon-alert"/>
 				</p:commandButton>
 			</h:panelGrid>
-			<p:dataTable id="personTable" var="person" value="#{personBean.getModel(group)}"  
+			<p:dataTable id="personTable" var="person" value="#{personBean.model}"  
 			             paginator="true" rows="5" paginatorPosition="bottom" 
 			             paginatorTemplate="{CurrentPageReport} {PreviousPageLink} {PageLinks} {NextPageLink}" 
 			             selection="#{personBean.selectedPeople}" rowKey="#{person.id}" >
@@ -30,14 +30,14 @@
 			    <p:column id="name" headerText="#{msg['person.lbl.name']}" filterBy="#{person.fullName}" sortBy="#{person.fullName}" style="width:76%" >
 			        <h:outputText value="#{person.fullName}" />
 			    </p:column>
-			    <p:column id="type" headerText="#{msg['person.lbl.type']}" filterBy="#{person.type}" sortBy="#{person.type}" style="width:76%" >
+			    <p:column id="role" headerText="#{msg['person.lbl.type']}" filterBy="#{person.getRole(domain)}" sortBy="#{person.getRole(domain)}" style="width:76%" >
 					<f:facet name="filter">
 						<p:selectOneMenu onchange="PF('personTable').filter()" >
 							<f:selectItem itemLabel="-- #{msg['person.lbl.everyone']} --" noSelectionOption="true"/>
-							<f:selectItems var="type" itemLabel="#{type.label}" itemValue="#{type}" value="#{personBean.types}" />
+							<f:selectItems var="role" itemLabel="#{role.title}" itemValue="#{role}" value="#{personBean.roles}" />
 						</p:selectOneMenu>
 					</f:facet>
-			        <h:outputText value="#{person.type.label}" />
+			        <h:outputText value="#{person.getRole(domain).title}" />
 			    </p:column>
 				<p:column headerText="Opções" style="width:2%">
 					<p:commandLink value="#{msg['person.lbl.edit']}" update=":dialog-user-form:userGrid" oncomplete="PF('userDialog').show();" partialSubmit="true" process="@this">

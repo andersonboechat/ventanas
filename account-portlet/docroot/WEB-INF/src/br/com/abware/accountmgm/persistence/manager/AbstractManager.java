@@ -12,6 +12,8 @@ import com.liferay.portal.model.PersistedModel;
 
 public abstract class AbstractManager<Entity extends PersistedModel, Model extends BaseModel> {
 
+	protected static final long COMPANY = 10153;
+	
 	protected abstract Class<Model> getModelClass();
 
 	protected abstract Entity getEntity(Model model) throws PersistenceException;

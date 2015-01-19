@@ -3,13 +3,15 @@ package br.com.abware.accountmgm.persistence.manager;
 import java.util.Arrays;
 import java.util.List;
 
-import org.apache.commons.beanutils.BeanUtils;
+import org.apache.commons.lang.StringUtils;
 
 import br.com.abware.jcondo.core.model.Flat;
 import br.com.abware.jcondo.core.model.Person;
 import br.com.abware.jcondo.exception.PersistenceException;
 
+import com.liferay.portal.NoSuchOrganizationException;
 import com.liferay.portal.model.Organization;
+import com.liferay.portal.model.OrganizationConstants;
 import com.liferay.portal.service.OrganizationLocalServiceUtil;
 import com.liferay.portlet.expando.model.ExpandoColumn;
 import com.liferay.portlet.expando.model.ExpandoTableConstants;
@@ -19,8 +21,6 @@ import com.liferay.portlet.expando.service.ExpandoValueLocalServiceUtil;
 
 public class FlatManagerImpl extends AbstractManager<Organization, Flat> {
 	
-	private static final long COMPANY = 10153;
-
 	private static final String BLOCK = "BLOCK";
 
 	private static final String NUMBER = "NUMBER";	
@@ -63,13 +63,17 @@ public class FlatManagerImpl extends AbstractManager<Organization, Flat> {
 		try {
 			Organization organization;
 
-			if (flat.getId() == 0) {
+			try {
 				organization = OrganizationLocalServiceUtil.getOrganization(flat.getId());
-			} else {
-				organization = OrganizationLocalServiceUtil.createOrganization(flat.getId());	
+			} catch (NoSuchOrganizationException e) {
+				organization = OrganizationLocalServiceUtil.createOrganization(flat.getId());
 			}
 
-			BeanUtils.copyProperties(organization, flat);
+			StringBuffer name = new StringBuffer();
+			name.append(flat.getBlock()).append("/").append(StringUtils.leftPad(String.valueOf(flat.getNumber()), 4, "0"));
+
+			organization.setName(name.toString());
+			organization.setType(OrganizationConstants.TYPE_REGULAR_ORGANIZATION);
 
 			return organization;
 		} catch (Exception e) {
@@ -79,21 +83,14 @@ public class FlatManagerImpl extends AbstractManager<Organization, Flat> {
 	
 	@Override
 	protected Flat getModel(Organization organization) throws Exception {
-		Flat flat = super.getModel(organization);
-		flat.setId(organization.getOrganizationId());
-		flat.setBlock(Integer.parseInt(getCustomField(BLOCK, organization)));
-		flat.setNumber(Integer.parseInt(getCustomField(NUMBER, organization)));
-		return flat;
+		String[] name = organization.getName().split("/");
+		return new Flat(organization.getOrganizationId(), Integer.parseInt(name[0]), Integer.parseInt(name[1]));
 	}
 
 	public Flat save(Flat flat) throws PersistenceException {
 		try {
 			Organization organization = getEntity(flat);
 			organization.persist();
-
-			saveCustomField(BLOCK, String.valueOf(flat.getBlock()), organization);
-			saveCustomField(NUMBER, String.valueOf(flat.getNumber()), organization);
-
 			return getModel(organization);
 		} catch (Exception e) {
 			throw new PersistenceException(e, "");

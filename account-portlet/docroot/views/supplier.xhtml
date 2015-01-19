@@ -12,7 +12,7 @@
 		<h:form id="supplier-form">
 			<h:panelGrid columns="3" styleClass="menu-cmds" columnClasses="menu-cmds-col1,menu-cmds-col2,menu-cmds-col3">
 				<p:commandButton value="Cadastrar Fornecedor" partialSubmit="true" process="@this" 
-								 update=":dialog-supplier-form:userGrid" oncomplete="PF('supplierDialog').show();">
+								 update=":supplier-details-form:grid" oncomplete="PF('supplierDialog').show();">
 					<f:setPropertyActionListener target="#{supplierBean.supplier}" value=""/>
 				</p:commandButton>
 				<p:commandButton value="Excluir Fornecedores" actionListener="#{supplierBean.onSupplierDelete}" 
@@ -37,10 +37,10 @@
 					<f:facet name="filter">
 						<p:selectOneMenu onchange="PF('supplierTable').filter()" >
 							<f:selectItem itemLabel="-- #{msg['supplier.lbl.everyone']} --" noSelectionOption="true"/>
-							<f:selectItems var="status" itemLabel="#{status.label}" itemValue="#{status}" value="#{supplierBean.status}" />
+							<f:selectItems var="status" value="#{supplierBean.status}" itemLabel="#{status.key}" itemValue="#{status}"/>
 						</p:selectOneMenu>
 					</f:facet>
-			        <h:outputText value="#{supplier.status}" />
+			        <h:outputText value="#{supplier.status.key}" />
 			    </p:column>
 				<p:column headerText="Opções" style="width:2%">
 					<p:commandLink value="Editar" update=":dialog-supplier-form:userGrid" oncomplete="PF('supplierDialog').show();" partialSubmit="true" process="@this">
@@ -51,8 +51,7 @@
 					</p:commandLink>
 				</p:column>
 				<p:rowExpansion>
-					<ui:include src="user.xhtml"><ui:param name="group" value="#{supplier}"/></ui:include>
-					<ui:include src="vehicle.xhtml"><ui:param name="group" value="#{supplier}"/></ui:include>
+					<ui:include src="user.xhtml"><ui:param name="domain" value="#{supplier}"/></ui:include>
 				</p:rowExpansion>
 			</p:dataTable>
 		</h:form>

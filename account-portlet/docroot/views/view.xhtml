@@ -91,12 +91,11 @@
 		<f:loadBundle basename="Language_pt_BR" var="msg"/>
 
 		<p:tabView id="tab" styleClass="account" style="font-style: normal;  height: 360px; width: 680px" activeIndex="0" cache="false">
-			<p:tab title="#{msg['main.my.account']}"><ui:include src="account.xhtml"/></p:tab>
+			<p:tab title="#{msg['main.my.account']}"><ui:include src="person-details.xhtml"/></p:tab>
 			<p:tab title="#{msg['main.flats']}"><ui:include src="flat.xhtml"/></p:tab>
-			<p:tab title="#{msg['main.suppliers']}" rendered="#{supplierBean.hasPermission()}"><ui:include src="supplier.xhtml"/></p:tab>
-			<p:tab title="#{msg['main.system']}" rendered="#{supplierBean.hasPermission()}"><ui:include src="system.xhtml"/></p:tab>
+			<p:tab title="#{msg['main.suppliers']}"><ui:include src="supplier.xhtml"/></p:tab>
 		</p:tabView>
-		<h:form id="dialog-user-form">
+		<h:form id="person-details-form">
 			<p:dialog header="#{msg['dlg.user.signon']}" widgetVar="userDialog" draggable="false" resizable="false" modal="true" closable="true" visible="false">
 				<ui:include src="person-details.xhtml"/>
 			</p:dialog>
@@ -106,10 +105,10 @@
 					label="Selecionar Foto" update="portrait,:outputMsg" process="@this" style="width:550px" oncomplete="PF('uploadDialog').hide();"/>			
 			</p:dialog>
 		</h:form>
-		<h:form id="dialog-supplier-form">
-			<p:dialog header="#{msg['dlg.supplier.signon']}" widgetVar="supplierDialog" draggable="false" resizable="false" modal="true" closable="true" visible="false">
-				<ui:include src="supplier-details.xhtml"/>
-			</p:dialog>
+		<h:form id="supplier-details-form">
+		<p:dialog id="dialog-supplier" header="#{msg['dlg.supplier.signon']}" widgetVar="supplierDialog" draggable="false" resizable="false" modal="true" closable="true" visible="false">
+			<ui:include src="supplier-details.xhtml"/>
+		</p:dialog>
 		</h:form>
 		<p:confirmDialog global="true" width="600" style="padding: 0px" showEffect="fade" hideEffect="fade" visible="false">
 			<p:commandButton value="#{msg['no']}" type="button" styleClass="ui-confirmdialog-no" icon="ui-icon-close" style="float: left; width: 200px; margin-left: 14%" />

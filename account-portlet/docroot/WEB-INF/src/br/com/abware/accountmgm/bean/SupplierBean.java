@@ -1,5 +1,6 @@
 package br.com.abware.accountmgm.bean;
 
+import java.util.Arrays;
 import java.util.List;
 
 import javax.annotation.PostConstruct;
@@ -9,7 +10,10 @@ import javax.faces.event.AjaxBehaviorEvent;
 
 import org.apache.log4j.Logger;
 
-import br.com.abware.accountmgm.bean.model.SupplierDataModel;
+import br.com.abware.accountmgm.bean.model.ModelDataModel;
+import br.com.abware.jcondo.core.SupplierStatus;
+import br.com.abware.jcondo.core.model.Person;
+import br.com.abware.jcondo.core.model.Supplier;
 
 
 @ManagedBean
@@ -18,15 +22,23 @@ public class SupplierBean {
 
 	private static Logger LOGGER = Logger.getLogger(SupplierBean.class);
 
-	private static final SupplierDataModel model = null;
+	private static final ModelDataModel<Supplier> model = null;
 	
-	private Object supplier;
+	private Person person;
 	
-	private List<Object> suppliers;
+	private Supplier supplier;
+	
+	private List<Supplier> suppliers;
+	
+	private List<SupplierStatus> status;
 
 	@PostConstruct
 	public void init() {
-		
+		try {
+			status = Arrays.asList(SupplierStatus.values());
+		} catch (Exception e) {
+			
+		}
 	}
 	
 	public void onSupplierSave(AjaxBehaviorEvent event) {
@@ -37,24 +49,40 @@ public class SupplierBean {
 		
 	}
 
-	public SupplierDataModel getModel() {
+	public ModelDataModel<Supplier> getModel() {
 		return model;
 	}
 
-	public Object getSupplier() {
+	public Person getPerson() {
+		return person;
+	}
+
+	public void setPerson(Person person) {
+		this.person = person;
+	}
+
+	public Supplier getSupplier() {
 		return supplier;
 	}
 
-	public void setSupplier(Object supplier) {
+	public void setSupplier(Supplier supplier) {
 		this.supplier = supplier;
 	}
 
-	public List<Object> getSuppliers() {
+	public List<Supplier> getSuppliers() {
 		return suppliers;
 	}
 
-	public void setSuppliers(List<Object> suppliers) {
+	public void setSuppliers(List<Supplier> suppliers) {
 		this.suppliers = suppliers;
+	}
+
+	public List<SupplierStatus> getStatus() {
+		return status;
+	}
+
+	public void setStatus(List<SupplierStatus> status) {
+		this.status = status;
 	}
 
 }
