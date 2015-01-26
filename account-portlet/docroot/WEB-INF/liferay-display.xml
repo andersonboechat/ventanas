@@ -4,5 +4,7 @@
 <display>
 	<category name="category.sample">
 		<portlet id="acount-management" />
+		<portlet id="flat-management" />
+		<portlet id="supplier-management" />
 	</category>
 </display>

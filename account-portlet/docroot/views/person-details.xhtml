@@ -11,7 +11,7 @@
 	<h:body>
 		<h:outputText value="#{accountBean.user.fullName} - Proprietario" style="font-family: Arial; font-size: 14px;"/>
 		<p:separator style="border: 1px solid #ccc;"/> <br/>
-		<h:panelGrid columns="3" columnClasses="my-account-col1,my-account-col2,my-account-col3" styleClass="my-account" style="margin: 10px 0px 20px 0px;" cellpadding="10">
+		<h:panelGrid id="person-details" columns="3" columnClasses="my-account-col1,my-account-col2,my-account-col3" styleClass="my-account" style="margin: 10px 0px 20px 0px;" cellpadding="10">
 			<p:column>
 		        <p:graphicImage id="portrait" value="#{accountBean.user.portraitPath}"/><br/>
 				<p:commandLink value="Alterar Foto" onclick="uploadDialog.show()"/>

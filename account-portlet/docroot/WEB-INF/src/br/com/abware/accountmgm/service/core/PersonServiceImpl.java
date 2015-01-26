@@ -1,6 +1,7 @@
 package br.com.abware.accountmgm.service.core;
 
 import java.io.File;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
@@ -13,7 +14,6 @@ import org.apache.commons.collections.ListUtils;
 import br.com.abware.accountmgm.persistence.manager.PersonManagerImpl;
 import br.com.abware.accountmgm.persistence.manager.SecurityManagerImpl;
 import br.com.abware.accountmgm.util.DomainPredicate;
-import br.com.abware.accountmgm.util.DomainTransformer;
 import br.com.abware.accountmgm.util.MembershipPredicate;
 import br.com.abware.jcondo.core.Permission;
 import br.com.abware.jcondo.core.model.Domain;
@@ -39,16 +39,16 @@ public class PersonServiceImpl implements PersonService {
 		try {
 			people = personManager.findPeople(domain);
 
-			while (people.iterator().hasNext()) {
-				try {
-					Person person = people.iterator().next();
-					if (!securityManager.hasPermission(person, Permission.VIEW)) {
-						people.remove(person);
-					}
-				} catch (ApplicationException e) {
-					// Do nothing
-				}
-			}
+//			while (people.iterator().hasNext()) {
+//				try {
+//					Person person = people.iterator().next();
+//					if (!securityManager.hasPermission(person, Permission.VIEW)) {
+//						people.remove(person);
+//					}
+//				} catch (ApplicationException e) {
+//					// Do nothing
+//				}
+//			}
 		} catch (PersistenceException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

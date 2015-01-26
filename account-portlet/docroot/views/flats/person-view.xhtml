@@ -1,0 +1,124 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+
+<f:view
+	xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:c="http://java.sun.com/jsp/jstl/core"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:ui="http://java.sun.com/jsf/facelets">
+	<h:head></h:head>
+	<h:body>
+		<ui:composition template="../person-template.xhtml">
+			<ui:define name="person-menu">
+				<p:panelGrid columns="4" style="width: 100%">
+					<p:column>
+						<p:commandButton value="Cadastrar" partialSubmit="true" process="@this" 
+										 update="person-details" oncomplete="PF('personDialog').show();">
+							<f:setPropertyActionListener target="#{testBean.person}" value=""/>
+						</p:commandButton>
+						<p:commandButton value="Excluir" actionListener="#{testBean.onPeopleDelete}" 
+										partialSubmit="true" process="@this,personTable" update="personTable">
+							<p:confirm header="#{msg['main.delete.confirm']}" message="#{msg['person.delete.message']}" icon="ui-icon-alert"/>
+						</p:commandButton>
+					</p:column>
+					<p:column>
+						<p:outputLabel value="Nome:"/>
+						<p:inputText id="personName" value="#{testBean.personName}">
+							<p:ajax event="change" listener="#{testBean.onPersonSearch}" update="personTable" partialSubmit="true" process="@this"/>
+						</p:inputText>
+					</p:column>
+				    <p:column id="block">
+				    	<p:outputLabel value="Bloco"/>
+						<p:selectOneMenu value="#{testBean.block}">
+							<f:selectItem itemLabel="-- #{msg['flat.lbl.everyone']} --" noSelectionOption="true"/>
+							<f:selectItems var="block" value="#{testBean.blocks}" itemLabel="#{block}" itemValue="#{block}"/>
+							<p:ajax event="change" listener="#{testBean.onBlockSelect}" update="personTable" partialSubmit="true" process="@this"/>
+						</p:selectOneMenu>
+				    </p:column>
+				    <p:column id="number">
+				    	<p:outputLabel value="Apt."/>
+						<p:selectOneMenu value="#{testBean.number}">
+							<f:selectItem itemLabel="-- #{msg['flat.lbl.everyone']} --" noSelectionOption="true"/>
+							<f:selectItems var="number" value="#{testBean.numbers}" itemLabel="#{number}" itemValue="#{number}"/>
+							<p:ajax event="change" listener="#{testBean.onNumberSelect}" update="personTable" partialSubmit="true" process="@this"/>
+						</p:selectOneMenu>
+				    </p:column>
+				</p:panelGrid>
+			</ui:define>
+			<ui:define name="person-list">
+				<p:dataTable id="personTable" var="person" value="#{testBean.model}"  
+				             paginator="true" rows="5" paginatorPosition="bottom" 
+				             paginatorTemplate="{CurrentPageReport} {PreviousPageLink} {PageLinks} {NextPageLink}" 
+				             selection="#{testBean.selectedPeople}" rowKey="#{person.id}" >
+					<p:column selectionMode="multiple" style="width:5%"/>
+					<p:column style="width: 20%">
+						<p:graphicImage value="http://ventanasresidencial.com.br#{person.picture}"/>
+					</p:column>
+					<p:column>
+						<p:panelGrid columns="1">
+		        			<h:outputText value="#{person.fullName}" />
+	        				<p:subTable var="membership" value="#{person.memberships}">
+	        					<p:column>
+	        						<h:outputText value="#{testBean.displayMembership(membership)}" />
+	        					</p:column>
+	        				</p:subTable>
+						</p:panelGrid>
+					</p:column>
+					<p:column style="width: 10%">
+						<p:commandLink update=":person-form:person-details" oncomplete="PF('personDialog').show();" partialSubmit="true" process="@this">
+							<h:graphicImage value="../images/edit.png" />
+							<f:setPropertyActionListener target="#{testBean.person}" value="#{person}"/>
+						</p:commandLink>
+					</p:column>
+					<p:column style="width: 10%">
+						<p:commandLink actionListener="#{testBean.onPersonDelete}" oncomplete="if (!args.validationFailed &amp;&amp; !args.exception) {PF('personTable').update();}" partialSubmit="true" process="@this">
+							<h:graphicImage value="../images/delete.png" />
+							<p:confirm header="#{msg['person.delete.confirm']}" message="#{msg['person.delete.message']}" icon="ui-icon-alert"/>
+							<f:setPropertyActionListener target="#{testBean.person}" value="#{person}"/>
+						</p:commandLink>
+					</p:column>
+				</p:dataTable>
+			</ui:define>
+			<ui:define name="person-details">
+				<h:outputText value="#{testBean.person.fullName} - Proprietario" style="font-family: Arial; font-size: 14px;"/>
+				<p:separator style="border: 1px solid #ccc;"/> <br/>
+				<h:panelGrid id="person-details" columns="3" columnClasses="my-account-col1,my-account-col2,my-account-col3" styleClass="my-account" style="margin: 10px 0px 20px 0px;" cellpadding="10">
+					<p:column>
+				        <p:graphicImage id="portrait" value="http://ventanasresidencial.com.br#{testBean.person.picture}"/><br/>
+						<p:commandLink value="Alterar Foto" onclick="PF('uploadDialog').show();"/>
+					</p:column>
+					<p:column>
+						<h:panelGrid columns="2">
+							<p:outputLabel for="email" value="Email"/>
+							<p:inputText id="email" value="#{testBean.person.emailAddress}"/>
+							<p:outputLabel for="firstName" value="Primeiro nome"/>
+							<p:inputText id="firstName" value="#{testBean.person.firstName}"/>
+							<p:outputLabel for="lastName" value="Último nome"/>
+							<p:inputText id="lastName" value="#{testBean.person.lastName}"/>
+							<p:outputLabel for="male" value="Sexo"/>
+							<p:selectOneMenu id="male" value="#{testBean.person.gender}">
+								<f:selectItem itemLabel="Masculino" itemValue="true" />
+								<f:selectItem itemLabel="Feminino" itemValue="false" />
+							</p:selectOneMenu>
+						</h:panelGrid>
+					</p:column>
+					<p:column>
+						<p:fieldset legend="Troca de Senha" style="margin-top: 0px; margin-bottom: 10px;">
+							<h:panelGrid columns="2">
+								<p:outputLabel for="pwd" value="Senha Atual" styleClass="my-account"/>
+								<p:password id="pwd" style=" width: 70px; margin-bottom: 10px"/>
+								<p:outputLabel for="newpwd" value="Nova Senha" styleClass="my-account"/>
+								<p:password id="newpwd" style=" width: 70px; margin-bottom: 10px"/>
+								<p:outputLabel for="pwdconf" value="Confirma Nova Senha" styleClass="my-account"/>
+								<p:password id="pwdconf" style="width: 70px; margin-bottom: 10px"/>
+							</h:panelGrid>
+						</p:fieldset>
+					</p:column>
+				</h:panelGrid>
+		
+				<p:commandButton value="Salvar" actionListener="#{testBean.onPersonSave}" update=":outputMsg" style="float: right; width: 70px; margin: 0px 0px 10px 5px;"/>			
+			</ui:define>
+		</ui:composition>
+	</h:body>
+</f:view>

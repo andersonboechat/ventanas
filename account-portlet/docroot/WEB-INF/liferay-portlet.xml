@@ -11,32 +11,22 @@
 		<footer-portlet-javascript>/js/locale.js</footer-portlet-javascript>
 		<css-class-wrapper>acount-management-portlet</css-class-wrapper>
 	</portlet>
+	<portlet>
+		<portlet-name>flat-management</portlet-name>
+		<icon>/icon.png</icon>
+		<instanceable>false</instanceable>
+		<ajaxable>false</ajaxable>
+		<header-portlet-css>/css/main.css</header-portlet-css>
+	</portlet>
+	<portlet>
+		<portlet-name>supplier-management</portlet-name>
+		<icon>/icon.png</icon>
+		<instanceable>false</instanceable>
+		<ajaxable>false</ajaxable>
+		<header-portlet-css>/css/main.css</header-portlet-css>
+	</portlet>
 	<role-mapper>
 		<role-name>administrator</role-name>
 		<role-link>Administrator</role-link>
-	</role-mapper>
-	<role-mapper>
-		<role-name>flat-owner</role-name>
-		<role-link>Organization Administrator</role-link>
-	</role-mapper>
-	<role-mapper>
-		<role-name>flat-renter</role-name>
-		<role-link>Organization Administrator</role-link>
-	</role-mapper>
-	<role-mapper>
-		<role-name>flat-resident</role-name>
-		<role-link>Flat Resident</role-link>
-	</role-mapper>
-	<role-mapper>
-		<role-name>flat-dependent</role-name>
-		<role-link>Flat Dependent</role-link>
-	</role-mapper>
-	<role-mapper>
-		<role-name>flat-guest</role-name>
-		<role-link>Flat Guest</role-link>
-	</role-mapper>
-	<role-mapper>
-		<role-name>flat-visitor</role-name>
-		<role-link>Organization User</role-link>
 	</role-mapper>
 </liferay-portlet-app>

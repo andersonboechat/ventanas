@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+
+<f:view
+	xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:c="http://java.sun.com/jsp/jstl/core"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:ui="http://java.sun.com/jsf/facelets">
+	<h:head></h:head>
+	<h:body>
+		<h:form id="vehicle-form">
+			<h:panelGrid columns="4" styleClass="menu-cmds" columnClasses="menu-cmds-col1,menu-cmds-col2,menu-cmds-col3">
+				<p:commandButton value="#{msg['vehicle.btn.add']}" partialSubmit="true" process="@this" 
+								 update="vehicle-details" oncomplete="PF('vehicleDialog').show();">
+					<f:setPropertyActionListener target="#{vehicleBean.vehicle}" value=""/>
+				</p:commandButton>
+				<p:commandButton value="#{msg['vehicle.btn.delete']}" actionListener="#{vehicleBean.onVehicleDelete}" 
+								 partialSubmit="true" process="@this,vehicleTable" update="vehicleTable,:outputMsg">
+					<p:confirm header="#{msg['main.delete.confirm']}" message="#{msg['vehicle.delete.message']}" icon="ui-icon-alert"/>
+				</p:commandButton>
+				<p:column>
+					<p:outputLabel value="Placa:"/>
+					<p:inputText id="license" value="#{vehicleBean.license}">
+						<p:ajax event="keyup" listener="#{vehicleBean.onVehicleSearch}" update="vehicleTable" partialSubmit="true" process="@this"/>
+					</p:inputText>
+				</p:column>
+				<p:column>
+					<p:selectOneMenu value="#{vehicleBean.type}">
+						<f:selectItem itemLabel="-- Tipo --" noSelectionOption="true"/>
+						<f:selectItems var="type" value="#{vehicleBean.types}" itemLabel="#{type.label}" itemValue="#{type.label}"/>
+						<p:ajax event="change" listener="#{vehicleBean.onVehicleSearch}" update="vehicleTable" partialSubmit="true" process="@this"/>
+					</p:selectOneMenu>
+				</p:column>
+				<p:column>
+					<p:selectOneMenu value="#{vehicleBean.flat}">
+						<f:selectItem itemLabel="-- Apartamento --" noSelectionOption="true"/>
+						<f:selectItems var="flat" value="#{vehicleBean.flats}" itemLabel="Apt. #{flat.number} - bloco #{flat.block}" itemValue="#{flat}"/>
+						<p:ajax event="change" listener="#{vehicleBean.onVehicleSearch}" update="vehicleTable" partialSubmit="true" process="@this"/>
+					</p:selectOneMenu>
+				</p:column>
+			</h:panelGrid>
+			<p:dataTable id="vehicleTable" var="vehicle" value="#{vehicleBean.model}"  
+			             paginator="true" rows="5" paginatorPosition="bottom" 
+			             paginatorTemplate="{CurrentPageReport} {PreviousPageLink} {PageLinks} {NextPageLink}" 
+			             selection="#{vehicleBean.selectedVehicles}" rowKey="#{vehicle.id}" >
+			    <p:ajax event="page" partialSubmit="true" process="name"/>
+				<p:column>
+					<p:graphicImage value="#{vehicle.picture}"/>
+				</p:column>
+				<p:column>
+					<p:panelGrid columns="2">
+						<p:outputLabel value="Placa:"/>
+	        			<h:outputText value="#{vehicle.license}"/>
+	        			<p:outputLabel value="Tipo:"/>
+						<p:selectOneMenu value="#{vehicle.type}">
+							<f:selectItems var="type" value="#{vehicleBean.types}" itemLabel="#{type.label}" itemValue="#{type}"/>
+							<p:ajax event="change" listener="#{vehicleBean.onTypeSelect}" update="vehicleTable" partialSubmit="true" process="@this"/>
+						</p:selectOneMenu>
+						<p:outputLabel value="Apartamento:" rendered="#{vehicle.type == 'RESIDENT'}"/>
+	        			<p:outputPanel rendered="#{vehicle.type == 'RESIDENT'}">
+	        				<c:forEach var="flat" items="#{vehicleBean.getVehicleFlats(vehicle)}">
+	        					<h:outputText value="Apt. #{flat.number} - bloco #{flat.block}" />
+	        				</c:forEach>
+	        			</p:outputPanel>
+					</p:panelGrid>
+				</p:column> 
+				<p:column>
+					<p:commandLink value="#{msg['person.lbl.delete']}" actionListener="#{vehicleBean.onVehicleDelete}" oncomplete="if (!args.validationFailed &amp;&amp; !args.exception) {PF('vehicleTable').update();}" partialSubmit="true" process="@this">
+						<p:confirm header="#{msg['person.delete.confirm']}" message="#{msg['person.delete.message']}" icon="ui-icon-alert"/>
+						<f:setPropertyActionListener target="#{vehicleBean.vehicle}" value="#{vehicle}"/>
+					</p:commandLink>
+				</p:column>
+			</p:dataTable>
+			<p:dialog header="Cadastro de Veículo" widgetVar="vehicleDialog" draggable="false" resizable="false" modal="true" closable="true" visible="false">
+				<h:panelGrid id="vehicle-details" columns="3">
+					<p:column>
+				        <p:graphicImage id="portrait" value="#{vehicleBean.vehicle.picture}"/><br/>
+						<p:commandLink value="Alterar Foto" onclick="PF('uploadDialog').show();"/>
+					</p:column>
+					<p:column>
+						<h:panelGrid columns="1">
+					        <p:inputText value="#{vehicleBean.vehicle.license}" required="true"/>
+					        <p:selectOneMenu value="#{vehicleBean.vehicle.type}" required="true">
+					        	<f:selectItem itemLabel="-- Tipo --" noSelectionOption="true"/>
+								<f:selectItems var="type" value="#{vehicleBean.types}" itemLabel="#{type.label}" itemValue="#{type}"/>
+							</p:selectOneMenu>
+							<p:selectOneMenu value="#{vehicleBean.selectedFlat}" rendered="#{vehicleBean.vehicle.type == 'RESIDENT'}">
+								<f:selectItem itemLabel="-- Apartamento --" noSelectionOption="true"/>
+								<f:selectItems var="flat" value="#{vehicleBean.flats}" itemLabel="Apt. #{flat.number} - bloco #{flat.block}" itemValue="#{flat}"/>
+							</p:selectOneMenu>
+						</h:panelGrid>
+					</p:column>
+					<p:column colspan="2">
+						<p:commandButton value="Salvar" actionListener="#{vehicleBean.onVehicleSave}" update=":outputMsg" oncomplete="if (!args.validationFailed &amp;&amp; !args.exception) {PF('vehicleTable').update(); PF('vehicleDialog').hide();}" style="float: right; width: 70px; margin: 0px 0px 10px 5px;"/>
+						<p:commandButton value="Cancelar" style="float: right; width: 70px; margin: 0px 0px 10px 5px;" oncomplete="PF('vehicleDialog').hide();"/>
+					</p:column>
+				</h:panelGrid>
+			</p:dialog>
+			<p:dialog widgetVar="uploadDialog">
+				<p:fileUpload fileUploadListener="#{vehicleBean.onPictureUpload}" 
+					allowTypes="/(\.|\/)(gif|jpe?g|png)$/" mode="advanced" showButtons="false" 
+					label="Selecionar Foto" update="portrait,:outputMsg" process="@this" style="width:550px" oncomplete="PF('uploadDialog').hide();"/>			
+			</p:dialog>
+			<p:confirmDialog global="true" width="600" style="padding: 0px" showEffect="fade" hideEffect="fade" visible="false">
+				<p:commandButton value="#{msg['no']}" type="button" styleClass="ui-confirmdialog-no" icon="ui-icon-close" style="float: left; width: 200px; margin-left: 14%" />
+				<p:commandButton value="#{msg['yes']}" type="button" styleClass="ui-confirmdialog-yes" icon="ui-icon-check" style="float: right; width: 200px; margin-right: 14%"/>
+			</p:confirmDialog>
+		</h:form>
+	</h:body>
+</f:view>

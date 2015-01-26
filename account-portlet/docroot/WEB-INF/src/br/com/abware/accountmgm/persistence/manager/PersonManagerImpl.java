@@ -262,13 +262,13 @@ public class PersonManagerImpl extends AbstractManager<User, Person> {
 
 				List<UserGroupRole> roles =  UserGroupRoleLocalServiceUtil.getUserGroupRoles(user.getUserId(), organization.getGroupId());
 				for (UserGroupRole ugr : roles) {
-					Role role = new Role(ugr.getRoleId(), RoleName.parse(ugr.getRole().getName()), ugr.getRole().getTitle());
+					Role role = new Role(ugr.getRoleId(), RoleName.parse(ugr.getRole().getName()), ugr.getRole().getTitleCurrentValue());
 					memberships.add(new Membership(role, domain));
 				}
 			}
 
 			List<Group> groups = GroupLocalServiceUtil.getUserGroups(user.getUserId());
-			
+
 			for (Group group : groups) {
 				if (group.getSite()) {
 					List<UserGroupRole> roles =  UserGroupRoleLocalServiceUtil.getUserGroupRoles(user.getUserId(), group.getGroupId());
@@ -278,10 +278,13 @@ public class PersonManagerImpl extends AbstractManager<User, Person> {
 					}
 				}
 			}
-			
-			person.setStatus(PersonStatus.parseStatus(user.getStatus()));
+
+			person.setMemberships(memberships);
+			//person.setStatus(PersonStatus.parseStatus(user.getStatus()));
+
 			person.setGender(user.isMale() ? Gender.MALE : Gender.FEMALE);
 			person.setPicture(user.getPortraitURL(helper.getThemeDisplay()));
+			person.setId(user.getUserId());
 
 			return person;
 		} catch (Exception e) {
@@ -308,6 +311,15 @@ public class PersonManagerImpl extends AbstractManager<User, Person> {
 		} catch (Exception e) {
 			throw new PersistenceException("");
 		}
+	}
+
+	public void removeDomain(Person person, Domain domain) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	public void addDomain(Person person, Domain domain) {
+		// TODO Auto-generated method stub
 	}
 
 }

@@ -1,13 +1,13 @@
 package br.com.abware.accountmgm.model;
 
-public enum VehicleAccessType {
+public enum VehicleType {
 
-	INBOUND("access.inbound"),
-	OUTBOUND("access.outbound");
+	RESIDENT("vehicle.type.resident"),
+	VISITOR("vehicle.type.visitor");
 
 	private String label;
 
-	private VehicleAccessType(String label) {
+	private VehicleType(String label) {
 		this.label = label;
 	}
 
@@ -19,4 +19,5 @@ public enum VehicleAccessType {
 	public String toString() {
 		return label;
 	}
+
 }

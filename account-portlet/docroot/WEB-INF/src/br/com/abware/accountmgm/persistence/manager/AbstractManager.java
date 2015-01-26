@@ -3,8 +3,7 @@ package br.com.abware.accountmgm.persistence.manager;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.commons.beanutils.BeanUtils;
-
+import br.com.abware.accountmgm.util.BeanUtils;
 import br.com.abware.jcondo.core.model.BaseModel;
 import br.com.abware.jcondo.exception.PersistenceException;
 

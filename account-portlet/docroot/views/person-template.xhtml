@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+
+<f:view
+	xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:c="http://java.sun.com/jsp/jstl/core"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:ui="http://java.sun.com/jsf/facelets">
+	<h:head></h:head>
+	<h:body>
+		<p:growl id="outputMsg"/>
+		<f:loadBundle basename="Language_pt_BR" var="msg"/>
+		<h:form id="person-form">
+			<ui:insert name="person-menu"></ui:insert>
+			<ui:insert name="person-list"></ui:insert>
+			<p:dialog header="#{msg['dlg.user.signon']}" widgetVar="personDialog" draggable="false" resizable="false" modal="true" closable="true" visible="false">
+				<ui:insert name="person-details"></ui:insert>
+			</p:dialog>
+			<p:dialog widgetVar="uploadDialog">
+				<p:fileUpload fileUploadListener="#{personBean.onPictureUpload}" 
+					allowTypes="/(\.|\/)(gif|jpe?g|png)$/" mode="advanced" showButtons="false" 
+					label="Selecionar Foto" update="portrait,:outputMsg" process="@this" style="width:550px" oncomplete="PF('uploadDialog').hide();"/>			
+			</p:dialog>
+			<p:confirmDialog global="true" width="600" style="padding: 0px" showEffect="fade" hideEffect="fade" visible="false">
+				<p:commandButton value="#{msg['no']}" type="button" styleClass="ui-confirmdialog-no" icon="ui-icon-close" style="float: left; width: 200px; margin-left: 14%" />
+				<p:commandButton value="#{msg['yes']}" type="button" styleClass="ui-confirmdialog-yes" icon="ui-icon-check" style="float: right; width: 200px; margin-right: 14%"/>
+			</p:confirmDialog>
+		</h:form>
+	</h:body>
+</f:view>

@@ -64,7 +64,7 @@ public class PersonBean extends BaseBean {
 	public void onPersonEdit() {
 		
 	}
-	
+
 	public List<Flat> getPersonFlats(Person person) {
 		return null;
 	}

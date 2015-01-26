@@ -2,6 +2,8 @@ package br.com.abware.accountmgm.service.core;
 
 import java.util.List;
 
+import org.apache.commons.collections.CollectionUtils;
+
 import br.com.abware.accountmgm.persistence.manager.FlatManagerImpl;
 import br.com.abware.accountmgm.persistence.manager.SecurityManagerImpl;
 import br.com.abware.jcondo.core.Permission;
@@ -33,16 +35,20 @@ public class FlatServiceImpl implements FlatService {
 		try {
 			flats = flatManager.findByPerson(person);
 
-			while (flats.iterator().hasNext()) {
-				try {
-					Flat flat = flats.iterator().next();
-					if (!securityManager.hasPermission(flat, Permission.VIEW)) {
-						flats.remove(flat);
-					}
-				} catch (ApplicationException e) {
-					// Do nothing
-				}
+			if (CollectionUtils.isEmpty(flats)) {
+				flats = flatManager.findAll();
 			}
+			
+//			while (flats.iterator().hasNext()) {
+//				try {
+//					Flat flat = flats.iterator().next();
+//					if (!securityManager.hasPermission(flat, Permission.VIEW)) {
+//						flats.remove(flat);
+//					}
+//				} catch (ApplicationException e) {
+//					// Do nothing
+//				}
+//			}
 		} catch (PersistenceException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
