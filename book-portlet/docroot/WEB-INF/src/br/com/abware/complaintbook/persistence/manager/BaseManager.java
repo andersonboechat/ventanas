@@ -13,7 +13,7 @@ import br.com.abware.complaintbook.persistence.entity.BaseEntity;
 
 public abstract class BaseManager<Entity extends BaseEntity> {
 
-	protected EntityManagerFactory emf = Persistence.createEntityManagerFactory("book-portlet");
+	protected static EntityManagerFactory emf = Persistence.createEntityManagerFactory("book-portlet");
 	
 	protected EntityManager em;
 

@@ -8,8 +8,6 @@
 		<class>br.com.abware.complaintbook.persistence.entity.Occurrence</class>
 		<properties>
 			<property name="hibernate.dialect" value="org.hibernate.dialect.MySQLDialect"/>  
-			<property name="hibernate.transaction.factory_class" value="org.hibernate.transaction.JDBCTransactionFactory" />  
-			<property name="hibernate.cache.provider_class" value="org.hibernate.cache.HashtableCacheProvider"/> 		
 			<property name="hibernate.query.substitutions" value="true 1,false 0"/>
 			<property name="hibernate.hbm2ddl.auto" value="validate"/>
 		</properties>
