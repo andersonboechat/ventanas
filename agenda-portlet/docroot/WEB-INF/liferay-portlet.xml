@@ -11,6 +11,7 @@
 		<header-portlet-javascript>/js/date-pt-BR.js</header-portlet-javascript>
 		<footer-portlet-javascript>/js/locale.js</footer-portlet-javascript>
 		<css-class-wrapper>agenda-portlet</css-class-wrapper>
+		<add-default-resource>true</add-default-resource>
 	</portlet>
 	<portlet>
 		<portlet-name>agenda-admin</portlet-name>

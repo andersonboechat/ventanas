@@ -59,6 +59,8 @@ public class BookingModel {
 
 	private BookingStatus status;
 	
+	private double price;
+	
 	private String comment;
 	
 	private String receipt;
@@ -307,10 +309,8 @@ public class BookingModel {
 				User user = UserHelper.getLoggedUser();
 				Role admin = RoleLocalServiceUtil.getRole(user.getCompanyId(), RoleConstants.ADMINISTRATOR);
 				Role powerUser = RoleLocalServiceUtil.getRole(user.getCompanyId(), RoleConstants.POWER_USER);
-				Role manager = RoleLocalServiceUtil.getRole(user.getCompanyId(), "Manager");
 
 				hasPermission = RoleLocalServiceUtil.hasUserRole(user.getUserId(), admin.getRoleId()) ||
-									RoleLocalServiceUtil.hasUserRole(user.getUserId(), manager.getRoleId()) ||
 									RoleLocalServiceUtil.hasUserRole(user.getUserId(), powerUser.getRoleId());
 
 				for (long userGroupId : user.getUserGroupIds()) {
@@ -322,7 +322,8 @@ public class BookingModel {
 				}
 			}
 			bm.openManager(owner);
-			Booking b = new Booking();
+			Booking b = bm.findById(new BookingPK(booking.getRoom().getId(), booking.getDate(), 
+												  booking.getStartTime(), booking.getEndTime()));
 			BeanUtils.copyProperties(b, booking);
 			bm.delete(b, UserHelper.getLoggedUserId());
 		} finally {
@@ -385,6 +386,14 @@ public class BookingModel {
 
 	public void setStatus(BookingStatus status) {
 		this.status = status;
+	}
+
+	public double getPrice() {
+		return price;
+	}
+
+	public void setPrice(double price) {
+		this.price = price;
 	}
 
 	public String getComment() {

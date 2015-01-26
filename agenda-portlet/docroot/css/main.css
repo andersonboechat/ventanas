@@ -1,3 +1,11 @@
+@import url(barbe.css);
+
+@import url(oven.css);
+
+.agenda-admin-portlet .portlet-title-text {
+	display: none;
+}
+
 .ui-growl {
 	top: 40% !important;
 	left:40% !important;
@@ -10,7 +18,7 @@
 .agenda .fc-day-number {
 	font-family: Georgia;
 	font-weight: bold;
-	font-size: 34px;
+	font-size: 18px;
 }
 	
 .agenda	label {
@@ -32,7 +40,7 @@
 .agenda .fc-event-inner {
 	border: 0px solid black;
 	width: 80px !important;
-	height: 40px;
+	height: 34px;
 	padding: 0px 0px 0px 42px;
 	font-weight: bold;
 	font-size: 13px;
@@ -42,6 +50,27 @@
 
 .agenda .fc-event-time {
 	display: none;
+}
+
+/* ---------- Room Styles ---------- */
+
+.room .barbe {
+	
+}
+
+.agenda	.cinema {
+}
+
+.agenda	.oven {
+}
+
+.agenda	.gourmet {
+}
+
+.agenda	.party {
+}
+
+.agenda	.sound {
 }
 
 /* ---------- Booking Styles ---------- */
@@ -147,7 +176,7 @@
 }
 
 .left3 {
-	width: 40%; 
+	width: 20%; 
 	text-align: left;
 	padding: 2px 2px 0px 0px;
 	border: 0px solid black;

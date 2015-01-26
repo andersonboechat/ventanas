@@ -35,6 +35,8 @@ public class Room extends BaseEntity {
 
 	private String name;
 
+	private double price;
+	
 	//bi-directional many-to-one association to Booking
 	@OneToMany(mappedBy="room")
 	private List<Booking> bookings;
@@ -88,6 +90,14 @@ public class Room extends BaseEntity {
 
 	public void setName(String name) {
 		this.name = name;
+	}
+
+	public double getPrice() {
+		return price;
+	}
+
+	public void setPrice(double price) {
+		this.price = price;
 	}
 
 	public List<Booking> getBookings() {

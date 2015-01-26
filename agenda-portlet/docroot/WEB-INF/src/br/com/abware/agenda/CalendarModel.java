@@ -37,7 +37,7 @@ public class CalendarModel extends LazyScheduleModel {
 	
 	public DefaultScheduleEvent createEvent(BookingModel booking) throws Exception {
 		DefaultScheduleEvent event; 
-		event = new DefaultScheduleEvent(booking.getFlat().getName(), 
+		event = new DefaultScheduleEvent(booking.getFlat().getName() + " " + booking.getStatus().getLabel(), 
 										 booking.getDate(), 
 										 booking.getDate(), 
 										 ScheduleBean.getBookingStyleClass(booking));

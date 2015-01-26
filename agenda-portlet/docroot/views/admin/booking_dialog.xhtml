@@ -8,11 +8,15 @@
 	xmlns:ui="http://java.sun.com/jsf/facelets">
 	<h:form id="booking-dialog-form-#{tabId}">
 		<p:dialog widgetVar="bookingDialog-#{tabId}" header="#{msg['booking.dialog.header']}" styleClass="agenda" modal="true" resizable="false" showEffect="fade" hideEffect="fade">
-			<p:growl id="growl" severity="warn,error,fatal" sticky="true"/>
 			<h:panelGrid id="bookingDetails-#{tabId}" columns="1">
 				<h:panelGrid columns="3" style="width: 900px; overflow: hidden; margin: 5px 0px 5px 0px; " styleClass="agenda" columnClasses="colTitle,colDate,colHour">				
+					<h:panelGrid columns="3">
 					<h:outputText value="#{msg['room']}: #{scheduleBean.room.name} " style="font-size: 14px; margin-top: 15px;"/>
-
+					<h:outputLabel value="#{msg['price']}:" style="border: 0px solid red; padding-left: 0px; margin-left: 15px; font-size: 14px; margin-top: 15px;"/>
+					<h:outputText value="#{scheduleBean.room.price}" style="font-size: 14px; margin-top: 15px;">
+						<f:convertNumber type="currency"/> 
+					</h:outputText>					
+					</h:panelGrid>
 					<h:outputText value="#{scheduleBean.bookingDate}">
 						<f:convertDateTime pattern="'#{msg['day']}:' dd/MM/yyyy" />
 					</h:outputText>
@@ -62,10 +66,10 @@
 				<p:selectBooleanCheckbox id="deal" value="#{scheduleBean.deal}" itemLabel="#{msg['agreement.user.deal']}" validator="#{scheduleBean.validateCheckbox}" validatorMessage="#{msg['agreement.deal.unchecked']}"/>
 
 				<h:panelGrid columns="2" style="float: right; height: 30px; overflow: hidden; margin: 20px 0px 10px 0px;">
-					<p:commandButton id="bookingConfirmBtn" value="#{msg.book}" actionListener="#{scheduleBean.onBookingRequest(tabId)}" rendered="#{not(scheduleBean.isCancelEnable())}" oncomplete="if (!args.validationFailed &amp;&amp; !args.exception) {if(PF('calendar-#{tabId}').update) {PF('calendar-#{tabId}').update()} PF('bookingDialog-#{tabId}').hide();}" style="margin: 0px 5px; width: 85px" update="growl">
+					<p:commandButton id="bookingConfirmBtn" value="#{msg.book}" actionListener="#{scheduleBean.onBookingRequest(tabId)}" rendered="#{not(scheduleBean.isCancelEnable())}" oncomplete="if (!args.validationFailed &amp;&amp; !args.exception) {if(PF('calendar-#{tabId}').update) {PF('calendar-#{tabId}').update()} PF('bookingDialog-#{tabId}').hide();}" style="margin: 0px 5px; width: 85px" update=":globalMsgs">
 						<p:confirm header="#{msg['confirm.dialog.header']}" message="#{msg['register.deadline']}" icon="ui-icon-alert"/>
 					</p:commandButton>
-					<p:commandButton id="bookingBtn" value="#{msg.book}" actionListener="#{scheduleBean.onBookingRequest(tabId)}" rendered="#{scheduleBean.isCancelEnable()}" oncomplete="if (!args.validationFailed &amp;&amp; !args.exception) {if(PF('calendar-#{tabId}').update) {PF('calendar-#{tabId}').update()} PF('bookingDialog-#{tabId}').hide();}" style="margin: 0px 5px; width: 85px" update="growl"/>
+					<p:commandButton id="bookingBtn" value="#{msg.book}" actionListener="#{scheduleBean.onBookingRequest(tabId)}" rendered="#{scheduleBean.isCancelEnable()}" oncomplete="if (!args.validationFailed &amp;&amp; !args.exception) {if(PF('calendar-#{tabId}').update) {PF('calendar-#{tabId}').update()} PF('bookingDialog-#{tabId}').hide();}" style="margin: 0px 5px; width: 85px" update=":globalMsgs"/>
 					<p:commandButton id="cancelBookingBtn" value="#{msg.cancel}" type="button" onclick="PF('bookingDialog-#{tabId}').hide();" global="false" style="margin: 0px 0px 0px 5px; width: 85px"/>
 				</h:panelGrid>
 			</h:panelGrid>

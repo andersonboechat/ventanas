@@ -29,6 +29,8 @@ public class Booking extends BaseEntity {
 
 	@Enumerated(EnumType.ORDINAL)
 	private BookingStatus status;
+	
+	private double price;
 
 	@ManyToOne
 	@JoinColumn(name="roomId", insertable=false, updatable=false)
@@ -56,6 +58,14 @@ public class Booking extends BaseEntity {
 
 	public void setStatus(BookingStatus status) {
 		this.status = status;
+	}
+
+	public double getPrice() {
+		return price;
+	}
+
+	public void setPrice(double price) {
+		this.price = price;
 	}
 
 	public Room getRoom() {

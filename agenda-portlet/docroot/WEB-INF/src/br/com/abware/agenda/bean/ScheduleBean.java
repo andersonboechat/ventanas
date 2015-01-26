@@ -106,27 +106,24 @@ public class ScheduleBean extends BaseBean {
 				bm.setFlatId(flat.getId());
 				bm.setUserId(resident.getUserId());
 				bm.setStatus(BookingStatus.OPENED);
+				bm.setPrice(room.getPrice());
 
 				bm.doBooking();
 
 				models.get(modelIndex).addEvent(models.get(modelIndex).createEvent(bm));
 
-				setMessages(FacesMessage.SEVERITY_INFO, getClientId(":tab:tabs:booking-dialog-form-" + modelIndex + ":bookingBtn"), 
-							"register.success");
+				setMessages(FacesMessage.SEVERITY_INFO, getClientId(":globalMsgs"), "register.success");
 
 				if (isCancelEnable()) {
 					Date deadline = DateUtils.addDays(bookingDate, -BookingModel.BKG_CANCEL_DEADLINE);
-					setMessages(FacesMessage.SEVERITY_INFO, getClientId(":tab:tabs:booking-dialog-form-" + modelIndex + ":bookingBtn"), 
-								"register.cancel.notify", DateFormatUtils.format(deadline, "dd/MM/yyyy"));
+					setMessages(FacesMessage.SEVERITY_INFO, getClientId(":globalMsgs"), "register.cancel.notify", DateFormatUtils.format(deadline, "dd/MM/yyyy"));
 				}
 
 				bookingDate = null;
 				deal = false;
 			} else {
-				setMessages(FacesMessage.SEVERITY_WARN, getClientId(":tab:tabs:booking-dialog-form-" + modelIndex + ":bookingBtn"), "agreement.deal.unchecked");
+				setMessages(FacesMessage.SEVERITY_WARN, getClientId(":globalMsgs"), "agreement.deal.unchecked");
 			}
-
-			setMessages(FacesMessage.SEVERITY_INFO, getClientId("agenda-status"), "request.search");
 		} catch (BusinessException e) {
 			LOGGER.warn(e.getMessage(), e);
 			setMessages(FacesMessage.SEVERITY_WARN, null, e.getMessage(), e.getArgs());
@@ -143,7 +140,7 @@ public class ScheduleBean extends BaseBean {
 		try { 
 			if (booking != null) {
 				booking.updateStatus(booking, BookingStatus.CANCELLED);
-				setMessages(FacesMessage.SEVERITY_INFO, getClientId(":tab:tabs:event-dialog-form-" + modelIndex + ":cancelBkgBtn"), "register.cancel.success");
+				setMessages(FacesMessage.SEVERITY_INFO, getClientId(":tabs:event-dialog-form-" + modelIndex + ":cancelBkgBtn"), "register.cancel.success");
 			}
 		} catch (Exception e) {
 			LOGGER.error(e.getMessage(), e);
@@ -151,9 +148,10 @@ public class ScheduleBean extends BaseBean {
 		}
 	}
 
-	public void onBookingDelete() {
+	public void onBookingDelete(int modelIndex) {
 		try {
 			booking.delete(booking);
+			setMessages(FacesMessage.SEVERITY_INFO, null, "register.delete.success");
 		} catch (BusinessException e) {
 			LOGGER.warn(e.getMessage(), e);
 			setMessages(FacesMessage.SEVERITY_WARN, null, e.getMessage(), e.getArgs());
@@ -176,7 +174,7 @@ public class ScheduleBean extends BaseBean {
 		bookingDate = (Date) e.getObject();
 
 		if (bookingDate.before(today)) {
-			setMessages(FacesMessage.SEVERITY_WARN, getClientId("growl2"), "register.past.date", 
+			setMessages(FacesMessage.SEVERITY_WARN, getClientId("globalMsgs"), "register.past.date", 
 						DateFormatUtils.format(bookingDate, "dd/MM/yyyy"), DateFormatUtils.format(today, "dd/MM/yyyy"));
 			RequestContext.getCurrentInstance().addCallbackParam("exception", true);
 		}
