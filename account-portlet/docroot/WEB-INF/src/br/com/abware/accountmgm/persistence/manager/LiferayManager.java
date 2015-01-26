@@ -9,7 +9,7 @@ import br.com.abware.jcondo.exception.PersistenceException;
 
 import com.liferay.portal.model.PersistedModel;
 
-public abstract class AbstractManager<Entity extends PersistedModel, Model extends BaseModel> {
+public abstract class LiferayManager<Entity extends PersistedModel, Model extends BaseModel> {
 
 	protected static final long COMPANY = 10153;
 	

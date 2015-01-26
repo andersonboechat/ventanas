@@ -8,10 +8,12 @@ import java.util.Map;
 
 import javax.faces.model.ListDataModel;
 
+import org.apache.commons.beanutils.BeanUtils;
 import org.primefaces.model.SelectableDataModel;
 
 import br.com.abware.accountmgm.model.Vehicle;
 import br.com.abware.accountmgm.service.core.VehicleServiceImpl;
+import br.com.abware.jcondo.core.model.BaseModel;
 import br.com.abware.jcondo.core.model.Flat;
 
 public class VehicleDataModel extends ListDataModel<Vehicle> implements SelectableDataModel<Vehicle>  {
@@ -48,30 +50,12 @@ public class VehicleDataModel extends ListDataModel<Vehicle> implements Selectab
 
     	for (Flat flat : model.getFlats()) {
 			if (filters != null) {
-	    		for (Iterator<String> it = filters.keySet().iterator(); it.hasNext();) {
-	    			String filterProperty = it.next();
-	    			Object filterValue = filters.get(filterProperty);
-	    			String fieldValue = null;
-
-	    			try {
-	    				fieldValue = String.valueOf(flat.getClass().getField(filterProperty).get(flat));
-	    			} catch (Exception e) {
-	    				// It is not a flat property
+	    		if (doFilter(filters, flat)) {
+	    			for (Vehicle vehicle : vehicleService.getVehicles(flat)) {
+	    				if (doFilter(filters, vehicle)) {
+	    					vehicles.add(vehicle);
+	    				}
 	    			}
-
-		    		if (filterValue == null || fieldValue == null || fieldValue.equals(filterValue)) {
-		    			for (Vehicle vehicle : vehicleService.getVehicles(flat)) {
-			    			try {
-			    				fieldValue = String.valueOf(vehicle.getClass().getField(filterProperty).get(vehicle));
-			    			} catch (Exception e) {
-			    				// It is not a vehicle property
-			    			}
-
-				    		if (filterValue == null || fieldValue == null || fieldValue.matches(".*" + filterValue + ".*")) {
-		    					vehicles.add(vehicle);
-		    				}
-		    			}
-		    		}
 	    		}
 			} else {
 				vehicles.addAll(vehicleService.getVehicles(flat));
@@ -79,6 +63,30 @@ public class VehicleDataModel extends ListDataModel<Vehicle> implements Selectab
     	}
 
 		model.setWrappedData(vehicles);
+	}
+	
+	private boolean doFilter(Map<String, Object> filters, BaseModel model) {
+		boolean match = true;
+
+		for (Iterator<String> it = filters.keySet().iterator(); it.hasNext();) {
+			String filterProperty = it.next();
+			Object filterValue = filters.get(filterProperty);
+			String fieldValue = null;
+
+			try {
+				fieldValue = BeanUtils.getProperty(model, filterProperty);
+    			if (filterValue == null  || fieldValue.toLowerCase().matches(".*" + filterValue.toString().toLowerCase() + ".*")) {
+    				match = true;
+    			} else {
+    				match = false;
+                    break;
+    			}
+			} catch (Exception e) {
+				match = true;
+			}
+		}
+
+		return match;
 	}
 
 	public List<Flat> getFlats() {

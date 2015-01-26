@@ -42,7 +42,7 @@ import com.liferay.portlet.expando.model.ExpandoTableConstants;
 import com.liferay.portlet.expando.model.ExpandoValue;
 import com.liferay.portlet.expando.service.ExpandoValueLocalServiceUtil;
 
-public class PersonManagerImpl extends AbstractManager<User, Person> {
+public class PersonManagerImpl extends LiferayManager<User, Person> {
 	
 	private static final String PERSON_TYPE = "TYPE";
 	

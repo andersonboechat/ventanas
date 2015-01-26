@@ -3,6 +3,8 @@ package br.com.abware.accountmgm.bean;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Set;
+import java.util.TreeSet;
 
 import javax.annotation.PostConstruct;
 import javax.faces.bean.ManagedBean;
@@ -41,11 +43,27 @@ public class VehicleBean extends BaseBean {
 
 	private Vehicle[] selectedVehicles;
 
+	private Set<Long> blocks;
+
+	private Long block;
+
+	private Set<Long> numbers;
+
+	private Long number;
+
 	@PostConstruct
 	public void init() {
 		try {
 			flats = flatService.getFlats(personService.getPerson());
 			model = new VehicleDataModel(vehicleService, flats);
+
+			blocks = new TreeSet<Long>();
+			numbers = new TreeSet<Long>();
+			for (Flat flat : flats) {
+				blocks.add(flat.getBlock());
+				numbers.add(flat.getNumber());
+			}
+
 			filters = new HashMap<String, Object>();
 			types = Arrays.asList(VehicleType.values());
 		} catch (Exception e) {
@@ -84,6 +102,10 @@ public class VehicleBean extends BaseBean {
 		//vehicleService.removeFromDomain(vehicle, flat);
 	}
 
+	public void onPictureUpload() {
+		
+	}
+	
 	public List<Flat> getVehicleFlats(Vehicle vehicle) {
 		return null;
 	}
@@ -154,6 +176,38 @@ public class VehicleBean extends BaseBean {
 
 	public void setSelectedVehicles(Vehicle[] selectedVehicles) {
 		this.selectedVehicles = selectedVehicles;
+	}
+
+	public Set<Long> getBlocks() {
+		return blocks;
+	}
+
+	public void setBlocks(Set<Long> blocks) {
+		this.blocks = blocks;
+	}
+
+	public Long getBlock() {
+		return block;
+	}
+
+	public void setBlock(Long block) {
+		this.block = block;
+	}
+
+	public Set<Long> getNumbers() {
+		return numbers;
+	}
+
+	public void setNumbers(Set<Long> numbers) {
+		this.numbers = numbers;
+	}
+
+	public Long getNumber() {
+		return number;
+	}
+
+	public void setNumber(Long number) {
+		this.number = number;
 	}
 
 	

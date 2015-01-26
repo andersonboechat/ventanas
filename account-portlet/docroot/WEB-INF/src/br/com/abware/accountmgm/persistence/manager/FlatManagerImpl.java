@@ -19,7 +19,7 @@ import com.liferay.portlet.expando.model.ExpandoValue;
 import com.liferay.portlet.expando.service.ExpandoColumnLocalServiceUtil;
 import com.liferay.portlet.expando.service.ExpandoValueLocalServiceUtil;
 
-public class FlatManagerImpl extends AbstractManager<Organization, Flat> {
+public class FlatManagerImpl extends LiferayManager<Organization, Flat> {
 	
 	private static final String BLOCK = "BLOCK";
 

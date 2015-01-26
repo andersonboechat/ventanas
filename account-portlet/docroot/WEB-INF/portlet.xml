@@ -64,4 +64,25 @@
 			<role-name>administrator</role-name>
 		</security-role-ref>
 	</portlet>
+	<portlet>
+		<portlet-name>vehicle-management</portlet-name>
+		<display-name>Vehicle Management</display-name>
+		<portlet-class>javax.portlet.faces.GenericFacesPortlet</portlet-class>
+		<init-param>
+			<name>javax.portlet.faces.defaultViewId.view</name>
+			<value>/views/vehicles/vehicle-view.xhtml</value>
+		</init-param>
+		<expiration-cache>0</expiration-cache>
+		<supports>
+			<mime-type>text/html</mime-type>
+		</supports>
+		<portlet-info>
+			<title>Vehicle Management</title>
+			<short-title>Vehicle Management</short-title>
+			<keywords>Vehicle Management</keywords>
+		</portlet-info>
+		<security-role-ref>
+			<role-name>administrator</role-name>
+		</security-role-ref>
+	</portlet>
 </portlet-app>
