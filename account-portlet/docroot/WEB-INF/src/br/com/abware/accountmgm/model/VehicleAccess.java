@@ -8,6 +8,6 @@ public class VehicleAccess {
 	
 	private Date date;
 	
-	private VehicleAccessType type;
+	private AccessType type;
 
 }

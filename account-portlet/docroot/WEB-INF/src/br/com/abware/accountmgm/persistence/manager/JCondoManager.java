@@ -68,7 +68,7 @@ public abstract class JCondoManager<Entity extends BaseEntity, Model extends Bas
 		}
 	}
 
-	public Entity save(Model model, long personId) throws Exception {
+	public Model save(Model model, long personId) throws Exception {
 		Date date = new Date();
 		Entity entity = getEntity(model);
 		entity.setUpdateDate(date);
@@ -85,7 +85,7 @@ public abstract class JCondoManager<Entity extends BaseEntity, Model extends Bas
 		em.getTransaction().commit();
 		em.refresh(entity);
 
-		return entity;
+		return getModel(entity);
 	}
 	
 	public void delete(Model model, long personId) throws Exception {
@@ -104,10 +104,10 @@ public abstract class JCondoManager<Entity extends BaseEntity, Model extends Bas
 	}
 
 	@SuppressWarnings("unchecked")
-	public List<Entity> findAll() {
+	public List<Model> findAll() throws Exception {
 		String query = "FROM " + getEntityClass().getSimpleName();
 		Query q = em.createQuery(query);
-		return q.getResultList();
+		return getModels(q.getResultList());
 	}	
 
 }

@@ -1,13 +1,13 @@
 package br.com.abware.accountmgm.model;
 
-public enum VehicleAccessType {
+public enum AccessType {
 
 	INBOUND("access.inbound"),
 	OUTBOUND("access.outbound");
 
 	private String label;
 
-	private VehicleAccessType(String label) {
+	private AccessType(String label) {
 		this.label = label;
 	}
 

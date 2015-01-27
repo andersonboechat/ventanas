@@ -1,20 +1,19 @@
 package br.com.abware.accountmgm.model;
 
-import java.util.List;
-
 import br.com.abware.jcondo.core.model.BaseModel;
+import br.com.abware.jcondo.core.model.Flat;
 
 public class Vehicle implements BaseModel {
 
 	private long id;
 
+	private String name;
+
 	private String picture;
 
 	private String license;
 
-	private VehicleType type;
-
-	private List<Flat> flats;
+	private Flat flat;
 
 	@Override
 	public long getId() {
@@ -23,6 +22,14 @@ public class Vehicle implements BaseModel {
 
 	public void setId(long id) {
 		this.id = id;
+	}
+
+	public String getName() {
+		return name;
+	}
+
+	public void setName(String name) {
+		this.name = name;
 	}
 
 	public String getPicture() {
@@ -38,23 +45,15 @@ public class Vehicle implements BaseModel {
 	}
 
 	public void setLicense(String license) {
-		this.license = license;
+		this.license = license.toUpperCase();
 	}
 
-	public VehicleType getType() {
-		return type;
+	public Flat getFlat() {
+		return flat;
 	}
 
-	public void setType(VehicleType type) {
-		this.type = type;
-	}
-
-	public List<Flat> getFlats() {
-		return flats;
-	}
-
-	public void setFlats(List<Flat> flats) {
-		this.flats = flats;
+	public void setFlat(Flat flat) {
+		this.flat = flat;
 	}
 
 }

@@ -12,13 +12,13 @@
 		<p:growl id="outputMsg"/>
 		<f:loadBundle basename="Language_pt_BR" var="msg"/>	
 		<h:form id="vehicle-form">
-			<p:panelGrid columns="4" styleClass="menu-cmds" columnClasses="menu-cmds-col1,menu-cmds-col2,menu-cmds-col3" style="width: 100%">
+			<p:panelGrid columns="3" styleClass="menu-cmds" columnClasses="menu-cmds-col1,menu-cmds-col2,menu-cmds-col3" style="width: 100%">
 				<p:column>
 						<p:commandButton value="Cadastrar" partialSubmit="true" process="@this" 
 										 update="vehicle-details" oncomplete="PF('vehicleDialog').show();">
 							<f:setPropertyActionListener target="#{vehicleBean.vehicle}" value=""/>
 						</p:commandButton>
-						<p:commandButton value="Excluir" actionListener="#{vehicleBean.onVehicleDelete}" 
+						<p:commandButton value="Excluir" actionListener="#{vehicleBean.onVehiclesDelete}" 
 										 partialSubmit="true" process="@this,vehicleTable" update="vehicleTable,:outputMsg">
 							<p:confirm header="#{msg['main.delete.confirm']}" message="#{msg['vehicle.delete.message']}" icon="ui-icon-alert"/>
 						</p:commandButton>
@@ -26,23 +26,26 @@
 				<p:column>
 					<p:outputLabel value="Placa:"/>
 					<p:inputText id="license" value="#{vehicleBean.license}">
-						<p:ajax event="keyup" listener="#{vehicleBean.onVehicleSearch}" update="vehicleTable" partialSubmit="true" process="@this"/>
+						<p:ajax event="change" listener="#{vehicleBean.onVehicleSearch}" update="vehicleTable" partialSubmit="true" process="@this"/>
 					</p:inputText>
 				</p:column>
-				<p:column>
-					<p:selectOneMenu value="#{vehicleBean.type}">
-						<f:selectItem itemLabel="-- Tipo --" noSelectionOption="true"/>
-						<f:selectItems var="type" value="#{vehicleBean.types}" itemLabel="#{type.label}" itemValue="#{type.label}"/>
-						<p:ajax event="change" listener="#{vehicleBean.onVehicleSearch}" update="vehicleTable" partialSubmit="true" process="@this"/>
+			    <p:column rendered="#{vehicleBean.flats.size() > 1}">
+			    	<p:outputLabel value="Apt."/>
+					<p:selectOneMenu value="#{vehicleBean.number}">
+						<f:selectItem itemLabel="-- #{msg['flat.lbl.everyone']} --" noSelectionOption="true"/>
+						<f:selectItems var="number" value="#{vehicleBean.numbers}" itemLabel="#{number}" itemValue="#{number}"/>
+						<p:ajax event="change" listener="#{vehicleBean.onNumberSelect}" update="vehicleTable" partialSubmit="true" process="@this"/>
 					</p:selectOneMenu>
-				</p:column>
-				<p:column>
-					<p:selectOneMenu value="#{vehicleBean.flat}">
-						<f:selectItem itemLabel="-- Apartamento --" noSelectionOption="true"/>
-						<f:selectItems var="flat" value="#{vehicleBean.flats}" itemLabel="Apt. #{flat.number} - bloco #{flat.block}" itemValue="#{flat}"/>
-						<p:ajax event="change" listener="#{vehicleBean.onVehicleSearch}" update="vehicleTable" partialSubmit="true" process="@this"/>
+			    	<p:outputLabel value=" - Bloco"/>
+					<p:selectOneMenu value="#{vehicleBean.block}">
+						<f:selectItem itemLabel="-- #{msg['flat.lbl.everyone']} --" noSelectionOption="true"/>
+						<f:selectItems var="block" value="#{vehicleBean.blocks}" itemLabel="#{block}" itemValue="#{block}"/>
+						<p:ajax event="change" listener="#{vehicleBean.onBlockSelect}" update="vehicleTable" partialSubmit="true" process="@this"/>
 					</p:selectOneMenu>
-				</p:column>
+			    </p:column>
+			    <p:column rendered="#{vehicleBean.flats.size() == 1}">
+			    	<h:outputText value="Apt. #{vehicleBean.flats.iterator.next.number} - Bloco #{vehicleBean.flats.iterator.next.block}"/>
+			    </p:column>
 			</p:panelGrid>
 			<p:dataTable id="vehicleTable" var="vehicle" value="#{vehicleBean.model}"  
 			             paginator="true" rows="5" paginatorPosition="bottom" 
@@ -56,17 +59,8 @@
 					<p:panelGrid columns="2">
 						<p:outputLabel value="Placa:"/>
 	        			<h:outputText value="#{vehicle.license}"/>
-	        			<p:outputLabel value="Tipo:"/>
-						<p:selectOneMenu value="#{vehicle.type}">
-							<f:selectItems var="type" value="#{vehicleBean.types}" itemLabel="#{type.label}" itemValue="#{type}"/>
-							<p:ajax event="change" listener="#{vehicleBean.onTypeSelect}" update="vehicleTable" partialSubmit="true" process="@this"/>
-						</p:selectOneMenu>
-						<p:outputLabel value="Apartamento:" rendered="#{vehicle.type == 'RESIDENT'}"/>
-	        			<p:outputPanel rendered="#{vehicle.type == 'RESIDENT'}">
-	        				<c:forEach var="flat" items="#{vehicle.flats}">
-	        					<h:outputText value="Apt. #{flat.number} - bloco #{flat.block}" />
-	        				</c:forEach>
-	        			</p:outputPanel>
+       					<h:outputText value="Apt. #{vehicle.flat.number} - bloco #{vehicle.flat.block}" rendered="#{vehicle.flat != null}"/>
+       					<h:outputText value="Visitante" rendered="#{vehicle.flat == null}"/>
 					</p:panelGrid>
 				</p:column> 
 				<p:column style="width: 10%">
@@ -87,26 +81,23 @@
 						<h:panelGrid columns="2">
 					    	<p:outputLabel value="Placa:"/>
 					        <p:inputText value="#{vehicleBean.vehicle.license}" required="true"/>
-					        <p:outputLabel value="Tipo:"/>
-					        <p:selectOneMenu value="#{vehicleBean.vehicle.type}" required="true">
-					        	<f:selectItem itemLabel="-- Tipo --" noSelectionOption="true"/>
-								<f:selectItems var="type" value="#{vehicleBean.types}" itemLabel="#{type.label}" itemValue="#{type}"/>
-							</p:selectOneMenu>
 							<c:choose>
-								<c:when test="#{vehicleBean.flats.size() > 0}">
+								<c:when test="#{vehicleBean.flats.size() > 1}">
 							    	<p:outputLabel value="Apt."/>
-									<p:selectOneMenu value="#{vehicleBean.flat.number}" required="#{vehicleBean.vehicle.type == 'RESIDENT'}">
+									<p:selectOneMenu value="#{vehicleBean.vehicle.flat.number}" required="true">
 										<f:selectItem itemLabel="-- #{msg['flat.lbl.everyone']} --" noSelectionOption="true"/>
 										<f:selectItems var="number" value="#{vehicleBean.numbers}" itemLabel="#{number}" itemValue="#{number}"/>
 									</p:selectOneMenu>
 							    	<p:outputLabel value="Bloco"/>
-									<p:selectOneMenu value="#{vehicleBean.flat.block}" required="#{vehicleBean.vehicle.type == 'RESIDENT'}">
+									<p:selectOneMenu value="#{vehicleBean.vehicle.flat.block}" required="true">
 										<f:selectItem itemLabel="-- #{msg['flat.lbl.everyone']} --" noSelectionOption="true"/>
 										<f:selectItems var="block" value="#{vehicleBean.blocks}" itemLabel="#{block}" itemValue="#{block}"/>
 									</p:selectOneMenu>
 								</c:when>
 								<c:otherwise>
-									<h:outputText value="Apt. #{vehicleBean.flat.number} - Bloco #{vehicleBean.flat.block}"/>
+									<h:outputText value="Apt. #{vehicleBean.vehicle.flat.number} - Bloco #{vehicleBean.vehicle.flat.block}"/>
+									<h:inputHidden binding="#{vehicleBean.vehicle.flat.number}" value="#{vehicleBean.flats.iterator.next.number}"/>
+									<h:inputHidden binding="#{vehicleBean.vehicle.flat.block}" value="#{vehicleBean.flats.iterator.next.block}"/>
 								</c:otherwise>
 							</c:choose>
 						</h:panelGrid>
