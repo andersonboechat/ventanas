@@ -6,6 +6,7 @@
 		<class>br.com.abware.accountmgm.persistence.entity.BaseEntity</class>
 		<class>br.com.abware.accountmgm.persistence.entity.VehicleEntity</class>
 		<class>br.com.abware.accountmgm.persistence.entity.FlatEntity</class>
+		<class>br.com.abware.accountmgm.persistence.entity.PersonEntity</class>
 		<class>br.com.abware.accountmgm.persistence.entity.AccessLogEntity</class>
 		<class>br.com.abware.accountmgm.persistence.entity.VehicleAccessLogEntity</class>
 		<class>br.com.abware.accountmgm.persistence.entity.ParkingEntity</class>

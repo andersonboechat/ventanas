@@ -8,7 +8,9 @@ import javax.persistence.Query;
 import org.apache.commons.lang.StringUtils;
 
 import com.liferay.portal.model.Group;
+import com.liferay.portal.model.Resource;
 import com.liferay.portal.service.GroupLocalServiceUtil;
+import com.liferay.portal.service.ResourceLocalServiceUtil;
 import com.liferay.portal.service.ServiceContext;
 
 import br.com.abware.accountmgm.persistence.entity.FlatEntity;
@@ -28,21 +30,26 @@ public class NewFlatManagerImpl extends JCondoManager<FlatEntity, Flat> {
 	}
 
 	public Flat save(Flat flat) throws Exception {
+		Flat f = super.save(flat);
+		Resource resource = ResourceLocalServiceUtil.addResource(helper.getCompanyId(), Flat.class.getName(), 
+																 0, String.valueOf(f.getId()));
+
 		String number = StringUtils.leftPad(String.valueOf(flat.getNumber()), 4, "0");
-		Group group = GroupLocalServiceUtil.addGroup(helper.getUserId(), Group.class.getName(), 0L, 
-													 flat.getBlock() + "/" + number, StringUtils.EMPTY, 3, 
-													 "/" + flat.getBlock() + "-" + number, false, true, 
-													 new ServiceContext());
-		flat.setId(group.getGroupId());
-		super.save(flat);
+		GroupLocalServiceUtil.addGroup(helper.getUserId(), "com.liferay.portal.model.Resource", 
+									   resource.getResourceId(), flat.getBlock() + "/" + number, 
+									   StringUtils.EMPTY, 3, "/" + flat.getBlock() + "-" + number, 
+									   false, true, new ServiceContext());
 		return flat;
 	}
-	
+
 	public void delete(Flat flat) throws Exception {
 		super.delete(flat);
-		GroupLocalServiceUtil.deleteGroup(flat.getId());
+		ResourceLocalServiceUtil.deleteResource(helper.getCompanyId(), Flat.class.getName(), 0, String.valueOf(flat.getId()));
+		String number = StringUtils.leftPad(String.valueOf(flat.getNumber()), 4, "0");
+		Group group = GroupLocalServiceUtil.getGroup(helper.getCompanyId(), flat.getBlock() + "/" + number);
+		GroupLocalServiceUtil.deleteGroup(group);
 	}
-	
+
 	public List<Flat> findByPerson(Person person) throws Exception {
 		List<Flat> flats = new ArrayList<Flat>();
 		String queryString = "FROM FlatEntity WHERE id = :id";
@@ -61,7 +68,7 @@ public class NewFlatManagerImpl extends JCondoManager<FlatEntity, Flat> {
 		} finally {
 			closeManager("FlatManager.findByPerson");
 		}
-		
+
 		return flats;
 	}
 
