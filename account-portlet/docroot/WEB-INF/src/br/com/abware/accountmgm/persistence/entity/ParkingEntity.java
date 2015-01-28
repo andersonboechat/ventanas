@@ -1,6 +1,14 @@
 package br.com.abware.accountmgm.persistence.entity;
 
-import javax.persistence.*;
+import javax.persistence.DiscriminatorColumn;
+import javax.persistence.DiscriminatorType;
+import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
+import javax.persistence.Id;
+import javax.persistence.Inheritance;
+import javax.persistence.InheritanceType;
+import javax.persistence.Table;
 
 import br.com.abware.accountmgm.model.ParkingType;
 
@@ -11,6 +19,8 @@ import br.com.abware.accountmgm.model.ParkingType;
  */
 @Entity
 @Table(name="jco_parking")
+@Inheritance(strategy=InheritanceType.JOINED)
+@DiscriminatorColumn(name="ID", discriminatorType=DiscriminatorType.INTEGER)
 public class ParkingEntity extends BaseEntity {
 
 	private static final long serialVersionUID = 1L;

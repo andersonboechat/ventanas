@@ -7,22 +7,25 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import org.primefaces.model.LazyDataModel;
-import org.primefaces.model.SortOrder;
+import javax.faces.model.ListDataModel;
+
+import org.apache.commons.beanutils.BeanUtils;
+import org.apache.commons.collections.MapUtils;
+import org.primefaces.model.SelectableDataModel;
 
 import br.com.abware.jcondo.core.model.BaseModel;
 
-public class ModelDataModel<Model extends BaseModel> extends LazyDataModel<Model> {
+public class ModelDataModel<Model extends BaseModel> extends ListDataModel<Model> implements SelectableDataModel<Model> {
 
-	private static final long serialVersionUID = 1L;
-	
+	public static final Integer ASCENDING_ORDER = 0;
+
+	public static final Integer DESCENDING_ORDER = 1;
+
 	private List<Model> models;
 	
-	private Class<? extends BaseModel> modelClass;
-	
 	public ModelDataModel(List<Model> models) {
+		super(models);
 		this.models = models;
-		this.modelClass = models.get(0).getClass();
 	}
 
     @Override
@@ -41,84 +44,68 @@ public class ModelDataModel<Model extends BaseModel> extends LazyDataModel<Model
         return model.getId();
     }
 
-	public List<Model> load(int first, int pageSize, String sortField, SortOrder sortOrder, Map<String, Object> filters) {
-		List<Model> data = new ArrayList<Model>();
+	public void filter(Map<String, Object> filters) throws Exception {
+    	List<Model> filteredModels = new ArrayList<Model>();
 
-		//filter
-		for(Model model : models) {
-			boolean match = true;
-
-			if (filters != null) {
+		if (!MapUtils.isEmpty(filters)) {
+			for (Model model : models) {
+				boolean match = true;
 				for (Iterator<String> it = filters.keySet().iterator(); it.hasNext();) {
-					try {
-						String filterProperty = it.next();
-						Object filterValue = filters.get(filterProperty);
-						String fieldValue = String.valueOf(model.getClass().getField(filterProperty).get(model));
+					String filterProperty = it.next();
+					Object filterValue = filters.get(filterProperty);
+					String fieldValue = null;
 
-						if(filterValue == null || fieldValue.startsWith(filterValue.toString())) {
-							match = true;
-						} else {
-							match = false;
-							break;
-						}
-					} catch(Exception e) {
-						match = false;
+					try {
+						fieldValue = BeanUtils.getProperty(model, filterProperty);
+		    			if (filterValue == null  || fieldValue.toLowerCase().matches(".*" + filterValue.toString().toLowerCase() + ".*")) {
+		    				match = true;
+		    			} else {
+		    				match = false;
+		                    break;
+		    			}
+					} catch (Exception e) {
+						match = true;
 					}
 				}
-			}
- 
-            if(match) {
-                data.add(model);
-            }
-        }
 
-		//sort
-		if(sortField != null) {
-			Collections.sort(data, new ModelSorter<Model>(modelClass, sortField, sortOrder));
-		}
-
-		//rowCount
-		int dataSize = data.size();
-		this.setRowCount(dataSize);
-
-		//paginate
-		if(dataSize > pageSize) {
-			try {
-				return data.subList(first, first + pageSize);
+				if (match) {
+					filteredModels.add(model);
+	    		}
 			}
-			catch(IndexOutOfBoundsException e) {
-				return data.subList(first, first + (dataSize % pageSize));
-			}
-		} else {
-			return data;
-		}
+    	} else {
+    		filteredModels = models;
+    	}
+
+		setWrappedData(filteredModels);
+	}
+    
+	@SuppressWarnings("unchecked")
+	public void sort(String field, int order) {
+		Collections.sort((List<Model>) getWrappedData(), new ModelSorter<Model>(field, order));
 	}
 	
 }
 
 class ModelSorter<Model> implements Comparator<Model> {
 
-    private String sortField;
+    private String field;
 
-    private SortOrder sortOrder;
-    
-    private Class<? extends BaseModel> modelClass;
+    private Integer order;
 
-    public ModelSorter(Class<? extends BaseModel> modelClass, String sortField, SortOrder sortOrder) {
-        this.sortField = sortField;
-        this.sortOrder = sortOrder;
-        this.modelClass = modelClass;  
+    public ModelSorter(String field, Integer order) {
+        this.field = field;
+        this.order = order;
     }
- 
+
     @SuppressWarnings({ "rawtypes", "unchecked" })
-	public int compare(Model car1, Model car2) {
+	public int compare(Model model1, Model model2) {
         try {
-            Object value1 = modelClass.getField(this.sortField).get(car1);
-            Object value2 = modelClass.getField(this.sortField).get(car2);
+            Object value1 = BeanUtils.getProperty(model1, field);
+            Object value2 = BeanUtils.getProperty(model2, field);
 
             int value = ((Comparable) value1).compareTo(value2);
 
-            return SortOrder.ASCENDING.equals(sortOrder) ? value : -1 * value;
+            return ModelDataModel.ASCENDING_ORDER.equals(order) ? value : -1 * value;
         } catch(Exception e) {
             throw new RuntimeException();
         }

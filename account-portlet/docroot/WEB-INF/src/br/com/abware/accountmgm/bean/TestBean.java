@@ -1,7 +1,7 @@
 package br.com.abware.accountmgm.bean;
 
+import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
@@ -11,20 +11,19 @@ import javax.faces.bean.ManagedBean;
 import javax.faces.bean.ViewScoped;
 import javax.faces.event.AjaxBehaviorEvent;
 
-import org.primefaces.component.selectonemenu.SelectOneMenu;
-
-import br.com.abware.accountmgm.bean.model.PersonDataModel;
+import br.com.abware.accountmgm.bean.model.ModelDataModel;
 import br.com.abware.jcondo.core.model.Condominium;
 import br.com.abware.jcondo.core.model.Flat;
 import br.com.abware.jcondo.core.model.Membership;
 import br.com.abware.jcondo.core.model.Person;
 import br.com.abware.jcondo.core.model.Supplier;
+import br.com.abware.jcondo.exception.ApplicationException;
 
 @ManagedBean
 @ViewScoped
 public class TestBean extends BaseBean {
 
-	private PersonDataModel model;
+	private ModelDataModel<Person> model;
 
 	private HashMap<String, Object> filters;
 
@@ -47,16 +46,18 @@ public class TestBean extends BaseBean {
 	@PostConstruct
 	public void init() {
 		try {
+			List<Person> people = new ArrayList<Person>();
 			List<Flat> flats = flatService.getFlats(personService.getPerson());
-			model = new PersonDataModel(personService, flats);
 
 			blocks = new TreeSet<Long>();
 			numbers = new TreeSet<Long>();
 			for (Flat flat : flats) {
 				blocks.add(flat.getBlock());
 				numbers.add(flat.getNumber());
+				people.addAll(personService.getPeople(flat));
 			}
 
+			model = new ModelDataModel<Person>(people);
 			filters = new HashMap<String, Object>();
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
@@ -66,30 +67,30 @@ public class TestBean extends BaseBean {
 
 	public void onPersonSearch(AjaxBehaviorEvent event) throws Exception {
 		filters.put("fullName", personName);
-		model.filter(model, filters);
+		model.filter(filters);
 	}
 
 	public void onBlockSelect(AjaxBehaviorEvent event) throws Exception {
-		filters.put("block", block);
-		model.filter(model, filters);
+		filters.put("memberships.domain.block", block);
+		model.filter(filters);
 	}
 
 	public void onNumberSelect(AjaxBehaviorEvent event) throws Exception {
-		filters.put("number", number);
-		model.filter(model, filters);
+		filters.put("memberships.domain.number", number);
+		model.filter(filters);
 	}
 
 	public void onPersonSave() {
 		
 	}
 
-	public void onPersonDelete() {
-		//personService.delete(person);
+	public void onPersonDelete() throws ApplicationException {
+		personService.delete(person);
 	}
 
-	public void onPeopleDelete() {
+	public void onPeopleDelete() throws ApplicationException {
 		for (Person person : selectedPeople) {
-			//personService.delete(person);
+			personService.delete(person);
 		}
 	}
 	
@@ -108,11 +109,11 @@ public class TestBean extends BaseBean {
 		return null;
 	}
 
-	public PersonDataModel getModel() {
+	public ModelDataModel<Person> getModel() {
 		return model;
 	}
 
-	public void setModel(PersonDataModel model) {
+	public void setModel(ModelDataModel<Person> model) {
 		this.model = model;
 	}
 

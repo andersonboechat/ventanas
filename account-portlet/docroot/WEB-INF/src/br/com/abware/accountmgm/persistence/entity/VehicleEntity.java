@@ -1,5 +1,6 @@
 package br.com.abware.accountmgm.persistence.entity;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Table;
@@ -18,8 +19,9 @@ public class VehicleEntity extends BaseEntity {
 	@Id
 	private long id;
 
-	private long flatId;
+	private long domainId;
 
+	@Column(updatable=false)
 	private String license;
 
 	private String name;
@@ -37,12 +39,12 @@ public class VehicleEntity extends BaseEntity {
 		this.id = id;
 	}
 
-	public long getFlatId() {
-		return flatId;
+	public long getDomainId() {
+		return domainId;
 	}
 
-	public void setFlatId(long flatId) {
-		this.flatId = flatId;
+	public void setDomainId(long domainId) {
+		this.domainId = domainId;
 	}
 
 	public String getLicense() {

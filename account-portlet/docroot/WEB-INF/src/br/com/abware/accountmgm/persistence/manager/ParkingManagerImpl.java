@@ -25,19 +25,19 @@ public class ParkingManagerImpl extends JCondoManager<ParkingEntity, Parking> {
 	public List<Parking> findOwnedParkings(Domain domain) throws PersistenceException {
 		try {
 			String queryString = "FROM ParkingEntity WHERE domainId = :domainId";
-			openManager("ParkingManager.findGrantedParkings");
+			openManager("ParkingManager.findOwnedParkings");
 			Query query = em.createQuery(queryString);
 			query.setParameter("domainId", domain.getId());
 			return getModels(query.getResultList());
 		} finally {
-			closeManager("ParkingManager.findGrantedParkings");
+			closeManager("ParkingManager.findOwnedParkings");
 		}
 	}
 
 	@SuppressWarnings("unchecked")
 	public List<Parking> findGrantedParkings(Domain domain) throws PersistenceException {
 		try {
-			String queryString = "FROM RentedParkingEntity  WHERE domainId = :domainId";
+			String queryString = "FROM RentedParkingEntity WHERE domainId = :domainId";
 			openManager("ParkingManager.findGrantedParkings");
 			Query query = em.createQuery(queryString);
 			query.setParameter("domainId", domain.getId());

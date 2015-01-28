@@ -2,38 +2,59 @@
 <!DOCTYPE resource-action-mapping PUBLIC "-//Liferay//DTD Resource Action Mapping 6.1.0//EN" "http://www.liferay.com/dtd/liferay-resource-action-mapping_6_1_0.dtd">
 <resource-action-mapping>
 	<model-resource>
-		<model-name>br.com.abware.agenda.BookingModel</model-name>
+		<model-name>br.com.abware.accountmgm.model.Vehicle</model-name>
 		<portlet-ref>
-			<portlet-name>agenda</portlet-name>
+			<portlet-name>vehicle-management</portlet-name>
 		</portlet-ref>
 		<permissions>
 			<supports>
-				<action-key>BOOK</action-key>
-				<action-key>BOOK_CANCEL</action-key>
-				<action-key>BOOK_DELETE</action-key>
-				<action-key>BOOK_VIEW</action-key>
+				<action-key>ADD</action-key>
+				<action-key>DELETE</action-key>
+				<action-key>VIEW</action-key>
+				<action-key>ASSIGN</action-key>
 			</supports>
 			<site-member-defaults>
-				<action-key>BOOK_VIEW</action-key>
+				<action-key>VIEW</action-key>
 			</site-member-defaults>
 			<guest-defaults/>
 			<guest-unsupported/>
 		</permissions>
 	</model-resource>
 	<model-resource>
-		<model-name>br.com.abware.agenda.RoomModel</model-name>
+		<model-name>br.com.abware.jcondo.core.model.Flat</model-name>
 		<portlet-ref>
-			<portlet-name>agenda</portlet-name>
+			<portlet-name>flat-management</portlet-name>
 		</portlet-ref>
 		<permissions>
 			<supports>
-				<action-key>ROOM_ADD</action-key>
-				<action-key>ROOM_UPDATE</action-key>
-				<action-key>ROOM_DELETE</action-key>
-				<action-key>ROOM_VIEW</action-key>
+				<action-key>ADD</action-key>
+				<action-key>UPDATE</action-key>
+				<action-key>DELETE</action-key>
+				<action-key>VIEW</action-key>
+				<action-key>ASSIGN</action-key>
 			</supports>
 			<site-member-defaults>
-				<action-key>ROOM_VIEW</action-key>
+				<action-key>VIEW</action-key>
+			</site-member-defaults>
+			<guest-defaults/>
+			<guest-unsupported/>
+		</permissions>
+	</model-resource>
+	<model-resource>
+		<model-name>br.com.abware.jcondo.core.model.Person</model-name>
+		<portlet-ref>
+			<portlet-name>flat-management</portlet-name>
+		</portlet-ref>
+		<permissions>
+			<supports>
+				<action-key>ADD</action-key>
+				<action-key>UPDATE</action-key>
+				<action-key>DELETE</action-key>
+				<action-key>VIEW</action-key>
+				<action-key>ASSIGN</action-key>
+			</supports>
+			<site-member-defaults>
+				<action-key>VIEW</action-key>
 			</site-member-defaults>
 			<guest-defaults/>
 			<guest-unsupported/>

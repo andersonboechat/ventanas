@@ -5,8 +5,9 @@
 		<non-jta-data-source>java:comp/env/jdbc/vtnDS</non-jta-data-source>
 		<class>br.com.abware.accountmgm.persistence.entity.BaseEntity</class>
 		<class>br.com.abware.accountmgm.persistence.entity.VehicleEntity</class>
-		<class>br.com.abware.accountmgm.persistence.entity.FlatVO</class>
+		<class>br.com.abware.accountmgm.persistence.entity.FlatEntity</class>
 		<class>br.com.abware.accountmgm.persistence.entity.AccessLogEntity</class>
+		<class>br.com.abware.accountmgm.persistence.entity.VehicleAccessLogEntity</class>
 		<class>br.com.abware.accountmgm.persistence.entity.ParkingEntity</class>
 		<class>br.com.abware.accountmgm.persistence.entity.RentedParkingEntity</class>
 		<properties>

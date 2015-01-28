@@ -2,11 +2,16 @@ package br.com.abware.accountmgm.persistence.entity;
 
 import java.util.Date;
 
+import javax.persistence.Column;
+import javax.persistence.DiscriminatorColumn;
+import javax.persistence.DiscriminatorType;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
 import javax.persistence.Id;
+import javax.persistence.Inheritance;
+import javax.persistence.InheritanceType;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
@@ -21,7 +26,9 @@ import br.com.abware.accountmgm.model.AccessType;
  * 
  */
 @Entity
-@Table(name="jco_vehicle_access_log")
+@Table(name="jco_access_log")
+@Inheritance(strategy=InheritanceType.JOINED)
+@DiscriminatorColumn(name="ID", discriminatorType=DiscriminatorType.INTEGER)
 public class AccessLogEntity extends BaseEntity {
 
 	private static final long serialVersionUID = 1L;
@@ -36,6 +43,7 @@ public class AccessLogEntity extends BaseEntity {
 	private String comment;
 
 	@Temporal(TemporalType.TIMESTAMP)
+	@Column(updatable=false)
 	private Date date;
 
 	@Enumerated(EnumType.ORDINAL)

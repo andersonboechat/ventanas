@@ -1,9 +1,9 @@
 package br.com.abware.accountmgm.model;
 
 import br.com.abware.jcondo.core.model.BaseModel;
-import br.com.abware.jcondo.core.model.Flat;
+import br.com.abware.jcondo.core.model.Domain;
 
-public class Vehicle implements BaseModel {
+public class Vehicle extends AbstractModel {
 
 	private long id;
 
@@ -13,8 +13,21 @@ public class Vehicle implements BaseModel {
 
 	private String license;
 
-	private Flat flat;
+	private Domain domain;
 
+	public boolean equals(BaseModel obj) {
+		return super.equals(obj) || (license != null && license.equalsIgnoreCase(((Vehicle) obj).getLicense()));
+	}
+
+	@Override
+	public String toString() {
+		StringBuffer sb = new StringBuffer();
+		sb.append("{id:").append(id).append(", license:")
+		  .append(license).append(", domain: ").append(domain).append("}");
+
+		return sb.toString();
+	}
+	
 	@Override
 	public long getId() {
 		return id;
@@ -48,12 +61,12 @@ public class Vehicle implements BaseModel {
 		this.license = license.toUpperCase();
 	}
 
-	public Flat getFlat() {
-		return flat;
+	public Domain getDomain() {
+		return domain;
 	}
 
-	public void setFlat(Flat flat) {
-		this.flat = flat;
+	public void setDomain(Domain domain) {
+		this.domain = domain;
 	}
 
 }
