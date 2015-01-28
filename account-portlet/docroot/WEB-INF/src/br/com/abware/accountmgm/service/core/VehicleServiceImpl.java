@@ -1,72 +1,126 @@
 package br.com.abware.accountmgm.service.core;
 
-import java.util.Arrays;
-import java.util.Collection;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang.StringUtils;
 
 import br.com.abware.accountmgm.model.Vehicle;
-import br.com.abware.accountmgm.model.VehicleAccess;
-import br.com.abware.accountmgm.model.VehicleType;
+import br.com.abware.accountmgm.persistence.manager.FlatManagerImpl;
+import br.com.abware.accountmgm.persistence.manager.ParkingManagerImpl;
+import br.com.abware.accountmgm.persistence.manager.SecurityManagerImpl;
 import br.com.abware.accountmgm.persistence.manager.VehicleManagerImpl;
-import br.com.abware.accountmgm.util.FlatTransformer;
+import br.com.abware.jcondo.core.Permission;
 import br.com.abware.jcondo.core.model.Domain;
 import br.com.abware.jcondo.core.model.Flat;
-import br.com.abware.jcondo.core.model.Membership;
 import br.com.abware.jcondo.core.model.Person;
 import br.com.abware.jcondo.core.service.BaseService;
 
 public class VehicleServiceImpl implements BaseService<Vehicle> {
 
 	private VehicleManagerImpl vehicleManager = new VehicleManagerImpl();
+
+	private FlatManagerImpl flatManager = new FlatManagerImpl();
 	
-	private PersonServiceImpl personService = new PersonServiceImpl();
-
-	public List<Vehicle> getVehicles(Flat flat) throws Exception {
-		return vehicleManager.findVehicles(flat);
-	}
-
-	public void register(Vehicle vehicle) throws Exception {
-		vehicleManager.save(vehicle, personService.getPerson().getId());
-	}
-
-	@SuppressWarnings("unchecked")
-	public void unregister(Vehicle vehicle) throws Exception {
-		Person person = personService.getPerson();
-		Collection<Flat> flats = CollectionUtils.transformedCollection(person.getMemberships(), new FlatTransformer());
-		vehicle.getFlats().removeAll(flats);
-		vehicle.setType(VehicleType.VISITOR);
-		vehicleManager.save(vehicle, personService.getPerson().getId());
-	}
-
-	public void changeType(VehicleType type, Vehicle vehicle, Flat flat) throws Exception {
-		Vehicle v = vehicleManager.findById(vehicle.getId());
-
-		if (type == VehicleType.RESIDENT) {
-			// Verificar se a quantidade de vagas do apartamento ainda nao excedeu
-			
-			// Remover o veiculo de outros apartamentos que estiver associado
+	private ParkingManagerImpl parkingManager = new ParkingManagerImpl();
+	
+	private SecurityManagerImpl securityManager = new SecurityManagerImpl();
+	
+	public Vehicle getVehicle(long vehicleId) throws Exception {
+		Vehicle vehicle = vehicleManager.findById(vehicleId);
+		if (vehicle == null) {
+			throw new Exception("veiculo nao cadastrado");
 		}
-		
-		v.setType(type);
-		vehicleManager.save(v, personService.getPerson().getId());
+
+		if (!securityManager.hasPermission(vehicle, Permission.VIEW)) {
+			throw new Exception("sem permissao para visualizar o veiculo " + vehicle);
+		}
+
+		return vehicle;
 	}
 
-	public void assignTo(Vehicle vehicle, Flat[] flats) throws Exception {
-		Vehicle v = vehicleManager.findById(vehicle.getId());
-		CollectionUtils.addAll(v.getFlats(), flats);
-		vehicleManager.save(v, personService.getPerson().getId());
+	public List<Vehicle> getVehicles(Person person) throws Exception {
+		List<Vehicle> vehicles = new ArrayList<Vehicle>();
+
+		for (Flat flat : flatManager.findByPerson(person)) {
+			CollectionUtils.addAll(vehicles, vehicleManager.findVehicles(flat).iterator());
+		}
+
+		// TODO verificar permissao de visualizar veiculos de visitantes
+		if (!securityManager.hasPermission(new Vehicle(), Permission.VIEW)) {
+			CollectionUtils.addAll(vehicles, vehicleManager.findVehicles(new Flat()).iterator());
+		}
+
+		return vehicles;
 	}
 
-	public void removeFrom(Vehicle vehicle, Flat[] flats) throws Exception {
-		Vehicle v = vehicleManager.findById(vehicle.getId());
-		v.getFlats().removeAll(Arrays.asList(flats));
-		vehicleManager.save(v, personService.getPerson().getId());		
+	public Vehicle register(Vehicle vehicle) throws Exception {
+		if (StringUtils.isEmpty(vehicle.getLicense())) {
+			throw new Exception("placa nao especificada");
+		}
+
+		Vehicle v = vehicleManager.findByLicense(vehicle.getLicense());
+
+		if (v != null) {
+			throw new Exception("veiculo ja registrado");
+		}
+
+		if (!securityManager.hasPermission(vehicle, Permission.ADD)) {
+			throw new Exception("sem permissao para cadastrar veiculos");
+		}
+
+		// Verifica se tem vaga para o apartamento especificado
+		// Visitantes podem acessar o condominio apenas para deixar/buscar passageiros
+		if (vehicle.getDomain() instanceof Flat && getParkingAmount(vehicle.getDomain()) > 0) {
+			throw new Exception("nao ha vagas disponíveis");
+		}
+
+		return vehicleManager.save(vehicle);
 	}
 
-	public void checkAccess(VehicleAccess access) {
-		
+	public int getParkingAmount(Domain domain) {
+		try {
+			if (domain instanceof Flat) {
+				int ownedParkingAmount = parkingManager.findOwnedParkings(domain).size();
+				int usedParkingAmount = vehicleManager.findVehicles(domain).size();
+				int grantedParkingAmount = parkingManager.findGrantedParkings(domain).size();
+				int rentedParkingAmount = parkingManager.findRentedParkings(domain).size();
+				return (ownedParkingAmount + rentedParkingAmount) - (grantedParkingAmount + usedParkingAmount);
+			} else {
+				int ownedParkingAmount = parkingManager.findOwnedParkings(domain).size();
+				int usedParkingAmount = vehicleManager.findVehicles(domain).size();
+				return ownedParkingAmount - usedParkingAmount;
+			}
+		} catch (Exception e) {
+			return 0;
+		}
+	}
+
+	public void assignTo(Vehicle vehicle, Domain domain) throws Exception {
+		Vehicle v = getVehicle(vehicle.getId());
+
+		if (v.getDomain() != null && !v.getDomain().equals(domain)) {
+			throw new Exception("veiculo ja associado ao dominio " + v.getDomain());
+		}
+
+		if (!securityManager.hasPermission(vehicle, Permission.DELETE)) {
+			throw new Exception("sem permissao para cadastrar veiculos");
+		}
+
+		v.setDomain(domain);
+		vehicleManager.save(v);
+	}
+
+	public void removeFrom(Vehicle vehicle) throws Exception {
+		Vehicle v = getVehicle(vehicle.getId());
+
+		if (!securityManager.hasPermission(vehicle, Permission.DELETE)) {
+			throw new Exception("sem permissao para cadastrar veiculos");
+		}
+
+		v.setDomain(null);
+		vehicleManager.save(v);
 	}
 
 }

@@ -1,21 +1,33 @@
 package br.com.abware.accountmgm.model;
 
-import java.util.List;
-
 import br.com.abware.jcondo.core.model.BaseModel;
+import br.com.abware.jcondo.core.model.Domain;
 
-public class Vehicle implements BaseModel {
+public class Vehicle extends AbstractModel {
 
 	private long id;
+
+	private String name;
 
 	private String picture;
 
 	private String license;
 
-	private VehicleType type;
+	private Domain domain;
 
-	private List<Flat> flats;
+	public boolean equals(BaseModel obj) {
+		return super.equals(obj) || (license != null && license.equalsIgnoreCase(((Vehicle) obj).getLicense()));
+	}
 
+	@Override
+	public String toString() {
+		StringBuffer sb = new StringBuffer();
+		sb.append("{id:").append(id).append(", license:")
+		  .append(license).append(", domain: ").append(domain).append("}");
+
+		return sb.toString();
+	}
+	
 	@Override
 	public long getId() {
 		return id;
@@ -23,6 +35,14 @@ public class Vehicle implements BaseModel {
 
 	public void setId(long id) {
 		this.id = id;
+	}
+
+	public String getName() {
+		return name;
+	}
+
+	public void setName(String name) {
+		this.name = name;
 	}
 
 	public String getPicture() {
@@ -38,23 +58,15 @@ public class Vehicle implements BaseModel {
 	}
 
 	public void setLicense(String license) {
-		this.license = license;
+		this.license = license.toUpperCase();
 	}
 
-	public VehicleType getType() {
-		return type;
+	public Domain getDomain() {
+		return domain;
 	}
 
-	public void setType(VehicleType type) {
-		this.type = type;
-	}
-
-	public List<Flat> getFlats() {
-		return flats;
-	}
-
-	public void setFlats(List<Flat> flats) {
-		this.flats = flats;
+	public void setDomain(Domain domain) {
+		this.domain = domain;
 	}
 
 }

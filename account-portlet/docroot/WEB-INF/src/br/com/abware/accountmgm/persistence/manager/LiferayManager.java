@@ -7,11 +7,15 @@ import br.com.abware.accountmgm.util.BeanUtils;
 import br.com.abware.jcondo.core.model.BaseModel;
 import br.com.abware.jcondo.exception.PersistenceException;
 
+import com.liferay.faces.portal.context.LiferayPortletHelper;
+import com.liferay.faces.portal.context.LiferayPortletHelperImpl;
 import com.liferay.portal.model.PersistedModel;
 
 public abstract class LiferayManager<Entity extends PersistedModel, Model extends BaseModel> {
 
 	protected static final long COMPANY = 10153;
+	
+	protected LiferayPortletHelper helper = new LiferayPortletHelperImpl();
 	
 	protected abstract Class<Model> getModelClass();
 

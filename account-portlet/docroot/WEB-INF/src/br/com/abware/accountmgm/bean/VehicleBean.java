@@ -1,6 +1,5 @@
 package br.com.abware.accountmgm.bean;
 
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Set;
@@ -9,12 +8,12 @@ import java.util.TreeSet;
 import javax.annotation.PostConstruct;
 import javax.faces.bean.ManagedBean;
 import javax.faces.bean.ViewScoped;
+import javax.faces.event.AjaxBehaviorEvent;
 
 import org.apache.log4j.Logger;
 
 import br.com.abware.accountmgm.bean.model.VehicleDataModel;
 import br.com.abware.accountmgm.model.Vehicle;
-import br.com.abware.accountmgm.model.VehicleType;
 import br.com.abware.jcondo.core.model.Flat;
 
 @ManagedBean
@@ -27,35 +26,27 @@ public class VehicleBean extends BaseBean {
 
 	private HashMap<String, Object> filters;
 
-	private Vehicle vehicle;
+	private Long block;
+
+	private Long number;
 
 	private String license;
 
-	private VehicleType type;
-
-	private List<VehicleType> types;
-
-	private Flat flat;
-
-	private Flat selectedFlat;
-
-	private List<Flat> flats;
+	private Vehicle vehicle;
 
 	private Vehicle[] selectedVehicles;
 
+	private List<Flat> flats;
+
 	private Set<Long> blocks;
 
-	private Long block;
-
 	private Set<Long> numbers;
-
-	private Long number;
 
 	@PostConstruct
 	public void init() {
 		try {
 			flats = flatService.getFlats(personService.getPerson());
-			model = new VehicleDataModel(vehicleService, flats);
+			model = new VehicleDataModel(vehicleService.getVehicles(personService.getPerson()));
 
 			blocks = new TreeSet<Long>();
 			numbers = new TreeSet<Long>();
@@ -65,49 +56,42 @@ public class VehicleBean extends BaseBean {
 			}
 
 			filters = new HashMap<String, Object>();
-			types = Arrays.asList(VehicleType.values());
 		} catch (Exception e) {
 			LOGGER.error("", e);
 		}
 	}
 
-	public void onVehicleSave() {
+	public void onVehicleSave() throws Exception {
 		vehicleService.register(vehicle);
-		Flat[] fs = selectedFlat == null ? (Flat[]) flats.toArray() : new Flat[] {selectedFlat};
-		vehicleService.assignTo(vehicle, fs);
 	}
 
-	public void onVehicleDelete() {
-		vehicleService.removeFrom(vehicle, (Flat[]) flats.toArray());
-		vehicleService.unregister(vehicle);
+	public void onVehiclesDelete() throws Exception {
+		for (Vehicle vehicle : selectedVehicles) {
+			vehicleService.removeFrom(vehicle);
+		}
+	}
+
+	public void onVehicleDelete() throws Exception {
+		vehicleService.removeFrom(vehicle);
 	}
 
 	public void onVehicleSearch() throws Exception {
 		filters.put("license", license);
-		filters.put("type", type);
-		filters.put("block", flat != null ? flat.getBlock() : null);
-		filters.put("number", flat != null ? flat.getNumber() : null);
-		model.filter(model, filters);
+		model.filter(filters);
 	}
 
-	public void onTypeSelect() {
-		vehicleService.changeType(vehicle);
+	public void onBlockSelect(AjaxBehaviorEvent event) throws Exception {
+		filters.put("flat.block", block);
+		model.filter(filters);
 	}
 
-	public void onFlatAdd() {
-		//vehicleService.addToDomain(vehicle, flat);
-	}
-
-	public void onFlatRemove() {
-		//vehicleService.removeFromDomain(vehicle, flat);
+	public void onNumberSelect(AjaxBehaviorEvent event) throws Exception {
+		filters.put("flat.number", number);
+		model.filter(filters);
 	}
 
 	public void onPictureUpload() {
 		
-	}
-	
-	public List<Flat> getVehicleFlats(Vehicle vehicle) {
-		return null;
 	}
 
 	public VehicleDataModel getModel() {
@@ -128,38 +112,6 @@ public class VehicleBean extends BaseBean {
 
 	public void setLicense(String license) {
 		this.license = license;
-	}
-
-	public VehicleType getType() {
-		return type;
-	}
-
-	public void setType(VehicleType type) {
-		this.type = type;
-	}
-
-	public List<VehicleType> getTypes() {
-		return types;
-	}
-
-	public void setTypes(List<VehicleType> types) {
-		this.types = types;
-	}
-
-	public Flat getFlat() {
-		return flat;
-	}
-
-	public void setFlat(Flat flat) {
-		this.flat = flat;
-	}
-
-	public Flat getSelectedFlat() {
-		return selectedFlat;
-	}
-
-	public void setSelectedFlat(Flat selectedFlat) {
-		this.selectedFlat = selectedFlat;
 	}
 
 	public List<Flat> getFlats() {

@@ -9,6 +9,9 @@ import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
 import javax.persistence.Query;
 
+import com.liferay.faces.portal.context.LiferayPortletHelper;
+import com.liferay.faces.portal.context.LiferayPortletHelperImpl;
+
 import br.com.abware.accountmgm.persistence.entity.BaseEntity;
 import br.com.abware.accountmgm.util.BeanUtils;
 import br.com.abware.jcondo.core.model.BaseModel;
@@ -21,6 +24,8 @@ public abstract class JCondoManager<Entity extends BaseEntity, Model extends Bas
 	protected EntityManager em;
 
 	protected String emOwner;
+	
+	protected LiferayPortletHelper helper = new LiferayPortletHelperImpl();	
 
 	protected abstract Class<Model> getModelClass();
 
@@ -68,11 +73,11 @@ public abstract class JCondoManager<Entity extends BaseEntity, Model extends Bas
 		}
 	}
 
-	public Entity save(Model model, long personId) throws Exception {
+	public Model save(Model model) throws Exception {
 		Date date = new Date();
 		Entity entity = getEntity(model);
 		entity.setUpdateDate(date);
-		entity.setUpdateUser(personId);
+		entity.setUpdateUser(helper.getUserId());
 
 		em.getTransaction().begin();
 
@@ -85,14 +90,14 @@ public abstract class JCondoManager<Entity extends BaseEntity, Model extends Bas
 		em.getTransaction().commit();
 		em.refresh(entity);
 
-		return entity;
+		return getModel(entity);
 	}
 	
-	public void delete(Model model, long personId) throws Exception {
+	public void delete(Model model) throws Exception {
 		Date date = new Date();
 		Entity entity = getEntity(model);
 		entity.setUpdateDate(date);
-		entity.setUpdateUser(personId);
+		entity.setUpdateUser(helper.getUserId());
 
 		em.getTransaction().begin();
 		em.remove(entity);
@@ -104,10 +109,10 @@ public abstract class JCondoManager<Entity extends BaseEntity, Model extends Bas
 	}
 
 	@SuppressWarnings("unchecked")
-	public List<Entity> findAll() {
+	public List<Model> findAll() throws Exception {
 		String query = "FROM " + getEntityClass().getSimpleName();
 		Query q = em.createQuery(query);
-		return q.getResultList();
+		return getModels(q.getResultList());
 	}	
 
 }

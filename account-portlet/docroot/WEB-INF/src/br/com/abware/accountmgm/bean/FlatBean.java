@@ -1,6 +1,8 @@
 package br.com.abware.accountmgm.bean;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.TreeSet;
 
 import javax.annotation.PostConstruct;
 import javax.faces.bean.ManagedBean;
@@ -19,23 +21,32 @@ public class FlatBean extends BaseBean {
 	private static Logger LOGGER = Logger.getLogger(FlatBean.class);
 
 	private ModelDataModel<Flat> model;
+	
+	private HashMap<String, Object> filters;	
 
 	private Person person;
 
 	private Flat flat;
 
-	private List<Integer> flatBlocks;
+	private TreeSet<Long> blocks;
 
-	private List<Integer> flatNumbers;
+	private TreeSet<Long> numbers;
 
 	@PostConstruct
 	public void init() {
 		try {
 			person = personService.getPerson();
-			model = new ModelDataModel<Flat>(flatService.getFlats(person));
-			flat = model.getRowData();
-			flatBlocks = flatService.getBlocks();
-			flatNumbers = flatService.getNumbers();
+			List<Flat> flats = flatService.getFlats(person);
+			model = new ModelDataModel<Flat>(flats);
+
+			blocks = new TreeSet<Long>();
+			numbers = new TreeSet<Long>();
+			for (Flat flat : flats) {
+				blocks.add(flat.getBlock());
+				numbers.add(flat.getNumber());
+			}
+
+			filters = new HashMap<String, Object>();
 		} catch (Exception e) {
 			LOGGER.error("", e);
 		}
@@ -69,19 +80,19 @@ public class FlatBean extends BaseBean {
 		this.flat = flat;
 	}
 
-	public List<Integer> getFlatBlocks() {
-		return flatBlocks;
+	public TreeSet<Long> getBlocks() {
+		return blocks;
 	}
 
-	public void setFlatBlocks(List<Integer> flatBlocks) {
-		this.flatBlocks = flatBlocks;
+	public void setBlocks(TreeSet<Long> blocks) {
+		this.blocks = blocks;
 	}
 
-	public List<Integer> getFlatNumbers() {
-		return flatNumbers;
+	public TreeSet<Long> getNumbers() {
+		return numbers;
 	}
 
-	public void setFlatNumbers(List<Integer> flatNumbers) {
-		this.flatNumbers = flatNumbers;
+	public void setNumbers(TreeSet<Long> numbers) {
+		this.numbers = numbers;
 	}	
 }

@@ -4,14 +4,15 @@ import java.util.List;
 
 import javax.persistence.Query;
 
+import com.liferay.portal.service.OrganizationLocalServiceUtil;
+
 import br.com.abware.accountmgm.model.Vehicle;
-import br.com.abware.accountmgm.persistence.entity.VehicleVO;
+import br.com.abware.accountmgm.persistence.entity.VehicleEntity;
+import br.com.abware.jcondo.core.model.Domain;
 import br.com.abware.jcondo.core.model.Flat;
 import br.com.abware.jcondo.exception.PersistenceException;
 
-public class VehicleManagerImpl extends JCondoManager<VehicleVO, Vehicle>{
-
-	protected static final long COMPANY = 10153;
+public class VehicleManagerImpl extends JCondoManager<VehicleEntity, Vehicle>{
 
 	@Override	
 	protected Class<Vehicle> getModelClass() {
@@ -19,16 +20,48 @@ public class VehicleManagerImpl extends JCondoManager<VehicleVO, Vehicle>{
 	}
 
 	@Override
-	protected Class<VehicleVO> getEntityClass() {
-		return VehicleVO.class;
+	protected Class<VehicleEntity> getEntityClass() {
+		return VehicleEntity.class;
+	}
+
+	@Override
+	protected VehicleEntity getEntity(Vehicle model) throws Exception {
+		VehicleEntity vehicle = super.getEntity(model);
+		vehicle.setDomainId(model.getDomain().getId());
+		return vehicle;
+	}
+
+	@Override
+	protected Vehicle getModel(VehicleEntity entity) throws Exception {
+		Vehicle vehicle = super.getModel(entity);
+		String name = OrganizationLocalServiceUtil.getOrganization(entity.getDomainId()).getName();
+		vehicle.setDomain(new Flat(entity.getDomainId(), Long.parseLong(name.split("/")[0]), Long.parseLong(name.split("/")[1])));
+		return vehicle;
 	}
 
 	@SuppressWarnings("unchecked")
-	public List<Vehicle> findVehicles(Flat flat) throws PersistenceException {
-		String queryString = "FROM VehicleVO v WHERE v.id IN (SELECT v.id FROM v.flats f WHERE f.id = :flatId)";
-		Query query = em.createQuery(queryString);
-		query.setParameter("flatId", flat.getId());
-		return getModels(query.getResultList());
+	public List<Vehicle> findVehicles(Domain domain) throws PersistenceException {
+		try {
+			String queryString = "FROM VehicleEntity WHERE domainId = :domainId";
+			openManager("VehicleManager.findVehicles");
+			Query query = em.createQuery(queryString);
+			query.setParameter("domainId", domain.getId());
+			return getModels(query.getResultList());
+		} finally {
+			closeManager("VehicleManager.findVehicles");
+		}
 	}
-	
+
+	public Vehicle findByLicense(String license) throws Exception {
+		try {
+			String queryString = "FROM VehicleEntity WHERE license = :license";
+			openManager("VehicleManager.findByLicense");
+			Query query = em.createQuery(queryString);
+			query.setParameter("license", license);
+			return getModel((VehicleEntity) query.getSingleResult());
+		} finally {
+			closeManager("VehicleManager.findByLicense");
+		}
+	}
+
 }

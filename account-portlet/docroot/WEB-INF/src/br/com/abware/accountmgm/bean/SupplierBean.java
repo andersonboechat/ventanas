@@ -37,7 +37,7 @@ public class SupplierBean {
 		try {
 			status = Arrays.asList(SupplierStatus.values());
 		} catch (Exception e) {
-			
+			LOGGER.error("", e);
 		}
 	}
 	

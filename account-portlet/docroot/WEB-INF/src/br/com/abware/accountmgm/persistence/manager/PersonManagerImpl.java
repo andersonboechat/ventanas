@@ -6,13 +6,11 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 
-import org.apache.commons.beanutils.BeanUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
 
 import br.com.abware.jcondo.core.Gender;
-import br.com.abware.jcondo.core.PersonStatus;
 import br.com.abware.jcondo.core.model.Condominium;
 import br.com.abware.jcondo.core.model.Domain;
 import br.com.abware.jcondo.core.model.Flat;
@@ -24,8 +22,6 @@ import br.com.abware.jcondo.core.model.Supplier;
 import br.com.abware.jcondo.exception.PersistenceException;
 import br.com.abware.jcondo.exception.SystemException;
 
-import com.liferay.faces.portal.context.LiferayPortletHelper;
-import com.liferay.faces.portal.context.LiferayPortletHelperImpl;
 import com.liferay.portal.NoSuchUserException;
 import com.liferay.portal.kernel.workflow.WorkflowConstants;
 import com.liferay.portal.model.Group;
@@ -46,8 +42,6 @@ public class PersonManagerImpl extends LiferayManager<User, Person> {
 	
 	private static final String PERSON_TYPE = "TYPE";
 	
-	private LiferayPortletHelper helper = new LiferayPortletHelperImpl();	
-
 	private String getCustomField(String fieldName, User user) throws Exception {
 		return (String) ExpandoValueLocalServiceUtil.getData(user.getCompanyId(), 
 															 user.getClass().getName(), 
