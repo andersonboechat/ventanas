@@ -8,7 +8,7 @@ import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 
 @MappedSuperclass
-public class BaseEntity implements Serializable {
+public abstract class BaseEntity implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 
@@ -17,9 +17,7 @@ public class BaseEntity implements Serializable {
 
 	protected long updateUser;
 
-	public long getId() {
-		return 0;
-	}
+	public abstract long getId();
 
 	public Date getUpdateDate() {
 		return updateDate;
