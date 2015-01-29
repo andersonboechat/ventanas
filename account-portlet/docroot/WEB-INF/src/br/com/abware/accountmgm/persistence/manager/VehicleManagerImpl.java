@@ -2,6 +2,7 @@ package br.com.abware.accountmgm.persistence.manager;
 
 import java.util.List;
 
+import javax.persistence.NoResultException;
 import javax.persistence.Query;
 
 import com.liferay.portal.service.OrganizationLocalServiceUtil;
@@ -59,6 +60,8 @@ public class VehicleManagerImpl extends JCondoManager<VehicleEntity, Vehicle>{
 			Query query = em.createQuery(queryString);
 			query.setParameter("license", license);
 			return getModel((VehicleEntity) query.getSingleResult());
+		} catch (NoResultException e) {
+			return null;
 		} finally {
 			closeManager("VehicleManager.findByLicense");
 		}

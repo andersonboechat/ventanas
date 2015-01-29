@@ -57,14 +57,14 @@ public abstract class JCondoManager<Entity extends BaseEntity, Model extends Bas
 		}		
 	}
 
-	public void openManager(String owner) {
+	public synchronized void openManager(String owner) {
 		if (em == null || !em.isOpen()) {
 			em = emf.createEntityManager();
 			emOwner = owner;
 		}
 	}
 
-	public void closeManager(String owner) {
+	public synchronized void closeManager(String owner) {
 		if (em != null && em.isOpen()) {
 			if (owner != null && owner.equals(emOwner)) {
 				em.close();
@@ -78,19 +78,23 @@ public abstract class JCondoManager<Entity extends BaseEntity, Model extends Bas
 		Entity entity = getEntity(model);
 		entity.setUpdateDate(date);
 		entity.setUpdateUser(helper.getUserId());
+		try {
+			openManager("JCondoManager.save." + model);
+			em.getTransaction().begin();
 
-		em.getTransaction().begin();
+			if (em.find(getEntityClass(), entity.getId()) != null) {
+				em.merge(entity);
+			} else {
+				em.persist(entity);
+			}
 
-		if (findById(entity.getId()) != null) {
-			em.merge(entity);
-		} else {
-			em.persist(entity);
+			em.getTransaction().commit();
+			em.refresh(entity);
+
+			return getModel(entity);
+		} finally {
+			closeManager("JCondoManager.save." + model);
 		}
-
-		em.getTransaction().commit();
-		em.refresh(entity);
-
-		return getModel(entity);
 	}
 	
 	public void delete(Model model) throws Exception {
