@@ -7,7 +7,6 @@ import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 
 import br.com.abware.accountmgm.model.Vehicle;
-import br.com.abware.accountmgm.persistence.manager.FlatManagerImpl;
 import br.com.abware.accountmgm.persistence.manager.ParkingManagerImpl;
 import br.com.abware.accountmgm.persistence.manager.SecurityManagerImpl;
 import br.com.abware.accountmgm.persistence.manager.VehicleManagerImpl;
@@ -21,7 +20,7 @@ public class VehicleServiceImpl implements BaseService<Vehicle> {
 
 	private VehicleManagerImpl vehicleManager = new VehicleManagerImpl();
 
-	private FlatManagerImpl flatManager = new FlatManagerImpl();
+	private FlatServiceImpl flatService = new FlatServiceImpl();
 	
 	private ParkingManagerImpl parkingManager = new ParkingManagerImpl();
 	
@@ -43,14 +42,14 @@ public class VehicleServiceImpl implements BaseService<Vehicle> {
 	public List<Vehicle> getVehicles(Person person) throws Exception {
 		List<Vehicle> vehicles = new ArrayList<Vehicle>();
 
-		for (Flat flat : flatManager.findByPerson(person)) {
+		for (Flat flat : flatService.getFlats(person)) {
 			CollectionUtils.addAll(vehicles, vehicleManager.findVehicles(flat).iterator());
 		}
 
 		// TODO verificar permissao de visualizar veiculos de visitantes
-		if (!securityManager.hasPermission(new Vehicle(), Permission.VIEW)) {
-			CollectionUtils.addAll(vehicles, vehicleManager.findVehicles(new Flat()).iterator());
-		}
+//		if (!securityManager.hasPermission(new Vehicle(), Permission.VIEW)) {
+//			CollectionUtils.addAll(vehicles, vehicleManager.findVehicles(new Flat()).iterator());
+//		}
 
 		return vehicles;
 	}
@@ -60,19 +59,28 @@ public class VehicleServiceImpl implements BaseService<Vehicle> {
 			throw new Exception("placa nao especificada");
 		}
 
+		if(!vehicle.getLicense().matches("[A-Za-z]{3,3}[0-9]{4,4}")) {
+			throw new Exception("placa invalida");
+		}
+
 		Vehicle v = vehicleManager.findByLicense(vehicle.getLicense());
 
 		if (v != null) {
 			throw new Exception("veiculo ja registrado");
 		}
 
-		if (!securityManager.hasPermission(vehicle, Permission.ADD)) {
-			throw new Exception("sem permissao para cadastrar veiculos");
+		if (vehicle.getDomain() != null && vehicle.getDomain() instanceof Flat && 
+			flatService.getFlat(vehicle.getDomain().getId()) == null) {
+			throw new Exception("apartamento nao encontrado");
 		}
+
+//		if (!securityManager.hasPermission(vehicle, Permission.ADD)) {
+//			throw new Exception("sem permissao para cadastrar veiculos");
+//		}
 
 		// Verifica se tem vaga para o apartamento especificado
 		// Visitantes podem acessar o condominio apenas para deixar/buscar passageiros
-		if (vehicle.getDomain() instanceof Flat && getParkingAmount(vehicle.getDomain()) > 0) {
+		if (vehicle.getDomain() instanceof Flat && getParkingAmount(vehicle.getDomain()) <= 0) {
 			throw new Exception("nao ha vagas disponíveis");
 		}
 

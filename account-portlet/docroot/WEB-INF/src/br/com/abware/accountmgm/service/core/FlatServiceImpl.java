@@ -24,6 +24,10 @@ public class FlatServiceImpl implements FlatService {
 
 	private static List<Integer> numbers;
 
+	public Flat getFlat(long flatId) throws Exception {
+		return flatManager.findById(flatId);
+	}
+
 	@Override
 	public List<Flat> getFlats() throws BusinessException {
 		return null; //flatManager.findAll();

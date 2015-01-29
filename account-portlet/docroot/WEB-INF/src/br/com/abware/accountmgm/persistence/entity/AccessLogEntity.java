@@ -14,6 +14,7 @@ import javax.persistence.Inheritance;
 import javax.persistence.InheritanceType;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.MappedSuperclass;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
@@ -28,7 +29,7 @@ import br.com.abware.accountmgm.model.AccessType;
 @Entity
 @Table(name="jco_access_log")
 @Inheritance(strategy=InheritanceType.JOINED)
-@DiscriminatorColumn(name="ID", discriminatorType=DiscriminatorType.INTEGER)
+@DiscriminatorColumn(name="entity", discriminatorType=DiscriminatorType.INTEGER)
 public class AccessLogEntity extends BaseEntity {
 
 	private static final long serialVersionUID = 1L;
@@ -36,18 +37,15 @@ public class AccessLogEntity extends BaseEntity {
 	@Id
 	private long id;
 
-    @ManyToOne(fetch=FetchType.LAZY)
-    @JoinColumn(name="id")
-	private VehicleEntity vehicle;
-
-	private String comment;
+	@Enumerated(EnumType.ORDINAL)
+	@Column(updatable=false)
+	private AccessType type;
 
 	@Temporal(TemporalType.TIMESTAMP)
 	@Column(updatable=false)
 	private Date date;
 
-	@Enumerated(EnumType.ORDINAL)
-	private AccessType type;
+	private String comment;
 
 	public AccessLogEntity() {
 	}

@@ -1,16 +1,22 @@
 package br.com.abware.accountmgm.bean;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
 
 import javax.annotation.PostConstruct;
+import javax.faces.application.FacesMessage;
 import javax.faces.bean.ManagedBean;
 import javax.faces.bean.ViewScoped;
+import javax.faces.context.FacesContext;
 import javax.faces.event.AjaxBehaviorEvent;
+import javax.faces.event.ValueChangeEvent;
 
 import org.apache.log4j.Logger;
+import org.apache.myfaces.commons.util.MessageUtils;
+import org.primefaces.component.selectonemenu.SelectOneMenu;
 
 import br.com.abware.accountmgm.bean.model.VehicleDataModel;
 import br.com.abware.accountmgm.model.Vehicle;
@@ -47,22 +53,33 @@ public class VehicleBean extends BaseBean {
 		try {
 			flats = flatService.getFlats(personService.getPerson());
 			model = new VehicleDataModel(vehicleService.getVehicles(personService.getPerson()));
-
+			vehicle = new Vehicle();
+			vehicle.setDomain(flats.get(0));
 			blocks = new TreeSet<Long>();
 			numbers = new TreeSet<Long>();
 			for (Flat flat : flats) {
 				blocks.add(flat.getBlock());
 				numbers.add(flat.getNumber());
 			}
-
 			filters = new HashMap<String, Object>();
 		} catch (Exception e) {
 			LOGGER.error("", e);
 		}
 	}
 
-	public void onVehicleSave() throws Exception {
-		vehicleService.register(vehicle);
+	public void onVehicleSave() {
+		try {
+			vehicleService.register(vehicle);
+		} catch (Exception e) {
+			FacesContext context = FacesContext.getCurrentInstance();
+			String component = context.getViewRoot().findComponent("outputMsg").getClientId();
+			context.addMessage(component, new FacesMessage(FacesMessage.SEVERITY_INFO, e.getMessage(), ""));
+		}
+	}
+
+	public void onVehicleCreate() throws Exception {
+		vehicle = new Vehicle();
+		vehicle.setDomain(new Flat());
 	}
 
 	public void onVehiclesDelete() throws Exception {
@@ -80,6 +97,16 @@ public class VehicleBean extends BaseBean {
 		model.filter(filters);
 	}
 
+	public void onFlatSelect(ValueChangeEvent event) throws Exception {
+		Flat flat = flats.get(Integer.valueOf((String) event.getNewValue()));
+		vehicle.setDomain(flat);
+	}
+
+	public void onFlatSelect2(AjaxBehaviorEvent event) throws Exception {
+		Flat flat = flats.get((Integer) ((SelectOneMenu) event.getSource()).getValue());
+		vehicle.setDomain(flat);
+	}
+	
 	public void onBlockSelect(AjaxBehaviorEvent event) throws Exception {
 		filters.put("flat.block", block);
 		model.filter(filters);

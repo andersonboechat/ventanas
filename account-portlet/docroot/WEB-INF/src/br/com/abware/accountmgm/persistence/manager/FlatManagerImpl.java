@@ -120,7 +120,16 @@ public class FlatManagerImpl extends LiferayManager<Organization, Flat> {
 			throw new PersistenceException(e, "");
 		}
 	}	
-	
+
+	public Flat findByBlockAndNumber(long block, long number) throws PersistenceException {
+		try {
+			String name = block + "/" + StringUtils.leftPad(String.valueOf(number), 4, "0");
+			return getModel(OrganizationLocalServiceUtil.getOrganization(helper.getCompanyId(), name));
+		} catch (Exception e) {
+			throw new PersistenceException(e, "");
+		}
+	}
+
 	public List<Integer> findFlatBlocks() {
 		try {
 			ExpandoColumn column;

@@ -14,14 +14,13 @@
 		<h:form id="vehicle-form">
 			<p:panelGrid columns="3" styleClass="menu-cmds" columnClasses="menu-cmds-col1,menu-cmds-col2,menu-cmds-col3" style="width: 100%">
 				<p:column>
-						<p:commandButton value="Cadastrar" partialSubmit="true" process="@this" 
-										 update="vehicle-details" oncomplete="PF('vehicleDialog').show();">
-							<f:setPropertyActionListener target="#{vehicleBean.vehicle}" value=""/>
-						</p:commandButton>
-						<p:commandButton value="Excluir" actionListener="#{vehicleBean.onVehiclesDelete}" 
-										 partialSubmit="true" process="@this,vehicleTable" update="vehicleTable,:outputMsg">
-							<p:confirm header="#{msg['main.delete.confirm']}" message="#{msg['vehicle.delete.message']}" icon="ui-icon-alert"/>
-						</p:commandButton>
+					<p:commandButton value="Cadastrar" actionListener="#{vehicleBean.onVehicleCreate}" 
+									 partialSubmit="true" process="@this" update="vehicle-details" oncomplete="PF('vehicleDialog').show();">
+					</p:commandButton>
+					<p:commandButton value="Excluir" actionListener="#{vehicleBean.onVehiclesDelete}" 
+									 partialSubmit="true" process="@this,vehicleTable" update="vehicleTable,:outputMsg">
+						<p:confirm header="#{msg['main.delete.confirm']}" message="#{msg['vehicle.delete.message']}" icon="ui-icon-alert"/>
+					</p:commandButton>
 				</p:column>
 				<p:column>
 					<p:outputLabel value="Placa:"/>
@@ -44,7 +43,7 @@
 					</p:selectOneMenu>
 			    </p:column>
 			    <p:column rendered="#{vehicleBean.flats.size() == 1}">
-			    	<h:outputText value="Apt. #{vehicleBean.flats.iterator.next.number} - Bloco #{vehicleBean.flats.iterator.next.block}"/>
+			    	<h:outputText value="Apt. #{vehicleBean.flats.get(0).number} - Bloco #{vehicleBean.flats.get(0).block}"/>
 			    </p:column>
 			</p:panelGrid>
 			<p:dataTable id="vehicleTable" var="vehicle" value="#{vehicleBean.model}"  
@@ -59,8 +58,8 @@
 					<p:panelGrid columns="2">
 						<p:outputLabel value="Placa:"/>
 	        			<h:outputText value="#{vehicle.license}"/>
-       					<h:outputText value="Apt. #{vehicle.flat.number} - bloco #{vehicle.flat.block}" rendered="#{vehicle.flat != null}"/>
-       					<h:outputText value="Visitante" rendered="#{vehicle.flat == null}"/>
+       					<h:outputText value="Apt. #{vehicle.domain.number} - bloco #{vehicle.domain.block}" rendered="#{vehicle.domain != null}"/>
+       					<h:outputText value="Visitante" rendered="#{vehicle.domain == null}"/>
 					</p:panelGrid>
 				</p:column> 
 				<p:column style="width: 10%">
@@ -71,41 +70,29 @@
 					</p:commandLink>
 				</p:column>
 			</p:dataTable>
-			<p:dialog header="Cadastro de Veículo" widgetVar="vehicleDialog" draggable="false" resizable="false" modal="true" closable="true" visible="false">
-				<h:panelGrid id="vehicle-details" columns="3">
-					<p:column>
-				        <p:graphicImage id="portrait" value="http://www.ventanasresidencial.com.br#{vehicleBean.vehicle.picture}"/><br/>
-						<p:commandLink value="Alterar Foto" onclick="PF('uploadDialog').show();"/>
-					</p:column>
-					<p:column>
-						<h:panelGrid columns="2">
-					    	<p:outputLabel value="Placa:"/>
-					        <p:inputText value="#{vehicleBean.vehicle.license}" required="true"/>
-							<c:choose>
-								<c:when test="#{vehicleBean.flats.size() > 1}">
-							    	<p:outputLabel value="Apt."/>
-									<p:selectOneMenu value="#{vehicleBean.vehicle.flat.number}" required="true">
-										<f:selectItem itemLabel="-- #{msg['flat.lbl.everyone']} --" noSelectionOption="true"/>
-										<f:selectItems var="number" value="#{vehicleBean.numbers}" itemLabel="#{number}" itemValue="#{number}"/>
-									</p:selectOneMenu>
-							    	<p:outputLabel value="Bloco"/>
-									<p:selectOneMenu value="#{vehicleBean.vehicle.flat.block}" required="true">
-										<f:selectItem itemLabel="-- #{msg['flat.lbl.everyone']} --" noSelectionOption="true"/>
-										<f:selectItems var="block" value="#{vehicleBean.blocks}" itemLabel="#{block}" itemValue="#{block}"/>
-									</p:selectOneMenu>
-								</c:when>
-								<c:otherwise>
-									<h:outputText value="Apt. #{vehicleBean.vehicle.flat.number} - Bloco #{vehicleBean.vehicle.flat.block}"/>
-									<h:inputHidden binding="#{vehicleBean.vehicle.flat.number}" value="#{vehicleBean.flats.iterator.next.number}"/>
-									<h:inputHidden binding="#{vehicleBean.vehicle.flat.block}" value="#{vehicleBean.flats.iterator.next.block}"/>
-								</c:otherwise>
-							</c:choose>
-						</h:panelGrid>
-					</p:column>
-				</h:panelGrid>
-				<h:panelGrid columns="2">
-					<p:commandButton value="Salvar" actionListener="#{vehicleBean.onVehicleSave}" update=":outputMsg" oncomplete="if (!args.validationFailed &amp;&amp; !args.exception) {PF('vehicleTable').update(); PF('vehicleDialog').hide();}" style="float: right; width: 70px; margin: 0px 0px 10px 5px;"/>
-					<p:commandButton value="Cancelar" style="float: right; width: 70px; margin: 0px 0px 10px 5px;" oncomplete="PF('vehicleDialog').hide();"/>
+			<p:dialog header="Cadastro de Veículo" widgetVar="vehicleDialog" draggable="false" resizable="false" modal="true" closable="false" visible="false" style=" width: 300px; padding: 3px">
+				<h:panelGrid id="vehicle-details" columns="1" style="border: 0px solid black; width: 100%;">
+					<p:commandLink value="Alterar Foto" onclick="PF('uploadDialog').show();" style="float: right"/>
+					<h:panelGrid columns="1" style="border: 1px solid black; width: 300px; height: 250px;">
+				        <p:graphicImage id="portrait" value="http://www.ventanasresidencial.com.br#{vehicleBean.vehicle.picture}" style="border: 1px solid black"/>
+					</h:panelGrid>
+					<h:panelGrid columns="2" style="border: 0px solid black; width: 100%; margin: 5px 0px 5px">
+				    	<p:outputLabel value="Placa:"/>
+				        <p:inputText value="#{vehicleBean.vehicle.license}" maxlength="7" required="true" style="width: 100px;"/>
+				    	<p:outputLabel value="Apartamento"/>
+						<p:selectOneMenu valueChangeListener="#{vehicleBean.onFlatSelect}" filter="true" rendered="#{vehicleBean.flats.size() > 1}" style="width: 100px;">
+							<f:selectItem itemLabel="-- #{msg['flat.lbl.everyone']} --" noSelectionOption="true"/>
+							<c:forEach var="flat" items="#{vehicleBean.flats}" varStatus="iterator">
+								<f:selectItem itemLabel="#{flat.block}/#{flat.number}" itemValue="#{iterator.index}"/>
+							</c:forEach>
+						</p:selectOneMenu>
+						<h:outputText value="#{vehicleBean.flats.get(0).block}/#{vehicleBean.flats.get(0).number}" rendered="#{vehicleBean.flats.size() == 1}"/>
+						<c:set target="#{vehicleBean.vehicle}" property="domain" value="#{vehicleBean.flats.get(0)}"/>
+			        </h:panelGrid>
+					<h:panelGrid columns="2" style="border: 0px solid black; float: right; margin: 10px 0px 5px">
+						<p:commandButton value="Salvar" actionListener="#{vehicleBean.onVehicleSave}" update=":outputMsg" oncomplete="if (!args.validationFailed) {PF('vehicleTable').update(); PF('vehicleDialog').hide();}" style="float: right; width: 80px; margin: 0px 0px 0px 5px;"/>
+						<p:commandButton value="Cancelar" type="button" onclick="PF('vehicleDialog').hide();" style="float: right; width: 80px; margin: 0px 0px 0px 5px;" global="false"/>
+					</h:panelGrid>
 				</h:panelGrid>
 			</p:dialog>
 			<p:dialog widgetVar="uploadDialog">
