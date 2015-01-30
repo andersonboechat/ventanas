@@ -7,7 +7,6 @@ import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 
 import br.com.abware.accountmgm.model.Vehicle;
-import br.com.abware.accountmgm.persistence.manager.ParkingManagerImpl;
 import br.com.abware.accountmgm.persistence.manager.SecurityManagerImpl;
 import br.com.abware.accountmgm.persistence.manager.VehicleManagerImpl;
 import br.com.abware.jcondo.core.Permission;
@@ -21,8 +20,8 @@ public class VehicleServiceImpl implements BaseService<Vehicle> {
 	private VehicleManagerImpl vehicleManager = new VehicleManagerImpl();
 
 	private FlatServiceImpl flatService = new FlatServiceImpl();
-	
-	private ParkingManagerImpl parkingManager = new ParkingManagerImpl();
+
+	private ParkingServiceImpl parkingService = new ParkingServiceImpl();
 	
 	private SecurityManagerImpl securityManager = new SecurityManagerImpl();
 	
@@ -32,9 +31,9 @@ public class VehicleServiceImpl implements BaseService<Vehicle> {
 			throw new Exception("veiculo nao cadastrado");
 		}
 
-		if (!securityManager.hasPermission(vehicle, Permission.VIEW)) {
-			throw new Exception("sem permissao para visualizar o veiculo " + vehicle);
-		}
+//		if (!securityManager.hasPermission(vehicle, Permission.VIEW)) {
+//			throw new Exception("sem permissao para visualizar o veiculo " + vehicle);
+//		}
 
 		return vehicle;
 	}
@@ -80,29 +79,11 @@ public class VehicleServiceImpl implements BaseService<Vehicle> {
 
 		// Verifica se tem vaga para o apartamento especificado
 		// Visitantes podem acessar o condominio apenas para deixar/buscar passageiros
-		if (vehicle.getDomain() instanceof Flat && getParkingAmount(vehicle.getDomain()) <= 0) {
+		if (vehicle.getDomain() instanceof Flat && parkingService.getParkingAmount(vehicle.getDomain()) <= 0) {
 			throw new Exception("nao ha vagas disponíveis");
 		}
 
 		return vehicleManager.save(vehicle);
-	}
-
-	public int getParkingAmount(Domain domain) {
-		try {
-			if (domain instanceof Flat) {
-				int ownedParkingAmount = parkingManager.findOwnedParkings(domain).size();
-				int usedParkingAmount = vehicleManager.findVehicles(domain).size();
-				int grantedParkingAmount = parkingManager.findGrantedParkings(domain).size();
-				int rentedParkingAmount = parkingManager.findRentedParkings(domain).size();
-				return (ownedParkingAmount + rentedParkingAmount) - (grantedParkingAmount + usedParkingAmount);
-			} else {
-				int ownedParkingAmount = parkingManager.findOwnedParkings(domain).size();
-				int usedParkingAmount = vehicleManager.findVehicles(domain).size();
-				return ownedParkingAmount - usedParkingAmount;
-			}
-		} catch (Exception e) {
-			return 0;
-		}
 	}
 
 	public void assignTo(Vehicle vehicle, Domain domain) throws Exception {
@@ -123,9 +104,9 @@ public class VehicleServiceImpl implements BaseService<Vehicle> {
 	public void removeFrom(Vehicle vehicle) throws Exception {
 		Vehicle v = getVehicle(vehicle.getId());
 
-		if (!securityManager.hasPermission(vehicle, Permission.DELETE)) {
-			throw new Exception("sem permissao para cadastrar veiculos");
-		}
+//		if (!securityManager.hasPermission(vehicle, Permission.DELETE)) {
+//			throw new Exception("sem permissao para cadastrar veiculos");
+//		}
 
 		v.setDomain(null);
 		vehicleManager.save(v);

@@ -1,6 +1,5 @@
 package br.com.abware.accountmgm.bean;
 
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Set;
@@ -15,8 +14,6 @@ import javax.faces.event.AjaxBehaviorEvent;
 import javax.faces.event.ValueChangeEvent;
 
 import org.apache.log4j.Logger;
-import org.apache.myfaces.commons.util.MessageUtils;
-import org.primefaces.component.selectonemenu.SelectOneMenu;
 
 import br.com.abware.accountmgm.bean.model.VehicleDataModel;
 import br.com.abware.accountmgm.model.Vehicle;
@@ -69,7 +66,11 @@ public class VehicleBean extends BaseBean {
 
 	public void onVehicleSave() {
 		try {
-			vehicleService.register(vehicle);
+			vehicle = vehicleService.register(vehicle);
+			model.addModel(vehicle);
+			FacesContext context = FacesContext.getCurrentInstance();
+			String component = context.getViewRoot().findComponent("outputMsg").getClientId();
+			context.addMessage(component, new FacesMessage(FacesMessage.SEVERITY_INFO, "veiculo registrado com sucesso", ""));
 		} catch (Exception e) {
 			FacesContext context = FacesContext.getCurrentInstance();
 			String component = context.getViewRoot().findComponent("outputMsg").getClientId();
@@ -89,7 +90,11 @@ public class VehicleBean extends BaseBean {
 	}
 
 	public void onVehicleDelete() throws Exception {
-		vehicleService.removeFrom(vehicle);
+		vehicleService.removeFrom(model.getRowData());
+		model.removeModel(model.getRowData());
+		FacesContext context = FacesContext.getCurrentInstance();
+		String component = context.getViewRoot().findComponent("outputMsg").getClientId();
+		context.addMessage(component, new FacesMessage(FacesMessage.SEVERITY_INFO, "exclusao realizada com sucesso", ""));
 	}
 
 	public void onVehicleSearch() throws Exception {
@@ -102,11 +107,6 @@ public class VehicleBean extends BaseBean {
 		vehicle.setDomain(flat);
 	}
 
-	public void onFlatSelect2(AjaxBehaviorEvent event) throws Exception {
-		Flat flat = flats.get((Integer) ((SelectOneMenu) event.getSource()).getValue());
-		vehicle.setDomain(flat);
-	}
-	
 	public void onBlockSelect(AjaxBehaviorEvent event) throws Exception {
 		filters.put("flat.block", block);
 		model.filter(filters);

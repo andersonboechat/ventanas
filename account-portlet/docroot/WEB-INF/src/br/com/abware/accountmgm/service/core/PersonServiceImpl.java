@@ -9,7 +9,6 @@ import java.util.List;
 import java.util.Set;
 
 import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.collections.ListUtils;
 
 import br.com.abware.accountmgm.persistence.manager.PersonManagerImpl;
 import br.com.abware.accountmgm.persistence.manager.SecurityManagerImpl;
@@ -149,7 +148,7 @@ public class PersonServiceImpl implements PersonService {
 							securityManager.hasPermission(role, Permission.ADD_USER)) {
 
 						securityManager.addRole(person, domain, role);
-		
+
 						// Configurando papeis de membro do condomínio de acordo com o papel de apartamento
 						if (domain instanceof Flat) {
 							if (role.getName() == RoleName.OWNER) {
@@ -160,23 +159,23 @@ public class PersonServiceImpl implements PersonService {
 									securityManager.addRole(person, domain, securityManager.getRole(domain, RoleName.DEBATER));
 									securityManager.addRole(person, domain, securityManager.getRole(domain, RoleName.HABITANT));
 								}
-							} 
-		
+							}
+
 							if (role.getName() == RoleName.RENTER) {
 								List<Person> owners = getOwners((Flat) domain);
-		
+
 								for (Person owner : owners) {
 									securityManager.removeRole(owner, domain, securityManager.getRole(domain, RoleName.LESSEE));
 									securityManager.removeRole(owner, domain, securityManager.getRole(domain, RoleName.DEBATER));
 									securityManager.removeRole(owner, domain, securityManager.getRole(domain, RoleName.HABITANT));
 								}
 							}
-		
+
 							if (role.getName() == RoleName.RESIDENT || role.getName() == RoleName.RENTER) {
 								securityManager.addRole(person, domain, securityManager.getRole(domain, RoleName.LESSEE));
 								securityManager.addRole(person, domain, securityManager.getRole(domain, RoleName.DEBATER));
 							} 
-		
+
 							if (role.getName() == RoleName.RESIDENT || 
 									role.getName() == RoleName.RENTER || role.getName() == RoleName.DEPENDENT) {
 								securityManager.addRole(person, domain, securityManager.getRole(domain, RoleName.HABITANT));

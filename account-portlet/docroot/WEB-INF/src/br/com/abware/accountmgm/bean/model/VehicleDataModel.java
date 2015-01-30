@@ -23,7 +23,15 @@ public class VehicleDataModel extends ListDataModel<Vehicle> implements Selectab
 		this.vehicles = vehicles;
 	}
 
-	@SuppressWarnings("unchecked")
+    public void addModel(Vehicle vehicle) {
+		vehicles.add(vehicle);
+	}
+    
+    public void removeModel(Vehicle vehicle) {
+		vehicles.remove(vehicle);
+	}
+
+    @SuppressWarnings("unchecked")
 	@Override
     public Vehicle getRowData(String rowKey) {
         for(Vehicle vehicle : (List<Vehicle>) getWrappedData()) {

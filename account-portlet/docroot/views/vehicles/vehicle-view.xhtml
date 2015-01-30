@@ -63,10 +63,9 @@
 					</p:panelGrid>
 				</p:column> 
 				<p:column style="width: 10%">
-					<p:commandLink actionListener="#{vehicleBean.onVehicleDelete}" oncomplete="if (!args.validationFailed &amp;&amp; !args.exception) {PF('vehicleTable').update();}" partialSubmit="true" process="@this">
+					<p:commandLink actionListener="#{vehicleBean.onVehicleDelete}" update="vehicleTable,:outputMsg" partialSubmit="true" process="@this">
 						<h:graphicImage value="../images/delete.png" />
 						<p:confirm header="#{msg['person.delete.confirm']}" message="#{msg['person.delete.message']}" icon="ui-icon-alert"/>
-						<f:setPropertyActionListener target="#{vehicleBean.vehicle}" value="#{vehicle}"/>
 					</p:commandLink>
 				</p:column>
 			</p:dataTable>
@@ -90,7 +89,7 @@
 						<c:set target="#{vehicleBean.vehicle}" property="domain" value="#{vehicleBean.flats.get(0)}"/>
 			        </h:panelGrid>
 					<h:panelGrid columns="2" style="border: 0px solid black; float: right; margin: 10px 0px 5px">
-						<p:commandButton value="Salvar" actionListener="#{vehicleBean.onVehicleSave}" update=":outputMsg" oncomplete="if (!args.validationFailed) {PF('vehicleTable').update(); PF('vehicleDialog').hide();}" style="float: right; width: 80px; margin: 0px 0px 0px 5px;"/>
+						<p:commandButton value="Salvar" actionListener="#{vehicleBean.onVehicleSave}" update="vehicleTable,:outputMsg" oncomplete="if (!args.validationFailed) {PF('vehicleDialog').hide();}" style="float: right; width: 80px; margin: 0px 0px 0px 5px;"/>
 						<p:commandButton value="Cancelar" type="button" onclick="PF('vehicleDialog').hide();" style="float: right; width: 80px; margin: 0px 0px 0px 5px;" global="false"/>
 					</h:panelGrid>
 				</h:panelGrid>
