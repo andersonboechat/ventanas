@@ -98,11 +98,7 @@ public abstract class JCondoManager<Entity extends BaseEntity, Model extends Bas
 			closeManager(key);
 		}
 	}
-<<<<<<< HEAD
 
-=======
-	
->>>>>>> refs/remotes/origin/master
 	public void delete(Model model) throws Exception {
 		String key = generateKey();
 		try {
