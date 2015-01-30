@@ -7,7 +7,13 @@
 	xmlns:h="http://java.sun.com/jsf/html"
 	xmlns:p="http://primefaces.org/ui"
 	xmlns:ui="http://java.sun.com/jsf/facelets">
-	<h:head></h:head>
+	<h:head>
+		<style>
+			.cropper {padding: 0; height: 600px;}
+			.cropper div {margin: 0 !important; padding: 0 !important;}
+			.cropper .img {height: 300px; margin: 0 !important;}
+		</style>
+	</h:head>
 	<h:body>
 		<p:growl id="outputMsg"/>
 		<f:loadBundle basename="Language_pt_BR" var="msg"/>	
@@ -15,7 +21,7 @@
 			<p:panelGrid columns="3" styleClass="menu-cmds" columnClasses="menu-cmds-col1,menu-cmds-col2,menu-cmds-col3" style="width: 100%">
 				<p:column>
 					<p:commandButton value="Cadastrar" actionListener="#{vehicleBean.onVehicleCreate}" 
-									 partialSubmit="true" process="@this" update="vehicle-details" oncomplete="PF('vehicleDialog').show();">
+									 partialSubmit="true" process="@this" update=":registerForm:vehicle-details" oncomplete="PF('vehicleDialog').show();">
 					</p:commandButton>
 					<p:commandButton value="Excluir" actionListener="#{vehicleBean.onVehiclesDelete}" 
 									 partialSubmit="true" process="@this,vehicleTable" update="vehicleTable,:outputMsg">
@@ -46,7 +52,7 @@
 			    	<h:outputText value="Apt. #{vehicleBean.flats.get(0).number} - Bloco #{vehicleBean.flats.get(0).block}"/>
 			    </p:column>
 			</p:panelGrid>
-			<p:dataTable id="vehicleTable" var="vehicle" value="#{vehicleBean.model}"  
+			<p:dataTable id="vehicleTable" widgetVar="vehicleTable" var="vehicle" value="#{vehicleBean.model}"  
 			             paginator="true" rows="5" paginatorPosition="bottom" 
 			             paginatorTemplate="{CurrentPageReport} {PreviousPageLink} {PageLinks} {NextPageLink}" 
 			             selection="#{vehicleBean.selectedVehicles}" rowKey="#{vehicle.id}" >
@@ -69,10 +75,28 @@
 					</p:commandLink>
 				</p:column>
 			</p:dataTable>
-			<p:dialog header="Cadastro de Veículo" widgetVar="vehicleDialog" draggable="false" resizable="false" modal="true" closable="false" visible="false" style=" width: 300px; padding: 3px">
+		</h:form>
+		<p:dialog id="uploadDialog" widgetVar="uploadDialog" visible="false" modal="true" header="Recorte de Imagem">
+			<h:form id="uploadForm" enctype="multipart/form-data">
+				<p:fileUpload id="image" label="Selecionar Foto" fileUploadListener="#{fileUploadBean.onFileUpload}" auto="true" update="uploadForm" rendered="#{empty fileUploadBean.imagePath}"/>
+				<p:panel rendered="#{!(empty fileUploadBean.imagePath)}" style="border: 0px !important;">
+					<p:panel styleClass="cropper" >
+						<p:imageCropper value="#{fileUploadBean.croppedImage}" image="http://localhost/account-portlet#{fileUploadBean.imagePath}" initialCoords="0,0,300,300" minSize="300" maxSize="300" aspectRatio="1"/>
+					</p:panel>
+					<p:panel style="margin: 0px auto; text-align: center; padding: 15px 0px; border: none">
+						<p:commandButton value="Recortar" actionListener="#{fileUploadBean.onCropp}" oncomplete="PF('uploadDialog').hide();"/>
+						<p:commandButton value="Cancelar" oncomplete="PF('uploadDialog').hide();">
+							<f:setPropertyActionListener target="#{fileUploadBean.imagePath}" value=""/>
+						</p:commandButton>
+					</p:panel>
+				</p:panel>
+			</h:form>		
+		</p:dialog>
+		<p:dialog header="Cadastro de Veículo" widgetVar="vehicleDialog" draggable="false" resizable="false" modal="true" closable="false" visible="true" style=" width: 300px; padding: 3px">
+			<h:form id="registerForm" enctype="multipart/form-data">
 				<h:panelGrid id="vehicle-details" columns="1" style="border: 0px solid black; width: 100%;">
-					<p:commandLink value="Alterar Foto" onclick="PF('uploadDialog').show();" style="float: right"/>
-					<h:panelGrid columns="1" style="border: 1px solid black; width: 300px; height: 250px;">
+					<p:commandLink value="Alterar Foto" onclick="PF('uploadDialog').show();"/>
+					<h:panelGrid columns="1" style="border: 1px solid black; width: 300px; height: 300px;">
 				        <p:graphicImage id="portrait" value="http://www.ventanasresidencial.com.br#{vehicleBean.vehicle.picture}" style="border: 1px solid black"/>
 					</h:panelGrid>
 					<h:panelGrid columns="2" style="border: 0px solid black; width: 100%; margin: 5px 0px 5px">
@@ -89,20 +113,15 @@
 						<c:set target="#{vehicleBean.vehicle}" property="domain" value="#{vehicleBean.flats.get(0)}"/>
 			        </h:panelGrid>
 					<h:panelGrid columns="2" style="border: 0px solid black; float: right; margin: 10px 0px 5px">
-						<p:commandButton value="Salvar" actionListener="#{vehicleBean.onVehicleSave}" update="vehicleTable,:outputMsg" oncomplete="if (!args.validationFailed) {PF('vehicleDialog').hide();}" style="float: right; width: 80px; margin: 0px 0px 0px 5px;"/>
+						<p:commandButton value="Salvar" actionListener="#{vehicleBean.onVehicleSave}" update="vehicle-details,:outputMsg" oncomplete="if (!args.validationFailed &amp;&amp; !args.exception) {PF('vehicleDialog').hide();}" style="float: right; width: 80px; margin: 0px 0px 0px 5px;"/>
 						<p:commandButton value="Cancelar" type="button" onclick="PF('vehicleDialog').hide();" style="float: right; width: 80px; margin: 0px 0px 0px 5px;" global="false"/>
 					</h:panelGrid>
 				</h:panelGrid>
-			</p:dialog>
-			<p:dialog widgetVar="uploadDialog">
-				<p:fileUpload fileUploadListener="#{vehicleBean.onPictureUpload}" 
-					allowTypes="/(\.|\/)(gif|jpe?g|png)$/" mode="advanced" showButtons="false" 
-					label="Selecionar Foto" update="portrait,:outputMsg" process="@this" style="width:550px" oncomplete="PF('uploadDialog').hide();"/>			
-			</p:dialog>
-			<p:confirmDialog global="true" width="600" style="padding: 0px" showEffect="fade" hideEffect="fade" visible="false">
-				<p:commandButton value="#{msg['no']}" type="button" styleClass="ui-confirmdialog-no" icon="ui-icon-close" style="float: left; width: 200px; margin-left: 14%" />
-				<p:commandButton value="#{msg['yes']}" type="button" styleClass="ui-confirmdialog-yes" icon="ui-icon-check" style="float: right; width: 200px; margin-right: 14%"/>
-			</p:confirmDialog>
-		</h:form>
+				<p:confirmDialog global="true" width="600" style="padding: 0px" showEffect="fade" hideEffect="fade" visible="false">
+					<p:commandButton value="#{msg['no']}" type="button" styleClass="ui-confirmdialog-no" icon="ui-icon-close" style="float: left; width: 200px; margin-left: 14%" />
+					<p:commandButton value="#{msg['yes']}" type="button" styleClass="ui-confirmdialog-yes" icon="ui-icon-check" style="float: right; width: 200px; margin-right: 14%"/>
+				</p:confirmDialog>
+			</h:form>		
+		</p:dialog>
 	</h:body>
 </f:view>

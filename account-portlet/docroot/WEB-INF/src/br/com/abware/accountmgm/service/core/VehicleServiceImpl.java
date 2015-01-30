@@ -6,6 +6,7 @@ import java.util.List;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 
+import br.com.abware.accountmgm.exception.ModelExistException;
 import br.com.abware.accountmgm.model.Vehicle;
 import br.com.abware.accountmgm.persistence.manager.SecurityManagerImpl;
 import br.com.abware.accountmgm.persistence.manager.VehicleManagerImpl;
@@ -29,6 +30,22 @@ public class VehicleServiceImpl implements BaseService<Vehicle> {
 		Vehicle vehicle = vehicleManager.findById(vehicleId);
 		if (vehicle == null) {
 			throw new Exception("veiculo nao cadastrado");
+		}
+
+//		if (!securityManager.hasPermission(vehicle, Permission.VIEW)) {
+//			throw new Exception("sem permissao para visualizar o veiculo " + vehicle);
+//		}
+
+		return vehicle;
+	}
+
+	public Vehicle getVehicle(String license) {
+		Vehicle vehicle = null;
+		try {
+			vehicle = vehicleManager.findByLicense(license);
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
 
 //		if (!securityManager.hasPermission(vehicle, Permission.VIEW)) {
@@ -65,7 +82,7 @@ public class VehicleServiceImpl implements BaseService<Vehicle> {
 		Vehicle v = vehicleManager.findByLicense(vehicle.getLicense());
 
 		if (v != null) {
-			throw new Exception("veiculo ja registrado");
+			throw new ModelExistException(null, "vehicle.exists");
 		}
 
 		if (vehicle.getDomain() != null && vehicle.getDomain() instanceof Flat && 

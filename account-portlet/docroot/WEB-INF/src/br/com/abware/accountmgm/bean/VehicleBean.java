@@ -14,8 +14,10 @@ import javax.faces.event.AjaxBehaviorEvent;
 import javax.faces.event.ValueChangeEvent;
 
 import org.apache.log4j.Logger;
+import org.primefaces.context.RequestContext;
 
 import br.com.abware.accountmgm.bean.model.VehicleDataModel;
+import br.com.abware.accountmgm.exception.ModelExistException;
 import br.com.abware.accountmgm.model.Vehicle;
 import br.com.abware.jcondo.core.model.Flat;
 
@@ -71,6 +73,12 @@ public class VehicleBean extends BaseBean {
 			FacesContext context = FacesContext.getCurrentInstance();
 			String component = context.getViewRoot().findComponent("outputMsg").getClientId();
 			context.addMessage(component, new FacesMessage(FacesMessage.SEVERITY_INFO, "veiculo registrado com sucesso", ""));
+		} catch (ModelExistException e) { 
+			vehicle = vehicleService.getVehicle(vehicle.getLicense());
+			FacesContext context = FacesContext.getCurrentInstance();
+			String component = context.getViewRoot().findComponent("outputMsg").getClientId();
+			context.addMessage(component, new FacesMessage(FacesMessage.SEVERITY_INFO, e.getLocalizedMessage(), ""));
+			RequestContext.getCurrentInstance().addCallbackParam("exception", true);
 		} catch (Exception e) {
 			FacesContext context = FacesContext.getCurrentInstance();
 			String component = context.getViewRoot().findComponent("outputMsg").getClientId();
