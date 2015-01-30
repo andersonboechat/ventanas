@@ -21,8 +21,8 @@ public class VehicleServiceImpl implements BaseService<Vehicle> {
 	private VehicleManagerImpl vehicleManager = new VehicleManagerImpl();
 
 	private FlatServiceImpl flatService = new FlatServiceImpl();
-	
-	private ParkingManagerImpl parkingManager = new ParkingManagerImpl();
+
+	private ParkingServiceImpl parkingService = new ParkingServiceImpl();
 	
 	private SecurityManagerImpl securityManager = new SecurityManagerImpl();
 	
@@ -80,29 +80,11 @@ public class VehicleServiceImpl implements BaseService<Vehicle> {
 
 		// Verifica se tem vaga para o apartamento especificado
 		// Visitantes podem acessar o condominio apenas para deixar/buscar passageiros
-		if (vehicle.getDomain() instanceof Flat && getParkingAmount(vehicle.getDomain()) <= 0) {
+		if (vehicle.getDomain() instanceof Flat && parkingService.getParkingAmount(vehicle.getDomain()) <= 0) {
 			throw new Exception("nao ha vagas disponíveis");
 		}
 
 		return vehicleManager.save(vehicle);
-	}
-
-	public int getParkingAmount(Domain domain) {
-		try {
-			if (domain instanceof Flat) {
-				int ownedParkingAmount = parkingManager.findOwnedParkings(domain).size();
-				int usedParkingAmount = vehicleManager.findVehicles(domain).size();
-				int grantedParkingAmount = parkingManager.findGrantedParkings(domain).size();
-				int rentedParkingAmount = parkingManager.findRentedParkings(domain).size();
-				return (ownedParkingAmount + rentedParkingAmount) - (grantedParkingAmount + usedParkingAmount);
-			} else {
-				int ownedParkingAmount = parkingManager.findOwnedParkings(domain).size();
-				int usedParkingAmount = vehicleManager.findVehicles(domain).size();
-				return ownedParkingAmount - usedParkingAmount;
-			}
-		} catch (Exception e) {
-			return 0;
-		}
 	}
 
 	public void assignTo(Vehicle vehicle, Domain domain) throws Exception {

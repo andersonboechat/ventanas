@@ -42,28 +42,30 @@ public class VehicleManagerImpl extends JCondoManager<VehicleEntity, Vehicle>{
 
 	@SuppressWarnings("unchecked")
 	public List<Vehicle> findVehicles(Domain domain) throws PersistenceException {
+		String key = generateKey();
 		try {
+			openManager(key);
 			String queryString = "FROM VehicleEntity WHERE domainId = :domainId";
-			openManager("VehicleManager.findVehicles");
 			Query query = em.createQuery(queryString);
 			query.setParameter("domainId", domain.getId());
 			return getModels(query.getResultList());
 		} finally {
-			closeManager("VehicleManager.findVehicles");
+			closeManager(key);
 		}
 	}
 
 	public Vehicle findByLicense(String license) throws Exception {
+		String key = generateKey();
 		try {
+			openManager(key);
 			String queryString = "FROM VehicleEntity WHERE license = :license";
-			openManager("VehicleManager.findByLicense");
 			Query query = em.createQuery(queryString);
 			query.setParameter("license", license);
 			return getModel((VehicleEntity) query.getSingleResult());
 		} catch (NoResultException e) {
 			return null;
 		} finally {
-			closeManager("VehicleManager.findByLicense");
+			closeManager(key);
 		}
 	}
 

@@ -23,40 +23,43 @@ public class ParkingManagerImpl extends JCondoManager<ParkingEntity, Parking> {
 
 	@SuppressWarnings("unchecked")
 	public List<Parking> findOwnedParkings(Domain domain) throws PersistenceException {
+		String key = generateKey();
 		try {
+			openManager(key);
 			String queryString = "FROM ParkingEntity WHERE domainId = :domainId";
-			openManager("ParkingManager.findOwnedParkings");
 			Query query = em.createQuery(queryString);
 			query.setParameter("domainId", domain.getId());
 			return getModels(query.getResultList());
 		} finally {
-			closeManager("ParkingManager.findOwnedParkings");
+			closeManager(key);
 		}
 	}
 
 	@SuppressWarnings("unchecked")
 	public List<Parking> findGrantedParkings(Domain domain) throws PersistenceException {
+		String key = generateKey();
 		try {
+			openManager(key);
 			String queryString = "FROM RentedParkingEntity WHERE domainId = :domainId";
-			openManager("ParkingManager.findGrantedParkings");
 			Query query = em.createQuery(queryString);
 			query.setParameter("domainId", domain.getId());
 			return getModels(query.getResultList());
 		} finally {
-			closeManager("ParkingManager.findGrantedParkings");
+			closeManager(key);
 		}
 	}
 
 	@SuppressWarnings("unchecked")
 	public List<Parking> findRentedParkings(Domain domain) throws PersistenceException {
+		String key = generateKey();
 		try {
+			openManager(key);
 			String queryString = "FROM RentedParkingEntity WHERE renterDomainId = :domainId";
-			openManager("ParkingManager.findRentedParkings");
 			Query query = em.createQuery(queryString);
 			query.setParameter("domainId", domain.getId());
 			return getModels(query.getResultList());
 		} finally {
-			closeManager("ParkingManager.findRentedParkings");
+			closeManager(key);
 		}
 	}
 

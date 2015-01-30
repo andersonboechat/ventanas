@@ -3,6 +3,7 @@ package br.com.abware.accountmgm.persistence.manager;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.UUID;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
@@ -54,7 +55,7 @@ public abstract class JCondoManager<Entity extends BaseEntity, Model extends Bas
 			return models;
 		} catch (Exception e) {
 			throw new PersistenceException(e, "");
-		}		
+		}
 	}
 
 	public synchronized void openManager(String owner) {
@@ -74,12 +75,13 @@ public abstract class JCondoManager<Entity extends BaseEntity, Model extends Bas
 	}
 
 	public Model save(Model model) throws Exception {
+		String key = generateKey();
 		Date date = new Date();
 		Entity entity = getEntity(model);
 		entity.setUpdateDate(date);
 		entity.setUpdateUser(helper.getUserId());
 		try {
-			openManager("JCondoManager.save." + model);
+			openManager(key);
 			em.getTransaction().begin();
 
 			if (em.find(getEntityClass(), entity.getId()) != null) {
@@ -93,30 +95,52 @@ public abstract class JCondoManager<Entity extends BaseEntity, Model extends Bas
 
 			return getModel(entity);
 		} finally {
-			closeManager("JCondoManager.save." + model);
+			closeManager(key);
 		}
 	}
 	
 	public void delete(Model model) throws Exception {
-		Date date = new Date();
-		Entity entity = getEntity(model);
-		entity.setUpdateDate(date);
-		entity.setUpdateUser(helper.getUserId());
-
-		em.getTransaction().begin();
-		em.remove(entity);
-		em.getTransaction().commit();
+		String key = generateKey();
+		try {
+			openManager(key);
+			Date date = new Date();
+			Entity entity = getEntity(model);
+			entity.setUpdateDate(date);
+			entity.setUpdateUser(helper.getUserId());
+	
+			em.getTransaction().begin();
+			em.remove(entity);
+			em.getTransaction().commit();
+		} finally {
+			closeManager(key);
+		}
 	}
 
 	public Model findById(Object id) throws Exception {
-		return getModel(em.find(getEntityClass(), id));
+		String key = generateKey();
+		try {
+			openManager(key);
+			return getModel(em.find(getEntityClass(), id));
+		} finally {
+			closeManager(key);
+		}
 	}
 
 	@SuppressWarnings("unchecked")
 	public List<Model> findAll() throws Exception {
-		String query = "FROM " + getEntityClass().getSimpleName();
-		Query q = em.createQuery(query);
-		return getModels(q.getResultList());
-	}	
+		String key = generateKey();
+		try {
+			openManager(key);
+			String query = "FROM " + getEntityClass().getSimpleName();
+			Query q = em.createQuery(query);
+			return getModels(q.getResultList());
+		} finally {
+			closeManager(key);
+		}
+	}
+	
+	protected String generateKey() {
+		return UUID.randomUUID().toString();
+	}
 
 }
