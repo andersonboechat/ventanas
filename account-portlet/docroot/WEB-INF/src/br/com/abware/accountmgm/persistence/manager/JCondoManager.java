@@ -85,7 +85,7 @@ public abstract class JCondoManager<Entity extends BaseEntity, Model extends Bas
 			em.getTransaction().begin();
 
 			if (em.find(getEntityClass(), entity.getId()) != null) {
-				em.merge(entity);
+				entity = em.merge(entity);
 			} else {
 				em.persist(entity);
 			}
@@ -98,7 +98,7 @@ public abstract class JCondoManager<Entity extends BaseEntity, Model extends Bas
 			closeManager(key);
 		}
 	}
-	
+
 	public void delete(Model model) throws Exception {
 		String key = generateKey();
 		try {

@@ -6,8 +6,8 @@ import java.util.List;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 
+import br.com.abware.accountmgm.exception.ModelExistException;
 import br.com.abware.accountmgm.model.Vehicle;
-import br.com.abware.accountmgm.persistence.manager.ParkingManagerImpl;
 import br.com.abware.accountmgm.persistence.manager.SecurityManagerImpl;
 import br.com.abware.accountmgm.persistence.manager.VehicleManagerImpl;
 import br.com.abware.jcondo.core.Permission;
@@ -32,9 +32,25 @@ public class VehicleServiceImpl implements BaseService<Vehicle> {
 			throw new Exception("veiculo nao cadastrado");
 		}
 
-		if (!securityManager.hasPermission(vehicle, Permission.VIEW)) {
-			throw new Exception("sem permissao para visualizar o veiculo " + vehicle);
+//		if (!securityManager.hasPermission(vehicle, Permission.VIEW)) {
+//			throw new Exception("sem permissao para visualizar o veiculo " + vehicle);
+//		}
+
+		return vehicle;
+	}
+
+	public Vehicle getVehicle(String license) {
+		Vehicle vehicle = null;
+		try {
+			vehicle = vehicleManager.findByLicense(license);
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
+
+//		if (!securityManager.hasPermission(vehicle, Permission.VIEW)) {
+//			throw new Exception("sem permissao para visualizar o veiculo " + vehicle);
+//		}
 
 		return vehicle;
 	}
@@ -66,7 +82,7 @@ public class VehicleServiceImpl implements BaseService<Vehicle> {
 		Vehicle v = vehicleManager.findByLicense(vehicle.getLicense());
 
 		if (v != null) {
-			throw new Exception("veiculo ja registrado");
+			throw new ModelExistException(null, "vehicle.exists");
 		}
 
 		if (vehicle.getDomain() != null && vehicle.getDomain() instanceof Flat && 
@@ -105,9 +121,9 @@ public class VehicleServiceImpl implements BaseService<Vehicle> {
 	public void removeFrom(Vehicle vehicle) throws Exception {
 		Vehicle v = getVehicle(vehicle.getId());
 
-		if (!securityManager.hasPermission(vehicle, Permission.DELETE)) {
-			throw new Exception("sem permissao para cadastrar veiculos");
-		}
+//		if (!securityManager.hasPermission(vehicle, Permission.DELETE)) {
+//			throw new Exception("sem permissao para cadastrar veiculos");
+//		}
 
 		v.setDomain(null);
 		vehicleManager.save(v);

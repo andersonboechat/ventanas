@@ -2,13 +2,14 @@ package br.com.abware.accountmgm.model;
 
 import br.com.abware.jcondo.core.model.BaseModel;
 import br.com.abware.jcondo.core.model.Domain;
+import br.com.abware.jcondo.core.model.Image;
 
 public class Vehicle extends AbstractModel {
 
 	private long id;
 
-	private String name;
-
+	private Image image;
+	
 	private String picture;
 
 	private String license;
@@ -37,12 +38,12 @@ public class Vehicle extends AbstractModel {
 		this.id = id;
 	}
 
-	public String getName() {
-		return name;
+	public Image getImage() {
+		return image;
 	}
 
-	public void setName(String name) {
-		this.name = name;
+	public void setImage(Image image) {
+		this.image = image;
 	}
 
 	public String getPicture() {

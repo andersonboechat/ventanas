@@ -1,6 +1,5 @@
 package br.com.abware.accountmgm.bean;
 
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Set;
@@ -9,18 +8,21 @@ import java.util.TreeSet;
 import javax.annotation.PostConstruct;
 import javax.faces.application.FacesMessage;
 import javax.faces.bean.ManagedBean;
+import javax.faces.bean.ManagedProperty;
 import javax.faces.bean.ViewScoped;
 import javax.faces.context.FacesContext;
 import javax.faces.event.AjaxBehaviorEvent;
 import javax.faces.event.ValueChangeEvent;
 
 import org.apache.log4j.Logger;
-import org.apache.myfaces.commons.util.MessageUtils;
-import org.primefaces.component.selectonemenu.SelectOneMenu;
+import org.primefaces.context.RequestContext;
+import org.primefaces.event.FileUploadEvent;
 
 import br.com.abware.accountmgm.bean.model.VehicleDataModel;
+import br.com.abware.accountmgm.exception.ModelExistException;
 import br.com.abware.accountmgm.model.Vehicle;
 import br.com.abware.jcondo.core.model.Flat;
+import br.com.abware.jcondo.core.model.Image;
 
 @ManagedBean
 @ViewScoped
@@ -28,6 +30,9 @@ public class VehicleBean extends BaseBean {
 
 	private static Logger LOGGER = Logger.getLogger(VehicleBean.class);
 
+	@ManagedProperty(value="#{fileUploadBean}")
+	private FileUploadBean fileUploadBean;
+	
 	private VehicleDataModel model;
 
 	private HashMap<String, Object> filters;
@@ -47,7 +52,7 @@ public class VehicleBean extends BaseBean {
 	private Set<Long> blocks;
 
 	private Set<Long> numbers;
-
+	
 	@PostConstruct
 	public void init() {
 		try {
@@ -55,6 +60,7 @@ public class VehicleBean extends BaseBean {
 			model = new VehicleDataModel(vehicleService.getVehicles(personService.getPerson()));
 			vehicle = new Vehicle();
 			vehicle.setDomain(flats.get(0));
+			vehicle.setImage(new Image());
 			blocks = new TreeSet<Long>();
 			numbers = new TreeSet<Long>();
 			for (Flat flat : flats) {
@@ -69,7 +75,17 @@ public class VehicleBean extends BaseBean {
 
 	public void onVehicleSave() {
 		try {
-			vehicleService.register(vehicle);
+			vehicle = vehicleService.register(vehicle);
+			model.addModel(vehicle);
+			FacesContext context = FacesContext.getCurrentInstance();
+			String component = context.getViewRoot().findComponent("outputMsg").getClientId();
+			context.addMessage(component, new FacesMessage(FacesMessage.SEVERITY_INFO, "veiculo registrado com sucesso", ""));
+		} catch (ModelExistException e) { 
+			vehicle = vehicleService.getVehicle(vehicle.getLicense());
+			FacesContext context = FacesContext.getCurrentInstance();
+			String component = context.getViewRoot().findComponent("outputMsg").getClientId();
+			context.addMessage(component, new FacesMessage(FacesMessage.SEVERITY_INFO, e.getLocalizedMessage(), ""));
+			RequestContext.getCurrentInstance().addCallbackParam("exception", true);
 		} catch (Exception e) {
 			FacesContext context = FacesContext.getCurrentInstance();
 			String component = context.getViewRoot().findComponent("outputMsg").getClientId();
@@ -80,6 +96,7 @@ public class VehicleBean extends BaseBean {
 	public void onVehicleCreate() throws Exception {
 		vehicle = new Vehicle();
 		vehicle.setDomain(new Flat());
+		vehicle.setImage(new Image());
 	}
 
 	public void onVehiclesDelete() throws Exception {
@@ -89,7 +106,11 @@ public class VehicleBean extends BaseBean {
 	}
 
 	public void onVehicleDelete() throws Exception {
-		vehicleService.removeFrom(vehicle);
+		vehicleService.removeFrom(model.getRowData());
+		model.removeModel(model.getRowData());
+		FacesContext context = FacesContext.getCurrentInstance();
+		String component = context.getViewRoot().findComponent("outputMsg").getClientId();
+		context.addMessage(component, new FacesMessage(FacesMessage.SEVERITY_INFO, "exclusao realizada com sucesso", ""));
 	}
 
 	public void onVehicleSearch() throws Exception {
@@ -102,11 +123,6 @@ public class VehicleBean extends BaseBean {
 		vehicle.setDomain(flat);
 	}
 
-	public void onFlatSelect2(AjaxBehaviorEvent event) throws Exception {
-		Flat flat = flats.get((Integer) ((SelectOneMenu) event.getSource()).getValue());
-		vehicle.setDomain(flat);
-	}
-	
 	public void onBlockSelect(AjaxBehaviorEvent event) throws Exception {
 		filters.put("flat.block", block);
 		model.filter(filters);
@@ -117,8 +133,17 @@ public class VehicleBean extends BaseBean {
 		model.filter(filters);
 	}
 
-	public void onPictureUpload() {
-		
+	public void onImageUpload(FileUploadEvent event) {
+		fileUploadBean.onFileUpload(event);
+		vehicle.getImage().setPath(fileUploadBean.getImagePath());
+	}
+
+	public void onImageCropp() {
+		fileUploadBean.onCropp();
+	}
+
+	public void setFileUploadBean(FileUploadBean fileUploadBean) {
+		this.fileUploadBean = fileUploadBean;
 	}
 
 	public VehicleDataModel getModel() {
