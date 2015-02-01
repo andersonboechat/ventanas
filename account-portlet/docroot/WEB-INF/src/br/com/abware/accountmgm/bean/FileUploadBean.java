@@ -80,6 +80,6 @@ public class FileUploadBean {
 
 	public void setImage(File image) {
 		this.image = image;
-	}	
+	}
 	
 }

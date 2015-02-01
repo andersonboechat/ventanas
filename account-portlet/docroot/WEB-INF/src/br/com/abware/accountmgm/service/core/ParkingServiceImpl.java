@@ -10,6 +10,8 @@ import br.com.abware.jcondo.core.service.BaseService;
 public class ParkingServiceImpl implements BaseService<Parking> {
 
 	private ParkingManagerImpl parkingManager = new ParkingManagerImpl();
+	
+	private VehicleManagerImpl vehicleManager = new VehicleManagerImpl();	
 
 	private VehicleManagerImpl vehicleManager = new VehicleManagerImpl();	
 
