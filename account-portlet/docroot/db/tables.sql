@@ -16,6 +16,43 @@
 /*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
 
 --
+-- Table structure for table `jco_access_log`
+--
+
+DROP TABLE IF EXISTS `jco_access_log`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `jco_access_log` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `entity` int(1) NOT NULL,
+  `type` int(1) NOT NULL,
+  `date` datetime NOT NULL,
+  `comment` varchar(200) DEFAULT NULL,
+  `updateDate` datetime NOT NULL,
+  `updateUser` bigint(20) NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `jco_flat`
+--
+
+DROP TABLE IF EXISTS `jco_flat`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `jco_flat` (
+  `id` bigint(20) NOT NULL,
+  `block` int(1) NOT NULL,
+  `number` int(5) NOT NULL,
+  `updateDate` datetime NOT NULL,
+  `updateUser` bigint(20) NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `block_number_UNIQUE` (`block`,`number`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
 -- Table structure for table `jco_parking`
 --
 
@@ -23,7 +60,7 @@ DROP TABLE IF EXISTS `jco_parking`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `jco_parking` (
-  `id` bigint(20) NOT NULL,
+  `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `domainId` bigint(20) NOT NULL,
   `code` varchar(10) NOT NULL,
   `type` int(1) NOT NULL,
@@ -31,7 +68,7 @@ CREATE TABLE `jco_parking` (
   `updateUser` bigint(20) NOT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `code_UNIQUE` (`code`)
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -51,6 +88,22 @@ CREATE TABLE `jco_parking_domain` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
+-- Table structure for table `jco_person`
+--
+
+DROP TABLE IF EXISTS `jco_person`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `jco_person` (
+  `id` bigint(20) NOT NULL,
+  `type` int(2) NOT NULL,
+  `updateDate` datetime NOT NULL,
+  `updateUser` bigint(20) NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
 -- Table structure for table `jco_vehicle`
 --
 
@@ -59,14 +112,16 @@ DROP TABLE IF EXISTS `jco_vehicle`;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `jco_vehicle` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
-  `flatId` bigint(20) DEFAULT '0',
+  `domainId` bigint(20) DEFAULT '0',
+  `imageId` bigint(20) DEFAULT '0',
   `license` varchar(8) NOT NULL,
   `name` varchar(45) DEFAULT NULL,
-  `picture` varchar(45) DEFAULT NULL,
   `updateDate` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `updateUser` bigint(20) NOT NULL,
-  PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `license_UNIQUE` (`license`),
+  KEY `domain_INDEX` (`domainId`)
+) ENGINE=InnoDB AUTO_INCREMENT=11 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -79,9 +134,6 @@ DROP TABLE IF EXISTS `jco_vehicle_access_log`;
 CREATE TABLE `jco_vehicle_access_log` (
   `id` bigint(20) NOT NULL,
   `vehicleId` bigint(20) NOT NULL,
-  `type` int(1) NOT NULL,
-  `date` datetime NOT NULL,
-  `comment` varchar(200) DEFAULT NULL,
   `updateDate` datetime NOT NULL,
   `updateUser` bigint(20) NOT NULL,
   PRIMARY KEY (`id`)
@@ -97,4 +149,4 @@ CREATE TABLE `jco_vehicle_access_log` (
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2015-01-27 17:34:03
+-- Dump completed on 2015-02-02 17:20:52

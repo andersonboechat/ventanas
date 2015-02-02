@@ -21,6 +21,7 @@ import org.primefaces.event.FileUploadEvent;
 import br.com.abware.accountmgm.bean.model.VehicleDataModel;
 import br.com.abware.accountmgm.exception.ModelExistException;
 import br.com.abware.accountmgm.model.Vehicle;
+import br.com.abware.accountmgm.util.BeanUtils;
 import br.com.abware.jcondo.core.model.Condominium;
 import br.com.abware.jcondo.core.model.Domain;
 import br.com.abware.jcondo.core.model.Flat;
@@ -28,7 +29,7 @@ import br.com.abware.jcondo.core.model.Image;
 import br.com.abware.jcondo.core.model.Supplier;
 
 @ViewScoped
-@ManagedBean(name="vehicleBean", eager=true)
+@ManagedBean
 public class VehicleBean extends BaseBean {
 
 	private static Logger LOGGER = Logger.getLogger(VehicleBean.class);
@@ -51,14 +52,12 @@ public class VehicleBean extends BaseBean {
 	private Vehicle[] selectedVehicles;
 
 	private List<Flat> flats;
-	
-	private Flat flat;
-	
-	private Image image;
 
 	private Set<Long> blocks;
 
 	private Set<Long> numbers;
+	
+	private boolean visitor;
 	
 	@PostConstruct
 	public void init() {
@@ -82,50 +81,86 @@ public class VehicleBean extends BaseBean {
 
 	public void onVehicleSave() {
 		try {
+			if (visitor && vehicle.getDomain().getId() > 0) {
+				vehicle.setDomain(new Flat());
+			}
+
 			if (vehicle.getId() == 0) {
-				vehicle.setDomain(flat);
 				vehicle = vehicleService.register(vehicle);
 				model.addModel(vehicle);
 			} else {
-				vehicleService.assignTo(vehicle, flat);
-				vehicleService.updateImage(vehicle, image);
+				vehicleService.assignTo(vehicle, vehicle.getDomain());
+				vehicleService.updateImage(vehicle, vehicle.getImage());
+				model.setModel(vehicle);
 			}
 
 			FacesContext context = FacesContext.getCurrentInstance();
 			String component = context.getViewRoot().findComponent("outputMsg").getClientId();
 			context.addMessage(component, new FacesMessage(FacesMessage.SEVERITY_INFO, "veiculo registrado com sucesso", ""));
-		} catch (ModelExistException e) { 
+		} catch (ModelExistException e) {
 			Vehicle v = vehicleService.getVehicle(vehicle.getLicense());
-			model.getRowData().setDomain(v.getDomain());
-			FacesContext context = FacesContext.getCurrentInstance();
-			String component = context.getViewRoot().findComponent("outputMsg").getClientId();
-			context.addMessage(component, new FacesMessage(FacesMessage.SEVERITY_INFO, e.getLocalizedMessage(), ""));
+
+			// Veiculo esta associado a um apartamento
+			if (v.getDomain().getId() > 0) {
+				String details;
+
+				if (flats.indexOf(v.getDomain()) >= 0) {
+					details = "Este veículo está cadastrado para o apartamento " + ((Flat) v.getDomain()).getBlock() + "/" + ((Flat) v.getDomain()).getNumber();
+				} else {
+					details = "Este veículo está cadastrado para um apartamento";
+				}
+
+				FacesContext context = FacesContext.getCurrentInstance();
+				String component = context.getViewRoot().findComponent("outputMsg").getClientId();
+				context.addMessage(component, new FacesMessage(FacesMessage.SEVERITY_WARN, e.getLocalizedMessage(), details));
+			} else {
+			// Veiculo eh visitante
+				try {
+					Domain domain = vehicle.getDomain();
+					BeanUtils.copyProperties(vehicle, v);
+					vehicle.setDomain(domain);
+				} catch (Exception ex) {
+					LOGGER.error("Falha ao clonar veiculo", ex);
+				}
+
+				RequestContext.getCurrentInstance().addCallbackParam("alert", true);
+			}
+
 			RequestContext.getCurrentInstance().addCallbackParam("exception", true);
 		} catch (Exception e) {
 			FacesContext context = FacesContext.getCurrentInstance();
 			String component = context.getViewRoot().findComponent("outputMsg").getClientId();
 			context.addMessage(component, new FacesMessage(FacesMessage.SEVERITY_INFO, e.getMessage(), ""));
+			RequestContext.getCurrentInstance().addCallbackParam("exception", true);
 		}
 	}
 
 	public void onVehicleCreate() throws Exception {
 		vehicle = new Vehicle();
-		vehicle.setDomain(new Condominium());
+		vehicle.setDomain(new Flat());
 		vehicle.setImage(new Image());
 	}
 
 	public void onVehiclesDelete() throws Exception {
 		for (Vehicle vehicle : selectedVehicles) {
-			vehicleService.removeFrom(vehicle);
+			vehicleService.removeFrom(vehicle, vehicle.getDomain());
 		}
 	}
 
 	public void onVehicleDelete() throws Exception {
-		vehicleService.removeFrom(model.getRowData());
+		vehicleService.removeFrom(model.getRowData(), model.getRowData().getDomain());
 		model.removeModel(model.getRowData());
 		FacesContext context = FacesContext.getCurrentInstance();
 		String component = context.getViewRoot().findComponent("outputMsg").getClientId();
 		context.addMessage(component, new FacesMessage(FacesMessage.SEVERITY_INFO, "exclusao realizada com sucesso", ""));
+	}
+	
+	public void onVehicleEdit() {
+		try {
+			BeanUtils.copyProperties(vehicle, model.getRowData());
+		} catch (Exception e) {
+			LOGGER.error("Falha ao editar veiculo", e);
+		}
 	}
 
 	public void onVehicleSearch() throws Exception {
@@ -136,9 +171,9 @@ public class VehicleBean extends BaseBean {
 	public void onFlatSelect(ValueChangeEvent event) throws Exception {
 		long id = (Long) event.getNewValue();
 		if (id == 0) {
-			flat = new Flat();
+			vehicle.setDomain(new Flat());
 		} else {
-			flat = flats.get(flats.indexOf(new Flat(id, 0, 0)));
+			vehicle.setDomain(flats.get(flats.indexOf(new Flat(id, 0, 0))));
 		}
 	}
 
@@ -247,6 +282,14 @@ public class VehicleBean extends BaseBean {
 
 	public void setNumber(Long number) {
 		this.number = number;
+	}
+
+	public boolean isVisitor() {
+		return visitor;
+	}
+
+	public void setVisitor(boolean visitor) {
+		this.visitor = visitor;
 	}
 
 	

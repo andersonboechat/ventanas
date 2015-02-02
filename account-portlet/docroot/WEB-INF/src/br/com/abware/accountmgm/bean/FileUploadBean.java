@@ -36,7 +36,7 @@ public class FileUploadBean {
 											"." + FilenameUtils.getExtension(uploadedFile.getFileName()),
 											new File(ec.getRealPath("") + imagePath));
 			FileUtils.copyInputStreamToFile(uploadedFile.getInputstream(), image);
-			Thumbnails.of(image).height(300).toFile(image);
+			Thumbnails.of(image).height(480).toFile(image);
 			imagePath = ec.getRequestScheme() + "://" + ec.getRequestServerName() + ec.getRequestContextPath() + imagePath + image.getName();
 		} catch (Exception e) {
 			e.printStackTrace();

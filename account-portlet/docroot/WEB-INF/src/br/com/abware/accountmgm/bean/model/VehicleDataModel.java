@@ -38,6 +38,19 @@ public class VehicleDataModel extends ListDataModel<Vehicle> implements Selectab
 	}
 
     @SuppressWarnings("unchecked")
+	public void setModel(Vehicle vehicle) {
+    	int index = ((List<Vehicle>) getWrappedData()).indexOf(vehicle);
+    	if (index >= 0) {
+    		((List<Vehicle>) getWrappedData()).set(index, vehicle);
+    	}
+
+    	index = vehicles.indexOf(vehicle);
+    	if (index >= 0) {
+    		vehicles.set(index, vehicle);
+    	}
+	}
+    
+    @SuppressWarnings("unchecked")
 	@Override
     public Vehicle getRowData(String rowKey) {
         for(Vehicle vehicle : (List<Vehicle>) getWrappedData()) {

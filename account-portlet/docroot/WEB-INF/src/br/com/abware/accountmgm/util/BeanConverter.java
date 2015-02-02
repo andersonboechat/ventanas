@@ -1,19 +1,31 @@
 package br.com.abware.accountmgm.util;
 
-import org.apache.commons.beanutils.Converter;
+import java.lang.reflect.InvocationTargetException;
 
-import br.com.abware.jcondo.core.PersonStatus;
+import org.apache.commons.beanutils.BeanUtils;
+import org.apache.commons.beanutils.Converter;
 
 public class BeanConverter implements Converter {
 
-	@Override
 	@SuppressWarnings("rawtypes")
+	@Override
 	public Object convert(Class arg0, Object orig) {
-		if ((Integer) orig == 0) {
-			return PersonStatus.ACTIVE;
-		} else {
-			return PersonStatus.INACTIVE;
+		Object dest = null;
+
+		try {
+			dest = arg0.newInstance();
+			BeanUtils.copyProperties(dest, orig);
+		} catch (IllegalAccessException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (InvocationTargetException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (InstantiationException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
+		return dest;
 	}
 
 }

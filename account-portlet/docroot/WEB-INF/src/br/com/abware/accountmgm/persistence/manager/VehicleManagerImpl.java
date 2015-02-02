@@ -41,7 +41,7 @@ public class VehicleManagerImpl extends JCondoManager<VehicleEntity, Vehicle>{
 	}
 
 	private String getPath(long imageId) {
-		return helper.getPortalURL() + helper.getThemeDisplay().getPathImage() + "/portrait?img_id=" + imageId;
+		return imageId == 0 ? null : helper.getPortalURL() + helper.getThemeDisplay().getPathImage() + "/portrait?img_id=" + imageId;
 	}
 	
 	@Override
@@ -54,10 +54,8 @@ public class VehicleManagerImpl extends JCondoManager<VehicleEntity, Vehicle>{
 			vehicle.setDomain(new Flat());
 		}
 
-		if (entity.getImageId() != 0) {
-			String path = getPath(entity.getImageId());
-			vehicle.setImage(new Image(entity.getImageId(), path, null, null));
-		}
+		String path = getPath(entity.getImageId());
+		vehicle.setImage(new Image(entity.getImageId(), path, null, null));
 
 		return vehicle;
 	}
