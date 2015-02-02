@@ -13,8 +13,6 @@ public class ParkingServiceImpl implements BaseService<Parking> {
 	
 	private VehicleManagerImpl vehicleManager = new VehicleManagerImpl();	
 
-	private VehicleManagerImpl vehicleManager = new VehicleManagerImpl();	
-
 	public int getParkingAmount(Domain domain) {
 		try {
 			int freeParkingAmount = parkingManager.findOwnedParkings(domain).size();

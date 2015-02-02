@@ -21,11 +21,14 @@ import org.primefaces.event.FileUploadEvent;
 import br.com.abware.accountmgm.bean.model.VehicleDataModel;
 import br.com.abware.accountmgm.exception.ModelExistException;
 import br.com.abware.accountmgm.model.Vehicle;
+import br.com.abware.jcondo.core.model.Condominium;
+import br.com.abware.jcondo.core.model.Domain;
 import br.com.abware.jcondo.core.model.Flat;
 import br.com.abware.jcondo.core.model.Image;
+import br.com.abware.jcondo.core.model.Supplier;
 
-@ManagedBean
 @ViewScoped
+@ManagedBean(name="vehicleBean", eager=true)
 public class VehicleBean extends BaseBean {
 
 	private static Logger LOGGER = Logger.getLogger(VehicleBean.class);
@@ -48,6 +51,10 @@ public class VehicleBean extends BaseBean {
 	private Vehicle[] selectedVehicles;
 
 	private List<Flat> flats;
+	
+	private Flat flat;
+	
+	private Image image;
 
 	private Set<Long> blocks;
 
@@ -59,7 +66,7 @@ public class VehicleBean extends BaseBean {
 			flats = flatService.getFlats(personService.getPerson());
 			model = new VehicleDataModel(vehicleService.getVehicles(personService.getPerson()));
 			vehicle = new Vehicle();
-			vehicle.setDomain(flats.get(0));
+			vehicle.setDomain(new Flat());
 			vehicle.setImage(new Image());
 			blocks = new TreeSet<Long>();
 			numbers = new TreeSet<Long>();
@@ -75,13 +82,21 @@ public class VehicleBean extends BaseBean {
 
 	public void onVehicleSave() {
 		try {
-			vehicle = vehicleService.register(vehicle);
-			model.addModel(vehicle);
+			if (vehicle.getId() == 0) {
+				vehicle.setDomain(flat);
+				vehicle = vehicleService.register(vehicle);
+				model.addModel(vehicle);
+			} else {
+				vehicleService.assignTo(vehicle, flat);
+				vehicleService.updateImage(vehicle, image);
+			}
+
 			FacesContext context = FacesContext.getCurrentInstance();
 			String component = context.getViewRoot().findComponent("outputMsg").getClientId();
 			context.addMessage(component, new FacesMessage(FacesMessage.SEVERITY_INFO, "veiculo registrado com sucesso", ""));
 		} catch (ModelExistException e) { 
-			vehicle = vehicleService.getVehicle(vehicle.getLicense());
+			Vehicle v = vehicleService.getVehicle(vehicle.getLicense());
+			model.getRowData().setDomain(v.getDomain());
 			FacesContext context = FacesContext.getCurrentInstance();
 			String component = context.getViewRoot().findComponent("outputMsg").getClientId();
 			context.addMessage(component, new FacesMessage(FacesMessage.SEVERITY_INFO, e.getLocalizedMessage(), ""));
@@ -95,7 +110,7 @@ public class VehicleBean extends BaseBean {
 
 	public void onVehicleCreate() throws Exception {
 		vehicle = new Vehicle();
-		vehicle.setDomain(new Flat());
+		vehicle.setDomain(new Condominium());
 		vehicle.setImage(new Image());
 	}
 
@@ -119,17 +134,21 @@ public class VehicleBean extends BaseBean {
 	}
 
 	public void onFlatSelect(ValueChangeEvent event) throws Exception {
-		Flat flat = flats.get(Integer.valueOf((String) event.getNewValue()));
-		vehicle.setDomain(flat);
+		long id = (Long) event.getNewValue();
+		if (id == 0) {
+			flat = new Flat();
+		} else {
+			flat = flats.get(flats.indexOf(new Flat(id, 0, 0)));
+		}
 	}
 
 	public void onBlockSelect(AjaxBehaviorEvent event) throws Exception {
-		filters.put("flat.block", block);
+		filters.put("domain.block", block);
 		model.filter(filters);
 	}
 
 	public void onNumberSelect(AjaxBehaviorEvent event) throws Exception {
-		filters.put("flat.number", number);
+		filters.put("domain.number", number);
 		model.filter(filters);
 	}
 
@@ -144,6 +163,22 @@ public class VehicleBean extends BaseBean {
 
 	public void setFileUploadBean(FileUploadBean fileUploadBean) {
 		this.fileUploadBean = fileUploadBean;
+	}
+	
+	public String displayDomain(Domain domain) {
+		if (domain != null && domain.getId() > 0) {
+			if (domain instanceof Flat) {
+				Flat flat = (Flat) domain;
+				return "Apt. " + flat.getNumber() + " - bloco " + flat.getBlock();
+			}
+			if (domain instanceof Supplier) {
+				return ((Supplier) domain).getName();
+			}
+			if (domain instanceof Condominium) {
+				return "Visitante";
+			}
+		}
+		return "Visitante";
 	}
 
 	public VehicleDataModel getModel() {

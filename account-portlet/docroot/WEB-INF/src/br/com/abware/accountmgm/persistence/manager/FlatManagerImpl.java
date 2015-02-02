@@ -100,6 +100,8 @@ public class FlatManagerImpl extends LiferayManager<Organization, Flat> {
 	public Flat findById(Object id) throws PersistenceException {
 		try {
 			return getModel(OrganizationLocalServiceUtil.getOrganization((Long) id));
+		} catch (NoSuchOrganizationException e) {
+			return null;
 		} catch (Exception e) {
 			throw new PersistenceException(e, "");
 		}

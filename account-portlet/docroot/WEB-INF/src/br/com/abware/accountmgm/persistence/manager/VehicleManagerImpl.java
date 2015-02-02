@@ -9,9 +9,7 @@ import javax.persistence.Query;
 import org.apache.commons.lang.StringUtils;
 
 import com.liferay.counter.service.CounterLocalServiceUtil;
-import com.liferay.portal.model.UserConstants;
 import com.liferay.portal.service.ImageLocalServiceUtil;
-import com.liferay.portal.service.OrganizationLocalServiceUtil;
 
 import br.com.abware.accountmgm.model.Vehicle;
 import br.com.abware.accountmgm.persistence.entity.VehicleEntity;
@@ -22,6 +20,8 @@ import br.com.abware.jcondo.exception.PersistenceException;
 
 public class VehicleManagerImpl extends JCondoManager<VehicleEntity, Vehicle>{
 
+	private FlatManagerImpl flatManager = new FlatManagerImpl();
+	
 	@Override	
 	protected Class<Vehicle> getModelClass() {
 		return Vehicle.class;
@@ -35,8 +35,8 @@ public class VehicleManagerImpl extends JCondoManager<VehicleEntity, Vehicle>{
 	@Override
 	protected VehicleEntity getEntity(Vehicle model) throws Exception {
 		VehicleEntity vehicle = super.getEntity(model);
-		vehicle.setDomainId(model.getDomain() != null ? model.getDomain().getId() : 0);
-		vehicle.setImageId(model.getImage() != null ? model.getImage().getId() : 0);
+		vehicle.setDomainId(model.getDomain().getId());
+		vehicle.setImageId(model.getImage().getId());
 		return vehicle;
 	}
 
@@ -49,8 +49,9 @@ public class VehicleManagerImpl extends JCondoManager<VehicleEntity, Vehicle>{
 		Vehicle vehicle = super.getModel(entity);
 
 		if (entity.getDomainId() != 0) {
-			String name = OrganizationLocalServiceUtil.getOrganization(entity.getDomainId()).getName();
-			vehicle.setDomain(new Flat(entity.getDomainId(), Long.parseLong(name.split("/")[0]), Long.parseLong(name.split("/")[1])));
+			vehicle.setDomain(flatManager.findById(entity.getDomainId()));
+		} else {
+			vehicle.setDomain(new Flat());
 		}
 
 		if (entity.getImageId() != 0) {
@@ -63,18 +64,18 @@ public class VehicleManagerImpl extends JCondoManager<VehicleEntity, Vehicle>{
 
 	@Override
 	public Vehicle save(Vehicle model) throws Exception {
-		if (model.getImage() != null) {
-			String path = getPath(model.getImage().getId());
-			if (!path.equals(model.getImage().getPath())) {
-				long imageId = model.getImage().getId() == 0 ? CounterLocalServiceUtil.increment() : model.getImage().getId();
-				ImageLocalServiceUtil.updateImage(imageId, new URL(model.getImage().getPath()).openStream());
-				model.setImage(new Image(imageId, null, null, null));
+		if(StringUtils.isEmpty(model.getImage().getPath())) {
+			if (model.getImage().getId() > 0) {
+				ImageLocalServiceUtil.deleteImage(model.getImage().getId());
 			}
+		} else if (!model.getImage().getPath().equals(getPath(model.getImage().getId()))) {
+			URL url = new URL(model.getImage().getPath());
+			long imageId = model.getImage().getId() == 0 ? CounterLocalServiceUtil.increment() : model.getImage().getId();
+			ImageLocalServiceUtil.updateImage(imageId, url.openStream());
+			model.getImage().setId(imageId);
 		}
 
-		Vehicle vehicle = super.save(model);
-
-		return vehicle;
+		return super.save(model);
 	}
 	
 	@SuppressWarnings("unchecked")
