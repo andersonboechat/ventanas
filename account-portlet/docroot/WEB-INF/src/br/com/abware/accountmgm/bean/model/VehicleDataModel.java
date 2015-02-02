@@ -20,15 +20,21 @@ public class VehicleDataModel extends ListDataModel<Vehicle> implements Selectab
 
     public VehicleDataModel(List<Vehicle> vehicles) throws Exception {
     	super(vehicles);
-		this.vehicles = vehicles;
+    	List<Vehicle> vs = new ArrayList<Vehicle>();
+    	vs.addAll(vehicles);
+		this.vehicles = vs;
 	}
 
-    public void addModel(Vehicle vehicle) {
+    @SuppressWarnings("unchecked")
+	public void addModel(Vehicle vehicle) {
 		vehicles.add(vehicle);
+		((List<Vehicle>) getWrappedData()).add(vehicle);
 	}
-    
-    public void removeModel(Vehicle vehicle) {
+   
+    @SuppressWarnings("unchecked")
+	public void removeModel(Vehicle vehicle) {
 		vehicles.remove(vehicle);
+		((List<Vehicle>) getWrappedData()).remove(vehicle);		
 	}
 
     @SuppressWarnings("unchecked")

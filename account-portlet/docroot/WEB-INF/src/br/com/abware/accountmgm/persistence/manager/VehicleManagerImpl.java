@@ -1,20 +1,27 @@
 package br.com.abware.accountmgm.persistence.manager;
 
+import java.net.URL;
 import java.util.List;
 
 import javax.persistence.NoResultException;
 import javax.persistence.Query;
 
-import com.liferay.portal.service.OrganizationLocalServiceUtil;
+import org.apache.commons.lang.StringUtils;
+
+import com.liferay.counter.service.CounterLocalServiceUtil;
+import com.liferay.portal.service.ImageLocalServiceUtil;
 
 import br.com.abware.accountmgm.model.Vehicle;
 import br.com.abware.accountmgm.persistence.entity.VehicleEntity;
 import br.com.abware.jcondo.core.model.Domain;
 import br.com.abware.jcondo.core.model.Flat;
+import br.com.abware.jcondo.core.model.Image;
 import br.com.abware.jcondo.exception.PersistenceException;
 
 public class VehicleManagerImpl extends JCondoManager<VehicleEntity, Vehicle>{
 
+	private FlatManagerImpl flatManager = new FlatManagerImpl();
+	
 	@Override	
 	protected Class<Vehicle> getModelClass() {
 		return Vehicle.class;
@@ -28,20 +35,49 @@ public class VehicleManagerImpl extends JCondoManager<VehicleEntity, Vehicle>{
 	@Override
 	protected VehicleEntity getEntity(Vehicle model) throws Exception {
 		VehicleEntity vehicle = super.getEntity(model);
-		vehicle.setDomainId(model.getDomain() != null ? model.getDomain().getId() : 0);
+		vehicle.setDomainId(model.getDomain().getId());
+		vehicle.setImageId(model.getImage().getId());
+		return vehicle;
+	}
+
+	private String getPath(long imageId) {
+		return helper.getPortalURL() + helper.getThemeDisplay().getPathImage() + "/portrait?img_id=" + imageId;
+	}
+	
+	@Override
+	protected Vehicle getModel(VehicleEntity entity) throws Exception {
+		Vehicle vehicle = super.getModel(entity);
+
+		if (entity.getDomainId() != 0) {
+			vehicle.setDomain(flatManager.findById(entity.getDomainId()));
+		} else {
+			vehicle.setDomain(new Flat());
+		}
+
+		if (entity.getImageId() != 0) {
+			String path = getPath(entity.getImageId());
+			vehicle.setImage(new Image(entity.getImageId(), path, null, null));
+		}
+
 		return vehicle;
 	}
 
 	@Override
-	protected Vehicle getModel(VehicleEntity entity) throws Exception {
-		Vehicle vehicle = super.getModel(entity);
-		if (entity.getDomainId() != 0) {
-			String name = OrganizationLocalServiceUtil.getOrganization(entity.getDomainId()).getName();
-			vehicle.setDomain(new Flat(entity.getDomainId(), Long.parseLong(name.split("/")[0]), Long.parseLong(name.split("/")[1])));
+	public Vehicle save(Vehicle model) throws Exception {
+		if(StringUtils.isEmpty(model.getImage().getPath())) {
+			if (model.getImage().getId() > 0) {
+				ImageLocalServiceUtil.deleteImage(model.getImage().getId());
+			}
+		} else if (!model.getImage().getPath().equals(getPath(model.getImage().getId()))) {
+			URL url = new URL(model.getImage().getPath());
+			long imageId = model.getImage().getId() == 0 ? CounterLocalServiceUtil.increment() : model.getImage().getId();
+			ImageLocalServiceUtil.updateImage(imageId, url.openStream());
+			model.getImage().setId(imageId);
 		}
-		return vehicle;
-	}
 
+		return super.save(model);
+	}
+	
 	@SuppressWarnings("unchecked")
 	public List<Vehicle> findVehicles(Domain domain) throws PersistenceException {
 		String key = generateKey();

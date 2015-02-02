@@ -23,12 +23,10 @@ public class VehicleEntity extends BaseEntity {
 
 	private long domainId;
 
+	private long imageId;
+
 	@Column(updatable=false)
 	private String license;
-
-	private String name;
-
-	private String picture;
 
 	public VehicleEntity() {
 	}
@@ -49,6 +47,14 @@ public class VehicleEntity extends BaseEntity {
 		this.domainId = domainId;
 	}
 
+	public long getImageId() {
+		return imageId;
+	}
+
+	public void setImageId(long imageId) {
+		this.imageId = imageId;
+	}
+
 	public String getLicense() {
 		return this.license;
 	}
@@ -57,20 +63,5 @@ public class VehicleEntity extends BaseEntity {
 		this.license = license;
 	}
 
-	public String getName() {
-		return name;
-	}
-
-	public void setName(String name) {
-		this.name = name;
-	}
-
-	public String getPicture() {
-		return this.picture;
-	}
-
-	public void setPicture(String picture) {
-		this.picture = picture;
-	}
 
 }

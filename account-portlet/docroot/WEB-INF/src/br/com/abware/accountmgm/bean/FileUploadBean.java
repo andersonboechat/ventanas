@@ -1,14 +1,13 @@
 package br.com.abware.accountmgm.bean;
 
 import java.io.File;
-import java.io.OutputStream;
 
 import javax.faces.application.FacesMessage;
 import javax.faces.bean.ManagedBean;
 import javax.faces.bean.ViewScoped;
+import javax.faces.context.ExternalContext;
 import javax.faces.context.FacesContext;
 import javax.imageio.stream.FileImageOutputStream;
-import javax.portlet.PortletContext;
 
 import net.coobird.thumbnailator.Thumbnails;
 
@@ -22,23 +21,23 @@ import org.primefaces.model.UploadedFile;
 @ViewScoped
 public class FileUploadBean {
 
-	private OutputStream imageStream;
-	
 	private String imagePath;
 	
 	private CroppedImage croppedImage;
+	
+	private File image;
 
 	public void onFileUpload(FileUploadEvent event) {
 		try {
-			PortletContext portletContext = (PortletContext) FacesContext.getCurrentInstance().getExternalContext().getContext();
+			ExternalContext ec = FacesContext.getCurrentInstance().getExternalContext();
+			imagePath = "/temp/";
 			UploadedFile uploadedFile = event.getFile();
-			File file = File.createTempFile(FilenameUtils.getBaseName(uploadedFile.getFileName()), 
+			image = File.createTempFile(FilenameUtils.getBaseName(uploadedFile.getFileName()), 
 											"." + FilenameUtils.getExtension(uploadedFile.getFileName()),
-											new File(portletContext.getRealPath("") + "/temp"));
-			FileUtils.copyInputStreamToFile(uploadedFile.getInputstream(), file);
-			imagePath = "/temp/" + file.getName();
-
-			Thumbnails.of(file).height(300).toFile(file);
+											new File(ec.getRealPath("") + imagePath));
+			FileUtils.copyInputStreamToFile(uploadedFile.getInputstream(), image);
+			Thumbnails.of(image).height(300).toFile(image);
+			imagePath = ec.getRequestScheme() + "://" + ec.getRequestServerName() + ec.getRequestContextPath() + imagePath + image.getName();
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -50,8 +49,7 @@ public class FileUploadBean {
         }
         FileImageOutputStream imageOutput;
         try {
-			PortletContext portletContext = (PortletContext) FacesContext.getCurrentInstance().getExternalContext().getContext();
-        	imageOutput = new FileImageOutputStream(new File(portletContext.getRealPath("") + imagePath));
+        	imageOutput = new FileImageOutputStream(image);
             imageOutput.write(croppedImage.getBytes(), 0, croppedImage.getBytes().length);
             imageOutput.close();
         } catch (Exception e) {
@@ -59,15 +57,7 @@ public class FileUploadBean {
         }
          
 	}
-
-	public OutputStream getImageStream() {
-		return imageStream;
-	}
-
-	public void setImageStream(OutputStream imageStream) {
-		this.imageStream = imageStream;
-	}
-
+	
 	public String getImagePath() {
 		return imagePath;
 	}
@@ -82,6 +72,14 @@ public class FileUploadBean {
 
 	public void setCroppedImage(CroppedImage croppedImage) {
 		this.croppedImage = croppedImage;
-	}	
+	}
+
+	public File getImage() {
+		return image;
+	}
+
+	public void setImage(File image) {
+		this.image = image;
+	}
 	
 }
