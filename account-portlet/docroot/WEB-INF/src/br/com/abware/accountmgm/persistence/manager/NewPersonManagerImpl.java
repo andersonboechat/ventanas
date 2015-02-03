@@ -3,41 +3,48 @@ package br.com.abware.accountmgm.persistence.manager;
 import java.io.File;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.List;
 
+import javax.persistence.Query;
+
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
 
 import br.com.abware.accountmgm.persistence.entity.PersonEntity;
+import br.com.abware.accountmgm.util.FlatTransformer;
 import br.com.abware.jcondo.core.Gender;
+import br.com.abware.jcondo.core.PersonStatus;
 import br.com.abware.jcondo.core.model.Condominium;
 import br.com.abware.jcondo.core.model.Domain;
 import br.com.abware.jcondo.core.model.Flat;
+import br.com.abware.jcondo.core.model.Image;
 import br.com.abware.jcondo.core.model.Membership;
 import br.com.abware.jcondo.core.model.Person;
 import br.com.abware.jcondo.core.model.Role;
 import br.com.abware.jcondo.core.model.RoleName;
-import br.com.abware.jcondo.core.model.Supplier;
 import br.com.abware.jcondo.exception.PersistenceException;
-import br.com.abware.jcondo.exception.SystemException;
 
 import com.liferay.portal.NoSuchUserException;
 import com.liferay.portal.kernel.workflow.WorkflowConstants;
 import com.liferay.portal.model.Group;
-import com.liferay.portal.model.Organization;
 import com.liferay.portal.model.User;
+import com.liferay.portal.model.UserConstants;
 import com.liferay.portal.model.UserGroupRole;
 import com.liferay.portal.service.GroupLocalServiceUtil;
-import com.liferay.portal.service.OrganizationLocalServiceUtil;
 import com.liferay.portal.service.ServiceContext;
 import com.liferay.portal.service.UserGroupRoleLocalServiceUtil;
 import com.liferay.portal.service.UserLocalServiceUtil;
-import com.liferay.portal.service.persistence.UserGroupRolePK;
 
 public class NewPersonManagerImpl extends JCondoManager<PersonEntity, Person> {
 	
+	private NewFlatManagerImpl flatManager = new NewFlatManagerImpl();
+
+	private String getPath(long imageId) {
+		return imageId == 0 ? null : helper.getPortalURL() + 
+									 UserConstants.getPortraitURL(helper.getThemeDisplay().getPathImage(), true, imageId); 
+	}	
+
 	@Override
 	protected Class<PersonEntity> getEntityClass() {
 		return PersonEntity.class;
@@ -51,18 +58,11 @@ public class NewPersonManagerImpl extends JCondoManager<PersonEntity, Person> {
 	public Person save(Person person) throws PersistenceException {
 		try {	
 			User user = null;
-
+			
 			try {
-				user = UserLocalServiceUtil.getUserById(person.getId());
+				user = UserLocalServiceUtil.getUserById(person.getUserId());
 			} catch (NoSuchUserException e) {
 			}
-
-			Calendar c = Calendar.getInstance();
-			c.setTime(person.getBirthday());
-
-			int birthdayDay = c.get(Calendar.DAY_OF_MONTH);
-			int birthdayMonth = c.get(Calendar.MONTH);
-			int birthdayYear = c.get(Calendar.YEAR);
 
 			boolean isMale = person.getGender().equals(Gender.MALE);
 
@@ -71,58 +71,44 @@ public class NewPersonManagerImpl extends JCondoManager<PersonEntity, Person> {
 											 		StringUtils.EMPTY, StringUtils.EMPTY, true, StringUtils.EMPTY, 
 											 		person.getEmailAddress(), 0, StringUtils.EMPTY, helper.getUser().getLocale(), 
 											 		person.getFirstName(), StringUtils.EMPTY, person.getLastName(), 0, 0, 
-											 		isMale, birthdayMonth, birthdayDay, birthdayYear, 
-											 		StringUtils.EMPTY, null, null, null, 
-											 		null, false, new ServiceContext());
+											 		isMale, 0, 0, 0, StringUtils.EMPTY, null, null, null, null, false, new ServiceContext());
+				person.setUserId(user.getUserId());
 			} else {
 				user = UserLocalServiceUtil.updateUser(person.getId(), user.getPassword(), StringUtils.EMPTY, StringUtils.EMPTY, false, 
 													   user.getReminderQueryQuestion(), user.getReminderQueryAnswer(), user.getScreenName(), 
 													   person.getEmailAddress(), user.getFacebookId(), user.getOpenId(), user.getLanguageId(), 
 													   user.getTimeZoneId(), user.getGreeting(), user.getComments(), person.getFirstName(), 
-													   StringUtils.EMPTY, person.getLastName(), 0, 0, isMale, birthdayMonth, birthdayDay, 
-													   birthdayYear, StringUtils.EMPTY, StringUtils.EMPTY, StringUtils.EMPTY, StringUtils.EMPTY, 
+													   StringUtils.EMPTY, person.getLastName(), 0, 0, isMale, 0, 0, 0, StringUtils.EMPTY, 
 													   StringUtils.EMPTY, StringUtils.EMPTY, StringUtils.EMPTY, StringUtils.EMPTY, 
-													   StringUtils.EMPTY, StringUtils.EMPTY, user.getJobTitle(), null, null, 
-													   null, null, null, new ServiceContext());
-
+													   StringUtils.EMPTY, StringUtils.EMPTY, StringUtils.EMPTY, StringUtils.EMPTY, 
+													   StringUtils.EMPTY, user.getJobTitle(), null, null, null, null, null, new ServiceContext());
 			}
 
 			try {
-				if (person.getPicture() != null && 
-						!person.getPicture().equalsIgnoreCase(user.getPortraitURL(helper.getThemeDisplay()))) {
-					File file = new File(new URL(person.getPicture()).toURI());
-					user = UserLocalServiceUtil.updatePortrait(person.getId(),	FileUtils.readFileToByteArray(file));
+				if(StringUtils.isEmpty(person.getPicture().getPath())) {
+					if (person.getPicture().getId() > 0) {
+						UserLocalServiceUtil.deletePortrait(person.getUserId());
+					}
+				} else if (!person.getPicture().getPath().equals(getPath(person.getPicture().getId()))) {
+					File file = new File(new URL(person.getPicture().getPath()).toURI());
+					UserLocalServiceUtil.updatePortrait(person.getId(),	FileUtils.readFileToByteArray(file));
+					file.delete();
 				}
 			} catch (Exception e) {
 				// TODO Log it!
 			}
 
-			return getModel(user);
+			return super.save(person);
 		} catch (Exception e) {
 			throw new PersistenceException("");
 		}
 	}
 
-	public void updatePersonDomains(Person person, List<Domain> domains) {
-		long[] groupIds = new long[0];
-
-		try {
-			for (Domain domain : domains) {
-				groupIds = ArrayUtils.add(groupIds, domain.getId());
-			}
-
-			if (groupIds.length > 0) {
-				UserLocalServiceUtil.updateGroups(person.getId(), groupIds, new ServiceContext());
-			}
-		} catch (Exception e) {
-			// TODO log it!
-		}
-	}	
-
 	public void delete(Person person) throws PersistenceException {
 		try {
 			if (person.getId() != 0) {
-				UserLocalServiceUtil.updateStatus(person.getId(), WorkflowConstants.STATUS_INACTIVE);
+				UserLocalServiceUtil.updateStatus(person.getUserId(), WorkflowConstants.STATUS_INACTIVE);
+				person.setStatus(PersonStatus.INACTIVE);
 			}
 		} catch (NoSuchUserException e) {
 			throw new PersistenceException("usuario nao cadastrado");
@@ -131,26 +117,42 @@ public class NewPersonManagerImpl extends JCondoManager<PersonEntity, Person> {
 		}
 	}
 
+	@SuppressWarnings("unchecked")
 	public List<Person> findPeople(Domain domain) throws PersistenceException {
+		String key = generateKey();
+		String queryString = "FROM PersonEntity WHERE flats.id = :flatId";
+
 		try {
-			List<PersonEntity> people = new ArrayList<PersonEntity>();
-
-			for (User user : UserLocalServiceUtil.getGroupUsers(domain.getId())) {
-				people.add(new PersonEntity());
-			}
-
-			return getModels(people);
-		} catch (Exception e) {
-			throw new PersistenceException("");
+			openManager(key);
+			Query query = em.createQuery(queryString);
+			query.setParameter("flatId", domain.getId());
+			return getModels(query.getResultList());
+		} finally {
+			closeManager(key);
 		}
 	}
 
 	public Person getLoggedPerson() throws PersistenceException {
+		String key = generateKey();
+		String queryString = "FROM PersonEntity WHERE userId = :userId";
+
 		try {
-			return getModel(helper.getUser());
-		} catch (Exception e) {
-			throw new PersistenceException("");
-		}	
+			openManager(key);
+			Query query = em.createQuery(queryString);
+			query.setParameter("userId", helper.getUser().getUserId());
+			return getModel((PersonEntity) query.getSingleResult());
+		} finally {
+			closeManager(key);
+		}
+	}
+
+	@Override
+	@SuppressWarnings("unchecked")
+	protected PersonEntity getEntity(Person person) throws Exception {
+		PersonEntity entity = super.getEntity(person);
+		List<Flat> flats = (List<Flat>) CollectionUtils.collect(person.getMemberships(), new FlatTransformer());
+		entity.setFlats(flatManager.getEntities(flats));
+		return entity;
 	}
 
 	@Override
@@ -159,11 +161,11 @@ public class NewPersonManagerImpl extends JCondoManager<PersonEntity, Person> {
 			Person person = super.getModel(entity);
 
 			List<Membership> memberships = new ArrayList<Membership>();
-			List<Group> groups = GroupLocalServiceUtil.getUserGroups(entity.getId());
+			List<Group> groups = GroupLocalServiceUtil.getUserGroups(entity.getUserId());
 
 			for (Group group : groups) {
 				if (group.getSite()) {
-					List<UserGroupRole> roles =  UserGroupRoleLocalServiceUtil.getUserGroupRoles(entity.getId(), group.getGroupId());
+					List<UserGroupRole> roles =  UserGroupRoleLocalServiceUtil.getUserGroupRoles(entity.getUserId(), group.getGroupId());
 					for (UserGroupRole ugr : roles) {
 						Role role = new Role(ugr.getRoleId(), RoleName.parse(ugr.getRole().getName()), ugr.getRole().getTitle());
 						memberships.add(new Membership(role, new Condominium(group.getGroupId(), group.getDescriptiveName())));
@@ -174,11 +176,15 @@ public class NewPersonManagerImpl extends JCondoManager<PersonEntity, Person> {
 			}
 
 			person.setMemberships(memberships);
-			//person.setStatus(PersonStatus.parseStatus(user.getStatus()));
 
+			User user = UserLocalServiceUtil.getUser(entity.getUserId());
+
+			person.setFirstName(user.getFirstName());
+			person.setLastName(user.getLastName());
+			person.setEmailAddress(user.getEmailAddress());
 			person.setGender(user.isMale() ? Gender.MALE : Gender.FEMALE);
-			person.setPicture(user.getPortraitURL(helper.getThemeDisplay()));
-			person.setId(user.getUserId());
+			person.setStatus(user.getStatus() == WorkflowConstants.STATUS_APPROVED ? PersonStatus.ACTIVE : PersonStatus.INACTIVE);
+			person.setPicture(new Image(user.getPortraitId(), getPath(user.getPortraitId()), null, null));
 
 			return person;
 		} catch (Exception e) {
@@ -186,25 +192,8 @@ public class NewPersonManagerImpl extends JCondoManager<PersonEntity, Person> {
 		}
 	}
 	
-	public Person findById(Object id) throws PersistenceException {
-		try {
-			return getModel(UserLocalServiceUtil.getUser((Long) id));
-		} catch (Exception e) {
-			throw new PersistenceException("");
-		}
-	}
-	
 	public boolean exists(Person person) throws Exception {
 		return getEntity(person) != null;
-	}
-
-	public List<Person> findAll() throws PersistenceException {
-		try {
-			List<User> users = UserLocalServiceUtil.getUsers(-1, -1);
-			return getModels(users);
-		} catch (Exception e) {
-			throw new PersistenceException("");
-		}
 	}
 
 	public void removeDomain(Person person, Domain domain) {

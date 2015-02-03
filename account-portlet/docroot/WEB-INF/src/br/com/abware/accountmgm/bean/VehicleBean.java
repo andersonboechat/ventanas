@@ -18,7 +18,7 @@ import org.apache.log4j.Logger;
 import org.primefaces.context.RequestContext;
 import org.primefaces.event.FileUploadEvent;
 
-import br.com.abware.accountmgm.bean.model.VehicleDataModel;
+import br.com.abware.accountmgm.bean.model.ModelDataModel;
 import br.com.abware.accountmgm.exception.ModelExistException;
 import br.com.abware.accountmgm.model.Vehicle;
 import br.com.abware.accountmgm.util.BeanUtils;
@@ -37,7 +37,7 @@ public class VehicleBean extends BaseBean {
 	@ManagedProperty(value="#{fileUploadBean}")
 	private FileUploadBean fileUploadBean;
 	
-	private VehicleDataModel model;
+	private ModelDataModel<Vehicle> model;
 
 	private HashMap<String, Object> filters;
 
@@ -63,7 +63,7 @@ public class VehicleBean extends BaseBean {
 	public void init() {
 		try {
 			flats = flatService.getFlats(personService.getPerson());
-			model = new VehicleDataModel(vehicleService.getVehicles(personService.getPerson()));
+			model = new ModelDataModel<Vehicle>(vehicleService.getVehicles(personService.getPerson()));
 			vehicle = new Vehicle();
 			vehicle.setDomain(new Flat());
 			vehicle.setImage(new Image());
@@ -139,6 +139,7 @@ public class VehicleBean extends BaseBean {
 		vehicle = new Vehicle();
 		vehicle.setDomain(new Flat());
 		vehicle.setImage(new Image());
+		visitor = false;
 	}
 
 	public void onVehiclesDelete() throws Exception {
@@ -158,6 +159,7 @@ public class VehicleBean extends BaseBean {
 	public void onVehicleEdit() {
 		try {
 			BeanUtils.copyProperties(vehicle, model.getRowData());
+			visitor = vehicle.getDomain().getId() == 0 ? true : false;
 		} catch (Exception e) {
 			LOGGER.error("Falha ao editar veiculo", e);
 		}
@@ -216,7 +218,7 @@ public class VehicleBean extends BaseBean {
 		return "Visitante";
 	}
 
-	public VehicleDataModel getModel() {
+	public ModelDataModel<Vehicle> getModel() {
 		return model;
 	}
 

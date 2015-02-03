@@ -34,10 +34,9 @@ public class NewFlatManagerImpl extends JCondoManager<FlatEntity, Flat> {
 		Resource resource = ResourceLocalServiceUtil.addResource(helper.getCompanyId(), Flat.class.getName(), 
 																 0, String.valueOf(f.getId()));
 
-		String number = StringUtils.leftPad(String.valueOf(flat.getNumber()), 4, "0");
 		GroupLocalServiceUtil.addGroup(helper.getUserId(), "com.liferay.portal.model.Resource", 
-									   resource.getResourceId(), flat.getBlock() + "/" + number, 
-									   StringUtils.EMPTY, 3, "/" + flat.getBlock() + "-" + number, 
+									   resource.getResourceId(), flat.toString(), 
+									   StringUtils.EMPTY, 3, "/" + flat.getBlock() + "-" + flat.getNumber(), 
 									   false, true, new ServiceContext());
 		return flat;
 	}
@@ -45,8 +44,7 @@ public class NewFlatManagerImpl extends JCondoManager<FlatEntity, Flat> {
 	public void delete(Flat flat) throws Exception {
 		super.delete(flat);
 		ResourceLocalServiceUtil.deleteResource(helper.getCompanyId(), Flat.class.getName(), 0, String.valueOf(flat.getId()));
-		String number = StringUtils.leftPad(String.valueOf(flat.getNumber()), 4, "0");
-		Group group = GroupLocalServiceUtil.getGroup(helper.getCompanyId(), flat.getBlock() + "/" + number);
+		Group group = GroupLocalServiceUtil.getGroup(helper.getCompanyId(), flat.toString());
 		GroupLocalServiceUtil.deleteGroup(group);
 	}
 

@@ -5,7 +5,7 @@ import br.com.abware.accountmgm.service.core.PersonServiceImpl;
 import br.com.abware.accountmgm.service.core.VehicleServiceImpl;
 import br.com.abware.jcondo.core.service.FlatService;
 
-public class BaseBean {
+public abstract class BaseBean {
 
 	protected static final FlatService flatService = new FlatServiceImpl();
 	
@@ -13,8 +13,4 @@ public class BaseBean {
 
 	protected static final VehicleServiceImpl vehicleService = new VehicleServiceImpl();	
 	
-	public BaseBean() {
-		// TODO Auto-generated constructor stub
-	}
-
 }

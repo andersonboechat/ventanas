@@ -8,6 +8,7 @@ import java.util.TreeSet;
 
 import javax.annotation.PostConstruct;
 import javax.faces.bean.ManagedBean;
+import javax.faces.bean.ManagedProperty;
 import javax.faces.bean.ViewScoped;
 import javax.faces.event.AjaxBehaviorEvent;
 
@@ -22,6 +23,9 @@ import br.com.abware.jcondo.exception.ApplicationException;
 @ManagedBean
 @ViewScoped
 public class TestBean extends BaseBean {
+	
+	@ManagedProperty(value="#{imageUploadBean}")
+	private ImageUploadBean imageUploadBean;
 
 	private ModelDataModel<Person> model;
 
@@ -47,7 +51,7 @@ public class TestBean extends BaseBean {
 	public void init() {
 		try {
 			List<Person> people = new ArrayList<Person>();
-			List<Flat> flats = flatService.getFlats(personService.getPerson());
+			flats = flatService.getFlats(personService.getPerson());
 
 			blocks = new TreeSet<Long>();
 			numbers = new TreeSet<Long>();
@@ -59,6 +63,8 @@ public class TestBean extends BaseBean {
 
 			model = new ModelDataModel<Person>(people);
 			filters = new HashMap<String, Object>();
+			imageUploadBean.setWidth(100);
+			imageUploadBean.setHeight(100);
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -81,9 +87,13 @@ public class TestBean extends BaseBean {
 	}
 
 	public void onPersonSave() {
-		
+		imageUploadBean.getImage();
 	}
 
+	public void onPersonCreate() throws Exception {
+		
+	}
+	
 	public void onPersonDelete() throws ApplicationException {
 		personService.delete(person);
 	}
@@ -93,20 +103,32 @@ public class TestBean extends BaseBean {
 			personService.delete(person);
 		}
 	}
-	
+
+	public void onPersonEdit() throws Exception {
+		
+	}
+
 	public String displayMembership(Membership membership) {
 		if (membership != null) {
 			if (membership.getDomain() instanceof Flat) {
 				Flat flat = (Flat) membership.getDomain(); 
-				return "Apt. " + flat.getNumber() + " - Bloco " + flat.getBlock() + " --- " + membership.getRole().getTitle();
+				return "Apartamento " + flat.getNumber() + " - Bloco " + flat.getBlock() + " --- " + membership.getRole().getTitle();
 			} else if (membership.getDomain() instanceof Supplier) {
-				return ((Supplier) membership.getDomain()).getName();
+				return ((Supplier) membership.getDomain()).getName() + " --- " + membership.getRole().getTitle();
 			} else if (membership.getDomain() instanceof Condominium) {
-				return ((Condominium) membership.getDomain()).getName();
+				return membership.getRole().getTitle();
 			}
 		}
 
 		return null;
+	}
+
+	public ImageUploadBean getImageUploadBean() {
+		return imageUploadBean;
+	}
+
+	public void setImageUploadBean(ImageUploadBean imageUploadBean) {
+		this.imageUploadBean = imageUploadBean;
 	}
 
 	public ModelDataModel<Person> getModel() {

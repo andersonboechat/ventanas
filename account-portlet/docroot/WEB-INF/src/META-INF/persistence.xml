@@ -5,6 +5,7 @@
 		<non-jta-data-source>java:comp/env/jdbc/vtnDS</non-jta-data-source>
 		<class>br.com.abware.accountmgm.persistence.entity.BaseEntity</class>
 		<class>br.com.abware.accountmgm.persistence.entity.VehicleEntity</class>
+		<class>br.com.abware.accountmgm.persistence.entity.DomainEntity</class>
 		<class>br.com.abware.accountmgm.persistence.entity.FlatEntity</class>
 		<class>br.com.abware.accountmgm.persistence.entity.PersonEntity</class>
 		<class>br.com.abware.accountmgm.persistence.entity.AccessLogEntity</class>

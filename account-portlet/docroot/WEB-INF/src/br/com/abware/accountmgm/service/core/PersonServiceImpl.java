@@ -94,7 +94,6 @@ public class PersonServiceImpl implements PersonService {
 	 * Se for locatário, associa aos papeis: Locatário, Alugador, Reclamador, Comentarista, Provedor de Acesso
 	 * 				   , associa os proprietários aos papeis: Proprietário
 	 */
-	@SuppressWarnings("unchecked")
 	@Override
 	public Person register(Person person) throws ApplicationException {
 		Person p = null;
