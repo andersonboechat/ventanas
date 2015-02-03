@@ -29,6 +29,7 @@ public class VehicleServiceImpl implements BaseService<Vehicle> {
 	
 	public Vehicle getVehicle(long vehicleId) throws Exception {
 		Vehicle vehicle = vehicleManager.findById(vehicleId);
+
 		if (vehicle == null) {
 			throw new Exception("veiculo nao cadastrado");
 		}
@@ -72,6 +73,10 @@ public class VehicleServiceImpl implements BaseService<Vehicle> {
 	}
 
 	public Vehicle register(Vehicle vehicle) throws Exception {
+//		if (!securityManager.hasPermission(vehicle, Permission.ADD)) {
+//			throw new Exception("sem permissao para cadastrar veiculos");
+//		}
+
 		if (StringUtils.isEmpty(vehicle.getLicense())) {
 			throw new Exception("placa nao especificada");
 		}
@@ -98,53 +103,54 @@ public class VehicleServiceImpl implements BaseService<Vehicle> {
 			}
 		}
 
-//		if (!securityManager.hasPermission(vehicle, Permission.ADD)) {
-//			throw new Exception("sem permissao para cadastrar veiculos");
-//		}
-
 		return vehicleManager.save(vehicle);
 	}
 
 	public void assignTo(Vehicle vehicle, Domain domain) throws Exception {
+//		if (!securityManager.hasPermission(vehicle, Permission.UPDATE)) {
+//			throw new Exception("sem permissao para cadastrar veiculos");
+//		}
+
 		Vehicle v = getVehicle(vehicle.getId());
 
-		if (v.getDomain() != null && v.getDomain() instanceof Flat) {
-			if (v.getDomain().getId() > 0) {
-				if (flatService.getFlat(v.getDomain().getId()) == null) {
+		if (domain instanceof Flat && !domain.equals(v.getDomain())) {
+			if (domain.getId() > 0) {
+				if (flatService.getFlat(domain.getId()) == null) {
 					throw new Exception("apartamento nao encontrado");
-				} else if (parkingService.getParkingAmount(v.getDomain()) <= 0){
+				} else if (parkingService.getParkingAmount(domain) <= 0){
 					throw new Exception("nao ha vagas disponíveis");
 				}
 			}
+
+			v.setDomain(domain);
+			vehicleManager.save(v);
+			vehicle.setDomain(domain);
 		}
-
-//		if (!securityManager.hasPermission(v, Permission.DELETE)) {
-//			throw new Exception("sem permissao para cadastrar veiculos");
-//		}
-
-		vehicleManager.save(v);
-		vehicle.setDomain(domain);
 	}
 
-	public void removeFrom(Vehicle vehicle) throws Exception {
-		Vehicle v = getVehicle(vehicle.getId());
-
-//		if (!securityManager.hasPermission(vehicle, Permission.DELETE)) {
+	public void removeFrom(Vehicle vehicle, Domain domain) throws Exception {
+//		if (!securityManager.hasPermission(vehicle, Permission.UPDATE)) {
 //			throw new Exception("sem permissao para cadastrar veiculos");
 //		}
 
-		v.setDomain(vehicle.getDomain());
+		Vehicle v = getVehicle(vehicle.getId());
+
+		if (!domain.equals(v.getDomain())) {
+			throw new Exception("veiculo associado a outro apartamento");
+		}
+
+		v.setDomain(domain);
 		vehicleManager.save(v);
 	}
 
 	public void updateImage(Vehicle vehicle, Image image) throws Exception {
-		Vehicle v = getVehicle(vehicle.getId());
-
-//		if (!securityManager.hasPermission(vehicle, Permission.DELETE)) {
+//		if (!securityManager.hasPermission(vehicle, Permission.UPDATE)) {
 //			throw new Exception("sem permissao para cadastrar veiculos");
 //		}
 
+		Vehicle v = getVehicle(vehicle.getId());
 		v.setImage(image);
+
 		v = vehicleManager.save(v);
 		vehicle.setImage(v.getImage());
 	}

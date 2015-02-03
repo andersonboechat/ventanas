@@ -1,6 +1,5 @@
 package br.com.abware.accountmgm.model;
 
-import br.com.abware.jcondo.core.model.BaseModel;
 import br.com.abware.jcondo.core.model.Domain;
 import br.com.abware.jcondo.core.model.Image;
 
@@ -16,7 +15,7 @@ public class Vehicle extends AbstractModel {
 
 	private Domain domain;
 
-	public boolean equals(BaseModel obj) {
+	public boolean equals(Object obj) {
 		return super.equals(obj) || (license != null && license.equalsIgnoreCase(((Vehicle) obj).getLicense()));
 	}
 
