@@ -48,18 +48,18 @@
 				</p:panelGrid>
 			</ui:define>
 			<ui:define name="model-list">
-				<p:dataTable id="personTable" var="person" value="#{testBean.model}"  
+				<p:dataTable id="personTable" var="model" value="#{testBean.model}"  
 				             paginator="true" rows="5" paginatorPosition="bottom" 
 				             paginatorTemplate="{CurrentPageReport} {PreviousPageLink} {PageLinks} {NextPageLink}" 
 				             selection="#{testBean.selectedPeople}" rowKey="#{person.id}" >
 					<p:column selectionMode="multiple" style="width: 17px"/>
 					<p:column style="width: 100px">
-						<p:graphicImage value="http://ventanasresidencial.com.br#{person.picture}"/>
+						<p:graphicImage value="#{model.person.picture}"/>
 					</p:column>
 					<p:column>
 						<p:panelGrid columns="1">
-		        			<h:outputText value="#{person.fullName}" />
-	        				<p:subTable var="membership" value="#{person.memberships}">
+		        			<h:outputText value="#{model.person.fullName}" />
+	        				<p:subTable var="membership" value="#{model.memberships}">
 	        					<p:column>
 	        						<h:outputText value="#{testBean.displayMembership(membership)}" />
 	        					</p:column>
@@ -69,14 +69,14 @@
 					<p:column style="width: 35px">
 						<p:commandLink update=":register-form:model-details" oncomplete="PF('registerDialog').show();" partialSubmit="true" process="@this">
 							<h:graphicImage value="../images/edit.png" />
-							<f:setPropertyActionListener target="#{testBean.person}" value="#{person}"/>
+							<f:setPropertyActionListener target="#{testBean.person}" value="#{model.person}"/>
 						</p:commandLink>
 					</p:column>
 					<p:column style="width: 35px">
 						<p:commandLink actionListener="#{testBean.onPersonDelete}" oncomplete="if (!args.validationFailed &amp;&amp; !args.exception) {PF('personTable').update();}" partialSubmit="true" process="@this">
 							<h:graphicImage value="../images/delete.png" />
 							<p:confirm header="#{msg['person.delete.confirm']}" message="#{msg['person.delete.message']}" icon="ui-icon-alert"/>
-							<f:setPropertyActionListener target="#{testBean.person}" value="#{person}"/>
+							<f:setPropertyActionListener target="#{testBean.person}" value="#{model.person}"/>
 						</p:commandLink>
 					</p:column>
 				</p:dataTable>

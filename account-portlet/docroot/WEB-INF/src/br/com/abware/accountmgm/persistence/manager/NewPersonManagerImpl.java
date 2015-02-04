@@ -147,35 +147,9 @@ public class NewPersonManagerImpl extends JCondoManager<PersonEntity, Person> {
 	}
 
 	@Override
-	@SuppressWarnings("unchecked")
-	protected PersonEntity getEntity(Person person) throws Exception {
-		PersonEntity entity = super.getEntity(person);
-		List<Flat> flats = (List<Flat>) CollectionUtils.collect(person.getMemberships(), new FlatTransformer());
-		entity.setFlats(flatManager.getEntities(flats));
-		return entity;
-	}
-
-	@Override
 	protected Person getModel(PersonEntity entity) throws PersistenceException {
 		try {
 			Person person = super.getModel(entity);
-
-			List<Membership> memberships = new ArrayList<Membership>();
-			List<Group> groups = GroupLocalServiceUtil.getUserGroups(entity.getUserId());
-
-			for (Group group : groups) {
-				if (group.getSite()) {
-					List<UserGroupRole> roles =  UserGroupRoleLocalServiceUtil.getUserGroupRoles(entity.getUserId(), group.getGroupId());
-					for (UserGroupRole ugr : roles) {
-						Role role = new Role(ugr.getRoleId(), RoleName.parse(ugr.getRole().getName()), ugr.getRole().getTitle());
-						memberships.add(new Membership(role, new Condominium(group.getGroupId(), group.getDescriptiveName())));
-					}
-				} else {
-					
-				}
-			}
-
-			person.setMemberships(memberships);
 
 			User user = UserLocalServiceUtil.getUser(entity.getUserId());
 
@@ -202,7 +176,17 @@ public class NewPersonManagerImpl extends JCondoManager<PersonEntity, Person> {
 	}
 
 	public void addDomain(Person person, Domain domain) {
-		// TODO Auto-generated method stub
+		String key = generateKey();
+		String queryString = "FROM PersonDomainEntity WHERE personId = :id";
+
+		try {
+			openManager(key);
+			PersonEntity entity = findEntityById(person.getId());
+			entity.getFlats().add(flatManager.getEntity(domain));
+			
+		} finally {
+			closeManager(key);
+		}
 	}
 
 }

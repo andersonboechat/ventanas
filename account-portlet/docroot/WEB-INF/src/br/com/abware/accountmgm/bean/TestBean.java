@@ -13,10 +13,12 @@ import javax.faces.bean.ViewScoped;
 import javax.faces.event.AjaxBehaviorEvent;
 
 import br.com.abware.accountmgm.bean.model.ModelDataModel;
+import br.com.abware.accountmgm.bean.model.PersonModel;
 import br.com.abware.jcondo.core.model.Condominium;
 import br.com.abware.jcondo.core.model.Flat;
 import br.com.abware.jcondo.core.model.Membership;
 import br.com.abware.jcondo.core.model.Person;
+import br.com.abware.jcondo.core.model.Role;
 import br.com.abware.jcondo.core.model.Supplier;
 import br.com.abware.jcondo.exception.ApplicationException;
 
@@ -27,7 +29,7 @@ public class TestBean extends BaseBean {
 	@ManagedProperty(value="#{imageUploadBean}")
 	private ImageUploadBean imageUploadBean;
 
-	private ModelDataModel<Person> model;
+	private ModelDataModel<PersonModel> model;
 
 	private HashMap<String, Object> filters;
 
@@ -50,18 +52,20 @@ public class TestBean extends BaseBean {
 	@PostConstruct
 	public void init() {
 		try {
-			List<Person> people = new ArrayList<Person>();
 			flats = flatService.getFlats(personService.getPerson());
-
 			blocks = new TreeSet<Long>();
 			numbers = new TreeSet<Long>();
 			for (Flat flat : flats) {
 				blocks.add(flat.getBlock());
 				numbers.add(flat.getNumber());
-				people.addAll(personService.getPeople(flat));
 			}
 
-			model = new ModelDataModel<Person>(people);
+			List<PersonModel> people = new ArrayList<PersonModel>();
+			for (Person person : personService.getPeople(personService.getPerson())) {
+				people.add(new PersonModel(person, personService.getMemberships(person)));
+			}
+
+			model = new ModelDataModel<PersonModel>(people);
 			filters = new HashMap<String, Object>();
 			imageUploadBean.setWidth(100);
 			imageUploadBean.setHeight(100);
@@ -72,7 +76,7 @@ public class TestBean extends BaseBean {
 	}
 
 	public void onPersonSearch(AjaxBehaviorEvent event) throws Exception {
-		filters.put("fullName", personName);
+		filters.put("person.fullName", personName);
 		model.filter(filters);
 	}
 
@@ -87,7 +91,14 @@ public class TestBean extends BaseBean {
 	}
 
 	public void onPersonSave() {
-		imageUploadBean.getImage();
+		try {
+			person.setPicture(imageUploadBean.getImage());
+			personService.register(person);
+			personService.updateMemberships(person, memberships);
+		} catch (ApplicationException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 
 	public void onPersonCreate() throws Exception {
@@ -131,11 +142,11 @@ public class TestBean extends BaseBean {
 		this.imageUploadBean = imageUploadBean;
 	}
 
-	public ModelDataModel<Person> getModel() {
+	public ModelDataModel<PersonModel> getModel() {
 		return model;
 	}
 
-	public void setModel(ModelDataModel<Person> model) {
+	public void setModel(ModelDataModel<PersonModel> model) {
 		this.model = model;
 	}
 

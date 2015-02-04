@@ -131,7 +131,7 @@ public abstract class JCondoManager<Entity extends BaseEntity, Model extends Bas
 	}
 
 	public Model findById(Object id) throws Exception {
-		return getModel(em.find(getEntityClass(), id));
+		return getModel(findEntityById(id));
 	}
 
 	protected Entity findEntityById(Object id) {

@@ -9,12 +9,14 @@ import java.util.List;
 import java.util.Set;
 
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang.StringUtils;
 
 import br.com.abware.accountmgm.persistence.manager.PersonManagerImpl;
 import br.com.abware.accountmgm.persistence.manager.SecurityManagerImpl;
 import br.com.abware.accountmgm.util.DomainPredicate;
 import br.com.abware.accountmgm.util.MembershipPredicate;
 import br.com.abware.jcondo.core.Permission;
+import br.com.abware.jcondo.core.model.Condominium;
 import br.com.abware.jcondo.core.model.Domain;
 import br.com.abware.jcondo.core.model.Flat;
 import br.com.abware.jcondo.core.model.Membership;
@@ -26,28 +28,24 @@ import br.com.abware.jcondo.exception.ApplicationException;
 import br.com.abware.jcondo.exception.PersistenceException;
 
 public class PersonServiceImpl implements PersonService {
-	
+
+	private static final Condominium CONDOMINIUM = new Condominium();
+
 	private static PersonManagerImpl personManager = new PersonManagerImpl();
-	
+
 	private static SecurityManagerImpl securityManager = new SecurityManagerImpl();
 
-	@Override
-	public List<Person> getPeople(Domain domain) throws ApplicationException {
-		List<Person> people = null;
+	private FlatServiceImpl flatService = new FlatServiceImpl();
+
+	public List<Person> getPeople(Person person) throws ApplicationException {
+		List<Person> people = new ArrayList<Person>();
 
 		try {
-			people = personManager.findPeople(domain);
+			for (Flat flat : flatService.getFlats(person)) {
+				people.addAll(personManager.findPeople(flat));
+			}
 
-//			while (people.iterator().hasNext()) {
-//				try {
-//					Person person = people.iterator().next();
-//					if (!securityManager.hasPermission(person, Permission.VIEW)) {
-//						people.remove(person);
-//					}
-//				} catch (ApplicationException e) {
-//					// Do nothing
-//				}
-//			}
+			people.addAll(getPeople(CONDOMINIUM));
 		} catch (PersistenceException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -55,7 +53,28 @@ public class PersonServiceImpl implements PersonService {
 		
 		return people;
 	}
+	
+	@Override
+	public List<Person> getPeople(Domain domain) throws ApplicationException {
+		List<Person> people = new ArrayList<Person>();
 
+		try {
+//			if (!securityManager.hasPermission(domain, Permission.VIEW)) {
+				people = personManager.findPeople(domain);
+//			}
+		} catch (PersistenceException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+		return people;
+	}
+
+	public Person getPerson(String identity) {
+		return null;
+	}
+	
+	
 	@Override
 	public Person getPerson() throws ApplicationException {
 		return personManager.getLoggedPerson();
@@ -71,6 +90,100 @@ public class PersonServiceImpl implements PersonService {
 	public boolean hasPermission(Person person, Permission permission) throws ApplicationException {
 		return securityManager.hasPermission(person, permission);
 	}
+
+	public Person newRegister(Person person) throws Exception {
+//		if (!securityManager.hasPermission(person, Permission.ADD_USER)) {
+//			throw new Exception("sem permissao para cadastrar usuario");
+//		}
+
+		if (StringUtils.isEmpty(person.getIdentity())) {
+			throw new Exception("identidade não fornecida");
+		}
+
+		if (getPerson(person.getIdentity()) != null) {
+			throw new Exception("existe usuario cadastrado com a identidade " + person.getIdentity());
+		}
+
+		return personManager.save(person);
+	}
+
+	public List<Membership> getMemberships(Person person) throws Exception {
+		List<Membership> memberships = new ArrayList<Membership>();
+		List<Flat> flats = flatService.getFlats(person);
+
+		for (Flat flat : flats) {
+			for (Role role : securityManager.getRoles(person, flat)) {
+				memberships.add(new Membership(role, flat));
+			}
+		}
+
+		for (Role role : securityManager.getRoles(person, CONDOMINIUM)) {
+			memberships.add(new Membership(role, CONDOMINIUM));
+		}
+
+		return memberships;
+	}
+
+	public void updateMemberships(Person person, List<Membership> memberships) throws Exception {
+		Set<Domain> domains = new HashSet<Domain>();
+		List<Membership> oldMemberships = getMemberships(person);
+		
+		/* Removendo pepeis */
+		for (Membership membership : oldMemberships) {
+			Domain domain = membership.getDomain();
+			Role role = membership.getRole();
+
+			if (!CollectionUtils.exists(memberships, new MembershipPredicate(domain, role))) {
+				if (securityManager.hasPermission(role, Permission.DELETE_PERSON)) {
+					securityManager.removeRole(person, domain, role);
+				} else {
+					throw new ApplicationException(null, "no permission to remove a person with this role from this domain");
+				}
+			}
+
+			domains.add(domain);
+		}
+
+		/* Removendo dominios */
+		for(Domain domain : domains) {
+			if (!CollectionUtils.exists(memberships, new DomainPredicate(domain))) {
+				if (securityManager.hasPermission(domain, Permission.DELETE_PERSON)) {
+					personManager.removeDomain(person, domain);
+				}
+			}
+		}
+
+		domains.clear();
+
+		/* Incluindo pepeis */
+		for (Membership membership : memberships) {
+			Domain domain = membership.getDomain();
+			Role role = membership.getRole();
+
+			/* usuário nao tem esse papel nesse dominio */
+			if (!CollectionUtils.exists(oldMemberships, new MembershipPredicate(domain, role))) {
+				if (securityManager.hasPermission(role, Permission.ADD_USER)) {
+					securityManager.addRole(person, domain, role);
+				} else {
+					throw new ApplicationException(null, "no permission to add a person with this role in this domain");
+				}
+			}
+
+			domains.add(domain);
+		}
+
+		/* Incluindo dominios */
+		for(Domain domain : domains) {
+			if (!CollectionUtils.exists(oldMemberships, new DomainPredicate(domain))) {
+				if (securityManager.hasPermission(domain, Permission.ADD_USER)) {
+					personManager.addDomain(person, domain);
+				}
+			}
+		}
+		
+	}
+
+
 
 	/**
 	 * Papeis de Apartamento: Proprietario, Morador, Dependente, Convidado, Visitante
@@ -201,6 +314,17 @@ public class PersonServiceImpl implements PersonService {
 		}
 
 		return p;
+	}
+	
+	public void newInactive(Person person) throws Exception {
+		Person p = personManager.findById(person.getId());
+
+		if (!securityManager.hasPermission(p, Permission.DELETE)) {
+			throw new Exception("sem permissao para excluir este usuario");
+		}
+
+		securityManager.removeAllRoles(p);
+		personManager.delete(p);
 	}
 	
 	public void inactive(Person person) throws ApplicationException {
