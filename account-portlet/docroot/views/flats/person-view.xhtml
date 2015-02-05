@@ -9,50 +9,51 @@
 	xmlns:ui="http://java.sun.com/jsf/facelets">
 	<h:head></h:head>
 	<h:body>
-		<ui:composition template="../person-template.xhtml">
-			<ui:define name="person-menu">
-				<p:panelGrid columns="4" style="width: 100%">
+		<ui:composition template="../model-template.xhtml">
+			<ui:define name="imageUploader-setter">
+				<c:set var="imageUploader" value="#{testBean.imageUploadBean}"/>
+			</ui:define>
+			<ui:define name="model-filters">
+				<p:panelGrid columns="3" styleClass="menu-cmds" columnClasses="menu-cmds-col1,menu-cmds-col2,menu-cmds-col3">
 					<p:column>
-						<p:commandButton value="Cadastrar" partialSubmit="true" process="@this" 
-										 update="person-details" oncomplete="PF('personDialog').show();">
-							<f:setPropertyActionListener target="#{testBean.person}" value=""/>
-						</p:commandButton>
+						<p:commandButton value="Cadastrar" actionListener="#{testBean.onPersonCreate}" 
+										 partialSubmit="true" process="@this" update=":register-form:model-details" oncomplete="PF('registerDialog').show();"/>
 						<p:commandButton value="Excluir" actionListener="#{testBean.onPeopleDelete}" 
 										partialSubmit="true" process="@this,personTable" update="personTable">
 							<p:confirm header="#{msg['main.delete.confirm']}" message="#{msg['person.delete.message']}" icon="ui-icon-alert"/>
 						</p:commandButton>
 					</p:column>
 					<p:column>
-						<p:outputLabel value="Nome:"/>
-						<p:inputText id="personName" value="#{testBean.personName}">
+						<p:inputText id="personName" value="#{testBean.personName}" placeholder="Buscar pelo nome" style="font-style: italic; width: 100%">
 							<p:ajax event="change" listener="#{testBean.onPersonSearch}" update="personTable" partialSubmit="true" process="@this"/>
 						</p:inputText>
 					</p:column>
-				    <p:column id="block">
-				    	<p:outputLabel value="Bloco"/>
-						<p:selectOneMenu value="#{testBean.block}">
+				    <p:column rendered="#{testBean.flats.size() > 1}">
+				    	<p:outputLabel value="Apt." style="vertical-align: middle; font-size: 12px; margin: 0px 5px 0px 0px"/>
+						<p:selectOneMenu value="#{testBean.number}" style="vertical-align: middle;">
+							<f:selectItem itemLabel="-- #{msg['flat.lbl.everyone']} --" noSelectionOption="true"/>
+							<f:selectItems var="number" value="#{testBean.numbers}" itemLabel="#{number}" itemValue="#{number}"/>
+							<p:ajax event="change" listener="#{testBean.onNumberSelect}" update="personTable" partialSubmit="true" process="@this"/>
+						</p:selectOneMenu>
+				    	<p:outputLabel value=" - Bloco" style="vertical-align: middle; font-size: 12px; margin: 0px 5px 0px 0px"/>
+						<p:selectOneMenu value="#{testBean.block}" style="vertical-align: middle;">
 							<f:selectItem itemLabel="-- #{msg['flat.lbl.everyone']} --" noSelectionOption="true"/>
 							<f:selectItems var="block" value="#{testBean.blocks}" itemLabel="#{block}" itemValue="#{block}"/>
 							<p:ajax event="change" listener="#{testBean.onBlockSelect}" update="personTable" partialSubmit="true" process="@this"/>
 						</p:selectOneMenu>
 				    </p:column>
-				    <p:column id="number">
-				    	<p:outputLabel value="Apt."/>
-						<p:selectOneMenu value="#{testBean.number}">
-							<f:selectItem itemLabel="-- #{msg['flat.lbl.everyone']} --" noSelectionOption="true"/>
-							<f:selectItems var="number" value="#{testBean.numbers}" itemLabel="#{number}" itemValue="#{number}"/>
-							<p:ajax event="change" listener="#{testBean.onNumberSelect}" update="personTable" partialSubmit="true" process="@this"/>
-						</p:selectOneMenu>
+				    <p:column rendered="#{testBean.flats.size() == 1}">
+				    	<h:outputText value="Apt. #{testBean.flats.get(0).number} - Bloco #{testBean.flats.get(0).block}"/>
 				    </p:column>
 				</p:panelGrid>
 			</ui:define>
-			<ui:define name="person-list">
+			<ui:define name="model-list">
 				<p:dataTable id="personTable" var="person" value="#{testBean.model}"  
 				             paginator="true" rows="5" paginatorPosition="bottom" 
 				             paginatorTemplate="{CurrentPageReport} {PreviousPageLink} {PageLinks} {NextPageLink}" 
 				             selection="#{testBean.selectedPeople}" rowKey="#{person.id}" >
-					<p:column selectionMode="multiple" style="width:5%"/>
-					<p:column style="width: 20%">
+					<p:column selectionMode="multiple" style="width: 17px"/>
+					<p:column style="width: 100px">
 						<p:graphicImage value="http://ventanasresidencial.com.br#{person.picture}"/>
 					</p:column>
 					<p:column>
@@ -65,13 +66,13 @@
 	        				</p:subTable>
 						</p:panelGrid>
 					</p:column>
-					<p:column style="width: 10%">
-						<p:commandLink update=":person-form:person-details" oncomplete="PF('personDialog').show();" partialSubmit="true" process="@this">
+					<p:column style="width: 35px">
+						<p:commandLink update=":register-form:model-details" oncomplete="PF('registerDialog').show();" partialSubmit="true" process="@this">
 							<h:graphicImage value="../images/edit.png" />
 							<f:setPropertyActionListener target="#{testBean.person}" value="#{person}"/>
 						</p:commandLink>
 					</p:column>
-					<p:column style="width: 10%">
+					<p:column style="width: 35px">
 						<p:commandLink actionListener="#{testBean.onPersonDelete}" oncomplete="if (!args.validationFailed &amp;&amp; !args.exception) {PF('personTable').update();}" partialSubmit="true" process="@this">
 							<h:graphicImage value="../images/delete.png" />
 							<p:confirm header="#{msg['person.delete.confirm']}" message="#{msg['person.delete.message']}" icon="ui-icon-alert"/>
@@ -80,13 +81,18 @@
 					</p:column>
 				</p:dataTable>
 			</ui:define>
-			<ui:define name="person-details">
-				<h:outputText value="#{testBean.person.fullName} - Proprietario" style="font-family: Arial; font-size: 14px;"/>
-				<p:separator style="border: 1px solid #ccc;"/> <br/>
-				<h:panelGrid id="person-details" columns="3" columnClasses="my-account-col1,my-account-col2,my-account-col3" styleClass="my-account" style="margin: 10px 0px 20px 0px;" cellpadding="10">
+			<ui:define name="model-details">
+				<h:panelGrid id="model-details" columns="3" columnClasses="my-account-col1,my-account-col2,my-account-col3" styleClass="my-account" style="margin: 10px 0px 20px 0px;" cellpadding="10">
 					<p:column>
-				        <p:graphicImage id="portrait" value="http://ventanasresidencial.com.br#{testBean.person.picture}"/><br/>
-						<p:commandLink value="Alterar Foto" onclick="PF('uploadDialog').show();"/>
+						<h:panelGrid columns="1" style="border: 0px solid black; width: 100px; height: 100px;">
+					        <p:graphicImage id="portrait" value="#{imageUploader.image.path}" style="border: 0px solid black;"/>
+							<p:commandLink value="Enviar Foto" update=":upload-form" oncomplete="PF('uploadDialog').show();" partialSubmit="true" process="@this">
+								<f:setPropertyActionListener target="#{imageUploader.image.path}" value=""/>
+							</p:commandLink>
+							<p:commandLink value="Tirar Foto" update=":upload-form" oncomplete="PF('uploadDialog').show();" partialSubmit="true" process="@this">
+								<f:setPropertyActionListener target="#{imageUploader.image.path}" value=""/>
+							</p:commandLink>
+						</h:panelGrid>					
 					</p:column>
 					<p:column>
 						<h:panelGrid columns="2">
@@ -116,7 +122,6 @@
 						</p:fieldset>
 					</p:column>
 				</h:panelGrid>
-		
 				<p:commandButton value="Salvar" actionListener="#{testBean.onPersonSave}" update=":outputMsg" style="float: right; width: 70px; margin: 0px 0px 10px 5px;"/>			
 			</ui:define>
 		</ui:composition>

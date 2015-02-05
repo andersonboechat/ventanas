@@ -8,7 +8,7 @@ import javax.persistence.Table;
 
 @Entity
 @Table(name="jco_flat")
-public class FlatEntity extends BaseEntity {
+public class FlatEntity extends DomainEntity {
 
 	private static final long serialVersionUID = 1L;
 

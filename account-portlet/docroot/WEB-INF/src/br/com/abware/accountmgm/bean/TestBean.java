@@ -8,22 +8,27 @@ import java.util.TreeSet;
 
 import javax.annotation.PostConstruct;
 import javax.faces.bean.ManagedBean;
+import javax.faces.bean.ManagedProperty;
 import javax.faces.bean.ViewScoped;
 import javax.faces.event.AjaxBehaviorEvent;
 
 import br.com.abware.accountmgm.bean.model.ModelDataModel;
+import br.com.abware.accountmgm.bean.model.PersonModel;
+import br.com.abware.accountmgm.util.BeanUtils;
 import br.com.abware.jcondo.core.model.Condominium;
 import br.com.abware.jcondo.core.model.Flat;
 import br.com.abware.jcondo.core.model.Membership;
 import br.com.abware.jcondo.core.model.Person;
 import br.com.abware.jcondo.core.model.Supplier;
-import br.com.abware.jcondo.exception.ApplicationException;
 
 @ManagedBean
 @ViewScoped
 public class TestBean extends BaseBean {
+	
+	@ManagedProperty(value="#{imageUploadBean}")
+	private ImageUploadBean imageUploadBean;
 
-	private ModelDataModel<Person> model;
+	private ModelDataModel<PersonModel> model;
 
 	private HashMap<String, Object> filters;
 
@@ -41,24 +46,30 @@ public class TestBean extends BaseBean {
 
 	private Person person;
 	
+	private PersonModel personModel;
+	
 	private Person[] selectedPeople;
 
 	@PostConstruct
 	public void init() {
 		try {
-			List<Person> people = new ArrayList<Person>();
-			List<Flat> flats = flatService.getFlats(personService.getPerson());
-
+			flats = flatService.getFlats(personService.getPerson());
 			blocks = new TreeSet<Long>();
 			numbers = new TreeSet<Long>();
 			for (Flat flat : flats) {
 				blocks.add(flat.getBlock());
 				numbers.add(flat.getNumber());
-				people.addAll(personService.getPeople(flat));
 			}
 
-			model = new ModelDataModel<Person>(people);
+			List<PersonModel> people = new ArrayList<PersonModel>();
+			for (Person person : personService.getPeople(personService.getPerson())) {
+				people.add(new PersonModel(person, personService.getMemberships(person)));
+			}
+
+			model = new ModelDataModel<PersonModel>(people);
 			filters = new HashMap<String, Object>();
+			imageUploadBean.setWidth(100);
+			imageUploadBean.setHeight(100);
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -66,7 +77,7 @@ public class TestBean extends BaseBean {
 	}
 
 	public void onPersonSearch(AjaxBehaviorEvent event) throws Exception {
-		filters.put("fullName", personName);
+		filters.put("person.fullName", personName);
 		model.filter(filters);
 	}
 
@@ -81,39 +92,68 @@ public class TestBean extends BaseBean {
 	}
 
 	public void onPersonSave() {
-		
+		try {
+			personModel.getPerson().setPicture(imageUploadBean.getImage());
+			Person person = personService.register(personModel.getPerson());
+			personModel.setPerson(person);
+			personService.updateMemberships(personModel.getPerson(), personModel.getMemberships());
+			model.addModel(personModel);
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 
-	public void onPersonDelete() throws ApplicationException {
+	public void onPersonCreate() throws Exception {
+		personModel = new PersonModel(new Person(), new ArrayList<Membership>());
+	}
+	
+	public void onPersonDelete() throws Exception {
 		personService.delete(person);
 	}
 
-	public void onPeopleDelete() throws ApplicationException {
+	public void onPeopleDelete() throws Exception {
 		for (Person person : selectedPeople) {
 			personService.delete(person);
 		}
 	}
-	
+
+	public void onPersonEdit() throws Exception {
+		try {
+			BeanUtils.copyProperties(personModel, model.getRowData());
+		} catch (Exception e) {
+			//LOGGER.error("Falha ao editar veiculo", e);
+		}
+	}
+
 	public String displayMembership(Membership membership) {
 		if (membership != null) {
 			if (membership.getDomain() instanceof Flat) {
 				Flat flat = (Flat) membership.getDomain(); 
-				return "Apt. " + flat.getNumber() + " - Bloco " + flat.getBlock() + " --- " + membership.getRole().getTitle();
+				return "Apartamento " + flat.getNumber() + " - Bloco " + flat.getBlock() + " --- " + membership.getRole().getTitle();
 			} else if (membership.getDomain() instanceof Supplier) {
-				return ((Supplier) membership.getDomain()).getName();
+				return ((Supplier) membership.getDomain()).getName() + " --- " + membership.getRole().getTitle();
 			} else if (membership.getDomain() instanceof Condominium) {
-				return ((Condominium) membership.getDomain()).getName();
+				return membership.getRole().getTitle();
 			}
 		}
 
 		return null;
 	}
 
-	public ModelDataModel<Person> getModel() {
+	public ImageUploadBean getImageUploadBean() {
+		return imageUploadBean;
+	}
+
+	public void setImageUploadBean(ImageUploadBean imageUploadBean) {
+		this.imageUploadBean = imageUploadBean;
+	}
+
+	public ModelDataModel<PersonModel> getModel() {
 		return model;
 	}
 
-	public void setModel(ModelDataModel<Person> model) {
+	public void setModel(ModelDataModel<PersonModel> model) {
 		this.model = model;
 	}
 

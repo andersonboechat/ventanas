@@ -1,14 +1,19 @@
 package br.com.abware.accountmgm.persistence.manager;
 
+import java.util.HashMap;
+
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+
+import org.apache.commons.collections.CollectionUtils;
 
 import com.liferay.faces.portal.context.LiferayPortletHelper;
 import com.liferay.faces.portal.context.LiferayPortletHelperImpl;
-import com.liferay.portal.model.Group;
+import com.liferay.portal.model.UserGroupRole;
 import com.liferay.portal.security.permission.ActionKeys;
 import com.liferay.portal.security.permission.PermissionChecker;
 import com.liferay.portal.security.permission.PermissionCheckerFactoryUtil;
-import com.liferay.portal.service.GroupLocalServiceUtil;
 import com.liferay.portal.service.RoleLocalServiceUtil;
 import com.liferay.portal.service.UserGroupRoleLocalServiceUtil;
 import com.liferay.portal.service.permission.OrganizationPermissionUtil;
@@ -31,6 +36,22 @@ public class SecurityManagerImpl {
 	
 	private LiferayPortletHelper helper = new LiferayPortletHelperImpl();
 
+	private static Map<RoleName, Role> roles;
+	
+	private Condominium portal;
+	
+	public SecurityManagerImpl() {
+		try {
+			portal = new Condominium();
+			roles = new HashMap<RoleName, Role>();
+			roles.put(RoleName.LESSEE, getRole(portal, RoleName.LESSEE));
+			roles.put(RoleName.DEBATER, getRole(portal, RoleName.DEBATER));
+			roles.put(RoleName.HABITANT, getRole(portal, RoleName.HABITANT));
+		} catch (Exception e) {
+			
+		}
+	}
+
 	/**
 	 * 
 	 * @param person
@@ -43,6 +64,41 @@ public class SecurityManagerImpl {
 			if (domain instanceof Flat) {
 				if (role.getName().getType() != 0) {
 					throw new Exception();
+				}
+
+				if (role.getName() == RoleName.OWNER) {
+					long renterRoleId = RoleLocalServiceUtil.getRole(helper.getCompanyId(), RoleName.RENTER.getLabel()).getRoleId();
+					List<UserGroupRole> list = UserGroupRoleLocalServiceUtil.getUserGroupRolesByGroupAndRole(domain.getId(), 
+																											 renterRoleId);
+
+					if (list.isEmpty()) {
+						addRole(person, portal, roles.get(RoleName.LESSEE));
+						addRole(person, portal, roles.get(RoleName.DEBATER));
+						addRole(person, portal, roles.get(RoleName.HABITANT));
+					}
+				}
+
+				if (role.getName() == RoleName.RENTER) {
+					long ownerRoleId = RoleLocalServiceUtil.getRole(helper.getCompanyId(), RoleName.OWNER.getLabel()).getRoleId();
+					List<UserGroupRole> list = UserGroupRoleLocalServiceUtil.getUserGroupRolesByGroupAndRole(domain.getId(), 
+																											 ownerRoleId);
+					for (UserGroupRole item : list) {
+						Person p = new Person();
+						p.setUserId(item.getUserId());
+						removeRole(p, portal, roles.get(RoleName.LESSEE));
+						removeRole(p, portal, roles.get(RoleName.DEBATER));
+						removeRole(p, portal, roles.get(RoleName.HABITANT));
+					}
+				}
+
+				if (role.getName() == RoleName.RESIDENT || role.getName() == RoleName.RENTER) {
+					addRole(person, portal, roles.get(RoleName.LESSEE));
+					addRole(person, portal, roles.get(RoleName.DEBATER));
+					addRole(person, portal, roles.get(RoleName.HABITANT));
+				}
+
+				if (role.getName() == RoleName.DEPENDENT) {
+					addRole(person, portal, roles.get(RoleName.HABITANT));
 				}
 			}
 
@@ -58,12 +114,12 @@ public class SecurityManagerImpl {
 				}
 			}
 
-			UserGroupRoleLocalServiceUtil.addUserGroupRoles(person.getId(), domain.getId(), new long[] {role.getId()});
+			UserGroupRoleLocalServiceUtil.addUserGroupRoles(person.getUserId(), domain.getId(), new long[] {role.getId()});
 		} catch (Exception e) {
 			throw new ApplicationException(e, "");
 		}
 	}
-
+	
 	public void removeRole(Person person, Domain domain, Role role) throws ApplicationException {
 		try {
 			if (domain instanceof Flat) {
@@ -84,7 +140,7 @@ public class SecurityManagerImpl {
 				}
 			}
 
-			UserGroupRoleLocalServiceUtil.deleteUserGroupRoles(person.getId(), domain.getId(), new long[] {role.getId()});	
+			UserGroupRoleLocalServiceUtil.deleteUserGroupRoles(person.getUserId(), domain.getId(), new long[] {role.getId()});	
 		} catch (Exception e) {
 			throw new ApplicationException(e, "");
 		}
@@ -92,14 +148,25 @@ public class SecurityManagerImpl {
 	
 	public Role getRole(Domain domain, RoleName roleName) throws ApplicationException {
 		try {
-			Group group = GroupLocalServiceUtil.getGroup(domain.getId());
-			com.liferay.portal.model.Role role = RoleLocalServiceUtil.getRole(group.getCompanyId(), roleName.getLabel());
+			com.liferay.portal.model.Role role = RoleLocalServiceUtil.getRole(helper.getCompanyId(), roleName.getLabel());
 			return new Role(role.getRoleId(), RoleName.parse(role.getName()), role.getTitle());
 		} catch(Exception e) {
 			throw new ApplicationException(e, "role could not be found"); 
 		}
 	}
 
+	public List<Role> getRoles(Person person, Domain domain) throws Exception {
+		List<Role> roles = new ArrayList<Role>();
+		List<UserGroupRole> list = UserGroupRoleLocalServiceUtil.getUserGroupRoles(person.getUserId(), domain.getDomainId());
+
+		for (UserGroupRole item : list) {
+			roles.add(new Role(item.getRole().getRoleId(), RoleName.parse(item.getRole().getName()), item.getRole().getTitle()));
+		}
+
+		return roles;
+	}
+	
+	
 	public boolean hasRole(Person person, Domain domain, Role role) {
 		return hasRole(person, new Domain[] {domain}, role);
 	}	
@@ -114,7 +181,8 @@ public class SecurityManagerImpl {
 	
 	public boolean hasPermission(BaseModel model, Permission permission) throws ApplicationException {
 		try {
-			PermissionChecker permissionChecker = PermissionCheckerFactoryUtil.create(helper.getUser());
+			//PermissionChecker permissionChecker = PermissionCheckerFactoryUtil.create(helper.getUser());
+			PermissionChecker permissionChecker = helper.getThemeDisplay().getPermissionChecker();
 
 			if (model instanceof Person) {
 				return checkUserPermission(permissionChecker, model.getId(), permission);
@@ -202,6 +270,33 @@ public class SecurityManagerImpl {
 		}
 
 		return UserPermissionUtil.contains(permissionChecker, roleId, actionkey);
+	}
+
+	public void removeAllRoles(Person person) throws Exception {
+		com.liferay.portal.model.Role role;
+		List<UserGroupRole> list = UserGroupRoleLocalServiceUtil.getUserGroupRoles(person.getUserId());
+
+		// Devolver papeis aos usuarios proprietarios do apartamento que o usuario sendo removido é locatario
+		for (UserGroupRole item : list) {
+			if ("flat".equalsIgnoreCase(item.getGroup().getDescription().trim())) {
+				role = RoleLocalServiceUtil.getRole(helper.getCompanyId(), RoleName.RENTER.getLabel());
+ 
+				if (item.getRoleId() == role.getRoleId()) {
+					role = RoleLocalServiceUtil.getRole(helper.getCompanyId(), RoleName.OWNER.getLabel());
+					List<UserGroupRole> list2 = UserGroupRoleLocalServiceUtil.getUserGroupRolesByGroupAndRole(item.getGroupId(), 
+																											  role.getRoleId());
+					for (UserGroupRole i : list2) {
+						Person p = new Person();
+						p.setUserId(i.getUserId());
+						addRole(p, portal, roles.get(RoleName.LESSEE));
+						addRole(p, portal, roles.get(RoleName.DEBATER));
+						addRole(p, portal, roles.get(RoleName.HABITANT));
+					}
+				}
+			}
+
+			UserGroupRoleLocalServiceUtil.deleteUserGroupRolesByUserId(person.getUserId());
+		}
 	}
 
 }

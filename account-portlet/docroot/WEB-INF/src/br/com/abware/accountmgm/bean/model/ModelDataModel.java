@@ -28,6 +28,31 @@ public class ModelDataModel<Model extends BaseModel> extends ListDataModel<Model
 		this.models = models;
 	}
 
+    @SuppressWarnings("unchecked")
+	public void addModel(Model model) {
+    	models.add(model);
+		((List<Model>) getWrappedData()).add(model);
+	}
+   
+    @SuppressWarnings("unchecked")
+	public void removeModel(Model model) {
+    	models.remove(model);
+		((List<Model>) getWrappedData()).remove(model);		
+	}
+
+    @SuppressWarnings("unchecked")
+	public void setModel(Model model) {
+    	int index = ((List<Model>) getWrappedData()).indexOf(model);
+    	if (index >= 0) {
+    		((List<Model>) getWrappedData()).set(index, model);
+    	}
+
+    	index = models.indexOf(model);
+    	if (index >= 0) {
+    		models.set(index, model);
+    	}
+	}	
+	
     @Override
     public Model getRowData(String rowKey) {
         for(Model model : models) {

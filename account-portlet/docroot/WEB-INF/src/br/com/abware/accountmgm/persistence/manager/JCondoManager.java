@@ -37,7 +37,21 @@ public abstract class JCondoManager<Entity extends BaseEntity, Model extends Bas
 		BeanUtils.copyProperties(entity, model);
 		return entity;
 	}
-	
+
+	protected List<Entity> getEntities(List<Model> models) throws PersistenceException {
+		try {
+			List<Entity> entities  = new ArrayList<Entity>();
+
+			for (Model model : models) {
+				entities.add(getEntity(model));
+			}
+
+			return entities;
+		} catch (Exception e) {
+			throw new PersistenceException(e, "");
+		}
+	}
+
 	protected Model getModel(Entity entity) throws Exception {
 		Model model = getModelClass().newInstance();
 		BeanUtils.copyProperties(model, entity);
@@ -117,10 +131,14 @@ public abstract class JCondoManager<Entity extends BaseEntity, Model extends Bas
 	}
 
 	public Model findById(Object id) throws Exception {
+		return getModel(findEntityById(id));
+	}
+
+	protected Entity findEntityById(Object id) {
 		String key = generateKey();
 		try {
 			openManager(key);
-			return getModel(em.find(getEntityClass(), id));
+			return em.find(getEntityClass(), id);
 		} finally {
 			closeManager(key);
 		}
