@@ -14,13 +14,12 @@ import javax.faces.event.AjaxBehaviorEvent;
 
 import br.com.abware.accountmgm.bean.model.ModelDataModel;
 import br.com.abware.accountmgm.bean.model.PersonModel;
+import br.com.abware.accountmgm.util.BeanUtils;
 import br.com.abware.jcondo.core.model.Condominium;
 import br.com.abware.jcondo.core.model.Flat;
 import br.com.abware.jcondo.core.model.Membership;
 import br.com.abware.jcondo.core.model.Person;
-import br.com.abware.jcondo.core.model.Role;
 import br.com.abware.jcondo.core.model.Supplier;
-import br.com.abware.jcondo.exception.ApplicationException;
 
 @ManagedBean
 @ViewScoped
@@ -46,6 +45,8 @@ public class TestBean extends BaseBean {
 	private List<Flat> flats;
 
 	private Person person;
+	
+	private PersonModel personModel;
 	
 	private Person[] selectedPeople;
 
@@ -92,31 +93,37 @@ public class TestBean extends BaseBean {
 
 	public void onPersonSave() {
 		try {
-			person.setPicture(imageUploadBean.getImage());
-			personService.register(person);
-			personService.updateMemberships(person, memberships);
-		} catch (ApplicationException e) {
+			personModel.getPerson().setPicture(imageUploadBean.getImage());
+			Person person = personService.register(personModel.getPerson());
+			personModel.setPerson(person);
+			personService.updateMemberships(personModel.getPerson(), personModel.getMemberships());
+			model.addModel(personModel);
+		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
 
 	public void onPersonCreate() throws Exception {
-		
+		personModel = new PersonModel(new Person(), new ArrayList<Membership>());
 	}
 	
-	public void onPersonDelete() throws ApplicationException {
+	public void onPersonDelete() throws Exception {
 		personService.delete(person);
 	}
 
-	public void onPeopleDelete() throws ApplicationException {
+	public void onPeopleDelete() throws Exception {
 		for (Person person : selectedPeople) {
 			personService.delete(person);
 		}
 	}
 
 	public void onPersonEdit() throws Exception {
-		
+		try {
+			BeanUtils.copyProperties(personModel, model.getRowData());
+		} catch (Exception e) {
+			//LOGGER.error("Falha ao editar veiculo", e);
+		}
 	}
 
 	public String displayMembership(Membership membership) {

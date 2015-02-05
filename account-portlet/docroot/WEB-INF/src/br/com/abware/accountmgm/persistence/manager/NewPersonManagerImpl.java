@@ -2,43 +2,30 @@ package br.com.abware.accountmgm.persistence.manager;
 
 import java.io.File;
 import java.net.URL;
-import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import javax.persistence.Query;
 
-import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
 
 import br.com.abware.accountmgm.persistence.entity.PersonEntity;
-import br.com.abware.accountmgm.util.FlatTransformer;
 import br.com.abware.jcondo.core.Gender;
 import br.com.abware.jcondo.core.PersonStatus;
-import br.com.abware.jcondo.core.model.Condominium;
 import br.com.abware.jcondo.core.model.Domain;
-import br.com.abware.jcondo.core.model.Flat;
 import br.com.abware.jcondo.core.model.Image;
-import br.com.abware.jcondo.core.model.Membership;
 import br.com.abware.jcondo.core.model.Person;
-import br.com.abware.jcondo.core.model.Role;
-import br.com.abware.jcondo.core.model.RoleName;
 import br.com.abware.jcondo.exception.PersistenceException;
 
 import com.liferay.portal.NoSuchUserException;
 import com.liferay.portal.kernel.workflow.WorkflowConstants;
-import com.liferay.portal.model.Group;
 import com.liferay.portal.model.User;
 import com.liferay.portal.model.UserConstants;
-import com.liferay.portal.model.UserGroupRole;
-import com.liferay.portal.service.GroupLocalServiceUtil;
 import com.liferay.portal.service.ServiceContext;
-import com.liferay.portal.service.UserGroupRoleLocalServiceUtil;
 import com.liferay.portal.service.UserLocalServiceUtil;
 
 public class NewPersonManagerImpl extends JCondoManager<PersonEntity, Person> {
-	
-	private NewFlatManagerImpl flatManager = new NewFlatManagerImpl();
 
 	private String getPath(long imageId) {
 		return imageId == 0 ? null : helper.getPortalURL() + 
@@ -74,7 +61,7 @@ public class NewPersonManagerImpl extends JCondoManager<PersonEntity, Person> {
 											 		isMale, 0, 0, 0, StringUtils.EMPTY, null, null, null, null, false, new ServiceContext());
 				person.setUserId(user.getUserId());
 			} else {
-				user = UserLocalServiceUtil.updateUser(person.getId(), user.getPassword(), StringUtils.EMPTY, StringUtils.EMPTY, false, 
+				user = UserLocalServiceUtil.updateUser(person.getUserId(), user.getPassword(), StringUtils.EMPTY, StringUtils.EMPTY, false, 
 													   user.getReminderQueryQuestion(), user.getReminderQueryAnswer(), user.getScreenName(), 
 													   person.getEmailAddress(), user.getFacebookId(), user.getOpenId(), user.getLanguageId(), 
 													   user.getTimeZoneId(), user.getGreeting(), user.getComments(), person.getFirstName(), 
@@ -91,7 +78,7 @@ public class NewPersonManagerImpl extends JCondoManager<PersonEntity, Person> {
 					}
 				} else if (!person.getPicture().getPath().equals(getPath(person.getPicture().getId()))) {
 					File file = new File(new URL(person.getPicture().getPath()).toURI());
-					UserLocalServiceUtil.updatePortrait(person.getId(),	FileUtils.readFileToByteArray(file));
+					user = UserLocalServiceUtil.updatePortrait(person.getUserId(), FileUtils.readFileToByteArray(file));
 					file.delete();
 				}
 			} catch (Exception e) {
@@ -106,10 +93,8 @@ public class NewPersonManagerImpl extends JCondoManager<PersonEntity, Person> {
 
 	public void delete(Person person) throws PersistenceException {
 		try {
-			if (person.getId() != 0) {
-				UserLocalServiceUtil.updateStatus(person.getUserId(), WorkflowConstants.STATUS_INACTIVE);
-				person.setStatus(PersonStatus.INACTIVE);
-			}
+			UserLocalServiceUtil.updateStatus(person.getUserId(), WorkflowConstants.STATUS_INACTIVE);
+			person.setStatus(PersonStatus.INACTIVE);
 		} catch (NoSuchUserException e) {
 			throw new PersistenceException("usuario nao cadastrado");
 		} catch (Exception e) {
@@ -118,21 +103,22 @@ public class NewPersonManagerImpl extends JCondoManager<PersonEntity, Person> {
 	}
 
 	@SuppressWarnings("unchecked")
-	public List<Person> findPeople(Domain domain) throws PersistenceException {
+	public List<Person> findPeople(Domain domain) throws Exception {
+		long[] userIds = UserLocalServiceUtil.getGroupUserIds(domain.getDomainId());
 		String key = generateKey();
-		String queryString = "FROM PersonEntity WHERE flats.id = :flatId";
+		String queryString = "FROM PersonEntity WHERE userId in :userIds";
 
 		try {
 			openManager(key);
 			Query query = em.createQuery(queryString);
-			query.setParameter("flatId", domain.getId());
+			query.setParameter("userIds", Arrays.asList(userIds));
 			return getModels(query.getResultList());
 		} finally {
 			closeManager(key);
 		}
 	}
 
-	public Person getLoggedPerson() throws PersistenceException {
+	public Person getPerson() throws PersistenceException {
 		String key = generateKey();
 		String queryString = "FROM PersonEntity WHERE userId = :userId";
 
@@ -165,28 +151,13 @@ public class NewPersonManagerImpl extends JCondoManager<PersonEntity, Person> {
 			throw new PersistenceException(e, "");
 		}
 	}
-	
-	public boolean exists(Person person) throws Exception {
-		return getEntity(person) != null;
+
+	public void removeDomain(Person person, Domain domain) throws Exception {
+		UserLocalServiceUtil.unsetGroupUsers(domain.getDomainId(), new long[] {person.getUserId()}, null);
 	}
 
-	public void removeDomain(Person person, Domain domain) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	public void addDomain(Person person, Domain domain) {
-		String key = generateKey();
-		String queryString = "FROM PersonDomainEntity WHERE personId = :id";
-
-		try {
-			openManager(key);
-			PersonEntity entity = findEntityById(person.getId());
-			entity.getFlats().add(flatManager.getEntity(domain));
-			
-		} finally {
-			closeManager(key);
-		}
+	public void addDomain(Person person, Domain domain) throws Exception {
+		UserLocalServiceUtil.addGroupUsers(domain.getDomainId(), new long[] {person.getUserId()});
 	}
 
 }

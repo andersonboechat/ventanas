@@ -157,7 +157,7 @@ public class SecurityManagerImpl {
 
 	public List<Role> getRoles(Person person, Domain domain) throws Exception {
 		List<Role> roles = new ArrayList<Role>();
-		List<UserGroupRole> list = UserGroupRoleLocalServiceUtil.getUserGroupRoles(person.getUserId(), domain.getId());
+		List<UserGroupRole> list = UserGroupRoleLocalServiceUtil.getUserGroupRoles(person.getUserId(), domain.getDomainId());
 
 		for (UserGroupRole item : list) {
 			roles.add(new Role(item.getRole().getRoleId(), RoleName.parse(item.getRole().getName()), item.getRole().getTitle()));
@@ -181,7 +181,8 @@ public class SecurityManagerImpl {
 	
 	public boolean hasPermission(BaseModel model, Permission permission) throws ApplicationException {
 		try {
-			PermissionChecker permissionChecker = PermissionCheckerFactoryUtil.create(helper.getUser());
+			//PermissionChecker permissionChecker = PermissionCheckerFactoryUtil.create(helper.getUser());
+			PermissionChecker permissionChecker = helper.getThemeDisplay().getPermissionChecker();
 
 			if (model instanceof Person) {
 				return checkUserPermission(permissionChecker, model.getId(), permission);
