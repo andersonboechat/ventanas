@@ -17,8 +17,11 @@ import br.com.abware.accountmgm.bean.model.PersonModel;
 import br.com.abware.accountmgm.util.BeanUtils;
 import br.com.abware.jcondo.core.model.Condominium;
 import br.com.abware.jcondo.core.model.Flat;
+import br.com.abware.jcondo.core.model.Image;
 import br.com.abware.jcondo.core.model.Membership;
 import br.com.abware.jcondo.core.model.Person;
+import br.com.abware.jcondo.core.model.Role;
+import br.com.abware.jcondo.core.model.RoleName;
 import br.com.abware.jcondo.core.model.Supplier;
 
 @ManagedBean
@@ -43,12 +46,12 @@ public class TestBean extends BaseBean {
 	private Long number;
 
 	private List<Flat> flats;
-
-	private Person person;
 	
 	private PersonModel personModel;
 	
 	private Person[] selectedPeople;
+
+	private List<Role> roles;
 
 	@PostConstruct
 	public void init() {
@@ -67,9 +70,21 @@ public class TestBean extends BaseBean {
 			}
 
 			model = new ModelDataModel<PersonModel>(people);
+			Person person = new Person();
+			person.setPicture(new Image());
+			personModel = new PersonModel(person, new ArrayList<Membership>());
 			filters = new HashMap<String, Object>();
-			imageUploadBean.setWidth(100);
-			imageUploadBean.setHeight(100);
+			imageUploadBean.setWidth(198);
+			imageUploadBean.setHeight(300);
+			roles = new ArrayList<Role>();
+			for (RoleName roleName : RoleName.values()) {
+				if (roleName.getType() == 0) {
+					try {
+					roles.add(securityManager.getRole(null, roleName));
+					} catch (Exception e) {}
+				}
+			}
+			
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -90,6 +105,10 @@ public class TestBean extends BaseBean {
 		filters.put("memberships.domain.number", number);
 		model.filter(filters);
 	}
+	
+	public void onRoleSelect(AjaxBehaviorEvent event) {
+		
+	}
 
 	public void onPersonSave() {
 		try {
@@ -109,7 +128,7 @@ public class TestBean extends BaseBean {
 	}
 	
 	public void onPersonDelete() throws Exception {
-		personService.delete(person);
+		personService.delete(personModel.getPerson());
 	}
 
 	public void onPeopleDelete() throws Exception {
@@ -121,8 +140,9 @@ public class TestBean extends BaseBean {
 	public void onPersonEdit() throws Exception {
 		try {
 			BeanUtils.copyProperties(personModel, model.getRowData());
+			imageUploadBean.setImage(personModel.getPerson().getPicture());
 		} catch (Exception e) {
-			//LOGGER.error("Falha ao editar veiculo", e);
+			e.printStackTrace();
 		}
 	}
 
@@ -189,12 +209,12 @@ public class TestBean extends BaseBean {
 		this.flats = flats;
 	}
 
-	public Person getPerson() {
-		return person;
+	public PersonModel getPersonModel() {
+		return personModel;
 	}
 
-	public void setPerson(Person person) {
-		this.person = person;
+	public void setPersonModel(PersonModel personModel) {
+		this.personModel = personModel;
 	}
 
 	public Set<Long> getBlocks() {
@@ -219,6 +239,14 @@ public class TestBean extends BaseBean {
 
 	public void setSelectedPeople(Person[] selectedPeople) {
 		this.selectedPeople = selectedPeople;
+	}
+
+	public List<Role> getRoles() {
+		return roles;
+	}
+
+	public void setRoles(List<Role> roles) {
+		this.roles = roles;
 	}
 
 }

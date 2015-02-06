@@ -5,6 +5,7 @@ import java.util.List;
 import org.apache.commons.collections.CollectionUtils;
 
 import br.com.abware.accountmgm.persistence.manager.FlatManagerImpl;
+import br.com.abware.accountmgm.persistence.manager.NewFlatManagerImpl;
 import br.com.abware.accountmgm.persistence.manager.SecurityManagerImpl;
 import br.com.abware.jcondo.core.Permission;
 import br.com.abware.jcondo.core.model.Flat;
@@ -14,9 +15,9 @@ import br.com.abware.jcondo.exception.ApplicationException;
 import br.com.abware.jcondo.exception.BusinessException;
 import br.com.abware.jcondo.exception.PersistenceException;
 
-public class FlatServiceImpl implements FlatService {
+public class FlatServiceImpl {
 
-	private static final FlatManagerImpl flatManager = new FlatManagerImpl();
+	private static final NewFlatManagerImpl flatManager = new NewFlatManagerImpl();
 
 	private static SecurityManagerImpl securityManager = new SecurityManagerImpl();
 
@@ -28,13 +29,11 @@ public class FlatServiceImpl implements FlatService {
 		return flatManager.findById(flatId);
 	}
 
-	@Override
 	public List<Flat> getFlats() throws BusinessException {
 		return null; //flatManager.findAll();
 	}
 
-	@Override
-	public List<Flat> getFlats(Person person) throws BusinessException {
+	public List<Flat> getFlats(Person person) throws Exception {
 		List<Flat> flats = null;
 		try {
 			flats = flatManager.findByPerson(person);
@@ -61,18 +60,16 @@ public class FlatServiceImpl implements FlatService {
 		return flats;
 	}
 
-	@Override
-	public List<Integer> getBlocks() {
+	public List<Integer> getBlocks() throws Exception {
 		if (blocks == null) {
-			blocks = flatManager.findFlatBlocks();
+//			blocks = flatManager.findFlatBlocks();
 		}
 		return blocks;
 	}
 
-	@Override
-	public List<Integer> getNumbers() {
+	public List<Integer> getNumbers() throws Exception {
 		if (numbers == null) {
-			numbers = flatManager.findFlatNumbers();
+//			numbers = flatManager.findFlatNumbers();
 		}
 		return numbers;
 	}

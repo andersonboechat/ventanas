@@ -62,7 +62,7 @@ public class NewFlatManagerImpl extends JCondoManager<FlatEntity, Flat> {
 
 	public List<Flat> findByPerson(Person person) throws Exception {
 		List<Flat> flats = new ArrayList<Flat>();
-		String queryString = "FROM FlatEntity WHERE id = :id";
+		String queryString = "FROM FlatEntity WHERE domainId = :id";
 
 		try {
 			openManager("FlatManager.findByPerson");

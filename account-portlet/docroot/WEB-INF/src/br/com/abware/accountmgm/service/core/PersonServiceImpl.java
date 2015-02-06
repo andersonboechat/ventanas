@@ -11,6 +11,7 @@ import java.util.Set;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 
+import br.com.abware.accountmgm.persistence.manager.NewPersonManagerImpl;
 import br.com.abware.accountmgm.persistence.manager.PersonManagerImpl;
 import br.com.abware.accountmgm.persistence.manager.SecurityManagerImpl;
 import br.com.abware.accountmgm.util.DomainPredicate;
@@ -27,17 +28,17 @@ import br.com.abware.jcondo.core.service.PersonService;
 import br.com.abware.jcondo.exception.ApplicationException;
 import br.com.abware.jcondo.exception.PersistenceException;
 
-public class PersonServiceImpl implements PersonService {
+public class PersonServiceImpl  {
 
 	private static final Condominium CONDOMINIUM = new Condominium();
 
-	private static PersonManagerImpl personManager = new PersonManagerImpl();
+	private static NewPersonManagerImpl personManager = new NewPersonManagerImpl();
 
 	private static SecurityManagerImpl securityManager = new SecurityManagerImpl();
 
 	private FlatServiceImpl flatService = new FlatServiceImpl();
 
-	public List<Person> getPeople(Person person) throws ApplicationException {
+	public List<Person> getPeople(Person person) throws Exception {
 		List<Person> people = new ArrayList<Person>();
 
 		try {
@@ -54,8 +55,7 @@ public class PersonServiceImpl implements PersonService {
 		return people;
 	}
 	
-	@Override
-	public List<Person> getPeople(Domain domain) throws ApplicationException {
+	public List<Person> getPeople(Domain domain) throws Exception {
 		List<Person> people = new ArrayList<Person>();
 
 		try {
@@ -75,20 +75,8 @@ public class PersonServiceImpl implements PersonService {
 	}
 	
 	
-	@Override
-	public Person getPerson() throws ApplicationException {
-		return personManager.getLoggedPerson();
-	}
-
-	@Override
-	public File getPortrait() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public boolean hasPermission(Person person, Permission permission) throws ApplicationException {
-		return securityManager.hasPermission(person, permission);
+	public Person getPerson() throws Exception {
+		return personManager.getPerson();
 	}
 
 	/**
@@ -114,8 +102,7 @@ public class PersonServiceImpl implements PersonService {
 	 * Se for locatário, associa aos papeis: Locatário, Alugador, Reclamador, Comentarista, Provedor de Acesso
 	 * 				   , associa os proprietários aos papeis: Proprietário
 	 */
-	@Override
-	public Person register(Person person) throws ApplicationException {
+	public Person register(Person person) throws Exception {
 //		if (!securityManager.hasPermission(person, Permission.ADD_USER)) {
 //			throw new Exception("sem permissao para cadastrar usuario");
 //		}
@@ -221,14 +208,8 @@ public class PersonServiceImpl implements PersonService {
 		inactive(person);
 	}
 	
-	@Override
-	public void setPortrait(File arg0) {
-		// TODO Auto-generated method stub
-
-	}
-
 	@SuppressWarnings("unchecked")
-	public List<Person> getOwners(Flat flat) {
+	public List<Person> getOwners(Flat flat) throws Exception {
 		List<Person> people;
 		try {
 			Role owner = securityManager.getRole(flat, RoleName.OWNER);
@@ -248,7 +229,7 @@ public class PersonServiceImpl implements PersonService {
 	}	
 
 	@SuppressWarnings("unchecked")
-	public List<Person> getRenters(Flat flat) {
+	public List<Person> getRenters(Flat flat) throws Exception {
 		List<Person> people;
 		try {
 			Role renter = securityManager.getRole(flat, RoleName.RENTER);

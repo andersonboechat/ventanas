@@ -2,12 +2,14 @@ package br.com.abware.accountmgm.persistence.manager;
 
 import java.io.File;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
 import javax.persistence.Query;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
 
 import br.com.abware.accountmgm.persistence.entity.PersonEntity;
@@ -21,15 +23,13 @@ import br.com.abware.jcondo.exception.PersistenceException;
 import com.liferay.portal.NoSuchUserException;
 import com.liferay.portal.kernel.workflow.WorkflowConstants;
 import com.liferay.portal.model.User;
-import com.liferay.portal.model.UserConstants;
 import com.liferay.portal.service.ServiceContext;
 import com.liferay.portal.service.UserLocalServiceUtil;
 
 public class NewPersonManagerImpl extends JCondoManager<PersonEntity, Person> {
 
 	private String getPath(long imageId) {
-		return imageId == 0 ? null : helper.getPortalURL() + 
-									 UserConstants.getPortraitURL(helper.getThemeDisplay().getPathImage(), true, imageId); 
+		return helper.getPortalURL() + helper.getThemeDisplay().getPathImage() + "/user_male_portrait?img_id=" + imageId; 
 	}	
 
 	@Override
@@ -105,17 +105,21 @@ public class NewPersonManagerImpl extends JCondoManager<PersonEntity, Person> {
 	@SuppressWarnings("unchecked")
 	public List<Person> findPeople(Domain domain) throws Exception {
 		long[] userIds = UserLocalServiceUtil.getGroupUserIds(domain.getDomainId());
-		String key = generateKey();
-		String queryString = "FROM PersonEntity WHERE userId in :userIds";
-
-		try {
-			openManager(key);
-			Query query = em.createQuery(queryString);
-			query.setParameter("userIds", Arrays.asList(userIds));
-			return getModels(query.getResultList());
-		} finally {
-			closeManager(key);
+		if (userIds.length > 0) {
+			String key = generateKey();
+			String queryString = "FROM PersonEntity WHERE userId in :userIds";
+	
+			try {
+				openManager(key);
+				Query query = em.createQuery(queryString);
+				query.setParameter("userIds", Arrays.asList(ArrayUtils.toObject(userIds)));
+				return getModels(query.getResultList());
+			} finally {
+				closeManager(key);
+			}
 		}
+		
+		return new ArrayList<Person>();
 	}
 
 	public Person getPerson() throws PersistenceException {
