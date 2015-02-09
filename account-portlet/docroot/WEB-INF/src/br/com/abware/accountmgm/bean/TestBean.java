@@ -1,6 +1,7 @@
 package br.com.abware.accountmgm.bean;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Set;
@@ -15,6 +16,7 @@ import javax.faces.event.AjaxBehaviorEvent;
 import br.com.abware.accountmgm.bean.model.ModelDataModel;
 import br.com.abware.accountmgm.bean.model.PersonModel;
 import br.com.abware.accountmgm.util.BeanUtils;
+import br.com.abware.jcondo.core.Gender;
 import br.com.abware.jcondo.core.model.Condominium;
 import br.com.abware.jcondo.core.model.Flat;
 import br.com.abware.jcondo.core.model.Image;
@@ -52,6 +54,10 @@ public class TestBean extends BaseBean {
 	private Person[] selectedPeople;
 
 	private List<Role> roles;
+	
+	private long selectedFlatId;
+	
+	private List<Gender> genders;
 
 	@PostConstruct
 	public void init() {
@@ -84,7 +90,7 @@ public class TestBean extends BaseBean {
 					} catch (Exception e) {}
 				}
 			}
-			
+			genders = Arrays.asList(Gender.values());
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -106,8 +112,8 @@ public class TestBean extends BaseBean {
 		model.filter(filters);
 	}
 	
-	public void onRoleSelect(AjaxBehaviorEvent event) {
-		
+	public void onRoleSelect(Membership membership) {
+		membership.setRole(roles.get(roles.indexOf(membership.getRole())));
 	}
 
 	public void onPersonSave() {
@@ -144,6 +150,12 @@ public class TestBean extends BaseBean {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
+	}
+	
+	public void onFlatAdd() {
+		Flat flat = flats.get(flats.indexOf(new Flat(selectedFlatId, 0, 0)));
+		personModel.getMemberships().add(new Membership(new Role(), flat));
+		selectedFlatId = 0;
 	}
 
 	public String displayMembership(Membership membership) {
@@ -247,6 +259,22 @@ public class TestBean extends BaseBean {
 
 	public void setRoles(List<Role> roles) {
 		this.roles = roles;
+	}
+
+	public long getSelectedFlatId() {
+		return selectedFlatId;
+	}
+
+	public void setSelectedFlatId(long selectedFlatId) {
+		this.selectedFlatId = selectedFlatId;
+	}
+
+	public List<Gender> getGenders() {
+		return genders;
+	}
+
+	public void setGenders(List<Gender> genders) {
+		this.genders = genders;
 	}
 
 }

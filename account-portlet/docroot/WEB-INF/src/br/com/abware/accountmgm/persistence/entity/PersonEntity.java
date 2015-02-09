@@ -1,6 +1,7 @@
 package br.com.abware.accountmgm.persistence.entity;
 
 import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.Table;
 
@@ -11,6 +12,7 @@ public class PersonEntity extends BaseEntity {
 	private static final long serialVersionUID = 1L;
 
 	@Id
+	@GeneratedValue
 	private long id;
 
 	private long userId;

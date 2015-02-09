@@ -40,6 +40,7 @@ public class SecurityManagerImpl {
 	public SecurityManagerImpl() {
 		try {
 			portal = new Condominium();
+			portal.setDomainId(10179);
 			roles = new HashMap<RoleName, Role>();
 			roles.put(RoleName.LESSEE, getRole(portal, RoleName.LESSEE));
 			roles.put(RoleName.DEBATER, getRole(portal, RoleName.DEBATER));
@@ -111,7 +112,7 @@ public class SecurityManagerImpl {
 				}
 			}
 
-			UserGroupRoleLocalServiceUtil.addUserGroupRoles(person.getUserId(), domain.getId(), new long[] {role.getId()});
+			UserGroupRoleLocalServiceUtil.addUserGroupRoles(person.getUserId(), domain.getDomainId(), new long[] {role.getId()});
 		} catch (Exception e) {
 			throw new ApplicationException(e, "");
 		}
@@ -137,7 +138,7 @@ public class SecurityManagerImpl {
 				}
 			}
 
-			UserGroupRoleLocalServiceUtil.deleteUserGroupRoles(person.getUserId(), domain.getId(), new long[] {role.getId()});	
+			UserGroupRoleLocalServiceUtil.deleteUserGroupRoles(person.getUserId(), domain.getDomainId(), new long[] {role.getId()});	
 		} catch (Exception e) {
 			throw new ApplicationException(e, "");
 		}

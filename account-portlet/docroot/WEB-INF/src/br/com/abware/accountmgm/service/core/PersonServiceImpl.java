@@ -1,7 +1,5 @@
 package br.com.abware.accountmgm.service.core;
 
-import java.io.File;
-
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
@@ -12,7 +10,6 @@ import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 
 import br.com.abware.accountmgm.persistence.manager.NewPersonManagerImpl;
-import br.com.abware.accountmgm.persistence.manager.PersonManagerImpl;
 import br.com.abware.accountmgm.persistence.manager.SecurityManagerImpl;
 import br.com.abware.accountmgm.util.DomainPredicate;
 import br.com.abware.accountmgm.util.MembershipPredicate;
@@ -24,7 +21,6 @@ import br.com.abware.jcondo.core.model.Membership;
 import br.com.abware.jcondo.core.model.Person;
 import br.com.abware.jcondo.core.model.Role;
 import br.com.abware.jcondo.core.model.RoleName;
-import br.com.abware.jcondo.core.service.PersonService;
 import br.com.abware.jcondo.exception.ApplicationException;
 import br.com.abware.jcondo.exception.PersistenceException;
 
@@ -37,6 +33,11 @@ public class PersonServiceImpl  {
 	private static SecurityManagerImpl securityManager = new SecurityManagerImpl();
 
 	private FlatServiceImpl flatService = new FlatServiceImpl();
+	
+	
+	public PersonServiceImpl() {
+		CONDOMINIUM.setDomainId(10179);
+	}
 
 	public List<Person> getPeople(Person person) throws Exception {
 		List<Person> people = new ArrayList<Person>();
@@ -128,9 +129,9 @@ public class PersonServiceImpl  {
 			}
 		}
 
-		for (Role role : securityManager.getRoles(person, CONDOMINIUM)) {
-			memberships.add(new Membership(role, CONDOMINIUM));
-		}
+//		for (Role role : securityManager.getRoles(person, CONDOMINIUM)) {
+//			memberships.add(new Membership(role, CONDOMINIUM));
+//		}
 
 		return memberships;
 	}
@@ -145,11 +146,11 @@ public class PersonServiceImpl  {
 			Role role = membership.getRole();
 
 			if (!CollectionUtils.exists(memberships, new MembershipPredicate(domain, role))) {
-				if (securityManager.hasPermission(role, Permission.DELETE_PERSON)) {
+//				if (securityManager.hasPermission(role, Permission.DELETE_PERSON)) {
 					securityManager.removeRole(person, domain, role);
-				} else {
-					throw new ApplicationException(null, "no permission to remove a person with this role from this domain");
-				}
+//				} else {
+//					throw new ApplicationException(null, "no permission to remove a person with this role from this domain");
+//				}
 			}
 
 			domains.add(domain);
@@ -158,9 +159,9 @@ public class PersonServiceImpl  {
 		/* Removendo dominios */
 		for(Domain domain : domains) {
 			if (!CollectionUtils.exists(memberships, new DomainPredicate(domain))) {
-				if (securityManager.hasPermission(domain, Permission.DELETE_PERSON)) {
+//				if (securityManager.hasPermission(domain, Permission.DELETE_PERSON)) {
 					personManager.removeDomain(person, domain);
-				}
+//				}
 			}
 		}
 
@@ -173,11 +174,11 @@ public class PersonServiceImpl  {
 
 			/* usuário nao tem esse papel nesse dominio */
 			if (!CollectionUtils.exists(oldMemberships, new MembershipPredicate(domain, role))) {
-				if (securityManager.hasPermission(role, Permission.ADD_USER)) {
+//				if (securityManager.hasPermission(role, Permission.ADD_USER)) {
 					securityManager.addRole(person, domain, role);
-				} else {
-					throw new ApplicationException(null, "no permission to add a person with this role in this domain");
-				}
+//				} else {
+//					throw new ApplicationException(null, "no permission to add a person with this role in this domain");
+//				}
 			}
 
 			domains.add(domain);
@@ -186,9 +187,9 @@ public class PersonServiceImpl  {
 		/* Incluindo dominios */
 		for(Domain domain : domains) {
 			if (!CollectionUtils.exists(oldMemberships, new DomainPredicate(domain))) {
-				if (securityManager.hasPermission(domain, Permission.ADD_USER)) {
+//				if (securityManager.hasPermission(domain, Permission.ADD_USER)) {
 					personManager.addDomain(person, domain);
-				}
+//				}
 			}
 		}
 		

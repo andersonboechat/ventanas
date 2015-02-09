@@ -51,7 +51,7 @@
 				             selection="#{testBean.selectedPeople}" rowKey="#{person.id}" >
 					<p:column selectionMode="multiple" style="width: 17px"/>
 					<p:column style="width: 100px">
-						<p:graphicImage value="#{model.person.picture.path}"/>
+						<p:graphicImage value="#{model.person.picture.path}" styleClass="foto" height="120" width="79"/>
 					</p:column>
 					<p:column>
 						<p:panelGrid columns="1">
@@ -82,7 +82,8 @@
 				<p:panelGrid id="model-details" columns="2" columnClasses="my-account-col1,my-account-col2" styleClass="no-border" style="margin: 10px 0px 20px 0px;" cellpadding="10">
 					<p:column>
 						<p:panelGrid columns="1" styleClass="person-image" columnClasses="no-margin">
-				        	<p:graphicImage id="portrait" value="http://localhost/account-portlet/temp/avatar.jpg"/>
+							<p:graphicImage id="portrait" value="#{imageUploader.image.path}"/>
+				        	<p:graphicImage id="portrait2" value="http://localhost/account-portlet/temp/avatar.jpg" rendered="false"/>
 				        </p:panelGrid>
 						<p:commandLink value="Enviar Foto" update=":upload-form" oncomplete="PF('uploadDialog').show();" partialSubmit="true" process="@this" style="float: right" styleClass="column">
 							<f:setPropertyActionListener target="#{imageUploader.image.path}" value=""/>
@@ -92,47 +93,42 @@
 						</p:commandLink>
 					</p:column>
 					<p:column>
+						<p:panelGrid columns="1" columnClasses="fieldClm">
 						<p:panelGrid columns="2" columnClasses="labelClm,fieldClm" style="width: 100%; margin: 0px">
 							<p:outputLabel for="email" value="Email: "/>
-							<p:inputText id="email" value="#{testBean.personModel.person.emailAddress}" required="true" size="40"/>
+							<p:inputText id="email" value="#{testBean.personModel.person.emailAddress}" size="40"/>
 							<p:outputLabel for="firstName" value="Nome: "/>
-							<p:inputText id="firstName" value="#{testBean.personModel.person.firstName}" required="true" size="40"/>
+							<p:inputText id="firstName" value="#{testBean.personModel.person.firstName}" size="40"/>
 							<p:outputLabel for="lastName" value="Sobrenome: "/>
-							<p:inputText id="lastName" value="#{testBean.personModel.person.lastName}" required="true" size="40"/>
+							<p:inputText id="lastName" value="#{testBean.personModel.person.lastName}" size="40"/>
 							<p:outputLabel for="identity" value="CPF: "/>
-							<p:inputMask id="identity" value="#{testBean.personModel.person.identity}" mask="999.999.999-99" required="true" size="40"/>
-							<p:outputLabel for="male" value="Sexo: "/>
-							<p:selectOneMenu id="male" value="#{testBean.personModel.person.gender}">
-								<f:selectItem itemLabel="Masculino" itemValue="true" />
-								<f:selectItem itemLabel="Feminino" itemValue="false" />
+							<p:inputMask id="identity" value="#{testBean.personModel.person.identity}" mask="999.999.999-99" size="40"/>
+							<p:outputLabel for="male" value="Sexo:"/>
+							<p:selectOneMenu id="male" value="#{testBean.personModel.person.gender}" required="false">
+								<f:selectItems var="gender" value="#{testBean.genders}" itemLabel="#{msg[gender.label]}"/>							
 							</p:selectOneMenu>
 						</p:panelGrid>
-						<p:commandLink id="domainBtn" value="Incluir Apartamento" style="float: right"/>
-						<p:overlayPanel id="domainPanel" for="domainBtn" hideEffect="fade" my="right top" at="right bottom">
-							<p:panelGrid columns="1" style="text-align: center; margin: 0px" styleClass="no-border">
-								<p:selectOneMenu filter="true" filterMatchMode="contains">
-									<f:selectItems var="flat" value="#{testBean.flats}" itemLabel="Apt. #{flat.number} - Bl. #{flat.block}" itemValue="#{flat.id}"/>
-								</p:selectOneMenu>
-								<p:commandButton value="Incluir"/>
-							</p:panelGrid>
-							
-						</p:overlayPanel>
-						
-						<p:dataTable var="membership" value="#{testBean.personModel.memberships}" style="width: 340px" emptyMessage="">
+						<p:panelGrid columns="2" style="text-align: center; margin: 0px; float: right" styleClass="no-border">
+							<p:selectOneMenu widgetVar="newFlat" id="newFlat" value="#{testBean.selectedFlatId}" filter="true" filterMatchMode="contains">
+								<f:selectItems var="flat" value="#{testBean.flats}" itemLabel="Apt. #{flat.number} - Bl. #{flat.block}" itemValue="#{flat.id}"/>
+							</p:selectOneMenu>
+							<p:commandButton value="Incluir" actionListener="#{testBean.onFlatAdd}" update=":register-form:memberships" partialSubmit="true" process="@namingcontainer"/>
+						</p:panelGrid>						
+						<p:dataTable id="memberships" var="membership" rows="2" paginator="true" paginatorAlwaysVisible="false" paginatorPosition="bottom" value="#{testBean.personModel.memberships}" style="width: 340px; margin-right: 10px;" emptyMessage="">
 							<p:column>
 								<p:panelGrid columns="1" columnClasses="fieldClm" style="width: 100%; margin: 0px; background-color: transparent !important" >
 									<h:outputText value="Apartamento #{membership.domain.number} - Bloco #{membership.domain.block}" />
 									<p:selectOneMenu value="#{membership.role.id}" style="vertical-align: middle;">
 										<f:selectItems var="role" value="#{testBean.roles}" itemLabel="#{role.title}" itemValue="#{role.id}"/>
-										<p:ajax event="change" listener="#{testBean.onRoleSelect}" partialSubmit="true" process="@this"/>
+										<p:ajax event="change" listener="#{testBean.onRoleSelect(membership)}" partialSubmit="true" process="@this"/>
 									</p:selectOneMenu>
 								</p:panelGrid>
 							</p:column>
 						</p:dataTable>
+						</p:panelGrid>
 					</p:column>
 				</p:panelGrid>
 				<p:commandButton value="Salvar" actionListener="#{testBean.onPersonSave}" update=":outputMsg" style="float: right; width: 70px; margin: 0px 0px 10px 5px;"/>
-							
 			</ui:define>
 		</ui:composition>
 	</h:body>

@@ -4,11 +4,12 @@ import java.io.File;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 
 import javax.persistence.Query;
 
-import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
 
@@ -58,14 +59,14 @@ public class NewPersonManagerImpl extends JCondoManager<PersonEntity, Person> {
 											 		StringUtils.EMPTY, StringUtils.EMPTY, true, StringUtils.EMPTY, 
 											 		person.getEmailAddress(), 0, StringUtils.EMPTY, helper.getUser().getLocale(), 
 											 		person.getFirstName(), StringUtils.EMPTY, person.getLastName(), 0, 0, 
-											 		isMale, 0, 0, 0, StringUtils.EMPTY, null, null, null, null, false, new ServiceContext());
+											 		isMale, 1, 1, 1900, StringUtils.EMPTY, null, null, null, null, false, new ServiceContext());
 				person.setUserId(user.getUserId());
 			} else {
 				user = UserLocalServiceUtil.updateUser(person.getUserId(), user.getPassword(), StringUtils.EMPTY, StringUtils.EMPTY, false, 
 													   user.getReminderQueryQuestion(), user.getReminderQueryAnswer(), user.getScreenName(), 
 													   person.getEmailAddress(), user.getFacebookId(), user.getOpenId(), user.getLanguageId(), 
 													   user.getTimeZoneId(), user.getGreeting(), user.getComments(), person.getFirstName(), 
-													   StringUtils.EMPTY, person.getLastName(), 0, 0, isMale, 0, 0, 0, StringUtils.EMPTY, 
+													   StringUtils.EMPTY, person.getLastName(), 0, 0, isMale, 1, 1, 1900, StringUtils.EMPTY, 
 													   StringUtils.EMPTY, StringUtils.EMPTY, StringUtils.EMPTY, StringUtils.EMPTY, 
 													   StringUtils.EMPTY, StringUtils.EMPTY, StringUtils.EMPTY, StringUtils.EMPTY, 
 													   StringUtils.EMPTY, user.getJobTitle(), null, null, null, null, null, new ServiceContext());
@@ -77,9 +78,9 @@ public class NewPersonManagerImpl extends JCondoManager<PersonEntity, Person> {
 						UserLocalServiceUtil.deletePortrait(person.getUserId());
 					}
 				} else if (!person.getPicture().getPath().equals(getPath(person.getPicture().getId()))) {
-					File file = new File(new URL(person.getPicture().getPath()).toURI());
-					user = UserLocalServiceUtil.updatePortrait(person.getUserId(), FileUtils.readFileToByteArray(file));
-					file.delete();
+					user = UserLocalServiceUtil.updatePortrait(person.getUserId(), 
+															   IOUtils.toByteArray(new URL(person.getPicture().getPath()).openStream()));
+					new File(new URL(person.getPicture().getPath()).getPath()).delete();
 				}
 			} catch (Exception e) {
 				// TODO Log it!
@@ -149,6 +150,7 @@ public class NewPersonManagerImpl extends JCondoManager<PersonEntity, Person> {
 			person.setGender(user.isMale() ? Gender.MALE : Gender.FEMALE);
 			person.setStatus(user.getStatus() == WorkflowConstants.STATUS_APPROVED ? PersonStatus.ACTIVE : PersonStatus.INACTIVE);
 			person.setPicture(new Image(user.getPortraitId(), getPath(user.getPortraitId()), null, null));
+			person.setBirthday(new Date());
 
 			return person;
 		} catch (Exception e) {
