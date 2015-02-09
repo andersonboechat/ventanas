@@ -45,15 +45,15 @@
 				</p:panelGrid>
 			</ui:define>
 			<ui:define name="model-list">
-				<p:dataTable id="personTable" var="model" value="#{testBean.model}"  
+				<p:dataTable widgetVar="personTable" id="personTable" var="model" value="#{testBean.model}"  
 				             paginator="true" rows="5" paginatorPosition="bottom" 
 				             paginatorTemplate="{CurrentPageReport} {PreviousPageLink} {PageLinks} {NextPageLink}" 
 				             selection="#{testBean.selectedPeople}" rowKey="#{person.id}" >
-					<p:column selectionMode="multiple" style="width: 17px"/>
-					<p:column style="width: 100px">
+		    		<p:column selectionMode="multiple" style="width: 17px;"/>
+					<p:column style="width: 81px;">
 						<p:graphicImage value="#{model.person.picture.path}" styleClass="foto" height="120" width="79"/>
 					</p:column>
-					<p:column>
+					<p:column style="vertical-align: top">
 						<p:panelGrid columns="1">
 		        			<h:outputText value="#{model.person.firstName} #{model.person.lastName}" />
 	        				<p:subTable var="membership" value="#{model.memberships}">
@@ -82,7 +82,7 @@
 				<p:panelGrid id="model-details" columns="2" columnClasses="my-account-col1,my-account-col2" styleClass="no-border" style="margin: 10px 0px 20px 0px;" cellpadding="10">
 					<p:column>
 						<p:panelGrid columns="1" styleClass="person-image" columnClasses="no-margin">
-							<p:graphicImage id="portrait" value="#{imageUploader.image.path}"/>
+							<p:graphicImage id="portrait" value="#{imageUploader.image.path}" width="198" height="300"/>
 				        	<p:graphicImage id="portrait2" value="http://localhost/account-portlet/temp/avatar.jpg" rendered="false"/>
 				        </p:panelGrid>
 						<p:commandLink value="Enviar Foto" update=":upload-form" oncomplete="PF('uploadDialog').show();" partialSubmit="true" process="@this" style="float: right" styleClass="column">
@@ -128,7 +128,7 @@
 						</p:panelGrid>
 					</p:column>
 				</p:panelGrid>
-				<p:commandButton value="Salvar" actionListener="#{testBean.onPersonSave}" update=":outputMsg" style="float: right; width: 70px; margin: 0px 0px 10px 5px;"/>
+				<p:commandButton value="Salvar" actionListener="#{testBean.onPersonSave}" update=":model-form:personTable, :outputMsg" oncomplete="if (!args.validationFailed) { if(!args.exception) {PF('registerDialog').hide();} else { if(args.alert) {PF('alertDialog').show();}}}" style="float: right; width: 70px; margin: 0px 0px 10px 5px;"/>
 			</ui:define>
 		</ui:composition>
 	</h:body>

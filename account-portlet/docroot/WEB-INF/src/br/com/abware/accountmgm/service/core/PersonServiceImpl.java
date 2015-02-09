@@ -47,7 +47,7 @@ public class PersonServiceImpl  {
 				people.addAll(personManager.findPeople(flat));
 			}
 
-			people.addAll(getPeople(CONDOMINIUM));
+//			people.addAll(getPeople(CONDOMINIUM));
 		} catch (PersistenceException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

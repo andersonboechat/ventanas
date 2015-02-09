@@ -118,11 +118,19 @@ public class TestBean extends BaseBean {
 
 	public void onPersonSave() {
 		try {
+			boolean isNew = personModel.getPerson().getId() == 0;
+
 			personModel.getPerson().setPicture(imageUploadBean.getImage());
 			Person person = personService.register(personModel.getPerson());
 			personModel.setPerson(person);
 			personService.updateMemberships(personModel.getPerson(), personModel.getMemberships());
-			model.addModel(personModel);
+
+			if (isNew) {
+				model.addModel(personModel);
+			} else {
+				model.setModel(personModel);
+			}
+			
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -145,6 +153,7 @@ public class TestBean extends BaseBean {
 
 	public void onPersonEdit() throws Exception {
 		try {
+			personModel = new PersonModel(new Person(), new ArrayList<Membership>());
 			BeanUtils.copyProperties(personModel, model.getRowData());
 			imageUploadBean.setImage(personModel.getPerson().getPicture());
 		} catch (Exception e) {

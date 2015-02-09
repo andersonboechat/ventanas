@@ -3,11 +3,11 @@ package br.com.abware.accountmgm.persistence.manager;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.persistence.EntityNotFoundException;
 import javax.persistence.Query;
 
 import org.apache.commons.lang.StringUtils;
 
-import com.liferay.portal.NoSuchGroupException;
 import com.liferay.portal.model.Group;
 import com.liferay.portal.model.GroupConstants;
 import com.liferay.portal.model.Resource;
@@ -34,22 +34,17 @@ public class NewFlatManagerImpl extends JCondoManager<FlatEntity, Flat> {
 	public Flat save(Flat flat) throws Exception {
 		Flat f = super.save(flat);
 
-		Group group;
-
-		try {
-			group = GroupLocalServiceUtil.getGroup(helper.getCompanyId(), flat.toString());
-		} catch (NoSuchGroupException e) {
-			group = GroupLocalServiceUtil.addGroup(helper.getUserId(), Resource.class.getName(), f.getId(), flat.toString(), 
-												   StringUtils.EMPTY, GroupConstants.TYPE_SITE_PRIVATE, 
-												   f.getBlock() + "-" + f.getNumber(), false, true, null);
+		if (flat.getDomainId() == 0) {
+			Group group = GroupLocalServiceUtil.addGroup(helper.getUserId(), Resource.class.getName(), f.getId(), flat.toString(), 
+														 StringUtils.EMPTY, GroupConstants.TYPE_SITE_PRIVATE, 
+														 f.getBlock() + "-" + f.getNumber(), false, true, null);
+			ResourceLocalServiceUtil.addResources(helper.getCompanyId(), group.getGroupId(), helper.getUserId(), 
+												  Flat.class.getName(), f.getId(), false, false, false);
+			f.setDomainId(group.getGroupId());
+			f = super.save(flat);
 		}
 
-		ResourceLocalServiceUtil.addResources(helper.getCompanyId(), group.getGroupId(), helper.getUserId(), 
-											  Flat.class.getName(), f.getId(), false, false, false);
-
-		f.setDomainId(group.getGroupId());
-
-		return super.save(f);
+		return f;
 	}
 
 	public void delete(Flat flat) throws Exception {
@@ -82,4 +77,21 @@ public class NewFlatManagerImpl extends JCondoManager<FlatEntity, Flat> {
 		return flats;
 	}
 
+	public Flat findByNumberAndBlock(long number, long block) throws Exception {
+		String key = generateKey();
+
+		try {
+			openManager(key);
+			String queryString = "FROM FlatEntity WHERE number = :number and block = :block";
+			Query query = em.createQuery(queryString);
+			query.setParameter("number", number);
+			query.setParameter("block", block);
+			return getModel((FlatEntity) query.getSingleResult());
+		} catch (EntityNotFoundException e) {
+			return null;
+		} finally {
+			closeManager(key);
+		}
+
+	}
 }

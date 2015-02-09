@@ -4,26 +4,18 @@ import java.util.List;
 
 import org.apache.commons.collections.CollectionUtils;
 
-import br.com.abware.accountmgm.persistence.manager.FlatManagerImpl;
 import br.com.abware.accountmgm.persistence.manager.NewFlatManagerImpl;
 import br.com.abware.accountmgm.persistence.manager.SecurityManagerImpl;
-import br.com.abware.jcondo.core.Permission;
 import br.com.abware.jcondo.core.model.Flat;
 import br.com.abware.jcondo.core.model.Person;
-import br.com.abware.jcondo.core.service.FlatService;
-import br.com.abware.jcondo.exception.ApplicationException;
 import br.com.abware.jcondo.exception.BusinessException;
 import br.com.abware.jcondo.exception.PersistenceException;
 
 public class FlatServiceImpl {
 
-	private static final NewFlatManagerImpl flatManager = new NewFlatManagerImpl();
+	private static NewFlatManagerImpl flatManager = new NewFlatManagerImpl();
 
 	private static SecurityManagerImpl securityManager = new SecurityManagerImpl();
-
-	private static List<Integer> blocks;
-
-	private static List<Integer> numbers;
 
 	public Flat getFlat(long flatId) throws Exception {
 		return flatManager.findById(flatId);
@@ -60,18 +52,17 @@ public class FlatServiceImpl {
 		return flats;
 	}
 
-	public List<Integer> getBlocks() throws Exception {
-		if (blocks == null) {
-//			blocks = flatManager.findFlatBlocks();
-		}
-		return blocks;
-	}
+	public Flat register(Flat flat) throws Exception {
+		Flat f = flatManager.findByNumberAndBlock(flat.getNumber(), flat.getBlock());
 
-	public List<Integer> getNumbers() throws Exception {
-		if (numbers == null) {
-//			numbers = flatManager.findFlatNumbers();
+		if (f != null) {
+			throw new Exception("Este apartamento já existe");
 		}
-		return numbers;
-	}
 
+		return flatManager.save(flat);
+	}
+	
+	public void delete(Flat flat) {
+		
+	}
 }

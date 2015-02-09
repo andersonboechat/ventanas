@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+
+<f:view
+	xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:c="http://java.sun.com/jsp/jstl/core"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:ui="http://java.sun.com/jsf/facelets">
+	<h:head></h:head>
+	<h:body>
+		<ui:composition template="../model-template.xhtml">
+			<ui:define name="model-filters">
+				<p:panelGrid id="model-filters" columns="2" styleClass="menu-cmds" columnClasses="menu-cmds-col1,menu-cmds-col2,menu-cmds-col3">
+					<p:column rendered="#{testBean.isSystemAdmin()}">
+						<p:commandButton value="Cadastrar Apartamento" actionListener="#{flatBean.onFlatCreate}" 
+										 partialSubmit="true" process="@this" update=":register-form:model-details" oncomplete="PF('registerDialog').show();"/>
+					</p:column>
+				    <p:column rendered="#{flatBean.flats.size() > 1}">
+				    	<p:selectCheckboxMenu label="Apartamentos" filter="true" filterMatchMode="contains">
+							<f:selectItems var="flat" value="#{flatBean.flats}" itemLabel="Apartamento #{flat.number} - Bloco #{flat.block}" itemValue="#{flat.id}"/>
+				    	</p:selectCheckboxMenu>
+				    </p:column>
+				    <p:column rendered="#{flatBean.flats.size() == 1}">
+				    	<h:outputText value="Apartamento #{flatBean.flats.get(0).number} - Bloco #{flatBean.flats.get(0).block}"/>
+				    </p:column>
+				</p:panelGrid>
+			</ui:define>
+			<ui:define name="model-list">
+				<p:dataTable widgetVar="flatTable" id="flatTable" var="flat" value="#{flatBean.model}"  
+				             paginator="true" rows="5" paginatorPosition="bottom" 
+				             paginatorTemplate="{CurrentPageReport} {PreviousPageLink} {PageLinks} {NextPageLink}" 
+				             selection="#{flatBean.selectedFlats}" rowKey="#{flat.id}" >
+					<p:column selectionMode="multiple" style="width: 17px;"/>
+					<p:column style="vertical-align: top">
+	        			<h:outputText value="Apartamento #{flat.number} - Bloco #{flat.block}" />
+					</p:column>
+					<p:column style="width: 35px">
+						<p:commandLink update=":register-form:model-details" actionListener="#{flatBean.onFlatEdit}" oncomplete="PF('registerDialog').show();" partialSubmit="true" process="@this" >
+							<h:graphicImage value="../images/edit.png" />
+						</p:commandLink>
+					</p:column>
+					<p:column style="width: 35px">
+						<p:commandLink actionListener="#{flatBean.onFlatDelete}" oncomplete="if (!args.validationFailed &amp;&amp; !args.exception) {PF('flatTable').update();}" partialSubmit="true" process="@this">
+							<h:graphicImage value="../images/delete.png" />
+							<p:confirm header="#{msg['flat.delete.confirm']}" message="#{msg['flat.delete.message']}" icon="ui-icon-alert"/>
+							<f:setPropertyActionListener target="#{flatBean.flat}" value="#{flat}"/>
+						</p:commandLink>
+					</p:column>
+				</p:dataTable>
+			</ui:define>
+			<ui:define name="model-details">
+				<p:panelGrid id="model-details" columns="2" columnClasses="my-account-col1,my-account-col2" styleClass="no-border" style="margin: 10px 0px 20px 0px;" cellpadding="10">
+					<p:outputLabel for="number" value="Apartamento: "/>
+					<p:inputText id="number" value="#{flatBean.flat.number}" size="40"/>
+					<p:outputLabel for="block" value="Bloco: "/>
+					<p:inputText id="block" value="#{flatBean.flat.block}" size="40"/>
+				</p:panelGrid>
+				<p:commandButton value="Salvar" actionListener="#{flatBean.onFlatSave}" update=":model-form:flatTable, :model-form:model-filters, :outputMsg" oncomplete="if (!args.validationFailed) { if(!args.exception) {PF('registerDialog').hide();} else { if(args.alert) {PF('alertDialog').show();}}}" style="float: right; width: 70px; margin: 0px 0px 10px 5px;"/>
+			</ui:define>
+		</ui:composition>
+	</h:body>
+</f:view>
