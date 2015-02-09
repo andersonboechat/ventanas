@@ -2,12 +2,16 @@ package br.com.abware.accountmgm.persistence.manager;
 
 import java.io.File;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 
 import javax.persistence.Query;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
 
 import br.com.abware.accountmgm.persistence.entity.PersonEntity;
@@ -21,15 +25,13 @@ import br.com.abware.jcondo.exception.PersistenceException;
 import com.liferay.portal.NoSuchUserException;
 import com.liferay.portal.kernel.workflow.WorkflowConstants;
 import com.liferay.portal.model.User;
-import com.liferay.portal.model.UserConstants;
 import com.liferay.portal.service.ServiceContext;
 import com.liferay.portal.service.UserLocalServiceUtil;
 
 public class NewPersonManagerImpl extends JCondoManager<PersonEntity, Person> {
 
 	private String getPath(long imageId) {
-		return imageId == 0 ? null : helper.getPortalURL() + 
-									 UserConstants.getPortraitURL(helper.getThemeDisplay().getPathImage(), true, imageId); 
+		return helper.getPortalURL() + helper.getThemeDisplay().getPathImage() + "/user_male_portrait?img_id=" + imageId; 
 	}	
 
 	@Override
@@ -58,14 +60,14 @@ public class NewPersonManagerImpl extends JCondoManager<PersonEntity, Person> {
 											 		StringUtils.EMPTY, StringUtils.EMPTY, true, StringUtils.EMPTY, 
 											 		person.getEmailAddress(), 0, StringUtils.EMPTY, helper.getUser().getLocale(), 
 											 		person.getFirstName(), StringUtils.EMPTY, person.getLastName(), 0, 0, 
-											 		isMale, 0, 0, 0, StringUtils.EMPTY, null, null, null, null, false, new ServiceContext());
+											 		isMale, 1, 1, 1900, StringUtils.EMPTY, null, null, null, null, false, new ServiceContext());
 				person.setUserId(user.getUserId());
 			} else {
 				user = UserLocalServiceUtil.updateUser(person.getUserId(), user.getPassword(), StringUtils.EMPTY, StringUtils.EMPTY, false, 
 													   user.getReminderQueryQuestion(), user.getReminderQueryAnswer(), user.getScreenName(), 
 													   person.getEmailAddress(), user.getFacebookId(), user.getOpenId(), user.getLanguageId(), 
 													   user.getTimeZoneId(), user.getGreeting(), user.getComments(), person.getFirstName(), 
-													   StringUtils.EMPTY, person.getLastName(), 0, 0, isMale, 0, 0, 0, StringUtils.EMPTY, 
+													   StringUtils.EMPTY, person.getLastName(), 0, 0, isMale, 1, 1, 1900, StringUtils.EMPTY, 
 													   StringUtils.EMPTY, StringUtils.EMPTY, StringUtils.EMPTY, StringUtils.EMPTY, 
 													   StringUtils.EMPTY, StringUtils.EMPTY, StringUtils.EMPTY, StringUtils.EMPTY, 
 													   StringUtils.EMPTY, user.getJobTitle(), null, null, null, null, null, new ServiceContext());
@@ -77,9 +79,9 @@ public class NewPersonManagerImpl extends JCondoManager<PersonEntity, Person> {
 						UserLocalServiceUtil.deletePortrait(person.getUserId());
 					}
 				} else if (!person.getPicture().getPath().equals(getPath(person.getPicture().getId()))) {
-					File file = new File(new URL(person.getPicture().getPath()).toURI());
-					user = UserLocalServiceUtil.updatePortrait(person.getUserId(), FileUtils.readFileToByteArray(file));
-					file.delete();
+					user = UserLocalServiceUtil.updatePortrait(person.getUserId(), 
+															   IOUtils.toByteArray(new URL(person.getPicture().getPath()).openStream()));
+					new File(new URL(person.getPicture().getPath()).getPath()).delete();
 				}
 			} catch (Exception e) {
 				// TODO Log it!
@@ -105,17 +107,21 @@ public class NewPersonManagerImpl extends JCondoManager<PersonEntity, Person> {
 	@SuppressWarnings("unchecked")
 	public List<Person> findPeople(Domain domain) throws Exception {
 		long[] userIds = UserLocalServiceUtil.getGroupUserIds(domain.getDomainId());
-		String key = generateKey();
-		String queryString = "FROM PersonEntity WHERE userId in :userIds";
-
-		try {
-			openManager(key);
-			Query query = em.createQuery(queryString);
-			query.setParameter("userIds", Arrays.asList(userIds));
-			return getModels(query.getResultList());
-		} finally {
-			closeManager(key);
+		if (userIds.length > 0) {
+			String key = generateKey();
+			String queryString = "FROM PersonEntity WHERE userId in :userIds";
+	
+			try {
+				openManager(key);
+				Query query = em.createQuery(queryString);
+				query.setParameter("userIds", Arrays.asList(ArrayUtils.toObject(userIds)));
+				return getModels(query.getResultList());
+			} finally {
+				closeManager(key);
+			}
 		}
+		
+		return new ArrayList<Person>();
 	}
 
 	public Person getPerson() throws PersistenceException {
@@ -145,6 +151,7 @@ public class NewPersonManagerImpl extends JCondoManager<PersonEntity, Person> {
 			person.setGender(user.isMale() ? Gender.MALE : Gender.FEMALE);
 			person.setStatus(user.getStatus() == WorkflowConstants.STATUS_APPROVED ? PersonStatus.ACTIVE : PersonStatus.INACTIVE);
 			person.setPicture(new Image(user.getPortraitId(), getPath(user.getPortraitId()), null, null));
+			person.setBirthday(new Date());
 
 			return person;
 		} catch (Exception e) {

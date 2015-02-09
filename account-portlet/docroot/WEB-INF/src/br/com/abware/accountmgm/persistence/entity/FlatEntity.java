@@ -8,13 +8,15 @@ import javax.persistence.Table;
 
 @Entity
 @Table(name="jco_flat")
-public class FlatEntity extends DomainEntity {
+public class FlatEntity extends BaseEntity {
 
 	private static final long serialVersionUID = 1L;
 
 	@Id
 	@GeneratedValue
 	private long id;
+	
+	private long domainId;
 
 	@Column(updatable=false)
 	private int block;
@@ -28,6 +30,14 @@ public class FlatEntity extends DomainEntity {
 
 	public void setId(long id) {
 		this.id = id;
+	}
+
+	public long getDomainId() {
+		return domainId;
+	}
+
+	public void setDomainId(long domainId) {
+		this.domainId = domainId;
 	}
 
 	public long getBlock() {

@@ -6,14 +6,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.collections.CollectionUtils;
-
 import com.liferay.faces.portal.context.LiferayPortletHelper;
 import com.liferay.faces.portal.context.LiferayPortletHelperImpl;
 import com.liferay.portal.model.UserGroupRole;
 import com.liferay.portal.security.permission.ActionKeys;
 import com.liferay.portal.security.permission.PermissionChecker;
-import com.liferay.portal.security.permission.PermissionCheckerFactoryUtil;
 import com.liferay.portal.service.RoleLocalServiceUtil;
 import com.liferay.portal.service.UserGroupRoleLocalServiceUtil;
 import com.liferay.portal.service.permission.OrganizationPermissionUtil;
@@ -43,6 +40,7 @@ public class SecurityManagerImpl {
 	public SecurityManagerImpl() {
 		try {
 			portal = new Condominium();
+			portal.setDomainId(10179);
 			roles = new HashMap<RoleName, Role>();
 			roles.put(RoleName.LESSEE, getRole(portal, RoleName.LESSEE));
 			roles.put(RoleName.DEBATER, getRole(portal, RoleName.DEBATER));
@@ -114,7 +112,7 @@ public class SecurityManagerImpl {
 				}
 			}
 
-			UserGroupRoleLocalServiceUtil.addUserGroupRoles(person.getUserId(), domain.getId(), new long[] {role.getId()});
+			UserGroupRoleLocalServiceUtil.addUserGroupRoles(person.getUserId(), domain.getDomainId(), new long[] {role.getId()});
 		} catch (Exception e) {
 			throw new ApplicationException(e, "");
 		}
@@ -140,7 +138,7 @@ public class SecurityManagerImpl {
 				}
 			}
 
-			UserGroupRoleLocalServiceUtil.deleteUserGroupRoles(person.getUserId(), domain.getId(), new long[] {role.getId()});	
+			UserGroupRoleLocalServiceUtil.deleteUserGroupRoles(person.getUserId(), domain.getDomainId(), new long[] {role.getId()});	
 		} catch (Exception e) {
 			throw new ApplicationException(e, "");
 		}
@@ -149,7 +147,7 @@ public class SecurityManagerImpl {
 	public Role getRole(Domain domain, RoleName roleName) throws ApplicationException {
 		try {
 			com.liferay.portal.model.Role role = RoleLocalServiceUtil.getRole(helper.getCompanyId(), roleName.getLabel());
-			return new Role(role.getRoleId(), RoleName.parse(role.getName()), role.getTitle());
+			return new Role(role.getRoleId(), RoleName.parse(role.getName()), role.getTitleCurrentValue());
 		} catch(Exception e) {
 			throw new ApplicationException(e, "role could not be found"); 
 		}
@@ -160,7 +158,7 @@ public class SecurityManagerImpl {
 		List<UserGroupRole> list = UserGroupRoleLocalServiceUtil.getUserGroupRoles(person.getUserId(), domain.getDomainId());
 
 		for (UserGroupRole item : list) {
-			roles.add(new Role(item.getRole().getRoleId(), RoleName.parse(item.getRole().getName()), item.getRole().getTitle()));
+			roles.add(new Role(item.getRole().getRoleId(), RoleName.parse(item.getRole().getName()), item.getRole().getTitleCurrentValue()));
 		}
 
 		return roles;

@@ -51,7 +51,7 @@ public class ModelDataModel<Model extends BaseModel> extends ListDataModel<Model
     	if (index >= 0) {
     		models.set(index, model);
     	}
-	}	
+	}
 	
     @Override
     public Model getRowData(String rowKey) {

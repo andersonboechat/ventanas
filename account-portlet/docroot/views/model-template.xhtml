@@ -9,7 +9,7 @@
 	xmlns:ui="http://java.sun.com/jsf/facelets">
 	<h:head>
 		<style>
-			.cropper {padding: 0; height: 480px;}
+			.cropper {padding: 0; height: 300px;}
 			.cropper div {margin: 0 !important; padding: 0 !important;}
 			.cropper .img {height: 300px; margin: 0 !important;}
 			.car-image {background: url("/account-portlet/images/car_icon.png") no-repeat center; text-align: center; margin: 0px auto;}
@@ -23,6 +23,18 @@
 			.menu-cmds-col1 {vertical-align: middle; width: 155px; border: none !important; padding: 0px; margin: 0px}
 			.menu-cmds-col2 {vertical-align: middle; width: 130px;}
 			.menu-cmds-col3 {vertical-align: middle; padding: 0; text-align: right}
+			.my-account-col1 {vertical-align: top; width: 198px; height: 300px}
+			.my-account-col2 {vertical-align: top; padding: 0px !important;}
+			.labelClm {width: 85px; background-color: transparent}
+			.fieldClm {background-color: transparent !important; float: right}
+			.person-image {
+				border: none !important; width: 198px; height: 300px; padding: 0px !important; margin:  0px !important;
+			}
+			.foto img {height: 100px; width: 66px}
+			.person-image div {border: none !important;}
+			.no-border tr {border: none !important;}
+			.no-border td {border: none !important;}
+			.no-margin {margin:  0px !important;padding: 0px !important;}
 		</style>
 	</h:head>
 	<h:body>
@@ -36,13 +48,13 @@
 				<p:commandButton value="#{msg['yes']}" type="button" styleClass="ui-confirmdialog-yes" icon="ui-icon-check" style="float: right; width: 200px; margin-right: 14%"/>
 			</p:confirmDialog>
 		</h:form>
-		<p:dialog header="#{msg['dlg.user.signon']}" widgetVar="registerDialog" draggable="false" resizable="false" modal="true" closable="true" visible="false">
+		<p:dialog header="#{msg['dlg.user.signon']}" widgetVar="registerDialog" draggable="true" resizable="false" modal="true" closable="true" visible="false">
 			<h:form id="register-form">
 				<ui:insert name="model-details"></ui:insert>
 			</h:form>
+
 		</p:dialog>
 		<p:dialog id="uploadDialog" widgetVar="uploadDialog" modal="true" header="Upload de Imagem">
-			<ui:insert name="imageUploader-setter"/>
 			<h:form id="upload-form" enctype="multipart/form-data">
 				<p:fileUpload id="image" label="Selecionar Foto" fileUploadListener="#{imageUploader.onImageUpload}" auto="true" update="upload-form" rendered="#{empty imageUploader.image.path}"/>
 				<p:panel rendered="#{!(empty imageUploader.image.path)}" style="border: 0px !important;">

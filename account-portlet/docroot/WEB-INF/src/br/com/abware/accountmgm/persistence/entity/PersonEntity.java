@@ -1,13 +1,8 @@
 package br.com.abware.accountmgm.persistence.entity;
 
-import java.util.List;
-
 import javax.persistence.Entity;
-import javax.persistence.FetchType;
+import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.JoinTable;
-import javax.persistence.ManyToMany;
 import javax.persistence.Table;
 
 @Entity
@@ -17,15 +12,12 @@ public class PersonEntity extends BaseEntity {
 	private static final long serialVersionUID = 1L;
 
 	@Id
+	@GeneratedValue
 	private long id;
 
 	private long userId;
 
     private String identity;
-
-    @ManyToMany(fetch=FetchType.LAZY)
-    @JoinTable(name="jco_person_flat", joinColumns={@JoinColumn(name="personId")}, inverseJoinColumns={@JoinColumn(name="flatId")})
-    private List<FlatEntity> flats;
 
 	public long getId() {
 		return id;
@@ -49,14 +41,6 @@ public class PersonEntity extends BaseEntity {
 
 	public void setIdentity(String identity) {
 		this.identity = identity;
-	}
-
-	public List<FlatEntity> getFlats() {
-		return flats;
-	}
-
-	public void setFlats(List<FlatEntity> flats) {
-		this.flats = flats;
 	}
 
 }

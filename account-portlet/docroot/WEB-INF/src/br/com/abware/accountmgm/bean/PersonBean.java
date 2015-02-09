@@ -50,7 +50,7 @@ public class PersonBean extends BaseBean {
 	public void onPersonSave() {
 		try {
 			person = personService.register(person);
-		} catch (ApplicationException e) {
+		} catch (Exception e) {
 			LOGGER.error("", e);
 		}
 	}

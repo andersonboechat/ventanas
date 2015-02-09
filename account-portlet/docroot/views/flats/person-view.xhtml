@@ -10,9 +10,6 @@
 	<h:head></h:head>
 	<h:body>
 		<ui:composition template="../model-template.xhtml">
-			<ui:define name="imageUploader-setter">
-				<c:set var="imageUploader" value="#{testBean.imageUploadBean}"/>
-			</ui:define>
 			<ui:define name="model-filters">
 				<p:panelGrid columns="3" styleClass="menu-cmds" columnClasses="menu-cmds-col1,menu-cmds-col2,menu-cmds-col3">
 					<p:column>
@@ -54,11 +51,11 @@
 				             selection="#{testBean.selectedPeople}" rowKey="#{person.id}" >
 					<p:column selectionMode="multiple" style="width: 17px"/>
 					<p:column style="width: 100px">
-						<p:graphicImage value="#{model.person.picture}"/>
+						<p:graphicImage value="#{model.person.picture.path}" styleClass="foto" height="120" width="79"/>
 					</p:column>
 					<p:column>
 						<p:panelGrid columns="1">
-		        			<h:outputText value="#{model.person.fullName}" />
+		        			<h:outputText value="#{model.person.firstName} #{model.person.lastName}" />
 	        				<p:subTable var="membership" value="#{model.memberships}">
 	        					<p:column>
 	        						<h:outputText value="#{testBean.displayMembership(membership)}" />
@@ -67,9 +64,8 @@
 						</p:panelGrid>
 					</p:column>
 					<p:column style="width: 35px">
-						<p:commandLink update=":register-form:model-details" oncomplete="PF('registerDialog').show();" partialSubmit="true" process="@this">
+						<p:commandLink update=":register-form:model-details" actionListener="#{testBean.onPersonEdit}" oncomplete="PF('registerDialog').show();" partialSubmit="true" process="@this" >
 							<h:graphicImage value="../images/edit.png" />
-							<f:setPropertyActionListener target="#{testBean.person}" value="#{model.person}"/>
 						</p:commandLink>
 					</p:column>
 					<p:column style="width: 35px">
@@ -82,47 +78,57 @@
 				</p:dataTable>
 			</ui:define>
 			<ui:define name="model-details">
-				<h:panelGrid id="model-details" columns="3" columnClasses="my-account-col1,my-account-col2,my-account-col3" styleClass="my-account" style="margin: 10px 0px 20px 0px;" cellpadding="10">
+				<c:set var="imageUploader" value="#{testBean.imageUploadBean}"/>
+				<p:panelGrid id="model-details" columns="2" columnClasses="my-account-col1,my-account-col2" styleClass="no-border" style="margin: 10px 0px 20px 0px;" cellpadding="10">
 					<p:column>
-						<h:panelGrid columns="1" style="border: 0px solid black; width: 100px; height: 100px;">
-					        <p:graphicImage id="portrait" value="#{imageUploader.image.path}" style="border: 0px solid black;"/>
-							<p:commandLink value="Enviar Foto" update=":upload-form" oncomplete="PF('uploadDialog').show();" partialSubmit="true" process="@this">
-								<f:setPropertyActionListener target="#{imageUploader.image.path}" value=""/>
-							</p:commandLink>
-							<p:commandLink value="Tirar Foto" update=":upload-form" oncomplete="PF('uploadDialog').show();" partialSubmit="true" process="@this">
-								<f:setPropertyActionListener target="#{imageUploader.image.path}" value=""/>
-							</p:commandLink>
-						</h:panelGrid>					
+						<p:panelGrid columns="1" styleClass="person-image" columnClasses="no-margin">
+							<p:graphicImage id="portrait" value="#{imageUploader.image.path}"/>
+				        	<p:graphicImage id="portrait2" value="http://localhost/account-portlet/temp/avatar.jpg" rendered="false"/>
+				        </p:panelGrid>
+						<p:commandLink value="Enviar Foto" update=":upload-form" oncomplete="PF('uploadDialog').show();" partialSubmit="true" process="@this" style="float: right" styleClass="column">
+							<f:setPropertyActionListener target="#{imageUploader.image.path}" value=""/>
+						</p:commandLink>
+						<p:commandLink value="Tirar Foto" update=":upload-form" oncomplete="PF('uploadDialog').show();" partialSubmit="true" process="@this" style="float: right" styleClass="column">
+							<f:setPropertyActionListener target="#{imageUploader.image.path}" value=""/>
+						</p:commandLink>
 					</p:column>
 					<p:column>
-						<h:panelGrid columns="2">
-							<p:outputLabel for="email" value="Email"/>
-							<p:inputText id="email" value="#{testBean.person.emailAddress}"/>
-							<p:outputLabel for="firstName" value="Primeiro nome"/>
-							<p:inputText id="firstName" value="#{testBean.person.firstName}"/>
-							<p:outputLabel for="lastName" value="Último nome"/>
-							<p:inputText id="lastName" value="#{testBean.person.lastName}"/>
-							<p:outputLabel for="male" value="Sexo"/>
-							<p:selectOneMenu id="male" value="#{testBean.person.gender}">
-								<f:selectItem itemLabel="Masculino" itemValue="true" />
-								<f:selectItem itemLabel="Feminino" itemValue="false" />
+						<p:panelGrid columns="1" columnClasses="fieldClm">
+						<p:panelGrid columns="2" columnClasses="labelClm,fieldClm" style="width: 100%; margin: 0px">
+							<p:outputLabel for="email" value="Email: "/>
+							<p:inputText id="email" value="#{testBean.personModel.person.emailAddress}" size="40"/>
+							<p:outputLabel for="firstName" value="Nome: "/>
+							<p:inputText id="firstName" value="#{testBean.personModel.person.firstName}" size="40"/>
+							<p:outputLabel for="lastName" value="Sobrenome: "/>
+							<p:inputText id="lastName" value="#{testBean.personModel.person.lastName}" size="40"/>
+							<p:outputLabel for="identity" value="CPF: "/>
+							<p:inputMask id="identity" value="#{testBean.personModel.person.identity}" mask="999.999.999-99" size="40"/>
+							<p:outputLabel for="male" value="Sexo:"/>
+							<p:selectOneMenu id="male" value="#{testBean.personModel.person.gender}" required="false">
+								<f:selectItems var="gender" value="#{testBean.genders}" itemLabel="#{msg[gender.label]}"/>							
 							</p:selectOneMenu>
-						</h:panelGrid>
+						</p:panelGrid>
+						<p:panelGrid columns="2" style="text-align: center; margin: 0px; float: right" styleClass="no-border">
+							<p:selectOneMenu widgetVar="newFlat" id="newFlat" value="#{testBean.selectedFlatId}" filter="true" filterMatchMode="contains">
+								<f:selectItems var="flat" value="#{testBean.flats}" itemLabel="Apt. #{flat.number} - Bl. #{flat.block}" itemValue="#{flat.id}"/>
+							</p:selectOneMenu>
+							<p:commandButton value="Incluir" actionListener="#{testBean.onFlatAdd}" update=":register-form:memberships" partialSubmit="true" process="@namingcontainer"/>
+						</p:panelGrid>						
+						<p:dataTable id="memberships" var="membership" rows="2" paginator="true" paginatorAlwaysVisible="false" paginatorPosition="bottom" value="#{testBean.personModel.memberships}" style="width: 340px; margin-right: 10px;" emptyMessage="">
+							<p:column>
+								<p:panelGrid columns="1" columnClasses="fieldClm" style="width: 100%; margin: 0px; background-color: transparent !important" >
+									<h:outputText value="Apartamento #{membership.domain.number} - Bloco #{membership.domain.block}" />
+									<p:selectOneMenu value="#{membership.role.id}" style="vertical-align: middle;">
+										<f:selectItems var="role" value="#{testBean.roles}" itemLabel="#{role.title}" itemValue="#{role.id}"/>
+										<p:ajax event="change" listener="#{testBean.onRoleSelect(membership)}" partialSubmit="true" process="@this"/>
+									</p:selectOneMenu>
+								</p:panelGrid>
+							</p:column>
+						</p:dataTable>
+						</p:panelGrid>
 					</p:column>
-					<p:column>
-						<p:fieldset legend="Troca de Senha" style="margin-top: 0px; margin-bottom: 10px;">
-							<h:panelGrid columns="2">
-								<p:outputLabel for="pwd" value="Senha Atual" styleClass="my-account"/>
-								<p:password id="pwd" style=" width: 70px; margin-bottom: 10px"/>
-								<p:outputLabel for="newpwd" value="Nova Senha" styleClass="my-account"/>
-								<p:password id="newpwd" style=" width: 70px; margin-bottom: 10px"/>
-								<p:outputLabel for="pwdconf" value="Confirma Nova Senha" styleClass="my-account"/>
-								<p:password id="pwdconf" style="width: 70px; margin-bottom: 10px"/>
-							</h:panelGrid>
-						</p:fieldset>
-					</p:column>
-				</h:panelGrid>
-				<p:commandButton value="Salvar" actionListener="#{testBean.onPersonSave}" update=":outputMsg" style="float: right; width: 70px; margin: 0px 0px 10px 5px;"/>			
+				</p:panelGrid>
+				<p:commandButton value="Salvar" actionListener="#{testBean.onPersonSave}" update=":outputMsg" style="float: right; width: 70px; margin: 0px 0px 10px 5px;"/>
 			</ui:define>
 		</ui:composition>
 	</h:body>
