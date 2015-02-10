@@ -43,7 +43,7 @@
 	<model-resource>
 		<model-name>br.com.abware.jcondo.core.model.Person</model-name>
 		<portlet-ref>
-			<portlet-name>flat-management</portlet-name>
+			<portlet-name>person-management</portlet-name>
 		</portlet-ref>
 		<permissions>
 			<supports>

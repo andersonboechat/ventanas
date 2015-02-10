@@ -40,7 +40,7 @@ public class FlatEntity extends BaseEntity {
 		this.domainId = domainId;
 	}
 
-	public long getBlock() {
+	public int getBlock() {
 		return block;
 	}
 
@@ -48,7 +48,7 @@ public class FlatEntity extends BaseEntity {
 		this.block = block;
 	}
 
-	public long getNumber() {
+	public int getNumber() {
 		return number;
 	}
 

@@ -3,7 +3,7 @@ package br.com.abware.accountmgm.persistence.manager;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.persistence.EntityNotFoundException;
+import javax.persistence.NoResultException;
 import javax.persistence.Query;
 
 import org.apache.commons.lang.StringUtils;
@@ -35,9 +35,9 @@ public class NewFlatManagerImpl extends JCondoManager<FlatEntity, Flat> {
 		Flat f = super.save(flat);
 
 		if (flat.getDomainId() == 0) {
-			Group group = GroupLocalServiceUtil.addGroup(helper.getUserId(), Resource.class.getName(), f.getId(), flat.toString(), 
+			Group group = GroupLocalServiceUtil.addGroup(helper.getUserId(), Group.class.getName(), 0, flat.toString(), 
 														 StringUtils.EMPTY, GroupConstants.TYPE_SITE_PRIVATE, 
-														 f.getBlock() + "-" + f.getNumber(), false, true, null);
+														 "/" + flat.getBlock() + "-" + flat.getNumber(), true, true, null);
 			ResourceLocalServiceUtil.addResources(helper.getCompanyId(), group.getGroupId(), helper.getUserId(), 
 												  Flat.class.getName(), f.getId(), false, false, false);
 			f.setDomainId(group.getGroupId());
@@ -77,7 +77,7 @@ public class NewFlatManagerImpl extends JCondoManager<FlatEntity, Flat> {
 		return flats;
 	}
 
-	public Flat findByNumberAndBlock(long number, long block) throws Exception {
+	public Flat findByNumberAndBlock(int number, int block) throws Exception {
 		String key = generateKey();
 
 		try {
@@ -87,7 +87,7 @@ public class NewFlatManagerImpl extends JCondoManager<FlatEntity, Flat> {
 			query.setParameter("number", number);
 			query.setParameter("block", block);
 			return getModel((FlatEntity) query.getSingleResult());
-		} catch (EntityNotFoundException e) {
+		} catch (NoResultException e) {
 			return null;
 		} finally {
 			closeManager(key);

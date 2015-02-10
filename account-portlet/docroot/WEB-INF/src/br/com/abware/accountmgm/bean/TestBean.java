@@ -39,11 +39,11 @@ public class TestBean extends BaseBean {
 
 	private String personName;
 
-	private Set<Long> blocks;
+	private Set<Integer> blocks;
 	
 	private Long block;
 	
-	private Set<Long> numbers;
+	private Set<Integer> numbers;
 
 	private Long number;
 
@@ -63,8 +63,8 @@ public class TestBean extends BaseBean {
 	public void init() {
 		try {
 			flats = flatService.getFlats(personService.getPerson());
-			blocks = new TreeSet<Long>();
-			numbers = new TreeSet<Long>();
+			blocks = new TreeSet<Integer>();
+			numbers = new TreeSet<Integer>();
 			for (Flat flat : flats) {
 				blocks.add(flat.getBlock());
 				numbers.add(flat.getNumber());
@@ -238,19 +238,19 @@ public class TestBean extends BaseBean {
 		this.personModel = personModel;
 	}
 
-	public Set<Long> getBlocks() {
+	public Set<Integer> getBlocks() {
 		return blocks;
 	}
 
-	public void setBlocks(Set<Long> blocks) {
+	public void setBlocks(Set<Integer> blocks) {
 		this.blocks = blocks;
 	}
 
-	public Set<Long> getNumbers() {
+	public Set<Integer> getNumbers() {
 		return numbers;
 	}
 
-	public void setNumbers(Set<Long> numbers) {
+	public void setNumbers(Set<Integer> numbers) {
 		this.numbers = numbers;
 	}
 

@@ -11,18 +11,19 @@
 	<h:body>
 		<ui:composition template="../model-template.xhtml">
 			<ui:define name="model-filters">
-				<p:panelGrid id="model-filters" columns="2" styleClass="menu-cmds" columnClasses="menu-cmds-col1,menu-cmds-col2,menu-cmds-col3">
-					<p:column rendered="#{testBean.isSystemAdmin()}">
-						<p:commandButton value="Cadastrar Apartamento" actionListener="#{flatBean.onFlatCreate}" 
+				<p:panelGrid id="model-filters" columns="2" styleClass="menu-cmds" columnClasses="menu-cmds-col1,menu-cmds-col2">
+					<p:column>
+						<p:commandButton value="Cadastrar" actionListener="#{flatBean.onFlatCreate}" 
 										 partialSubmit="true" process="@this" update=":register-form:model-details" oncomplete="PF('registerDialog').show();"/>
+						<p:commandButton value="Excluir" actionListener="#{flatBean.onFlatsDelete}" 
+										partialSubmit="true" process="@this,flatTable" update="flatTable">
+							<p:confirm header="#{msg['main.delete.confirm']}" message="#{msg['person.delete.message']}" icon="ui-icon-alert"/>
+						</p:commandButton>
 					</p:column>
-				    <p:column rendered="#{flatBean.flats.size() > 1}">
+				    <p:column>
 				    	<p:selectCheckboxMenu label="Apartamentos" filter="true" filterMatchMode="contains">
 							<f:selectItems var="flat" value="#{flatBean.flats}" itemLabel="Apartamento #{flat.number} - Bloco #{flat.block}" itemValue="#{flat.id}"/>
 				    	</p:selectCheckboxMenu>
-				    </p:column>
-				    <p:column rendered="#{flatBean.flats.size() == 1}">
-				    	<h:outputText value="Apartamento #{flatBean.flats.get(0).number} - Bloco #{flatBean.flats.get(0).block}"/>
 				    </p:column>
 				</p:panelGrid>
 			</ui:define>
@@ -50,13 +51,13 @@
 				</p:dataTable>
 			</ui:define>
 			<ui:define name="model-details">
-				<p:panelGrid id="model-details" columns="2" columnClasses="my-account-col1,my-account-col2" styleClass="no-border" style="margin: 10px 0px 20px 0px;" cellpadding="10">
+				<p:panelGrid id="model-details" columns="2" styleClass="no-border" style="margin: 10px 0px 20px 0px;" cellpadding="10">
 					<p:outputLabel for="number" value="Apartamento: "/>
 					<p:inputText id="number" value="#{flatBean.flat.number}" size="40"/>
 					<p:outputLabel for="block" value="Bloco: "/>
 					<p:inputText id="block" value="#{flatBean.flat.block}" size="40"/>
 				</p:panelGrid>
-				<p:commandButton value="Salvar" actionListener="#{flatBean.onFlatSave}" update=":model-form:flatTable, :model-form:model-filters, :outputMsg" oncomplete="if (!args.validationFailed) { if(!args.exception) {PF('registerDialog').hide();} else { if(args.alert) {PF('alertDialog').show();}}}" style="float: right; width: 70px; margin: 0px 0px 10px 5px;"/>
+				<p:commandButton value="Salvar" actionListener="#{flatBean.onFlatSave}" update=":model-form:flatTable, :model-form:model-filters, :outputMsg" oncomplete="if (!args.validationFailed) { if(!args.exception) {PF('registerDialog').hide();} else { if(args.alert) {PF('alertDialog').show();}}}" style="float: right; width: 70px; margin: 0px 10px 10px 5px;"/>
 			</ui:define>
 		</ui:composition>
 	</h:body>

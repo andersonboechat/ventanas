@@ -13,6 +13,7 @@ import com.liferay.portal.security.permission.ActionKeys;
 import com.liferay.portal.security.permission.PermissionChecker;
 import com.liferay.portal.service.RoleLocalServiceUtil;
 import com.liferay.portal.service.UserGroupRoleLocalServiceUtil;
+import com.liferay.portal.service.permission.GroupPermissionUtil;
 import com.liferay.portal.service.permission.OrganizationPermissionUtil;
 import com.liferay.portal.service.permission.UserPermissionUtil;
 
@@ -185,7 +186,7 @@ public class SecurityManagerImpl {
 			if (model instanceof Person) {
 				return checkUserPermission(permissionChecker, model.getId(), permission);
 			} else if (model instanceof Flat || model instanceof Supplier) {
-				return checkOrganizationPermission(permissionChecker, model.getId(), permission);
+				return checkFlatPermission(permissionChecker, (Flat) model, permission);
 			} else if (model instanceof Condominium) {
 				return checkGroupPermission(permissionChecker, model.getId(), permission);
 			} else if (model instanceof Role) {
@@ -197,6 +198,11 @@ public class SecurityManagerImpl {
 			throw new ApplicationException(e, "fail.check.permission");
 		}
 	}
+	
+	private boolean checkFlatPermission(PermissionChecker permissionChecker, Flat flat, Permission permission) throws Exception {
+		return permissionChecker.hasPermission(flat.getDomainId(), Flat.class.getName(), flat.getId(), permission.name());
+	}
+	
 
 	private boolean checkUserPermission(PermissionChecker permissionChecker, long userId, Permission permission) throws Exception {
 		String actionkey;
@@ -253,7 +259,7 @@ public class SecurityManagerImpl {
 			throw new SystemException("Permission not supported");
 		}
 
-		return OrganizationPermissionUtil.contains(permissionChecker, groupId, actionkey);
+		return GroupPermissionUtil.contains(permissionChecker, groupId, actionkey);
 	}
 
 	private boolean checkRolePermission(PermissionChecker permissionChecker, long roleId, Permission permission) throws Exception {

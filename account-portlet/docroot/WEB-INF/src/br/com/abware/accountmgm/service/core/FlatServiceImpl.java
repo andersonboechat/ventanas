@@ -6,6 +6,7 @@ import org.apache.commons.collections.CollectionUtils;
 
 import br.com.abware.accountmgm.persistence.manager.NewFlatManagerImpl;
 import br.com.abware.accountmgm.persistence.manager.SecurityManagerImpl;
+import br.com.abware.jcondo.core.Permission;
 import br.com.abware.jcondo.core.model.Flat;
 import br.com.abware.jcondo.core.model.Person;
 import br.com.abware.jcondo.exception.BusinessException;
@@ -28,12 +29,12 @@ public class FlatServiceImpl {
 	public List<Flat> getFlats(Person person) throws Exception {
 		List<Flat> flats = null;
 		try {
-			flats = flatManager.findByPerson(person);
-
-			if (CollectionUtils.isEmpty(flats)) {
+			if (securityManager.hasPermission(new Flat(), Permission.VIEW)) {
 				flats = flatManager.findAll();
+			} else {
+				flats = flatManager.findByPerson(person);
 			}
-			
+
 //			while (flats.iterator().hasNext()) {
 //				try {
 //					Flat flat = flats.iterator().next();

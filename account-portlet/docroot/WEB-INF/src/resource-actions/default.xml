@@ -1,4 +1,4 @@
 <?xml version="1.0"?>
 <resource-action-mapping>
-	<resource file="resource-actions/agenda.xml" />
+	<resource file="resource-actions/account.xml" />
 </resource-action-mapping>

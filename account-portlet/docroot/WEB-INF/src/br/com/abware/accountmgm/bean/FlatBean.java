@@ -26,13 +26,13 @@ public class FlatBean extends BaseBean {
 
 	private HashMap<String, Object> filters;	
 
-	private Set<Long> blocks;
+	private Set<Integer> blocks;
 
-	private Long block;
+	private int block;
 
-	private Set<Long> numbers;
+	private Set<Integer> numbers;
 
-	private Long number;
+	private int number;
 
 	private List<Flat> flats;
 	
@@ -46,8 +46,8 @@ public class FlatBean extends BaseBean {
 			flats = flatService.getFlats(personService.getPerson());
 			model = new ModelDataModel<Flat>(flats);
 
-			blocks = new TreeSet<Long>();
-			numbers = new TreeSet<Long>();
+			blocks = new TreeSet<Integer>();
+			numbers = new TreeSet<Integer>();
 			for (Flat flat : flats) {
 				blocks.add(flat.getBlock());
 				numbers.add(flat.getNumber());
@@ -84,7 +84,7 @@ public class FlatBean extends BaseBean {
 				model.setModel(flat);
 			}		
 		} catch (Exception e) {
-			
+			e.printStackTrace();
 		}
 	}
 	
@@ -111,35 +111,35 @@ public class FlatBean extends BaseBean {
 		return model;
 	}
 
-	public Set<Long> getBlocks() {
+	public Set<Integer> getBlocks() {
 		return blocks;
 	}
 
-	public void setBlocks(Set<Long> blocks) {
+	public void setBlocks(Set<Integer> blocks) {
 		this.blocks = blocks;
 	}
 
-	public Long getBlock() {
+	public Integer getBlock() {
 		return block;
 	}
 
-	public void setBlock(Long block) {
+	public void setBlock(Integer block) {
 		this.block = block;
 	}
 
-	public Set<Long> getNumbers() {
+	public Set<Integer> getNumbers() {
 		return numbers;
 	}
 
-	public void setNumbers(Set<Long> numbers) {
+	public void setNumbers(Set<Integer> numbers) {
 		this.numbers = numbers;
 	}
 
-	public Long getNumber() {
+	public int getNumber() {
 		return number;
 	}
 
-	public void setNumber(Long number) {
+	public void setNumber(int number) {
 		this.number = number;
 	}
 
