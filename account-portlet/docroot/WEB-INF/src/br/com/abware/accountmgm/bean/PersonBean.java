@@ -14,7 +14,6 @@ import br.com.abware.accountmgm.bean.model.ModelDataModel;
 import br.com.abware.jcondo.core.model.Flat;
 import br.com.abware.jcondo.core.model.Person;
 import br.com.abware.jcondo.core.model.RoleName;
-import br.com.abware.jcondo.exception.ApplicationException;
 
 @ManagedBean
 @ViewScoped

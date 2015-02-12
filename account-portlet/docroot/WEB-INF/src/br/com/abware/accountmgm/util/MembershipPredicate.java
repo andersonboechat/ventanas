@@ -2,26 +2,26 @@ package br.com.abware.accountmgm.util;
 
 import org.apache.commons.collections.Predicate;
 
+import br.com.abware.jcondo.core.PersonType;
 import br.com.abware.jcondo.core.model.Domain;
 import br.com.abware.jcondo.core.model.Membership;
-import br.com.abware.jcondo.core.model.Role;
 
 public class MembershipPredicate implements Predicate {
 
 	private Domain domain;
 	
-	private Role role;
+	private PersonType type;
 	
-	public MembershipPredicate(Domain domain, Role role) {
+	public MembershipPredicate(Domain domain, PersonType type) {
 		this.domain = domain;
-		this.role = role;
+		this.type = type;
 	}
 
 	@Override
 	public boolean evaluate(Object obj) {
 		Membership m = (Membership) obj;
 
-		if (m.getDomain().equals(domain) && m.getRole().equals(role)) {
+		if (m.getDomain().equals(domain) && m.getType().equals(type)) {
 			return true;
 		}
 

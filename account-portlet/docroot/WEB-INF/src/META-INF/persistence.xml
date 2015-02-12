@@ -12,6 +12,8 @@
 		<class>br.com.abware.accountmgm.persistence.entity.VehicleAccessLogEntity</class>
 		<class>br.com.abware.accountmgm.persistence.entity.ParkingEntity</class>
 		<class>br.com.abware.accountmgm.persistence.entity.RentedParkingEntity</class>
+		<class>br.com.abware.accountmgm.persistence.entity.MembershipEntity</class>
+		<class>br.com.abware.accountmgm.persistence.entity.MembershipEntityPK</class>
 		<properties>
 			<property name="hibernate.dialect" value="org.hibernate.dialect.MySQLDialect"/>  
 			<property name="hibernate.query.substitutions" value="true 1,false 0"/>

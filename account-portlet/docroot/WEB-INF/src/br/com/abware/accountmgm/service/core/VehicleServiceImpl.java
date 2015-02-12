@@ -10,7 +10,6 @@ import br.com.abware.accountmgm.exception.ModelExistException;
 import br.com.abware.accountmgm.model.Vehicle;
 import br.com.abware.accountmgm.persistence.manager.SecurityManagerImpl;
 import br.com.abware.accountmgm.persistence.manager.VehicleManagerImpl;
-import br.com.abware.jcondo.core.Permission;
 import br.com.abware.jcondo.core.model.Domain;
 import br.com.abware.jcondo.core.model.Flat;
 import br.com.abware.jcondo.core.model.Image;

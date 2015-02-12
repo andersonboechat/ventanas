@@ -1,44 +1,22 @@
 package br.com.abware.accountmgm.persistence.entity;
 
 import javax.persistence.Column;
+import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
 import javax.persistence.Table;
 
 @Entity
 @Table(name="jco_flat")
-public class FlatEntity extends BaseEntity {
+@DiscriminatorValue(value="1")
+public class FlatEntity extends DomainEntity {
 
 	private static final long serialVersionUID = 1L;
-
-	@Id
-	@GeneratedValue
-	private long id;
-	
-	private long domainId;
 
 	@Column(updatable=false)
 	private int block;
 
 	@Column(updatable=false)
 	private int number;
-
-	public long getId() {
-		return id;
-	}
-
-	public void setId(long id) {
-		this.id = id;
-	}
-
-	public long getDomainId() {
-		return domainId;
-	}
-
-	public void setDomainId(long domainId) {
-		this.domainId = domainId;
-	}
 
 	public int getBlock() {
 		return block;

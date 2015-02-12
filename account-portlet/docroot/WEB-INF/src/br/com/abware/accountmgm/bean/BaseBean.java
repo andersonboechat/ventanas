@@ -5,7 +5,6 @@ import br.com.abware.accountmgm.service.core.FlatServiceImpl;
 import br.com.abware.accountmgm.service.core.PersonServiceImpl;
 import br.com.abware.accountmgm.service.core.VehicleServiceImpl;
 import br.com.abware.jcondo.core.model.Condominium;
-import br.com.abware.jcondo.core.service.FlatService;
 
 public abstract class BaseBean {
 

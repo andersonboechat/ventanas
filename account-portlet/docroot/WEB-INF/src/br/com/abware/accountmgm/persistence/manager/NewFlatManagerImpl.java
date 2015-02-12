@@ -39,7 +39,7 @@ public class NewFlatManagerImpl extends JCondoManager<FlatEntity, Flat> {
 														 StringUtils.EMPTY, GroupConstants.TYPE_SITE_PRIVATE, 
 														 "/" + flat.getBlock() + "-" + flat.getNumber(), true, true, null);
 			ResourceLocalServiceUtil.addResources(helper.getCompanyId(), group.getGroupId(), helper.getUserId(), 
-												  Flat.class.getName(), f.getId(), false, false, false);
+												  Flat.class.getName(), f.getId(), false, true, false);
 			f.setDomainId(group.getGroupId());
 			f = super.save(flat);
 		}
