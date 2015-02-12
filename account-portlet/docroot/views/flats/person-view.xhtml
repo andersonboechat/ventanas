@@ -45,18 +45,18 @@
 				</p:panelGrid>
 			</ui:define>
 			<ui:define name="model-list">
-				<p:dataTable id="personTable" var="model" value="#{testBean.model}"  
+				<p:dataTable widgetVar="personTable" id="personTable" var="person" value="#{testBean.model}"  
 				             paginator="true" rows="5" paginatorPosition="bottom" 
 				             paginatorTemplate="{CurrentPageReport} {PreviousPageLink} {PageLinks} {NextPageLink}" 
 				             selection="#{testBean.selectedPeople}" rowKey="#{person.id}" >
-					<p:column selectionMode="multiple" style="width: 17px"/>
-					<p:column style="width: 100px">
-						<p:graphicImage value="#{model.person.picture.path}" styleClass="foto" height="120" width="79"/>
+		    		<p:column selectionMode="multiple" style="width: 17px;"/>
+					<p:column style="width: 81px;">
+						<p:graphicImage value="#{person.picture.path}" styleClass="foto" height="120" width="79"/>
 					</p:column>
-					<p:column>
+					<p:column style="vertical-align: top">
 						<p:panelGrid columns="1">
-		        			<h:outputText value="#{model.person.firstName} #{model.person.lastName}" />
-	        				<p:subTable var="membership" value="#{model.memberships}">
+		        			<h:outputText value="#{person.firstName} #{person.lastName}" />
+	        				<p:subTable var="membership" value="#{person.memberships}">
 	        					<p:column>
 	        						<h:outputText value="#{testBean.displayMembership(membership)}" />
 	        					</p:column>
@@ -82,8 +82,7 @@
 				<p:panelGrid id="model-details" columns="2" columnClasses="my-account-col1,my-account-col2" styleClass="no-border" style="margin: 10px 0px 20px 0px;" cellpadding="10">
 					<p:column>
 						<p:panelGrid columns="1" styleClass="person-image" columnClasses="no-margin">
-							<p:graphicImage id="portrait" value="#{imageUploader.image.path}"/>
-				        	<p:graphicImage id="portrait2" value="http://localhost/account-portlet/temp/avatar.jpg" rendered="false"/>
+							<p:graphicImage id="portrait" value="#{imageUploader.image.path}" width="198" height="300"/>
 				        </p:panelGrid>
 						<p:commandLink value="Enviar Foto" update=":upload-form" oncomplete="PF('uploadDialog').show();" partialSubmit="true" process="@this" style="float: right" styleClass="column">
 							<f:setPropertyActionListener target="#{imageUploader.image.path}" value=""/>
@@ -96,15 +95,15 @@
 						<p:panelGrid columns="1" columnClasses="fieldClm">
 						<p:panelGrid columns="2" columnClasses="labelClm,fieldClm" style="width: 100%; margin: 0px">
 							<p:outputLabel for="email" value="Email: "/>
-							<p:inputText id="email" value="#{testBean.personModel.person.emailAddress}" size="40"/>
+							<p:inputText id="email" value="#{testBean.person.emailAddress}" size="40"/>
 							<p:outputLabel for="firstName" value="Nome: "/>
-							<p:inputText id="firstName" value="#{testBean.personModel.person.firstName}" size="40"/>
+							<p:inputText id="firstName" value="#{testBean.person.firstName}" size="40"/>
 							<p:outputLabel for="lastName" value="Sobrenome: "/>
-							<p:inputText id="lastName" value="#{testBean.personModel.person.lastName}" size="40"/>
+							<p:inputText id="lastName" value="#{testBean.person.lastName}" size="40"/>
 							<p:outputLabel for="identity" value="CPF: "/>
-							<p:inputMask id="identity" value="#{testBean.personModel.person.identity}" mask="999.999.999-99" size="40"/>
+							<p:inputMask id="identity" value="#{testBean.person.identity}" mask="999.999.999-99" size="40"/>
 							<p:outputLabel for="male" value="Sexo:"/>
-							<p:selectOneMenu id="male" value="#{testBean.personModel.person.gender}" required="false">
+							<p:selectOneMenu id="male" value="#{testBean.person.gender}" required="false">
 								<f:selectItems var="gender" value="#{testBean.genders}" itemLabel="#{msg[gender.label]}"/>							
 							</p:selectOneMenu>
 						</p:panelGrid>
@@ -114,13 +113,12 @@
 							</p:selectOneMenu>
 							<p:commandButton value="Incluir" actionListener="#{testBean.onFlatAdd}" update=":register-form:memberships" partialSubmit="true" process="@namingcontainer"/>
 						</p:panelGrid>						
-						<p:dataTable id="memberships" var="membership" rows="2" paginator="true" paginatorAlwaysVisible="false" paginatorPosition="bottom" value="#{testBean.personModel.memberships}" style="width: 340px; margin-right: 10px;" emptyMessage="">
+						<p:dataTable id="memberships" var="membership" rows="2" paginator="true" paginatorAlwaysVisible="false" paginatorPosition="bottom" value="#{testBean.person.memberships}" style="width: 340px; margin-right: 10px;" emptyMessage="">
 							<p:column>
 								<p:panelGrid columns="1" columnClasses="fieldClm" style="width: 100%; margin: 0px; background-color: transparent !important" >
 									<h:outputText value="Apartamento #{membership.domain.number} - Bloco #{membership.domain.block}" />
-									<p:selectOneMenu value="#{membership.role.id}" style="vertical-align: middle;">
-										<f:selectItems var="role" value="#{testBean.roles}" itemLabel="#{role.title}" itemValue="#{role.id}"/>
-										<p:ajax event="change" listener="#{testBean.onRoleSelect(membership)}" partialSubmit="true" process="@this"/>
+									<p:selectOneMenu value="#{membership.type}" style="vertical-align: middle;">
+										<f:selectItems var="type" value="#{testBean.types}" itemLabel="#{msg[type.label]}"/>
 									</p:selectOneMenu>
 								</p:panelGrid>
 							</p:column>
@@ -128,7 +126,7 @@
 						</p:panelGrid>
 					</p:column>
 				</p:panelGrid>
-				<p:commandButton value="Salvar" actionListener="#{testBean.onPersonSave}" update=":outputMsg" style="float: right; width: 70px; margin: 0px 0px 10px 5px;"/>
+				<p:commandButton value="Salvar" actionListener="#{testBean.onPersonSave}" update=":model-form:personTable, :outputMsg" oncomplete="if (!args.validationFailed) { if(!args.exception) {PF('registerDialog').hide();} else { if(args.alert) {PF('alertDialog').show();}}}" style="float: right; width: 70px; margin: 0px 0px 10px 5px;"/>
 			</ui:define>
 		</ui:composition>
 	</h:body>

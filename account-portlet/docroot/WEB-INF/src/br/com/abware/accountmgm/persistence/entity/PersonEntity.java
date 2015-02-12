@@ -1,8 +1,15 @@
 package br.com.abware.accountmgm.persistence.entity;
 
+import java.util.List;
+
+import javax.persistence.CascadeType;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.JoinTable;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
 @Entity
@@ -18,6 +25,10 @@ public class PersonEntity extends BaseEntity {
 	private long userId;
 
     private String identity;
+
+    @OneToMany(cascade=CascadeType.ALL, fetch=FetchType.LAZY)
+    @JoinTable(name="jco_membership", joinColumns={@JoinColumn(name="personId", referencedColumnName="id")}, inverseJoinColumns={@JoinColumn(name="personId", referencedColumnName="personId")})
+    private List<MembershipEntity> memberships;
 
 	public long getId() {
 		return id;

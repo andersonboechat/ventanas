@@ -4,9 +4,9 @@ import java.io.File;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Date;
 import java.util.List;
 
+import javax.persistence.NoResultException;
 import javax.persistence.Query;
 
 import org.apache.commons.io.IOUtils;
@@ -16,6 +16,7 @@ import org.apache.commons.lang.StringUtils;
 import br.com.abware.accountmgm.persistence.entity.PersonEntity;
 import br.com.abware.jcondo.core.Gender;
 import br.com.abware.jcondo.core.PersonStatus;
+import br.com.abware.jcondo.core.PersonType;
 import br.com.abware.jcondo.core.model.Domain;
 import br.com.abware.jcondo.core.model.Image;
 import br.com.abware.jcondo.core.model.Person;
@@ -83,7 +84,7 @@ public class NewPersonManagerImpl extends JCondoManager<PersonEntity, Person> {
 					new File(new URL(person.getPicture().getPath()).getPath()).delete();
 				}
 			} catch (Exception e) {
-				// TODO Log it!
+				e.printStackTrace();
 			}
 
 			return super.save(person);
@@ -100,6 +101,14 @@ public class NewPersonManagerImpl extends JCondoManager<PersonEntity, Person> {
 			throw new PersistenceException("usuario nao cadastrado");
 		} catch (Exception e) {
 			throw new PersistenceException("");
+		}
+	}
+	
+	public void lock(Person person) throws Exception {
+		try {
+			UserLocalServiceUtil.updateLockoutById(person.getUserId(), true);
+		} catch (NoSuchUserException e) {
+			throw new PersistenceException("usuario nao cadastrado");
 		}
 	}
 
@@ -150,7 +159,7 @@ public class NewPersonManagerImpl extends JCondoManager<PersonEntity, Person> {
 			person.setGender(user.isMale() ? Gender.MALE : Gender.FEMALE);
 			person.setStatus(user.getStatus() == WorkflowConstants.STATUS_APPROVED ? PersonStatus.ACTIVE : PersonStatus.INACTIVE);
 			person.setPicture(new Image(user.getPortraitId(), getPath(user.getPortraitId()), null, null));
-			person.setBirthday(new Date());
+			//person.setBirthday(new Date());
 
 			return person;
 		} catch (Exception e) {
@@ -164,6 +173,24 @@ public class NewPersonManagerImpl extends JCondoManager<PersonEntity, Person> {
 
 	public void addDomain(Person person, Domain domain) throws Exception {
 		UserLocalServiceUtil.addGroupUsers(domain.getDomainId(), new long[] {person.getUserId()});
+	}
+
+	@SuppressWarnings("unchecked")
+	public List<Person> findPeopleByType(Domain domain, PersonType type) throws Exception {
+		String key = generateKey();
+		String queryString = "FROM PersonEntity WHERE memberships.domain.id = :id AND memberships.type = :type";
+
+		try {
+			openManager(key);
+			Query query = em.createQuery(queryString);
+			query.setParameter("id", domain.getId());
+			query.setParameter("type", type);
+			return getModels(query.getResultList());
+		} catch (NoResultException e) {
+			return new ArrayList<Person>();
+		} finally {
+			closeManager(key);
+		}
 	}
 
 }

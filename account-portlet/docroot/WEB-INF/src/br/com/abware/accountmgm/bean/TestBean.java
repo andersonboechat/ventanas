@@ -1,6 +1,5 @@
 package br.com.abware.accountmgm.bean;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -13,17 +12,18 @@ import javax.faces.bean.ManagedProperty;
 import javax.faces.bean.ViewScoped;
 import javax.faces.event.AjaxBehaviorEvent;
 
+import org.apache.commons.collections.CollectionUtils;
+
 import br.com.abware.accountmgm.bean.model.ModelDataModel;
-import br.com.abware.accountmgm.bean.model.PersonModel;
 import br.com.abware.accountmgm.util.BeanUtils;
+import br.com.abware.accountmgm.util.DomainPredicate;
 import br.com.abware.jcondo.core.Gender;
+import br.com.abware.jcondo.core.PersonType;
 import br.com.abware.jcondo.core.model.Condominium;
 import br.com.abware.jcondo.core.model.Flat;
 import br.com.abware.jcondo.core.model.Image;
 import br.com.abware.jcondo.core.model.Membership;
 import br.com.abware.jcondo.core.model.Person;
-import br.com.abware.jcondo.core.model.Role;
-import br.com.abware.jcondo.core.model.RoleName;
 import br.com.abware.jcondo.core.model.Supplier;
 
 @ManagedBean
@@ -33,27 +33,27 @@ public class TestBean extends BaseBean {
 	@ManagedProperty(value="#{imageUploadBean}")
 	private ImageUploadBean imageUploadBean;
 
-	private ModelDataModel<PersonModel> model;
+	private ModelDataModel<Person> model;
 
 	private HashMap<String, Object> filters;
 
 	private String personName;
 
-	private Set<Long> blocks;
+	private Set<Integer> blocks;
 	
 	private Long block;
 	
-	private Set<Long> numbers;
+	private Set<Integer> numbers;
 
 	private Long number;
 
 	private List<Flat> flats;
 	
-	private PersonModel personModel;
+	private Person person;
 	
 	private Person[] selectedPeople;
 
-	private List<Role> roles;
+	private List<PersonType> types;
 	
 	private long selectedFlatId;
 	
@@ -63,33 +63,20 @@ public class TestBean extends BaseBean {
 	public void init() {
 		try {
 			flats = flatService.getFlats(personService.getPerson());
-			blocks = new TreeSet<Long>();
-			numbers = new TreeSet<Long>();
+			blocks = new TreeSet<Integer>();
+			numbers = new TreeSet<Integer>();
 			for (Flat flat : flats) {
 				blocks.add(flat.getBlock());
 				numbers.add(flat.getNumber());
 			}
 
-			List<PersonModel> people = new ArrayList<PersonModel>();
-			for (Person person : personService.getPeople(personService.getPerson())) {
-				people.add(new PersonModel(person, personService.getMemberships(person)));
-			}
-
-			model = new ModelDataModel<PersonModel>(people);
+			model = new ModelDataModel<Person>(personService.getPeople(personService.getPerson()));
 			Person person = new Person();
 			person.setPicture(new Image());
-			personModel = new PersonModel(person, new ArrayList<Membership>());
 			filters = new HashMap<String, Object>();
 			imageUploadBean.setWidth(198);
 			imageUploadBean.setHeight(300);
-			roles = new ArrayList<Role>();
-			for (RoleName roleName : RoleName.values()) {
-				if (roleName.getType() == 0) {
-					try {
-					roles.add(securityManager.getRole(null, roleName));
-					} catch (Exception e) {}
-				}
-			}
+			types = Arrays.asList(PersonType.FLAT_TYPES);
 			genders = Arrays.asList(Gender.values());
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
@@ -98,7 +85,7 @@ public class TestBean extends BaseBean {
 	}
 
 	public void onPersonSearch(AjaxBehaviorEvent event) throws Exception {
-		filters.put("person.fullName", personName);
+		filters.put("fullName", personName);
 		model.filter(filters);
 	}
 
@@ -112,17 +99,18 @@ public class TestBean extends BaseBean {
 		model.filter(filters);
 	}
 	
-	public void onRoleSelect(Membership membership) {
-		membership.setRole(roles.get(roles.indexOf(membership.getRole())));
-	}
-
 	public void onPersonSave() {
 		try {
-			personModel.getPerson().setPicture(imageUploadBean.getImage());
-			Person person = personService.register(personModel.getPerson());
-			personModel.setPerson(person);
-			personService.updateMemberships(personModel.getPerson(), personModel.getMemberships());
-			model.addModel(personModel);
+			person.setPicture(imageUploadBean.getImage());
+
+			if (person.getId() == 0) {
+				person = personService.register(person);
+				model.addModel(person);
+			} else {
+				person = personService.update(person);
+				model.setModel(person);
+			}
+			
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -130,23 +118,33 @@ public class TestBean extends BaseBean {
 	}
 
 	public void onPersonCreate() throws Exception {
-		personModel = new PersonModel(new Person(), new ArrayList<Membership>());
+		person = new Person();
+		person.setPicture(new Image());
 	}
-	
+
 	public void onPersonDelete() throws Exception {
-		personService.delete(personModel.getPerson());
+		removeMemberships(person);
+		person = personService.update(person);
 	}
 
 	public void onPeopleDelete() throws Exception {
 		for (Person person : selectedPeople) {
-			personService.delete(person);
+			removeMemberships(person);
+			person = personService.update(person);
+		}
+	}
+
+	private void removeMemberships(Person person) {
+		for (Flat flat : flats) {
+			person.getMemberships().removeAll(CollectionUtils.select(person.getMemberships(), 
+																	 new DomainPredicate(flat)));
 		}
 	}
 
 	public void onPersonEdit() throws Exception {
 		try {
-			BeanUtils.copyProperties(personModel, model.getRowData());
-			imageUploadBean.setImage(personModel.getPerson().getPicture());
+			BeanUtils.copyProperties(person, model.getRowData());
+			imageUploadBean.setImage(person.getPicture());
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -154,7 +152,7 @@ public class TestBean extends BaseBean {
 	
 	public void onFlatAdd() {
 		Flat flat = flats.get(flats.indexOf(new Flat(selectedFlatId, 0, 0)));
-		personModel.getMemberships().add(new Membership(new Role(), flat));
+		person.getMemberships().add(new Membership(PersonType.VISITOR, flat));
 		selectedFlatId = 0;
 	}
 
@@ -162,11 +160,11 @@ public class TestBean extends BaseBean {
 		if (membership != null) {
 			if (membership.getDomain() instanceof Flat) {
 				Flat flat = (Flat) membership.getDomain(); 
-				return "Apartamento " + flat.getNumber() + " - Bloco " + flat.getBlock() + " --- " + membership.getRole().getTitle();
+				return "Apartamento " + flat.getNumber() + " - Bloco " + flat.getBlock() + " --- " + membership.getType().getLabel();
 			} else if (membership.getDomain() instanceof Supplier) {
-				return ((Supplier) membership.getDomain()).getName() + " --- " + membership.getRole().getTitle();
+				return ((Supplier) membership.getDomain()).getName() + " --- " + membership.getType().getLabel();
 			} else if (membership.getDomain() instanceof Condominium) {
-				return membership.getRole().getTitle();
+				return membership.getType().getLabel();
 			}
 		}
 
@@ -181,11 +179,11 @@ public class TestBean extends BaseBean {
 		this.imageUploadBean = imageUploadBean;
 	}
 
-	public ModelDataModel<PersonModel> getModel() {
+	public ModelDataModel<Person> getModel() {
 		return model;
 	}
 
-	public void setModel(ModelDataModel<PersonModel> model) {
+	public void setModel(ModelDataModel<Person> model) {
 		this.model = model;
 	}
 
@@ -221,27 +219,27 @@ public class TestBean extends BaseBean {
 		this.flats = flats;
 	}
 
-	public PersonModel getPersonModel() {
-		return personModel;
+	public Person getPerson() {
+		return person;
 	}
 
-	public void setPersonModel(PersonModel personModel) {
-		this.personModel = personModel;
+	public void setPerson(Person person) {
+		this.person = person;
 	}
 
-	public Set<Long> getBlocks() {
+	public Set<Integer> getBlocks() {
 		return blocks;
 	}
 
-	public void setBlocks(Set<Long> blocks) {
+	public void setBlocks(Set<Integer> blocks) {
 		this.blocks = blocks;
 	}
 
-	public Set<Long> getNumbers() {
+	public Set<Integer> getNumbers() {
 		return numbers;
 	}
 
-	public void setNumbers(Set<Long> numbers) {
+	public void setNumbers(Set<Integer> numbers) {
 		this.numbers = numbers;
 	}
 
@@ -253,12 +251,12 @@ public class TestBean extends BaseBean {
 		this.selectedPeople = selectedPeople;
 	}
 
-	public List<Role> getRoles() {
-		return roles;
+	public List<PersonType> getTypes() {
+		return types;
 	}
 
-	public void setRoles(List<Role> roles) {
-		this.roles = roles;
+	public void setTypes(List<PersonType> types) {
+		this.types = types;
 	}
 
 	public long getSelectedFlatId() {

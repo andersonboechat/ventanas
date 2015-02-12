@@ -41,9 +41,9 @@ public class VehicleBean extends BaseBean {
 
 	private HashMap<String, Object> filters;
 
-	private Long block;
+	private int block;
 
-	private Long number;
+	private int number;
 
 	private String license;
 
@@ -53,9 +53,9 @@ public class VehicleBean extends BaseBean {
 
 	private List<Flat> flats;
 
-	private Set<Long> blocks;
+	private Set<Integer> blocks;
 
-	private Set<Long> numbers;
+	private Set<Integer> numbers;
 	
 	private boolean visitor;
 	
@@ -67,8 +67,8 @@ public class VehicleBean extends BaseBean {
 			vehicle = new Vehicle();
 			vehicle.setDomain(new Flat());
 			vehicle.setImage(new Image());
-			blocks = new TreeSet<Long>();
-			numbers = new TreeSet<Long>();
+			blocks = new TreeSet<Integer>();
+			numbers = new TreeSet<Integer>();
 			for (Flat flat : flats) {
 				blocks.add(flat.getBlock());
 				numbers.add(flat.getNumber());
@@ -254,35 +254,35 @@ public class VehicleBean extends BaseBean {
 		this.selectedVehicles = selectedVehicles;
 	}
 
-	public Set<Long> getBlocks() {
+	public Set<Integer> getBlocks() {
 		return blocks;
 	}
 
-	public void setBlocks(Set<Long> blocks) {
+	public void setBlocks(Set<Integer> blocks) {
 		this.blocks = blocks;
 	}
 
-	public Long getBlock() {
+	public int getBlock() {
 		return block;
 	}
 
-	public void setBlock(Long block) {
+	public void setBlock(int block) {
 		this.block = block;
 	}
 
-	public Set<Long> getNumbers() {
+	public Set<Integer> getNumbers() {
 		return numbers;
 	}
 
-	public void setNumbers(Set<Long> numbers) {
+	public void setNumbers(Set<Integer> numbers) {
 		this.numbers = numbers;
 	}
 
-	public Long getNumber() {
+	public int getNumber() {
 		return number;
 	}
 
-	public void setNumber(Long number) {
+	public void setNumber(int number) {
 		this.number = number;
 	}
 
