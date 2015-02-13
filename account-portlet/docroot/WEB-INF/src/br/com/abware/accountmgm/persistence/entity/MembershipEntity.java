@@ -15,8 +15,17 @@ public class MembershipEntity extends BaseEntity {
 
 	private static final long serialVersionUID = 1L;
 
-	@EmbeddedId
-	private MembershipEntityPK membershipId;
+	@Id
+	@GeneratedValue
+	private long id;
+
+	@OneToOne
+	@JoinColumn(name="domainId")
+	private DomainEntity domain;
+
+	@OneToOne
+	@JoinColumn(name="personId")
+	private PersonEntity person;
 
 	@Enumerated(EnumType.ORDINAL)
 	private PersonType type;
@@ -25,15 +34,7 @@ public class MembershipEntity extends BaseEntity {
 	}
 
 	public long getId() {
-		return 0;
-	}
-
-	public MembershipEntityPK getMembershipId() {
-		return this.membershipId;
-	}
-
-	public void setMembershipId(MembershipEntityPK id) {
-		this.membershipId = id;
+		return id;
 	}
 
 	public PersonType getType() {

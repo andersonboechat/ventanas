@@ -31,7 +31,8 @@
 				<action-key>UPDATE</action-key>
 				<action-key>DELETE</action-key>
 				<action-key>VIEW</action-key>
-				<action-key>ASSIGN</action-key>
+				<action-key>ASSIGN_MEMBER</action-key>
+				<action-key>REMOVE_MEMBER</action-key>
 			</supports>
 			<site-member-defaults>
 				<action-key>VIEW</action-key>
@@ -56,6 +57,21 @@
 			<site-member-defaults>
 				<action-key>VIEW</action-key>
 			</site-member-defaults>
+			<guest-defaults/>
+			<guest-unsupported/>
+		</permissions>
+	</model-resource>
+	<model-resource>
+		<model-name>br.com.abware.jcondo.core.PersonType</model-name>
+		<portlet-ref>
+			<portlet-name>person-management</portlet-name>
+		</portlet-ref>
+		<permissions>
+			<supports>
+				<action-key>ASSIGN_MEMBER</action-key>
+				<action-key>REMOVE_MEMBER</action-key>
+			</supports>
+			<site-member-defaults/>
 			<guest-defaults/>
 			<guest-unsupported/>
 		</permissions>

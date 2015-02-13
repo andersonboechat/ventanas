@@ -114,7 +114,7 @@ public class NewPersonManagerImpl extends JCondoManager<PersonEntity, Person> {
 
 	@SuppressWarnings("unchecked")
 	public List<Person> findPeople(Domain domain) throws Exception {
-		long[] userIds = UserLocalServiceUtil.getGroupUserIds(domain.getDomainId());
+		long[] userIds = UserLocalServiceUtil.getGroupUserIds(domain.getRelatedId());
 		if (userIds.length > 0) {
 			String key = generateKey();
 			String queryString = "FROM PersonEntity WHERE userId in :userIds";
@@ -168,11 +168,11 @@ public class NewPersonManagerImpl extends JCondoManager<PersonEntity, Person> {
 	}
 
 	public void removeDomain(Person person, Domain domain) throws Exception {
-		UserLocalServiceUtil.unsetGroupUsers(domain.getDomainId(), new long[] {person.getUserId()}, null);
+		UserLocalServiceUtil.unsetGroupUsers(domain.getRelatedId(), new long[] {person.getUserId()}, null);
 	}
 
 	public void addDomain(Person person, Domain domain) throws Exception {
-		UserLocalServiceUtil.addGroupUsers(domain.getDomainId(), new long[] {person.getUserId()});
+		UserLocalServiceUtil.addGroupUsers(domain.getRelatedId(), new long[] {person.getUserId()});
 	}
 
 	@SuppressWarnings("unchecked")

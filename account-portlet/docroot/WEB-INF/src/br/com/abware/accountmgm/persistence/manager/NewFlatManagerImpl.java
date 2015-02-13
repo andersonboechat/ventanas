@@ -10,7 +10,6 @@ import org.apache.commons.lang.StringUtils;
 
 import com.liferay.portal.model.Group;
 import com.liferay.portal.model.GroupConstants;
-import com.liferay.portal.model.Resource;
 import com.liferay.portal.model.ResourceConstants;
 import com.liferay.portal.service.GroupLocalServiceUtil;
 import com.liferay.portal.service.ResourceLocalServiceUtil;
@@ -34,14 +33,14 @@ public class NewFlatManagerImpl extends JCondoManager<FlatEntity, Flat> {
 	public Flat save(Flat flat) throws Exception {
 		Flat f = super.save(flat);
 
-		if (flat.getDomainId() == 0) {
+		if (flat.getRelatedId() == 0) {
 			Group group = GroupLocalServiceUtil.addGroup(helper.getUserId(), Group.class.getName(), 0, flat.toString(), 
 														 StringUtils.EMPTY, GroupConstants.TYPE_SITE_PRIVATE, 
 														 "/" + flat.getBlock() + "-" + flat.getNumber(), true, true, null);
 			ResourceLocalServiceUtil.addResources(helper.getCompanyId(), group.getGroupId(), helper.getUserId(), 
 												  Flat.class.getName(), f.getId(), false, true, false);
-			f.setDomainId(group.getGroupId());
-			f = super.save(flat);
+			f.setRelatedId(group.getGroupId());
+			f = super.save(f);
 		}
 
 		return f;
@@ -50,14 +49,14 @@ public class NewFlatManagerImpl extends JCondoManager<FlatEntity, Flat> {
 	public void delete(Flat flat) throws Exception {
 		super.delete(flat);
 		ResourceLocalServiceUtil.deleteResource(helper.getCompanyId(), Flat.class.getName(), ResourceConstants.SCOPE_COMPANY, helper.getCompanyId());
-		ResourceLocalServiceUtil.deleteResource(helper.getCompanyId(), Flat.class.getName(), ResourceConstants.SCOPE_GROUP, flat.getDomainId());
+		ResourceLocalServiceUtil.deleteResource(helper.getCompanyId(), Flat.class.getName(), ResourceConstants.SCOPE_GROUP, flat.getRelatedId());
 		ResourceLocalServiceUtil.deleteResource(helper.getCompanyId(), Flat.class.getName(), ResourceConstants.SCOPE_INDIVIDUAL, flat.getId());
-		GroupLocalServiceUtil.deleteGroup(flat.getDomainId());
+		GroupLocalServiceUtil.deleteGroup(flat.getRelatedId());
 	}
 
 	public List<Flat> findByPerson(Person person) throws Exception {
 		List<Flat> flats = new ArrayList<Flat>();
-		String queryString = "FROM FlatEntity WHERE domainId = :id";
+		String queryString = "FROM FlatEntity WHERE relatedId = :id";
 
 		try {
 			openManager("FlatManager.findByPerson");

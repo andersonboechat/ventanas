@@ -24,7 +24,7 @@ public class ModelDataModel<Model extends BaseModel> extends ListDataModel<Model
 	private List<Model> models;
 	
 	public ModelDataModel(List<Model> models) {
-		super(models);
+		super(new ArrayList<Model>(models));
 		this.models = models;
 	}
 
