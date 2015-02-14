@@ -13,7 +13,7 @@ import javax.persistence.Table;
 @Table(name="jco_domain")
 @Inheritance(strategy=InheritanceType.JOINED)
 @DiscriminatorColumn(name="domain", discriminatorType=DiscriminatorType.INTEGER)
-public class DomainEntity extends BaseEntity {
+public abstract class DomainEntity extends BaseEntity {
 
 	private static final long serialVersionUID = 1L;
 

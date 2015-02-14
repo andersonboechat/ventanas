@@ -1,5 +1,6 @@
 package br.com.abware.accountmgm.persistence.entity;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.persistence.CascadeType;
@@ -7,10 +8,10 @@ import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.JoinTable;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
+
+import org.hibernate.annotations.IndexColumn;
 
 @Entity
 @Table(name="jco_person")
@@ -26,10 +27,16 @@ public class PersonEntity extends BaseEntity {
 
     private String identity;
 
-    @OneToMany(cascade=CascadeType.ALL, fetch=FetchType.LAZY)
-    @JoinTable(name="jco_membership", joinColumns={@JoinColumn(name="personId", referencedColumnName="id")}, inverseJoinColumns={@JoinColumn(name="personId", referencedColumnName="personId")})
+    @OneToMany(cascade=CascadeType.ALL, fetch=FetchType.EAGER, mappedBy="person")
+    @IndexColumn(name="id")
+    @IndexColumn(name="policy_sequence", nullable=false, base=0)
+    @JoinColumn(name="policy_root_oid", nullable=false)    
     private List<MembershipEntity> memberships;
 
+    public PersonEntity() {
+		this.memberships = new ArrayList<MembershipEntity>();
+	}
+    
 	public long getId() {
 		return id;
 	}
@@ -52,6 +59,14 @@ public class PersonEntity extends BaseEntity {
 
 	public void setIdentity(String identity) {
 		this.identity = identity;
+	}
+
+	public List<MembershipEntity> getMemberships() {
+		return memberships;
+	}
+
+	public void setMemberships(List<MembershipEntity> memberships) {
+		this.memberships = memberships;
 	}
 
 }

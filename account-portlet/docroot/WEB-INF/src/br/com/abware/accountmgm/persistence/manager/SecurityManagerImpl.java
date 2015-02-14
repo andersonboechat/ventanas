@@ -39,7 +39,7 @@ public class SecurityManagerImpl {
 	public SecurityManagerImpl() {
 		try {
 			portal = new Condominium();
-			portal.setDomainId(10179);
+			portal.setRelatedId(10179);
 		} catch (Exception e) {
 			
 		}
@@ -81,19 +81,19 @@ public class SecurityManagerImpl {
 			}
 
 			if (membership.getType() == PersonType.RESIDENT) {
-				addRole(person, membership.getDomain(), RoleName.VEHIACLE_ENROLLER);
+//				addRole(person, membership.getDomain(), RoleName.VEHIACLE_ENROLLER);
 			}
 
 			if (membership.getType() == PersonType.RENTER || membership.getType() == PersonType.RESIDENT) {
 				addRole(person, portal, RoleName.LESSEE);
 				addRole(person, portal, RoleName.DEBATER);
-				addRole(person, portal, RoleName.USER_ENROLLER);
+//				addRole(person, portal, RoleName.USER_ENROLLER);
 			}
 
 			if (membership.getType() == PersonType.RENTER || 
 					membership.getType() == PersonType.RESIDENT || membership.getType() == PersonType.DEPENDENT) {
 				addRole(person, portal, RoleName.HABITANT);
-				addRole(person, portal, RoleName.SITE_MEMBER);
+//				addRole(person, portal, RoleName.SITE_MEMBER);
 			}
 
 		}
@@ -165,7 +165,7 @@ public class SecurityManagerImpl {
 	private void addRole(Person person, Domain domain, RoleName role) throws ApplicationException {
 		try {
 			long roleId = RoleLocalServiceUtil.getRole(helper.getCompanyId(), role.getLabel()).getRoleId();
-			UserGroupRoleLocalServiceUtil.addUserGroupRoles(person.getUserId(), domain.getDomainId(), new long[] {roleId});
+			UserGroupRoleLocalServiceUtil.addUserGroupRoles(person.getUserId(), domain.getRelatedId(), new long[] {roleId});
 		} catch (Exception e) {
 			throw new ApplicationException(e, "");
 		}
@@ -174,7 +174,7 @@ public class SecurityManagerImpl {
 	private void removeRole(Person person, Domain domain, RoleName role) throws ApplicationException {
 		try {
 			long roleId = RoleLocalServiceUtil.getRole(helper.getCompanyId(), role.getLabel()).getRoleId();
-			UserGroupRoleLocalServiceUtil.deleteUserGroupRoles(person.getUserId(), domain.getDomainId(), new long[] {roleId});	
+			UserGroupRoleLocalServiceUtil.deleteUserGroupRoles(person.getUserId(), domain.getRelatedId(), new long[] {roleId});	
 		} catch (Exception e) {
 			throw new ApplicationException(e, "");
 		}
@@ -188,7 +188,7 @@ public class SecurityManagerImpl {
 			if (model instanceof Person) {
 				return checkUserPermission(permissionChecker, ((Person) model).getUserId(), permission);
 			} else if (model instanceof Flat || model instanceof Supplier || model instanceof Condominium) {
-				return checkDomainPermission(permissionChecker, ((Membership) model).getDomain(), permission);
+				return checkDomainPermission(permissionChecker, (Domain) model, permission);
 			} else if (model instanceof Membership) {
 				return checkDomainPermission(permissionChecker, ((Membership) model).getDomain(), permission) && 
 						checkPersonTypePermission(permissionChecker, ((Membership) model).getType(), permission);
@@ -201,19 +201,19 @@ public class SecurityManagerImpl {
 	}
 
 	private boolean checkPersonTypePermission(PermissionChecker permissionChecker, PersonType type, Permission permission) throws Exception {
-		return permissionChecker.hasPermission(portal.getDomainId(), PersonType.class.getName(), type.ordinal(), permission.name());
+		return permissionChecker.hasPermission(portal.getRelatedId(), PersonType.class.getName(), type.ordinal(), permission.name());
 	}	
 
 	private boolean checkDomainPermission(PermissionChecker permissionChecker, Domain domain, Permission permission) throws Exception {
-		return permissionChecker.hasPermission(domain.getDomainId(), domain.getClass().getName(), domain.getId(), permission.name());
+		return permissionChecker.hasPermission(domain.getRelatedId(), domain.getClass().getName(), domain.getId(), permission.name());
 	}
 
 	private boolean checkUserPermission(PermissionChecker permissionChecker, long userId, Permission permission) throws Exception {
 		String actionkey;
 
-		if (permission == Permission.UPDATE_PERSON) {
+		if (permission == Permission.UPDATE) {
 			actionkey = ActionKeys.UPDATE;
-		} else if (permission == Permission.ADD_USER) { 
+		} else if (permission == Permission.ADD) { 
 			actionkey = ActionKeys.ADD_USER;
 		} else {
 			throw new SystemException("permission.not.supported");
@@ -227,7 +227,7 @@ public class SecurityManagerImpl {
 
 		if (permission == Permission.UPDATE_PERSON) {
 			actionkey = ActionKeys.MANAGE_USERS;
-		} else if (permission == Permission.ADD_USER) {
+		} else if (permission == Permission.ADD_PERSON) {
 			actionkey = ActionKeys.ADD_USER;
 		} else if (permission == Permission.DELETE_PERSON) {
 			actionkey = ActionKeys.MANAGE_USERS;
@@ -249,7 +249,7 @@ public class SecurityManagerImpl {
 
 		if (permission == Permission.UPDATE_PERSON) {
 			actionkey = ActionKeys.MANAGE_USERS;
-		} else if (permission == Permission.ADD_USER) {
+		} else if (permission == Permission.ADD) {
 			actionkey = ActionKeys.ADD_USER;
 		} else if (permission == Permission.DELETE_PERSON) {
 			actionkey = ActionKeys.MANAGE_USERS;

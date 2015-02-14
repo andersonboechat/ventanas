@@ -2,9 +2,9 @@ package br.com.abware.accountmgm.service.core;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.TreeSet;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
@@ -33,11 +33,11 @@ public class PersonServiceImpl  {
 	private FlatServiceImpl flatService = new FlatServiceImpl();
 	
 	public PersonServiceImpl() {
-		CONDOMINIUM.setDomainId(10179);
+		CONDOMINIUM.setRelatedId(10179);
 	}
 
 	public List<Person> getPeople(Person person) throws Exception {
-		Set<Person> people = new TreeSet<Person>(); 
+		Set<Person> people = new HashSet<Person>(); 
 
 		try {
 			for (Flat flat : flatService.getFlats(person)) {
@@ -49,7 +49,7 @@ public class PersonServiceImpl  {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-
+		
 		return new ArrayList<Person>(people);
 	}
 
@@ -134,13 +134,17 @@ public class PersonServiceImpl  {
 			throw new ApplicationException(null, "identidade não fornecida");
 		}
 
-		Person p = getPerson(person.getIdentity());
+		Person p = personManager.findById(person.getId());
 		if (p == null) {
-			throw new ApplicationException(null, "usuario nao cadastrado com a identidade " + person.getIdentity());
+			throw new ApplicationException(null, "usuario nao cadastrado");
 		}
 
 		validateMemberships(person);
-		
+
+		if (p.getMemberships() == null) {
+			p.setMemberships(new ArrayList<Membership>());
+		}
+
 		List<Membership> memberships = (List<Membership>) CollectionUtils.subtract(p.getMemberships(), person.getMemberships());
 
 		for (Membership membership : memberships) {
@@ -174,7 +178,7 @@ public class PersonServiceImpl  {
 
 			/* usuário deixou de ter esse papel nesse dominio */
 			if (!CollectionUtils.exists(person.getMemberships(), new MembershipPredicate(domain, type))) {
-				if (!securityManager.hasPermission(membership, Permission.DELETE_PERSON)) {
+				if (!securityManager.hasPermission(membership, Permission.REMOVE_MEMBER)) {
 					throw new Exception("");
 				}
 			}
@@ -187,7 +191,7 @@ public class PersonServiceImpl  {
 
 			/* usuário nao tem esse papel nesse dominio */
 			if (!CollectionUtils.exists(oldMemberships, new MembershipPredicate(domain, type))) {
-				if (!securityManager.hasPermission(membership, Permission.ADD_USER)) {
+				if (!securityManager.hasPermission(membership, Permission.ASSIGN_MEMBER)) {
 					throw new Exception("");
 				}
 			}

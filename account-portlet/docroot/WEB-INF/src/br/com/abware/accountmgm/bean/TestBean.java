@@ -1,5 +1,6 @@
 package br.com.abware.accountmgm.bean;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -71,7 +72,7 @@ public class TestBean extends BaseBean {
 			}
 
 			model = new ModelDataModel<Person>(personService.getPeople(personService.getPerson()));
-			Person person = new Person();
+			person = new Person();
 			person.setPicture(new Image());
 			filters = new HashMap<String, Object>();
 			imageUploadBean.setWidth(198);
@@ -152,6 +153,9 @@ public class TestBean extends BaseBean {
 	
 	public void onFlatAdd() {
 		Flat flat = flats.get(flats.indexOf(new Flat(selectedFlatId, 0, 0)));
+		if (person.getMemberships() == null) {
+			person.setMemberships(new ArrayList<Membership>());
+		}
 		person.getMemberships().add(new Membership(PersonType.VISITOR, flat));
 		selectedFlatId = 0;
 	}
