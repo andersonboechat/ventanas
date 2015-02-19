@@ -10,6 +10,7 @@ import java.util.Map;
 import javax.faces.model.ListDataModel;
 
 import org.apache.commons.beanutils.BeanUtils;
+import org.apache.commons.beanutils.PropertyUtils;
 import org.apache.commons.collections.MapUtils;
 import org.primefaces.model.SelectableDataModel;
 
@@ -78,19 +79,10 @@ public class ModelDataModel<Model extends BaseModel> extends ListDataModel<Model
 				for (Iterator<String> it = filters.keySet().iterator(); it.hasNext();) {
 					String filterProperty = it.next();
 					Object filterValue = filters.get(filterProperty);
-					String fieldValue = null;
-
-					try {
-						fieldValue = BeanUtils.getProperty(model, filterProperty);
-		    			if (filterValue == null  || fieldValue.toLowerCase().matches(".*" + filterValue.toString().toLowerCase() + ".*")) {
-		    				match = true;
-		    			} else {
-		    				match = false;
-		                    break;
-		    			}
-					} catch (Exception e) {
-						match = true;
-					}
+    				if (!match(model, filterProperty, filterValue)) {
+    					match = false;
+    					break;
+    				}
 				}
 
 				if (match) {
@@ -107,6 +99,37 @@ public class ModelDataModel<Model extends BaseModel> extends ListDataModel<Model
 	@SuppressWarnings("unchecked")
 	public void sort(String field, int order) {
 		Collections.sort((List<Model>) getWrappedData(), new ModelSorter<Model>(field, order));
+	}
+
+	@SuppressWarnings("rawtypes")
+	private boolean match(Object obj, String filterProperty, Object filterValue) throws Exception {
+		// memberships.domain.number
+		String[] properties = filterProperty.split("\\.");
+
+		if (properties.length > 1) {
+			if (PropertyUtils.getPropertyType(obj, properties[0]).equals(List.class)) {
+				List list = (List) PropertyUtils.getProperty(obj, properties[0]);
+				for (Object object : list) {
+					if (match(object, filterProperty.substring(properties[0].length() + 1), filterValue)) {
+						return true;
+					}
+				}
+			} else {
+				Object o = PropertyUtils.getProperty(obj, properties[0]);
+				return match(o, filterProperty.substring(properties[0].length() + 1), filterValue);
+			}
+		} else {
+			try {
+				String fieldValue = BeanUtils.getProperty(obj, filterProperty);
+				if (filterValue == null || fieldValue.toLowerCase().matches(".*" + filterValue.toString().toLowerCase() + ".*")) {
+					return true;
+				}
+			} catch (Exception e) {
+				return true;
+			}
+		}
+
+		return false;
 	}
 	
 }

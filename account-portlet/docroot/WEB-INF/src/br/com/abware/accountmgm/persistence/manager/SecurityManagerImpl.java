@@ -8,10 +8,12 @@ import com.liferay.faces.portal.context.LiferayPortletHelper;
 import com.liferay.faces.portal.context.LiferayPortletHelperImpl;
 import com.liferay.portal.security.permission.ActionKeys;
 import com.liferay.portal.security.permission.PermissionChecker;
+import com.liferay.portal.service.GroupLocalServiceUtil;
 import com.liferay.portal.service.RoleLocalServiceUtil;
 import com.liferay.portal.service.UserGroupRoleLocalServiceUtil;
 import com.liferay.portal.service.permission.GroupPermissionUtil;
 import com.liferay.portal.service.permission.OrganizationPermissionUtil;
+import com.liferay.portal.service.permission.PortalPermissionUtil;
 import com.liferay.portal.service.permission.UserPermissionUtil;
 
 import br.com.abware.accountmgm.util.PersonTypePredicate;
@@ -81,21 +83,20 @@ public class SecurityManagerImpl {
 			}
 
 			if (membership.getType() == PersonType.RESIDENT) {
-//				addRole(person, membership.getDomain(), RoleName.VEHIACLE_ENROLLER);
+				addRole(person, membership.getDomain(), RoleName.VEHIACLE_ENROLLER);
 			}
 
 			if (membership.getType() == PersonType.RENTER || membership.getType() == PersonType.RESIDENT) {
 				addRole(person, portal, RoleName.LESSEE);
 				addRole(person, portal, RoleName.DEBATER);
-//				addRole(person, portal, RoleName.USER_ENROLLER);
+				addRole(person, portal, RoleName.USER_ENROLLER);
 			}
 
 			if (membership.getType() == PersonType.RENTER || 
 					membership.getType() == PersonType.RESIDENT || membership.getType() == PersonType.DEPENDENT) {
 				addRole(person, portal, RoleName.HABITANT);
-//				addRole(person, portal, RoleName.SITE_MEMBER);
+				addRole(person, portal, RoleName.SITE_MEMBER);
 			}
-
 		}
 
 		if (membership.getDomain() instanceof Supplier) {
@@ -214,7 +215,7 @@ public class SecurityManagerImpl {
 		if (permission == Permission.UPDATE) {
 			actionkey = ActionKeys.UPDATE;
 		} else if (permission == Permission.ADD) { 
-			actionkey = ActionKeys.ADD_USER;
+			return PortalPermissionUtil.contains(permissionChecker, ActionKeys.ADD_USER);
 		} else {
 			throw new SystemException("permission.not.supported");
 		}
