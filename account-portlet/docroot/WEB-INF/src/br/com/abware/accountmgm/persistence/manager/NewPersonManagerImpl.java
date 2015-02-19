@@ -4,6 +4,7 @@ import java.io.File;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 
 import javax.persistence.NoResultException;
@@ -13,12 +14,15 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
 
+import br.com.abware.accountmgm.persistence.entity.MembershipEntity;
 import br.com.abware.accountmgm.persistence.entity.PersonEntity;
+import br.com.abware.accountmgm.util.BeanUtils;
 import br.com.abware.jcondo.core.Gender;
 import br.com.abware.jcondo.core.PersonStatus;
 import br.com.abware.jcondo.core.PersonType;
 import br.com.abware.jcondo.core.model.Domain;
 import br.com.abware.jcondo.core.model.Image;
+import br.com.abware.jcondo.core.model.Membership;
 import br.com.abware.jcondo.core.model.Person;
 import br.com.abware.jcondo.exception.PersistenceException;
 
@@ -145,11 +149,36 @@ public class NewPersonManagerImpl extends JCondoManager<PersonEntity, Person> {
 			closeManager(key);
 		}
 	}
+	
+	@Override
+	protected PersonEntity getEntity(Person model) throws Exception {
+		PersonEntity person = super.getEntity(model);
+
+		List<MembershipEntity> memberships = new ArrayList<MembershipEntity>();
+		for (Membership membership : model.getMemberships()) {
+			MembershipEntity m = new MembershipEntity(model.getId());
+			BeanUtils.copyProperties(m, membership);
+			m.setUpdateDate(new Date());
+			m.setUpdateUser(helper.getUserId());
+			memberships.add(m);
+		}
+		person.setMemberships(memberships);
+
+		return person;
+	}
 
 	@Override
 	protected Person getModel(PersonEntity entity) throws PersistenceException {
 		try {
 			Person person = super.getModel(entity);
+
+			List<Membership> memberships = new ArrayList<Membership>();
+			for (MembershipEntity membership : entity.getMemberships()) {
+				Membership m = new Membership();
+				BeanUtils.copyProperties(m, membership);
+				memberships.add(m);
+			}
+			person.setMemberships(memberships);
 
 			User user = UserLocalServiceUtil.getUser(entity.getUserId());
 
@@ -178,7 +207,7 @@ public class NewPersonManagerImpl extends JCondoManager<PersonEntity, Person> {
 	@SuppressWarnings("unchecked")
 	public List<Person> findPeopleByType(Domain domain, PersonType type) throws Exception {
 		String key = generateKey();
-		String queryString = "FROM PersonEntity WHERE memberships.domain.id = :id AND memberships.type = :type";
+		String queryString = "FROM PersonEntity p JOIN p.memberships m WHERE m.domain.id = :id AND m.type = :type";
 
 		try {
 			openManager(key);

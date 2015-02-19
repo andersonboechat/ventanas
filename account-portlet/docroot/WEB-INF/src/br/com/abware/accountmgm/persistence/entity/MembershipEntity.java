@@ -23,18 +23,32 @@ public class MembershipEntity extends BaseEntity {
 	@JoinColumn(name="domainId")
 	private DomainEntity domain;
 
-	@OneToOne
-	@JoinColumn(name="personId")
-	private PersonEntity person;
-
 	@Enumerated(EnumType.ORDINAL)
 	private PersonType type;
 
+	private long personId;
+	
 	public MembershipEntity() {
+	}	
+
+	public MembershipEntity(long personId) {
+		this.personId = personId;
+	}	
+
+	public void setId(long id) {
+		this.id = id;
 	}
 
 	public long getId() {
 		return id;
+	}
+
+	public DomainEntity getDomain() {
+		return domain;
+	}
+
+	public void setDomain(DomainEntity domain) {
+		this.domain = domain;
 	}
 
 	public PersonType getType() {
@@ -45,4 +59,11 @@ public class MembershipEntity extends BaseEntity {
 		this.type = type;
 	}
 
+	public long getPersonId() {
+		return personId;
+	}
+
+	public void setPersonId(long personId) {
+		this.personId = personId;
+	}
 }

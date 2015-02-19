@@ -6,6 +6,9 @@ import java.util.List;
 
 import org.apache.commons.beanutils.Converter;
 
+import br.com.abware.accountmgm.persistence.entity.MembershipEntity;
+import br.com.abware.jcondo.core.model.Membership;
+
 public class ListConverter implements Converter {
 
 	@Override
@@ -19,7 +22,7 @@ public class ListConverter implements Converter {
 
 		for (Object obj : (List) orig) {
 			try {
-				Object dest = new Object(); 
+				Object dest = getDestObject(obj); 
 				BeanUtils.copyProperties(dest, obj);
 				dests.add(dest);
 			} catch (IllegalAccessException e) {
@@ -34,4 +37,13 @@ public class ListConverter implements Converter {
 		return dests;
 	}
 
+	private Object getDestObject(Object orig) {
+		if (orig instanceof Membership) {
+			return new MembershipEntity();
+		}
+		if (orig instanceof MembershipEntity) {
+			return new Membership();
+		}		
+		return null;
+	}
 }
