@@ -63,7 +63,7 @@ public class NewFlatManagerImpl extends JCondoManager<FlatEntity, Flat> {
 			for (Group group : GroupLocalServiceUtil.getUserGroups(person.getUserId())) {
 				try {
 					Query query = em.createQuery(queryString);
-					query.setParameter("id", group.getClassPK());
+					query.setParameter("id", group.getGroupId());
 					flats.add(getModel((FlatEntity) query.getSingleResult()));
 				} catch (Exception e) {
 					

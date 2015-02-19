@@ -1,5 +1,8 @@
 package br.com.abware.accountmgm.bean;
 
+import java.util.Locale;
+import java.util.ResourceBundle;
+
 import br.com.abware.accountmgm.persistence.manager.SecurityManagerImpl;
 import br.com.abware.accountmgm.service.core.FlatServiceImpl;
 import br.com.abware.accountmgm.service.core.PersonServiceImpl;
@@ -17,5 +20,7 @@ public abstract class BaseBean {
 	protected static final SecurityManagerImpl securityManager = new SecurityManagerImpl();
 
 	protected static final Condominium CONDOMINIUM = new Condominium();
+	
+	protected static ResourceBundle rb = ResourceBundle.getBundle("Language", new Locale("pt", "BR"));
 
 }

@@ -91,7 +91,7 @@ public class TestBean extends BaseBean {
 	}
 
 	public void onBlockSelect(AjaxBehaviorEvent event) throws Exception {
-		filters.put("memberships.domain.block", block);
+		filters.put("memberships[0].domain.block", block);
 		model.filter(filters);
 	}
 
@@ -164,11 +164,11 @@ public class TestBean extends BaseBean {
 		if (membership != null) {
 			if (membership.getDomain() instanceof Flat) {
 				Flat flat = (Flat) membership.getDomain(); 
-				return "Apartamento " + flat.getNumber() + " - Bloco " + flat.getBlock() + " --- " + membership.getType().getLabel();
+				return "Apartamento " + flat.getNumber() + " - Bloco " + flat.getBlock() + " --- " + rb.getString(membership.getType().getLabel());
 			} else if (membership.getDomain() instanceof Supplier) {
-				return ((Supplier) membership.getDomain()).getName() + " --- " + membership.getType().getLabel();
+				return ((Supplier) membership.getDomain()).getName() + " --- " + rb.getString(membership.getType().getLabel());
 			} else if (membership.getDomain() instanceof Condominium) {
-				return membership.getType().getLabel();
+				return rb.getString(membership.getType().getLabel());
 			}
 		}
 
