@@ -182,6 +182,7 @@ public class NewPersonManagerImpl extends JCondoManager<PersonEntity, Person> {
 
 			User user = UserLocalServiceUtil.getUser(entity.getUserId());
 
+			person.setFullName(user.getFullName());
 			person.setFirstName(user.getFirstName());
 			person.setLastName(user.getLastName());
 			person.setEmailAddress(user.getEmailAddress());

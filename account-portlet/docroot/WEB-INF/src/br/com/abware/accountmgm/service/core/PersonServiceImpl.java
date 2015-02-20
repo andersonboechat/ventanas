@@ -49,7 +49,7 @@ public class PersonServiceImpl  {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		
+
 		return new ArrayList<Person>(people);
 	}
 
@@ -57,7 +57,7 @@ public class PersonServiceImpl  {
 		List<Person> people = new ArrayList<Person>();
 
 		try {
-			if (!securityManager.hasPermission(domain, Permission.VIEW)) {
+			if (securityManager.hasPermission(domain, Permission.VIEW)) {
 				people = personManager.findPeople(domain);
 			}
 		} catch (PersistenceException e) {
@@ -119,6 +119,7 @@ public class PersonServiceImpl  {
 
 		for (Membership membership : person.getMemberships()) {
 			securityManager.addMembership(p, membership);
+			personManager.addDomain(person, membership.getDomain());
 		}
 
 		return p;
@@ -149,13 +150,15 @@ public class PersonServiceImpl  {
 
 		for (Membership membership : memberships) {
 			securityManager.removeMembership(person, membership);
+			personManager.removeDomain(person, membership.getDomain());
 		}
 
 		memberships = (List<Membership>) CollectionUtils.subtract(person.getMemberships(), p.getMemberships());
 
 		for (Membership membership : memberships) {
 			securityManager.addMembership(person, membership);
-		}		
+			personManager.addDomain(person, membership.getDomain());
+		}
 
 		return personManager.save(person);
 	}	

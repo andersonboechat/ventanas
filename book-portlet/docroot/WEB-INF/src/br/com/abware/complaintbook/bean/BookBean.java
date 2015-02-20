@@ -172,7 +172,7 @@ public class BookBean {
 			logger.debug(mailBody);
 			
 			String mailFrom = "administracao@ventanasresidencial.com.br";
-			String mailTo = "reidvan@rjbarbosa.com.br";
+			String mailTo = "sindico@ventanasresidencial.com.br";
 
 			MailMessage mailMessage = new MailMessage();
 			mailMessage.setFrom(new InternetAddress(mailFrom));

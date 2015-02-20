@@ -91,7 +91,7 @@ public class TestBean extends BaseBean {
 	}
 
 	public void onBlockSelect(AjaxBehaviorEvent event) throws Exception {
-		filters.put("memberships[0].domain.block", block);
+		filters.put("memberships.domain.block", block);
 		model.filter(filters);
 	}
 
@@ -121,6 +121,7 @@ public class TestBean extends BaseBean {
 	public void onPersonCreate() throws Exception {
 		person = new Person();
 		person.setPicture(new Image());
+		imageUploadBean.setImage(person.getPicture());
 	}
 
 	public void onPersonDelete() throws Exception {
