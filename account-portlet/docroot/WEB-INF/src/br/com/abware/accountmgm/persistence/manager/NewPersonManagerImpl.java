@@ -3,7 +3,6 @@ package br.com.abware.accountmgm.persistence.manager;
 import java.io.File;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
@@ -11,7 +10,6 @@ import javax.persistence.NoResultException;
 import javax.persistence.Query;
 
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
 
 import br.com.abware.accountmgm.persistence.entity.MembershipEntity;
@@ -46,6 +44,53 @@ public class NewPersonManagerImpl extends JCondoManager<PersonEntity, Person> {
 	@Override
 	protected Class<Person> getModelClass() {
 		return Person.class;
+	}
+
+	@Override
+	protected PersonEntity getEntity(Person model) throws Exception {
+		PersonEntity person = super.getEntity(model);
+
+		List<MembershipEntity> memberships = new ArrayList<MembershipEntity>();
+		for (Membership membership : model.getMemberships()) {
+			MembershipEntity m = new MembershipEntity(model.getId());
+			BeanUtils.copyProperties(m, membership);
+			m.setUpdateDate(new Date());
+			m.setUpdateUser(helper.getUserId());
+			memberships.add(m);
+		}
+		person.setMemberships(memberships);
+
+		return person;
+	}
+	
+	@Override
+	protected Person getModel(PersonEntity entity) throws PersistenceException {
+		try {
+			Person person = super.getModel(entity);
+
+			List<Membership> memberships = new ArrayList<Membership>();
+			for (MembershipEntity membership : entity.getMemberships()) {
+				Membership m = new Membership();
+				BeanUtils.copyProperties(m, membership);
+				memberships.add(m);
+			}
+			person.setMemberships(memberships);
+
+			User user = UserLocalServiceUtil.getUser(entity.getUserId());
+
+			person.setFullName(user.getFullName());
+			person.setFirstName(user.getFirstName());
+			person.setLastName(user.getLastName());
+			person.setEmailAddress(user.getEmailAddress());
+			person.setGender(user.isMale() ? Gender.MALE : Gender.FEMALE);
+			person.setStatus(user.getStatus() == WorkflowConstants.STATUS_APPROVED ? PersonStatus.ACTIVE : PersonStatus.INACTIVE);
+			person.setPicture(new Image(user.getPortraitId(), getPath(user.getPortraitId()), null, null));
+			//person.setBirthday(new Date());
+
+			return person;
+		} catch (Exception e) {
+			throw new PersistenceException(e, "");
+		}
 	}
 
 	public Person save(Person person) throws PersistenceException {
@@ -118,25 +163,22 @@ public class NewPersonManagerImpl extends JCondoManager<PersonEntity, Person> {
 
 	@SuppressWarnings("unchecked")
 	public List<Person> findPeople(Domain domain) throws Exception {
-		long[] userIds = UserLocalServiceUtil.getGroupUserIds(domain.getRelatedId());
-		if (userIds.length > 0) {
-			String key = generateKey();
-			String queryString = "FROM PersonEntity WHERE userId in :userIds";
-	
-			try {
-				openManager(key);
-				Query query = em.createQuery(queryString);
-				query.setParameter("userIds", Arrays.asList(ArrayUtils.toObject(userIds)));
-				return getModels(query.getResultList());
-			} finally {
-				closeManager(key);
-			}
+		String key = generateKey();
+		String queryString = "SELECT p FROM PersonEntity p JOIN p.memberships m WHERE m.domain.id = :id";
+
+		try {
+			openManager(key);
+			Query query = em.createQuery(queryString);
+			query.setParameter("id", domain.getId());
+			return getModels(query.getResultList());
+		} catch (NoResultException e) {
+			return new ArrayList<Person>();
+		} finally {
+			closeManager(key);
 		}
-		
-		return new ArrayList<Person>();
 	}
 
-	public Person getPerson() throws PersistenceException {
+	public Person findPerson() throws PersistenceException {
 		String key = generateKey();
 		String queryString = "FROM PersonEntity WHERE userId = :userId";
 
@@ -150,65 +192,10 @@ public class NewPersonManagerImpl extends JCondoManager<PersonEntity, Person> {
 		}
 	}
 	
-	@Override
-	protected PersonEntity getEntity(Person model) throws Exception {
-		PersonEntity person = super.getEntity(model);
-
-		List<MembershipEntity> memberships = new ArrayList<MembershipEntity>();
-		for (Membership membership : model.getMemberships()) {
-			MembershipEntity m = new MembershipEntity(model.getId());
-			BeanUtils.copyProperties(m, membership);
-			m.setUpdateDate(new Date());
-			m.setUpdateUser(helper.getUserId());
-			memberships.add(m);
-		}
-		person.setMemberships(memberships);
-
-		return person;
-	}
-
-	@Override
-	protected Person getModel(PersonEntity entity) throws PersistenceException {
-		try {
-			Person person = super.getModel(entity);
-
-			List<Membership> memberships = new ArrayList<Membership>();
-			for (MembershipEntity membership : entity.getMemberships()) {
-				Membership m = new Membership();
-				BeanUtils.copyProperties(m, membership);
-				memberships.add(m);
-			}
-			person.setMemberships(memberships);
-
-			User user = UserLocalServiceUtil.getUser(entity.getUserId());
-
-			person.setFullName(user.getFullName());
-			person.setFirstName(user.getFirstName());
-			person.setLastName(user.getLastName());
-			person.setEmailAddress(user.getEmailAddress());
-			person.setGender(user.isMale() ? Gender.MALE : Gender.FEMALE);
-			person.setStatus(user.getStatus() == WorkflowConstants.STATUS_APPROVED ? PersonStatus.ACTIVE : PersonStatus.INACTIVE);
-			person.setPicture(new Image(user.getPortraitId(), getPath(user.getPortraitId()), null, null));
-			//person.setBirthday(new Date());
-
-			return person;
-		} catch (Exception e) {
-			throw new PersistenceException(e, "");
-		}
-	}
-
-	public void removeDomain(Person person, Domain domain) throws Exception {
-		UserLocalServiceUtil.unsetGroupUsers(domain.getRelatedId(), new long[] {person.getUserId()}, null);
-	}
-
-	public void addDomain(Person person, Domain domain) throws Exception {
-		UserLocalServiceUtil.addGroupUsers(domain.getRelatedId(), new long[] {person.getUserId()});
-	}
-
 	@SuppressWarnings("unchecked")
 	public List<Person> findPeopleByType(Domain domain, PersonType type) throws Exception {
 		String key = generateKey();
-		String queryString = "FROM PersonEntity p JOIN p.memberships m WHERE m.domain.id = :id AND m.type = :type";
+		String queryString = "SELECT p FROM PersonEntity p JOIN p.memberships m WHERE m.domain.id = :id AND m.type = :type";
 
 		try {
 			openManager(key);
@@ -221,6 +208,14 @@ public class NewPersonManagerImpl extends JCondoManager<PersonEntity, Person> {
 		} finally {
 			closeManager(key);
 		}
+	}
+
+	public void removeDomain(Person person, Domain domain) throws Exception {
+		UserLocalServiceUtil.unsetGroupUsers(domain.getRelatedId(), new long[] {person.getUserId()}, null);
+	}
+
+	public void addDomain(Person person, Domain domain) throws Exception {
+		UserLocalServiceUtil.addGroupUsers(domain.getRelatedId(), new long[] {person.getUserId()});
 	}
 
 }

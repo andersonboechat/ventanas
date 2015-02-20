@@ -54,31 +54,24 @@ public class NewFlatManagerImpl extends JCondoManager<FlatEntity, Flat> {
 		GroupLocalServiceUtil.deleteGroup(flat.getRelatedId());
 	}
 
+	@SuppressWarnings("unchecked")
 	public List<Flat> findByPerson(Person person) throws Exception {
-		List<Flat> flats = new ArrayList<Flat>();
-		String queryString = "FROM FlatEntity WHERE relatedId = :id";
-
+		String key = generateKey();
 		try {
-			openManager("FlatManager.findByPerson");
-			for (Group group : GroupLocalServiceUtil.getUserGroups(person.getUserId())) {
-				try {
-					Query query = em.createQuery(queryString);
-					query.setParameter("id", group.getGroupId());
-					flats.add(getModel((FlatEntity) query.getSingleResult()));
-				} catch (Exception e) {
-					
-				}
-			}
+			openManager(key);
+			String queryString = "SELECT f FROM FlatEntity f JOIN f.people p WHERE p.id = :id";
+			Query query = em.createQuery(queryString);
+			query.setParameter("id", person.getId());
+			return getModels(query.getResultList());
+		} catch (NoResultException e) {
+			return new ArrayList<Flat>();
 		} finally {
-			closeManager("FlatManager.findByPerson");
+			closeManager(key);
 		}
-
-		return flats;
 	}
 
 	public Flat findByNumberAndBlock(int number, int block) throws Exception {
 		String key = generateKey();
-
 		try {
 			openManager(key);
 			String queryString = "FROM FlatEntity WHERE number = :number and block = :block";
@@ -91,6 +84,5 @@ public class NewFlatManagerImpl extends JCondoManager<FlatEntity, Flat> {
 		} finally {
 			closeManager(key);
 		}
-
 	}
 }

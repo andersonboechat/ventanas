@@ -68,6 +68,7 @@
 		</portlet-ref>
 		<permissions>
 			<supports>
+				<action-key>VIEW</action-key>
 				<action-key>ASSIGN_MEMBER</action-key>
 				<action-key>REMOVE_MEMBER</action-key>
 			</supports>

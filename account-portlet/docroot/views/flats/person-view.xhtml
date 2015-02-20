@@ -117,7 +117,8 @@
 							<p:column>
 								<p:panelGrid columns="1" columnClasses="fieldClm" style="width: 100%; margin: 0px; background-color: transparent !important" >
 									<h:outputText value="Apartamento #{membership.domain.number} - Bloco #{membership.domain.block}" />
-									<p:selectOneMenu value="#{membership.type}" style="vertical-align: middle;">
+									<h:outputText value="#{msg[membership.type.label]}" rendered="#{not testBean.canChangeType(membership)}"/>
+									<p:selectOneMenu value="#{membership.type}" style="vertical-align: middle;" rendered="#{testBean.canChangeType(membership)}">
 										<f:selectItems var="type" value="#{testBean.types}" itemLabel="#{msg[type.label]}"/>
 									</p:selectOneMenu>
 								</p:panelGrid>
