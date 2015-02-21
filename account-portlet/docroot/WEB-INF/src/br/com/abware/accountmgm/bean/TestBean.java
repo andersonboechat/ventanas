@@ -175,6 +175,10 @@ public class TestBean extends BaseBean {
 
 		return null;
 	}
+	
+	public boolean canChangeType(Membership membership) throws Exception {
+		return types.contains(membership.getType());
+	}
 
 	public ImageUploadBean getImageUploadBean() {
 		return imageUploadBean;

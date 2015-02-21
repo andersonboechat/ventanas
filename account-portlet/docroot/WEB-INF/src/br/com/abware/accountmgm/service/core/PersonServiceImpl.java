@@ -31,9 +31,21 @@ public class PersonServiceImpl  {
 	private static SecurityManagerImpl securityManager = new SecurityManagerImpl();
 
 	private FlatServiceImpl flatService = new FlatServiceImpl();
-	
+
 	public PersonServiceImpl() {
 		CONDOMINIUM.setRelatedId(10179);
+	}
+
+	public List<PersonType> getTypes() throws Exception {
+		List<PersonType> types = new ArrayList<PersonType>();
+
+		for (PersonType type : PersonType.values()) {
+			if (securityManager.hasPermission(type, Permission.VIEW)) {
+				types.add(type);
+			}
+		}
+
+		return types;
 	}
 
 	public List<Person> getPeople(Person person) throws Exception {
@@ -74,7 +86,7 @@ public class PersonServiceImpl  {
 	
 	
 	public Person getPerson() throws Exception {
-		return personManager.getPerson();
+		return personManager.findPerson();
 	}
 
 	/**
@@ -113,13 +125,13 @@ public class PersonServiceImpl  {
 			throw new ApplicationException(null, "existe usuario cadastrado com a identidade " + person.getIdentity());
 		}
 
+		validateDomains(person);
 		validateMemberships(person);
 
 		Person p = personManager.save(person);
 
 		for (Membership membership : person.getMemberships()) {
 			securityManager.addMembership(p, membership);
-			personManager.addDomain(person, membership.getDomain());
 		}
 
 		return p;
@@ -140,6 +152,7 @@ public class PersonServiceImpl  {
 			throw new ApplicationException(null, "usuario nao cadastrado");
 		}
 
+		validateDomains(person);
 		validateMemberships(person);
 
 		if (p.getMemberships() == null) {
@@ -150,18 +163,21 @@ public class PersonServiceImpl  {
 
 		for (Membership membership : memberships) {
 			securityManager.removeMembership(person, membership);
-			personManager.removeDomain(person, membership.getDomain());
 		}
 
 		memberships = (List<Membership>) CollectionUtils.subtract(person.getMemberships(), p.getMemberships());
 
 		for (Membership membership : memberships) {
 			securityManager.addMembership(person, membership);
-			personManager.addDomain(person, membership.getDomain());
 		}
 
 		return personManager.save(person);
 	}	
+
+	private void validateDomains(Person person) throws Exception {
+		// TODO Auto-generated method stub
+		
+	}
 
 	private void validateMemberships(Person person) throws Exception {
 		List<Membership> oldMemberships;
@@ -187,7 +203,6 @@ public class PersonServiceImpl  {
 			}
 		}
 
-		/* Incluindo pepeis */
 		for (Membership membership : memberships) {
 			Domain domain = membership.getDomain();
 			PersonType type = membership.getType();

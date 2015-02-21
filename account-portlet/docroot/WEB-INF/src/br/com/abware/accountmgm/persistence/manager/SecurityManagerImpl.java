@@ -8,9 +8,9 @@ import com.liferay.faces.portal.context.LiferayPortletHelper;
 import com.liferay.faces.portal.context.LiferayPortletHelperImpl;
 import com.liferay.portal.security.permission.ActionKeys;
 import com.liferay.portal.security.permission.PermissionChecker;
-import com.liferay.portal.service.GroupLocalServiceUtil;
 import com.liferay.portal.service.RoleLocalServiceUtil;
 import com.liferay.portal.service.UserGroupRoleLocalServiceUtil;
+import com.liferay.portal.service.UserLocalServiceUtil;
 import com.liferay.portal.service.permission.GroupPermissionUtil;
 import com.liferay.portal.service.permission.OrganizationPermissionUtil;
 import com.liferay.portal.service.permission.PortalPermissionUtil;
@@ -42,6 +42,8 @@ public class SecurityManagerImpl {
 		try {
 			portal = new Condominium();
 			portal.setRelatedId(10179);
+			
+			helper.getScopeGroup();
 		} catch (Exception e) {
 			
 		}
@@ -52,115 +54,130 @@ public class SecurityManagerImpl {
 			if (membership.getType() == PersonType.OWNER) {
 				List<Person> renters = personManager.findPeopleByType(membership.getDomain(), PersonType.RENTER);
 
+				// Se o apartamento estiver alugado, o proprietario não tem pepel no apartamento
 				if (renters.isEmpty()) {
-					addRole(person, portal, RoleName.LESSEE);
-					addRole(person, portal, RoleName.DEBATER);
-					addRole(person, portal, RoleName.HABITANT);
-					addRole(person, portal, RoleName.USER_ENROLLER);
-					addRole(person, membership.getDomain(), RoleName.FLAT_ADMIN);
+					addRole(person, portal, RoleName.SENIOR_USER);
+					addRole(person, membership.getDomain(), RoleName.FLAT_MANAGER);
+					addGroup(person, membership.getDomain());
 				}
-
-				addRole(person, portal, RoleName.SITE_MEMBER);
 			}
 
 			if (membership.getType() == PersonType.RENTER) {
 				List<Person> owners = personManager.findPeopleByType(membership.getDomain(), PersonType.OWNER);
-				PersonTypePredicate predicate = new PersonTypePredicate(PersonType.OWNER);
+				PersonTypePredicate ownerPredicate = new PersonTypePredicate(PersonType.OWNER);
+				PersonTypePredicate renterPredicate = new PersonTypePredicate(PersonType.RENTER);
 				
 				for (Person owner : owners) {
-					// Remover papeis somente se não for proprietário de outros apartamentos
-					if (CollectionUtils.countMatches(owner.getMemberships(), predicate) == 1) {
-						removeRole(owner, portal, RoleName.LESSEE);
-						removeRole(owner, portal, RoleName.DEBATER);
-						removeRole(owner, portal, RoleName.HABITANT);
-						removeRole(owner, portal, RoleName.USER_ENROLLER);
+					// Remover papeis do portal somente se não for proprietário/locatário de outros apartamentos
+					int counter = CollectionUtils.countMatches(owner.getMemberships(), ownerPredicate) + 
+								  CollectionUtils.countMatches(owner.getMemberships(), renterPredicate);
+
+					if (counter == 1) {
+						removeRole(owner, portal, RoleName.SENIOR_USER);
 					}
 
-					removeRole(owner, membership.getDomain(), RoleName.FLAT_ADMIN);
+					removeRole(owner, membership.getDomain(), RoleName.FLAT_MANAGER);
+					removeGroup(owner, membership.getDomain());
 				}
 
-				addRole(person, membership.getDomain(), RoleName.FLAT_ADMIN);
+				addRole(person, portal, RoleName.SENIOR_USER);
+				addRole(person, membership.getDomain(), RoleName.FLAT_MANAGER);
+				addGroup(person, membership.getDomain());
 			}
 
 			if (membership.getType() == PersonType.RESIDENT) {
-				addRole(person, membership.getDomain(), RoleName.VEHIACLE_ENROLLER);
+				addRole(person, portal, RoleName.REGULAR_USER);
+				addRole(person, membership.getDomain(), RoleName.FLAT_ASSISTANT);
+				addGroup(person, membership.getDomain());
 			}
 
-			if (membership.getType() == PersonType.RENTER || membership.getType() == PersonType.RESIDENT) {
-				addRole(person, portal, RoleName.LESSEE);
-				addRole(person, portal, RoleName.DEBATER);
-				addRole(person, portal, RoleName.USER_ENROLLER);
-			}
-
-			if (membership.getType() == PersonType.RENTER || 
-					membership.getType() == PersonType.RESIDENT || membership.getType() == PersonType.DEPENDENT) {
-				addRole(person, portal, RoleName.HABITANT);
-				addRole(person, portal, RoleName.SITE_MEMBER);
+			if (membership.getType() == PersonType.DEPENDENT) {
+				addRole(person, portal, RoleName.JUNIOR_USER);
+				addRole(person, membership.getDomain(), RoleName.FLAT_MEMBER);
+				addGroup(person, membership.getDomain());
 			}
 		}
 
 		if (membership.getDomain() instanceof Supplier) {
 			if (membership.getType() == PersonType.MANAGER) {
-				addRole(person, membership.getDomain(), RoleName.SUPPLIER_ADMIN);
+				addRole(person, membership.getDomain(), RoleName.SUPPLIER_MANAGER);
 			}
 
-			if (membership.getType() == PersonType.EMPLOYEE) {
-				addRole(person, membership.getDomain(), RoleName.EMPLOYEE);
+			if (((Supplier) membership.getDomain()).getName() == "SECURITY") {
+				if (membership.getType() == PersonType.GATEKEEPER) {
+					//addRole(person, portal, RoleName.SECURITY_USER));
+				}
 			}
 
-			if (membership.getType() == PersonType.GATEKEEPER) {
-				addRole(person, portal, RoleName.ACCESS_LOGGER);
-				addRole(person, portal, RoleName.USER_ENROLLER);
-				addRole(person, portal, RoleName.VEHIACLE_ENROLLER);
-			}
-
+			addGroup(person, membership.getDomain());
 		}
 
 		if (membership.getDomain() instanceof Condominium) {
 			if (membership.getType() == PersonType.SYNCDIC || membership.getType() == PersonType.SUB_SYNCDIC) {
-				//addRole(person, portal, RoleName.ADMIN));
+				addRole(person, portal, RoleName.SITE_ADMIN);
+				addRole(person, membership.getDomain(), RoleName.ADMIN_MANAGER);
 			}
 
 			if (membership.getType() == PersonType.ADMIN_ASSISTANT) {
-				addRole(person, membership.getDomain(), RoleName.FLAT_ADMIN);
-				addRole(person, membership.getDomain(), RoleName.SUPPLIER_ADMIN);
-				addRole(person, portal, RoleName.USER_ENROLLER);
-				addRole(person, portal, RoleName.VEHIACLE_ENROLLER);
+				addRole(person, portal, RoleName.SITE_ADMIN);
+				addRole(person, membership.getDomain(), RoleName.ADMIN_ASSISTANT);
 			}
 
-			if (membership.getType() == PersonType.EMPLOYEE) {
-				addRole(person, membership.getDomain(), RoleName.EMPLOYEE);
-			}
+			addGroup(person, membership.getDomain());		
 		}
 	}
 
 	public void removeMembership(Person person, Membership membership) throws Exception {
 		if (membership.getDomain() instanceof Flat) {
-			removeRole(person, portal, RoleName.LESSEE);
-			removeRole(person, portal, RoleName.DEBATER);
-			removeRole(person, portal, RoleName.HABITANT);
-			removeRole(person, portal, RoleName.GUEST);
-			removeRole(person, portal, RoleName.VISITOR);
-			removeRole(person, portal, RoleName.USER_ENROLLER);
-			removeRole(person, portal, RoleName.VEHIACLE_ENROLLER);			
-			removeRole(person, membership.getDomain(), RoleName.FLAT_ADMIN);
+			if (membership.getType() == PersonType.OWNER || membership.getType() == PersonType.RENTER) {
+				Person p = personManager.findById(person.getId());
+				PersonTypePredicate ownerPredicate = new PersonTypePredicate(PersonType.OWNER);
+				PersonTypePredicate renterPredicate = new PersonTypePredicate(PersonType.RENTER);
+				
+				// Remover papeis do portal somente se não for proprietário/locatário de outros apartamentos
+				int counter = CollectionUtils.countMatches(p.getMemberships(), ownerPredicate) + 
+							  CollectionUtils.countMatches(p.getMemberships(), renterPredicate);				
+				if (counter == 1) {
+					removeRole(person, portal, RoleName.SENIOR_USER);
+				}				
+
+				removeRole(person, membership.getDomain(), RoleName.FLAT_MANAGER);
+			}
+
+			if (membership.getType() == PersonType.RENTER) {
+				List<Person> renters = personManager.findPeopleByType(membership.getDomain(), PersonType.RENTER);
+
+				// Se não houver outros locatários, devolver papeis para os proprietarios
+				if (renters.isEmpty() || renters.size() == 1) {
+					List<Person> owners = personManager.findPeopleByType(membership.getDomain(), PersonType.OWNER);
+
+					for (Person owner : owners) {
+						addRole(owner, portal, RoleName.SENIOR_USER);
+						addRole(owner, membership.getDomain(), RoleName.FLAT_MANAGER);
+						addGroup(owner, membership.getDomain());
+					}
+				}
+			}
+
+			removeRole(person, portal, RoleName.REGULAR_USER);
+			removeRole(person, membership.getDomain(), RoleName.FLAT_ASSISTANT);
+			removeRole(person, portal, RoleName.JUNIOR_USER);
+			removeRole(person, membership.getDomain(), RoleName.FLAT_MEMBER);
 		}
 
 		if (membership.getDomain() instanceof Supplier) {
-			removeRole(person, portal, RoleName.EMPLOYEE);
-			removeRole(person, portal, RoleName.ACCESS_LOGGER);
-			removeRole(person, portal, RoleName.USER_ENROLLER);
-			removeRole(person, portal, RoleName.VEHIACLE_ENROLLER);
+			//removeRole(person, portal, RoleName.SECURITY_USER));
+			removeRole(person, membership.getDomain(), RoleName.SUPPLIER_MANAGER);
 		}
 
 		if (membership.getDomain() instanceof Condominium) {
-			removeRole(person, portal, RoleName.EMPLOYEE);
-			removeRole(person, portal, RoleName.VISITOR);
-			removeRole(person, membership.getDomain(), RoleName.FLAT_ADMIN);
-			removeRole(person, membership.getDomain(), RoleName.SUPPLIER_ADMIN);
-			removeRole(person, portal, RoleName.USER_ENROLLER);
-			removeRole(person, portal, RoleName.VEHIACLE_ENROLLER);
+			removeRole(person, portal, RoleName.SITE_ADMIN);
+			removeRole(person, membership.getDomain(), RoleName.ADMIN_MANAGER);
+			removeRole(person, membership.getDomain(), RoleName.ADMIN_ASSISTANT);
+			removeRole(person, membership.getDomain(), RoleName.ADMIN_MEMBER);
 		}
+
+		removeGroup(person, membership.getDomain());
 	}
 
 	private void addRole(Person person, Domain domain, RoleName role) throws ApplicationException {
@@ -171,7 +188,7 @@ public class SecurityManagerImpl {
 			throw new ApplicationException(e, "");
 		}
 	}
-	
+
 	private void removeRole(Person person, Domain domain, RoleName role) throws ApplicationException {
 		try {
 			long roleId = RoleLocalServiceUtil.getRole(helper.getCompanyId(), role.getLabel()).getRoleId();
@@ -180,6 +197,14 @@ public class SecurityManagerImpl {
 			throw new ApplicationException(e, "");
 		}
 	}
+
+	private void removeGroup(Person person, Domain domain) throws Exception {
+		UserLocalServiceUtil.unsetGroupUsers(domain.getRelatedId(), new long[] {person.getUserId()}, null);
+	}
+
+	private void addGroup(Person person, Domain domain) throws Exception {
+		UserLocalServiceUtil.addGroupUsers(domain.getRelatedId(), new long[] {person.getUserId()});
+	}	
 
 	public boolean hasPermission(BaseModel model, Permission permission) throws ApplicationException {
 		try {
