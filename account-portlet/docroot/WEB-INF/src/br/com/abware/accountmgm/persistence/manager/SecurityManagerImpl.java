@@ -12,8 +12,6 @@ import com.liferay.portal.security.permission.PermissionChecker;
 import com.liferay.portal.service.RoleLocalServiceUtil;
 import com.liferay.portal.service.UserGroupRoleLocalServiceUtil;
 import com.liferay.portal.service.UserLocalServiceUtil;
-import com.liferay.portal.service.permission.GroupPermissionUtil;
-import com.liferay.portal.service.permission.OrganizationPermissionUtil;
 import com.liferay.portal.service.permission.PortalPermissionUtil;
 import com.liferay.portal.service.permission.UserPermissionUtil;
 
@@ -21,6 +19,7 @@ import br.com.abware.accountmgm.util.PersonTypePredicate;
 import br.com.abware.accountmgm.util.PersonTypeTransformer;
 import br.com.abware.jcondo.core.Permission;
 import br.com.abware.jcondo.core.PersonType;
+import br.com.abware.jcondo.core.model.Administration;
 import br.com.abware.jcondo.core.model.BaseModel;
 import br.com.abware.jcondo.core.model.Condominium;
 import br.com.abware.jcondo.core.model.Domain;
@@ -117,7 +116,7 @@ public class SecurityManagerImpl {
 			addGroup(person, membership.getDomain());
 		}
 
-		if (membership.getDomain() instanceof Condominium) {
+		if (membership.getDomain() instanceof Administration) {
 			if (membership.getType() == PersonType.SYNCDIC || membership.getType() == PersonType.SUB_SYNCDIC) {
 				addRole(person, portal, RoleName.SITE_ADMIN);
 				addRole(person, membership.getDomain(), RoleName.ADMIN_MANAGER);
@@ -126,6 +125,10 @@ public class SecurityManagerImpl {
 			if (membership.getType() == PersonType.ADMIN_ASSISTANT) {
 				addRole(person, portal, RoleName.SITE_ADMIN);
 				addRole(person, membership.getDomain(), RoleName.ADMIN_ASSISTANT);
+			}
+
+			if (membership.getType() == PersonType.ADMIN_ADVISOR || membership.getType() == PersonType.TAX_ADVISOR) {
+				addRole(person, membership.getDomain(), RoleName.ADMIN_MEMBER);
 			}
 
 			addGroup(person, membership.getDomain());		
@@ -178,7 +181,7 @@ public class SecurityManagerImpl {
 			removeRole(person, membership.getDomain(), RoleName.SUPPLIER_MANAGER);
 		}
 
-		if (membership.getDomain() instanceof Condominium) {
+		if (membership.getDomain() instanceof Administration) {
 			removeRole(person, portal, RoleName.SITE_ADMIN);
 			removeRole(person, membership.getDomain(), RoleName.ADMIN_MANAGER);
 			removeRole(person, membership.getDomain(), RoleName.ADMIN_ASSISTANT);
@@ -250,7 +253,7 @@ public class SecurityManagerImpl {
 
 			if (model instanceof Person) {
 				return checkUserPermission(permissionChecker, ((Person) model).getUserId(), permission);
-			} else if (model instanceof Flat || model instanceof Supplier || model instanceof Condominium) {
+			} else if (model instanceof Flat || model instanceof Supplier || model instanceof Administration) {
 				return checkDomainPermission(permissionChecker, (Domain) model, permission);
 			} else if (model instanceof Membership) {
 				return checkPersonTypePermission(permissionChecker, ((Membership) model).getType(), ((Membership) model).getDomain(), permission);
@@ -282,50 +285,6 @@ public class SecurityManagerImpl {
 		}
 
 		return UserPermissionUtil.contains(permissionChecker, userId, actionkey);
-	}
-	
-	private boolean checkOrganizationPermission(PermissionChecker permissionChecker, long organizationId, Permission permission) throws Exception {
-		String actionkey;
-
-		if (permission == Permission.UPDATE_PERSON) {
-			actionkey = ActionKeys.MANAGE_USERS;
-		} else if (permission == Permission.ADD_PERSON) {
-			actionkey = ActionKeys.ADD_USER;
-		} else if (permission == Permission.DELETE_PERSON) {
-			actionkey = ActionKeys.MANAGE_USERS;
-		} else if (permission == Permission.UPDATE) {
-			actionkey = ActionKeys.UPDATE;
-		} else if (permission == Permission.ADD) {
-			actionkey = ActionKeys.ADD_ORGANIZATION;
-		} else if (permission == Permission.DELETE) {
-			actionkey = ActionKeys.DELETE;
-		} else {
-			throw new SystemException("Permission not supported");
-		}
-
-		return OrganizationPermissionUtil.contains(permissionChecker, organizationId, actionkey);
-	}
-
-	private boolean checkGroupPermission(PermissionChecker permissionChecker, long groupId, Permission permission) throws Exception {
-		String actionkey;
-
-		if (permission == Permission.UPDATE_PERSON) {
-			actionkey = ActionKeys.MANAGE_USERS;
-		} else if (permission == Permission.ADD) {
-			actionkey = ActionKeys.ADD_USER;
-		} else if (permission == Permission.DELETE_PERSON) {
-			actionkey = ActionKeys.MANAGE_USERS;
-		} else if (permission == Permission.UPDATE) {
-			actionkey = ActionKeys.UPDATE;
-		} else if (permission == Permission.ADD) {
-			actionkey = ActionKeys.MANAGE;
-		} else if (permission == Permission.DELETE) {
-			actionkey = ActionKeys.DELETE;
-		} else {
-			throw new SystemException("Permission not supported");
-		}
-
-		return GroupPermissionUtil.contains(permissionChecker, groupId, actionkey);
 	}
 
 }

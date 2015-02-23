@@ -14,6 +14,7 @@ import br.com.abware.accountmgm.persistence.manager.SecurityManagerImpl;
 import br.com.abware.accountmgm.util.MembershipPredicate;
 import br.com.abware.jcondo.core.Permission;
 import br.com.abware.jcondo.core.PersonType;
+import br.com.abware.jcondo.core.model.Administration;
 import br.com.abware.jcondo.core.model.Condominium;
 import br.com.abware.jcondo.core.model.Domain;
 import br.com.abware.jcondo.core.model.Flat;
@@ -30,6 +31,8 @@ public class PersonServiceImpl  {
 	private static NewPersonManagerImpl personManager = new NewPersonManagerImpl();
 
 	private static SecurityManagerImpl securityManager = new SecurityManagerImpl();
+	
+	private static AdministrationServiceImpl adminService = new AdministrationServiceImpl();
 
 	private FlatServiceImpl flatService = new FlatServiceImpl();
 
@@ -45,7 +48,7 @@ public class PersonServiceImpl  {
 			ts = PersonType.FLAT_TYPES;
 		} else if (domain instanceof Supplier) {
 			ts = PersonType.SUPPLIER_TYPES;
-		} else if (domain instanceof Condominium) {
+		} else if (domain instanceof Administration) {
 			ts = PersonType.ADMIN_TYPES;
 		} else {
 			throw new Exception("Unknown domain");
@@ -68,7 +71,7 @@ public class PersonServiceImpl  {
 				people.addAll(getPeople(flat));
 			}
 
-			people.addAll(getPeople(CONDOMINIUM));
+			people.addAll(getPeople(adminService.getAdministration("Administration")));
 		} catch (PersistenceException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

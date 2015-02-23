@@ -34,7 +34,8 @@ public class NewFlatManagerImpl extends JCondoManager<FlatEntity, Flat> {
 		Flat f = super.save(flat);
 
 		if (flat.getRelatedId() == 0) {
-			Group group = GroupLocalServiceUtil.addGroup(helper.getUserId(), Group.class.getName(), 0, f.toString(), 
+			String name = flat.getBlock() + "/" + StringUtils.leftPad(String.valueOf(flat.getNumber()), 4, "0");
+			Group group = GroupLocalServiceUtil.addGroup(helper.getUserId(), Group.class.getName(), 0, name, 
 														 StringUtils.EMPTY, GroupConstants.TYPE_SITE_PRIVATE, 
 														 "/" + f.getBlock() + "-" + f.getNumber(), true, true, null);
 			ResourceLocalServiceUtil.addResources(helper.getCompanyId(), group.getGroupId(), helper.getUserId(), 

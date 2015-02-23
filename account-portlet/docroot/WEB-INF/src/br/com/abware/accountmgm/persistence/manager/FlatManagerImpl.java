@@ -10,9 +10,13 @@ import br.com.abware.jcondo.core.model.Person;
 import br.com.abware.jcondo.exception.PersistenceException;
 
 import com.liferay.portal.NoSuchOrganizationException;
+import com.liferay.portal.model.Group;
+import com.liferay.portal.model.GroupConstants;
 import com.liferay.portal.model.Organization;
 import com.liferay.portal.model.OrganizationConstants;
+import com.liferay.portal.service.GroupLocalServiceUtil;
 import com.liferay.portal.service.OrganizationLocalServiceUtil;
+import com.liferay.portal.service.ResourceLocalServiceUtil;
 import com.liferay.portlet.expando.model.ExpandoColumn;
 import com.liferay.portlet.expando.model.ExpandoTableConstants;
 import com.liferay.portlet.expando.model.ExpandoValue;
@@ -21,38 +25,6 @@ import com.liferay.portlet.expando.service.ExpandoValueLocalServiceUtil;
 
 public class FlatManagerImpl extends LiferayManager<Organization, Flat> {
 	
-	private static final String BLOCK = "BLOCK";
-
-	private static final String NUMBER = "NUMBER";	
-
-	private String getCustomField(String fieldName, Organization organization) throws Exception {
-		return (String) ExpandoValueLocalServiceUtil.getData(organization.getCompanyId(), 
-														     organization.getClass().getName(), 
-														     ExpandoTableConstants.DEFAULT_TABLE_NAME, 
-														     fieldName, 
-														     organization.getOrganizationId());
-	}
-
-	private void saveCustomField(String fieldName, String fieldValue, Organization organization) throws Exception {
-		ExpandoValue value = ExpandoValueLocalServiceUtil.getValue(organization.getCompanyId(), 
-																   organization.getClass().getName(), 
-																   ExpandoTableConstants.DEFAULT_TABLE_NAME, 
-																   fieldName, 
-																   organization.getOrganizationId());
-
-		if(value == null) {
-			ExpandoValueLocalServiceUtil.addValue(organization.getCompanyId(), 
-												  organization.getClass().getName(), 
-												  ExpandoTableConstants.DEFAULT_TABLE_NAME, 
-												  fieldName, 
-												  organization.getOrganizationId(),
-												  fieldValue);
-		} else {
-			value.setData(fieldValue);
-			ExpandoValueLocalServiceUtil.updateExpandoValue(value);
-		}
-	}
-
 	@Override
 	protected Class<Flat> getModelClass() {
 		return Flat.class;
@@ -88,13 +60,20 @@ public class FlatManagerImpl extends LiferayManager<Organization, Flat> {
 	}
 
 	public Flat save(Flat flat) throws PersistenceException {
-		try {
-			Organization organization = getEntity(flat);
-			organization.persist();
-			return getModel(organization);
-		} catch (Exception e) {
-			throw new PersistenceException(e, "");
+//		Flat f = super.save(flat);
+
+		if (flat.getRelatedId() == 0) {
+			Organization org = OrganizationLocalServiceUtil.addOrganization(helper.getUserId(), 0, flat.getBlock() + "/" + flat.getNumber(), 
+																			"flat", 
+																			recursable, regionId, countryId, statusId, 
+																			comments, site, serviceContext);
+			ResourceLocalServiceUtil.addResources(helper.getCompanyId(), org.getGroupId(), helper.getUserId(), 
+												  Flat.class.getName(), flat.getId(), false, true, false);
+			f.setRelatedId(org.getGroupId());
+			f = super.save(f);
 		}
+
+		return f;
 	}
 
 	public Flat findById(Object id) throws PersistenceException {

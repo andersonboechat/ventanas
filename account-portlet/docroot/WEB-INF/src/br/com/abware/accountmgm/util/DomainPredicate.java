@@ -17,7 +17,7 @@ public class DomainPredicate implements Predicate {
 	public boolean evaluate(Object obj) {
 		Membership m = (Membership) obj;
 
-		if (m.getDomain().equals(domain)) {
+		if (m.getDomain().getClass().equals(this.domain.getClass()) && m.getDomain().equals(domain)) {
 			return true;
 		}
 
