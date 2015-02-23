@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="ISO-8859-1"?>
+<?xml version="1.0" encoding="UTF-8"?>
 
 <f:view
 	xmlns="http://www.w3.org/1999/xhtml"
@@ -64,12 +64,12 @@
 						</p:panelGrid>
 					</p:column>
 					<p:column style="width: 35px">
-						<p:commandLink update=":register-form:model-details" actionListener="#{testBean.onPersonEdit}" oncomplete="PF('registerDialog').show();" partialSubmit="true" process="@this" >
+						<p:commandLink update=":register-form:model-details" actionListener="#{testBean.onPersonEdit}" oncomplete="PF('registerDialog').show();" partialSubmit="true" process="@this" disabled="#{!testBean.canEditPerson(person)}">
 							<h:graphicImage value="../images/edit.png" />
 						</p:commandLink>
 					</p:column>
 					<p:column style="width: 35px">
-						<p:commandLink actionListener="#{testBean.onPersonDelete}" oncomplete="if (!args.validationFailed &amp;&amp; !args.exception) {PF('personTable').update();}" partialSubmit="true" process="@this">
+						<p:commandLink actionListener="#{testBean.onPersonDelete}" oncomplete="if (!args.validationFailed &amp;&amp; !args.exception) {PF('personTable').update();}" partialSubmit="true" process="@this" disabled="#{!testBean.canEditPerson(person)}">
 							<h:graphicImage value="../images/delete.png" />
 							<p:confirm header="#{msg['person.delete.confirm']}" message="#{msg['person.delete.message']}" icon="ui-icon-alert"/>
 							<f:setPropertyActionListener target="#{testBean.person}" value="#{model.person}"/>
@@ -90,26 +90,33 @@
 						<p:commandLink value="Tirar Foto" update=":upload-form" oncomplete="PF('uploadDialog').show();" partialSubmit="true" process="@this" style="float: right" styleClass="column">
 							<f:setPropertyActionListener target="#{imageUploader.image.path}" value=""/>
 						</p:commandLink>
+						<p:panelGrid columns="2" columnClasses="fieldClm" style="width: 100%; margin: 0px; background-color: transparent !important" rendered="false">
+							<h:outputText value="Função Administrativa: "/>
+							<h:outputText value="#{testBean.getAdminDomain().type}" rendered="#{testBean.adminTypes.size() == 1}"/>
+							<p:selectOneMenu value="#{testBean.getAdminDomain().type}" style="vertical-align: middle;" rendered="#{testBean.adminTypes.size() > 1}">
+								<f:selectItems var="type" value="#{testBean.adminTypes}" itemLabel="#{msg[type.label]}"/>
+							</p:selectOneMenu>
+						</p:panelGrid>
 					</p:column>
 					<p:column>
 						<p:panelGrid columns="1" columnClasses="fieldClm">
 						<p:panelGrid columns="2" columnClasses="labelClm,fieldClm" style="width: 100%; margin: 0px">
 							<p:outputLabel for="email" value="Email: "/>
-							<p:inputText id="email" value="#{testBean.person.emailAddress}" size="40"/>
+							<p:inputText id="email" value="#{testBean.person.emailAddress}" size="40" readonly="#{!testBean.canEditInfo()}"/>
 							<p:outputLabel for="firstName" value="Nome: "/>
-							<p:inputText id="firstName" value="#{testBean.person.firstName}" size="40"/>
+							<p:inputText id="firstName" value="#{testBean.person.firstName}" size="40" readonly="#{!testBean.canEditInfo()}"/>
 							<p:outputLabel for="lastName" value="Sobrenome: "/>
-							<p:inputText id="lastName" value="#{testBean.person.lastName}" size="40"/>
+							<p:inputText id="lastName" value="#{testBean.person.lastName}" size="40" readonly="#{!testBean.canEditInfo()}"/>
 							<p:outputLabel for="identity" value="CPF: "/>
-							<p:inputMask id="identity" value="#{testBean.person.identity}" mask="999.999.999-99" size="40"/>
+							<p:inputMask id="identity" value="#{testBean.person.identity}" mask="999.999.999-99" size="40" readonly="#{!testBean.canEditInfo()}"/>
 							<p:outputLabel for="male" value="Sexo:"/>
-							<p:selectOneMenu id="male" value="#{testBean.person.gender}" required="false">
+							<p:selectOneMenu id="male" value="#{testBean.person.gender}" required="false" disabled="#{!testBean.canEditInfo()}">
 								<f:selectItems var="gender" value="#{testBean.genders}" itemLabel="#{msg[gender.label]}"/>							
 							</p:selectOneMenu>
 						</p:panelGrid>
-						<p:panelGrid columns="2" style="text-align: center; margin: 0px; float: right" styleClass="no-border">
+						<p:panelGrid columns="2" style="text-align: center; margin: 0px; float: right" styleClass="no-border" rendered="#{testBean.getUnassignedFlats().size() > 0}">
 							<p:selectOneMenu widgetVar="newFlat" id="newFlat" value="#{testBean.selectedFlatId}" filter="true" filterMatchMode="contains">
-								<f:selectItems var="flat" value="#{testBean.flats}" itemLabel="Apt. #{flat.number} - Bl. #{flat.block}" itemValue="#{flat.id}"/>
+								<f:selectItems var="flat" value="#{testBean.getUnassignedFlats()}" itemLabel="Apt. #{flat.number} - Bl. #{flat.block}" itemValue="#{flat.id}"/>
 							</p:selectOneMenu>
 							<p:commandButton value="Incluir" actionListener="#{testBean.onFlatAdd}" update=":register-form:memberships" partialSubmit="true" process="@namingcontainer"/>
 						</p:panelGrid>						
@@ -117,9 +124,9 @@
 							<p:column>
 								<p:panelGrid columns="1" columnClasses="fieldClm" style="width: 100%; margin: 0px; background-color: transparent !important" >
 									<h:outputText value="Apartamento #{membership.domain.number} - Bloco #{membership.domain.block}" />
-									<h:outputText value="#{msg[membership.type.label]}" rendered="#{not testBean.canChangeType(membership)}"/>
+									<h:outputText value="#{msg[membership.type.label]}" rendered="#{!testBean.canChangeType(membership)}"/>
 									<p:selectOneMenu value="#{membership.type}" style="vertical-align: middle;" rendered="#{testBean.canChangeType(membership)}">
-										<f:selectItems var="type" value="#{testBean.types}" itemLabel="#{msg[type.label]}"/>
+										<f:selectItems var="type" value="#{testBean.flatTypes.get(membership.domain)}" itemLabel="#{msg[type.label]}"/>
 									</p:selectOneMenu>
 								</p:panelGrid>
 							</p:column>

@@ -24,7 +24,7 @@
 	</portlet>
 	<portlet>
 		<portlet-name>flat-management</portlet-name>
-		<display-name>Flat Management</display-name>
+		<display-name>Cadastro de Apartamentos</display-name>
 		<portlet-class>javax.portlet.faces.GenericFacesPortlet</portlet-class>
 		<init-param>
 			<name>javax.portlet.faces.defaultViewId.view</name>
@@ -35,8 +35,8 @@
 			<mime-type>text/html</mime-type>
 		</supports>
 		<portlet-info>
-			<title>Flat Management</title>
-			<short-title>Flat Management</short-title>
+			<title>Cadastro de Apartamentos</title>
+			<short-title>Apartamentos</short-title>
 			<keywords>Flat Management</keywords>
 		</portlet-info>
 		<security-role-ref>
@@ -45,7 +45,7 @@
 	</portlet>
 	<portlet>
 		<portlet-name>person-management</portlet-name>
-		<display-name>Person Management</display-name>
+		<display-name>Cadastro de Usuários</display-name>
 		<portlet-class>javax.portlet.faces.GenericFacesPortlet</portlet-class>
 		<init-param>
 			<name>javax.portlet.faces.defaultViewId.view</name>
@@ -56,8 +56,8 @@
 			<mime-type>text/html</mime-type>
 		</supports>
 		<portlet-info>
-			<title>Person Management</title>
-			<short-title>Person Management</short-title>
+			<title>Cadastro de Usuários</title>
+			<short-title>Usuários</short-title>
 			<keywords>Person Management</keywords>
 		</portlet-info>
 		<security-role-ref>
@@ -66,7 +66,7 @@
 	</portlet>
 	<portlet>
 		<portlet-name>supplier-management</portlet-name>
-		<display-name>Supplier Management</display-name>
+		<display-name>Cadastro de Fornecedores</display-name>
 		<portlet-class>javax.portlet.faces.GenericFacesPortlet</portlet-class>
 		<init-param>
 			<name>javax.portlet.faces.defaultViewId.view</name>
@@ -77,9 +77,9 @@
 			<mime-type>text/html</mime-type>
 		</supports>
 		<portlet-info>
-			<title>Supplier Management</title>
-			<short-title>Supplier Management</short-title>
-			<keywords>Supplier Management</keywords>
+			<title>Cadastro de Fornecedores</title>
+			<short-title>Fornecedores</short-title>
+			<keywords>Cadastro de Fornecedores</keywords>
 		</portlet-info>
 		<security-role-ref>
 			<role-name>administrator</role-name>
@@ -87,7 +87,7 @@
 	</portlet>
 	<portlet>
 		<portlet-name>vehicle-management</portlet-name>
-		<display-name>Vehicle Management</display-name>
+		<display-name>Cadastro de Veículos</display-name>
 		<portlet-class>javax.portlet.faces.GenericFacesPortlet</portlet-class>
 		<init-param>
 			<name>javax.portlet.faces.defaultViewId.view</name>
@@ -98,8 +98,8 @@
 			<mime-type>text/html</mime-type>
 		</supports>
 		<portlet-info>
-			<title>Vehicle Management</title>
-			<short-title>Vehicle Management</short-title>
+			<title>Cadastro de Veículos</title>
+			<short-title>Veículos</short-title>
 			<keywords>Vehicle Management</keywords>
 		</portlet-info>
 		<security-role-ref>
