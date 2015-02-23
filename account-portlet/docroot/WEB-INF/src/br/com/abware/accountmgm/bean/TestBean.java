@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 
@@ -18,9 +19,11 @@ import org.apache.commons.collections.CollectionUtils;
 import br.com.abware.accountmgm.bean.model.ModelDataModel;
 import br.com.abware.accountmgm.util.BeanUtils;
 import br.com.abware.accountmgm.util.DomainPredicate;
+import br.com.abware.accountmgm.util.FlatTransformer;
 import br.com.abware.jcondo.core.Gender;
 import br.com.abware.jcondo.core.PersonType;
 import br.com.abware.jcondo.core.model.Condominium;
+import br.com.abware.jcondo.core.model.Domain;
 import br.com.abware.jcondo.core.model.Flat;
 import br.com.abware.jcondo.core.model.Image;
 import br.com.abware.jcondo.core.model.Membership;
@@ -54,7 +57,9 @@ public class TestBean extends BaseBean {
 	
 	private Person[] selectedPeople;
 
-	private List<PersonType> types;
+	private Map<Domain, List<PersonType>> flatTypes;
+
+	private List<PersonType> adminTypes;
 	
 	private long selectedFlatId;
 	
@@ -66,9 +71,11 @@ public class TestBean extends BaseBean {
 			flats = flatService.getFlats(personService.getPerson());
 			blocks = new TreeSet<Integer>();
 			numbers = new TreeSet<Integer>();
+			flatTypes = new HashMap<Domain, List<PersonType>>();
 			for (Flat flat : flats) {
 				blocks.add(flat.getBlock());
 				numbers.add(flat.getNumber());
+				flatTypes.put(flat, personService.getTypes(flat));
 			}
 
 			model = new ModelDataModel<Person>(personService.getPeople(personService.getPerson()));
@@ -77,8 +84,8 @@ public class TestBean extends BaseBean {
 			filters = new HashMap<String, Object>();
 			imageUploadBean.setWidth(198);
 			imageUploadBean.setHeight(300);
-			types = Arrays.asList(PersonType.FLAT_TYPES);
 			genders = Arrays.asList(Gender.values());
+			adminTypes = personService.getTypes(new Condominium());
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -175,11 +182,48 @@ public class TestBean extends BaseBean {
 
 		return null;
 	}
-	
+
 	public boolean canChangeType(Membership membership) throws Exception {
-		return types.contains(membership.getType());
+		List<PersonType> types = flatTypes.get(membership.getDomain());
+		return types != null ? types.contains(membership.getType()) : false;
 	}
 
+	public boolean canEditPerson(Person person) throws Exception {
+		boolean canEdit = false;
+		if (person.equals(personService.getPerson())) {
+			canEdit = true;
+		} else {
+			for (Membership membership : person.getMemberships()) {
+				canEdit = canChangeType(membership);
+				if (canEdit) {
+					return true;
+				}
+			}
+		}
+		return canEdit;
+	}
+
+	public boolean canEditInfo() throws Exception {
+		return person.equals(personService.getPerson());
+	}
+	
+	@SuppressWarnings("unchecked")
+	public List<Flat> getUnassignedFlats() throws Exception {
+		if (person != null && person.getMemberships() != null) {
+			List<Flat> fs = (List<Flat>) CollectionUtils.collect(person.getMemberships(), new FlatTransformer());
+			return (List<Flat>) CollectionUtils.subtract(flats, fs);
+		} else {
+			return flats;
+		}
+	}
+
+	public Domain getAdminDomain() throws Exception {
+		if (person != null && person.getMemberships() != null) {
+			return (Domain) CollectionUtils.find(person.getMemberships(), new DomainPredicate(new Condominium(3, "")));
+		}
+		return null;
+	}
+	
 	public ImageUploadBean getImageUploadBean() {
 		return imageUploadBean;
 	}
@@ -260,12 +304,12 @@ public class TestBean extends BaseBean {
 		this.selectedPeople = selectedPeople;
 	}
 
-	public List<PersonType> getTypes() {
-		return types;
+	public List<PersonType> getAdminTypes() {
+		return adminTypes;
 	}
 
-	public void setTypes(List<PersonType> types) {
-		this.types = types;
+	public void setAdminTypes(List<PersonType> types) {
+		this.adminTypes = types;
 	}
 
 	public long getSelectedFlatId() {
@@ -282,6 +326,14 @@ public class TestBean extends BaseBean {
 
 	public void setGenders(List<Gender> genders) {
 		this.genders = genders;
+	}
+
+	public Map<Domain, List<PersonType>> getFlatTypes() {
+		return flatTypes;
+	}
+
+	public void setFlatTypes(Map<Domain, List<PersonType>> typeList) {
+		this.flatTypes = typeList;
 	}
 
 }

@@ -19,6 +19,7 @@ import br.com.abware.jcondo.core.model.Domain;
 import br.com.abware.jcondo.core.model.Flat;
 import br.com.abware.jcondo.core.model.Membership;
 import br.com.abware.jcondo.core.model.Person;
+import br.com.abware.jcondo.core.model.Supplier;
 import br.com.abware.jcondo.exception.ApplicationException;
 import br.com.abware.jcondo.exception.PersistenceException;
 
@@ -36,11 +37,22 @@ public class PersonServiceImpl  {
 		CONDOMINIUM.setRelatedId(10179);
 	}
 
-	public List<PersonType> getTypes() throws Exception {
+	public List<PersonType> getTypes(Domain domain) throws Exception {
 		List<PersonType> types = new ArrayList<PersonType>();
+		PersonType[] ts;
 
-		for (PersonType type : PersonType.values()) {
-			if (securityManager.hasPermission(type, Permission.VIEW)) {
+		if (domain instanceof Flat) {
+			ts = PersonType.FLAT_TYPES;
+		} else if (domain instanceof Supplier) {
+			ts = PersonType.SUPPLIER_TYPES;
+		} else if (domain instanceof Condominium) {
+			ts = PersonType.ADMIN_TYPES;
+		} else {
+			throw new Exception("Unknown domain");
+		}
+
+		for (PersonType type : ts) {
+			if (securityManager.hasPermission(new Membership(type, domain), Permission.VIEW)) {
 				types.add(type);
 			}
 		}
