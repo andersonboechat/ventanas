@@ -83,16 +83,11 @@
 					<p:column>
 						<p:panelGrid columns="1" styleClass="person-image" columnClasses="no-margin" style="text-align: center">
 							<p:graphicImage id="portrait" value="#{imageUploader.image.path}" width="198" height="300"/>
-					        <h:outputText value="#{msg[testBean.adminMembership.type.label]}" rendered="#{!empty(testBean.adminMembership.type) and empty(testBean.types.get(testBean.administration))}"/>
-							<p:selectOneMenu value="#{testBean.adminMembership.type}" style="vertical-align: middle;" rendered="#{!empty(testBean.types.get(testBean.administration))}">
-								<f:selectItem itemLabel="Sem função" noSelectionOption="true"/>
-								<f:selectItems var="type" value="#{testBean.types.get(testBean.administration)}" itemLabel="#{msg[type.label]}" itemValue="#{type}"/>
-							</p:selectOneMenu>
 							<p:panelGrid columns="2" columnClasses="no-margin" style="text-align: center; width: 100%">
-								<p:commandLink value="Enviar Foto" update=":upload-form" oncomplete="PF('uploadDialog').show();" partialSubmit="true" process="@this" style="float: none" styleClass="column">
+								<p:commandLink value="Enviar Foto" update=":upload-form" oncomplete="PF('uploadDialog').show();" partialSubmit="true" process="@this" style="float: none" styleClass="column" disabled="#{!testBean.canEditInfo()}">
 									<f:setPropertyActionListener target="#{imageUploader.image.path}" value=""/>
 								</p:commandLink>
-								<p:commandLink value="Tirar Foto" update=":upload-form" oncomplete="PF('uploadDialog').show();" partialSubmit="true" process="@this" style="float: none; text_align: center" styleClass="column">
+								<p:commandLink value="Tirar Foto" update=":upload-form" oncomplete="PF('uploadDialog').show();" partialSubmit="true" process="@this" style="float: none; text_align: center" styleClass="column" disabled="#{!testBean.canEditInfo()}">
 									<f:setPropertyActionListener target="#{imageUploader.image.path}" value=""/>
 								</p:commandLink>
 							</p:panelGrid>
@@ -111,14 +106,14 @@
 								<p:inputMask id="identity" value="#{testBean.person.identity}" mask="999.999.999-99" size="40" readonly="#{!testBean.canEditInfo()}"/>
 								<p:outputLabel for="male" value="Sexo:"/>
 								<p:selectOneMenu id="male" value="#{testBean.person.gender}" required="false" disabled="#{!testBean.canEditInfo()}">
-									<f:selectItems var="gender" value="#{testBean.genders}" itemLabel="#{msg[gender.label]}"/>							
+									<f:selectItems var="gender" value="#{testBean.genders}" itemLabel="#{msg[gender.label]}"/>
 								</p:selectOneMenu>
 							</p:panelGrid>
 							<p:panelGrid columns="2" style="text-align: center; margin: 0px; float: right" styleClass="no-border" rendered="#{testBean.getUnassignedDomains().size() > 0}">
-								<p:selectOneMenu value="#{testBean.selectedDomainId}" filter="true" filterMatchMode="contains">
+								<p:selectOneMenu id="newDomain" value="#{testBean.selectedDomainId}" filter="true" filterMatchMode="contains">
 									<f:selectItems var="domain" value="#{testBean.getUnassignedDomains()}" itemLabel="#{testBean.displayDomain(domain)}" itemValue="#{domain.id}"/>
 								</p:selectOneMenu>
-								<p:commandButton value="Incluir" actionListener="#{testBean.onDomainAdd}" update=":register-form:memberships" partialSubmit="true" process="@namingcontainer"/>
+								<p:commandButton value="Incluir" actionListener="#{testBean.onDomainAdd}" update=":register-form:memberships, newDomain" partialSubmit="true" process="@namingcontainer"/>
 							</p:panelGrid>
 							<p:dataTable id="memberships" var="membership" rows="2" paginator="true" paginatorAlwaysVisible="false" paginatorPosition="bottom" value="#{testBean.person.memberships}" style="width: 340px; margin-right: 10px;" emptyMessage="">
 								<p:column>
@@ -135,7 +130,7 @@
 					</p:column>
 				</p:panelGrid>
 				<p:commandButton value="Salvar" actionListener="#{testBean.onPersonSave}" update=":model-form:personTable, :outputMsg" oncomplete="if (!args.validationFailed) { if(!args.exception) {PF('registerDialog').hide();} else { if(args.alert) {PF('alertDialog').show();}}}" style="float: right; width: 80px; margin: 0px 0px 10px 5px;"/>
-				<p:commandButton value="Cancelar" type="button" oncomplete="if (!args.validationFailed) { if(!args.exception) {PF('registerDialog').hide();} else { if(args.alert) {PF('alertDialog').show();}}}" style="float: right; width: 80px; margin: 0px 0px 10px 5px;"/>
+				<p:commandButton value="Cancelar" oncomplete="if (!args.validationFailed) { if(!args.exception) {PF('registerDialog').hide();} else { if(args.alert) {PF('alertDialog').show();}}}" style="float: right; width: 80px; margin: 0px 0px 10px 5px;"/>
 			</ui:define>
 		</ui:composition>
 	</h:body>

@@ -136,6 +136,7 @@ public class SecurityManagerImpl {
 		}
 	}
 
+	@SuppressWarnings("unchecked")
 	public void removeMembership(Person person, Membership membership) throws Exception {
 		Person p = personManager.findById(person.getId());
 
@@ -193,8 +194,7 @@ public class SecurityManagerImpl {
 		if (p.getMemberships() == null || p.getMemberships().size() <= 1) {
 			removeGroup(person, portal);
 		} else {
-			List<PersonType> types = Arrays.asList(PersonType.ADMIN_TYPES);
-			types.addAll(Arrays.asList(PersonType.FLAT_TYPES));
+			List<PersonType> types = (List<PersonType>) CollectionUtils.union(Arrays.asList(PersonType.ADMIN_TYPES), Arrays.asList(PersonType.FLAT_TYPES));
 			types.remove(PersonType.GUEST);
 			types.remove(PersonType.VISITOR);
 			p.getMemberships().remove(membership);

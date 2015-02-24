@@ -15,12 +15,12 @@ import javax.faces.bean.ViewScoped;
 import javax.faces.event.AjaxBehaviorEvent;
 
 import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.collections.MapUtils;
 
 import br.com.abware.accountmgm.bean.model.ModelDataModel;
 import br.com.abware.accountmgm.util.BeanUtils;
 import br.com.abware.accountmgm.util.DomainPredicate;
-import br.com.abware.accountmgm.util.FlatTransformer;
+import br.com.abware.accountmgm.util.DomainTransformer;
+import br.com.abware.accountmgm.util.IdPredicate;
 import br.com.abware.jcondo.core.Gender;
 import br.com.abware.jcondo.core.PersonType;
 import br.com.abware.jcondo.core.model.Administration;
@@ -72,9 +72,15 @@ public class TestBean extends BaseBean {
 	public void init() {
 		try {
 			flats = flatService.getFlats(personService.getPerson());
+			administration = adminService.getAdministration("Administration");
+
+			types = new HashMap<Domain, List<PersonType>>();
+			if (administration != null) {
+				types.put(administration, personService.getTypes(administration));
+			}
+
 			blocks = new TreeSet<Integer>();
 			numbers = new TreeSet<Integer>();
-			types = new HashMap<Domain, List<PersonType>>();
 			for (Flat flat : flats) {
 				blocks.add(flat.getBlock());
 				numbers.add(flat.getNumber());
@@ -88,9 +94,7 @@ public class TestBean extends BaseBean {
 			imageUploadBean.setWidth(198);
 			imageUploadBean.setHeight(300);
 			genders = Arrays.asList(Gender.values());
-			administration = adminService.getAdministration("Administration");
-			types.put(administration, personService.getTypes(administration));
-			adminMembership = new Membership(null, administration);
+
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -137,8 +141,6 @@ public class TestBean extends BaseBean {
 		person = new Person();
 		person.setPicture(new Image());
 		imageUploadBean.setImage(person.getPicture());
-		adminMembership.setId(0);
-		adminMembership.setType(null);
 	}
 
 	public void onPersonDelete() throws Exception {
@@ -164,31 +166,25 @@ public class TestBean extends BaseBean {
 		try {
 			BeanUtils.copyProperties(person, model.getRowData());
 			imageUploadBean.setImage(person.getPicture());
-			Membership membership = (Membership) CollectionUtils.find(person.getMemberships(), new DomainPredicate(administration));
-			if (membership != null) {
-				adminMembership.setId(membership.getId());
-				adminMembership.setType(membership.getType());
-			} else {
-				adminMembership.setId(0);
-				adminMembership.setType(null);
-			}
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 	}
 	
 	public void onDomainAdd() {
-		Domain domain = new Domain();
-		domain.setId(selectedDomainId);
-		domain = (Domain) MapUtils.getObject(types, domain);
-		if (person.getMemberships() == null) {
-			person.setMemberships(new ArrayList<Membership>());
-		}
+		List<Domain> domains = new ArrayList<Domain>(types.keySet());
+		Domain domain = (Domain) CollectionUtils.find(domains, new IdPredicate(selectedDomainId));
+		
+		if (domain != null) {
+			if (person.getMemberships() == null) {
+				person.setMemberships(new ArrayList<Membership>());
+			}
 
-		if (domain instanceof Flat) {
-			person.getMemberships().add(new Membership(PersonType.VISITOR, domain));			
-		} else if (domain instanceof Administration) {
-			person.getMemberships().add(new Membership(PersonType.EMPLOYEE, domain));
+			if (domain instanceof Flat) {
+				person.getMemberships().add(new Membership(PersonType.VISITOR, domain));			
+			} else if (domain instanceof Administration) {
+				person.getMemberships().add(new Membership(PersonType.EMPLOYEE, domain));
+			}
 		}
 
 		selectedDomainId = 0;
@@ -240,18 +236,17 @@ public class TestBean extends BaseBean {
 	}
 	
 	@SuppressWarnings("unchecked")
-	public Set<Domain> getUnassignedDomains() throws Exception {
-		Set<Domain> domains = types.keySet();
+	public List<Domain> getUnassignedDomains() throws Exception {
+		List<Domain> domains = new ArrayList<Domain>(types.keySet());
 
-		if (person != null && person.getMemberships() != null) {
-			List<Domain> ds = new ArrayList<Domain>(CollectionUtils.collect(person.getMemberships(), new FlatTransformer()));
-			ds.add(administration);
-			return (Set<Domain>) CollectionUtils.subtract(domains, ds);
+		if (person != null && !CollectionUtils.isEmpty(person.getMemberships())) {
+			List<Domain> ds = new ArrayList<Domain>(CollectionUtils.collect(person.getMemberships(), new DomainTransformer()));
+			return (List<Domain>) CollectionUtils.subtract(domains, ds);
 		} else {
 			return domains;
 		}
 	}
-	
+
 	public ImageUploadBean getImageUploadBean() {
 		return imageUploadBean;
 	}

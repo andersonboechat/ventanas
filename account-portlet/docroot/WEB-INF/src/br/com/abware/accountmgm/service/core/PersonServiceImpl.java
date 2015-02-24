@@ -84,7 +84,7 @@ public class PersonServiceImpl  {
 		List<Person> people = new ArrayList<Person>();
 
 		try {
-			if (securityManager.hasPermission(domain, Permission.VIEW)) {
+			if (domain != null && securityManager.hasPermission(domain, Permission.VIEW)) {
 				people = personManager.findPeople(domain);
 			}
 		} catch (PersistenceException e) {

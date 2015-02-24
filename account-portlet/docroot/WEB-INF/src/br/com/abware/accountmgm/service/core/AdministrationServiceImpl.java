@@ -16,7 +16,11 @@ public class AdministrationServiceImpl {
 	}
 
 	public Administration getAdministration(String name) throws Exception {
-		return adminManager.findByName(name);
+		Administration admin = adminManager.findByName(name);
+		if (!securityManager.hasPermission(admin, Permission.VIEW)) {
+			return null;
+		}
+		return admin;
 	}
 
 	public Administration register(Administration admin) throws Exception {

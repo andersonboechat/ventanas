@@ -60,7 +60,7 @@ public class NewFlatManagerImpl extends JCondoManager<FlatEntity, Flat> {
 		String key = generateKey();
 		try {
 			openManager(key);
-			String queryString = "SELECT f FROM FlatEntity f JOIN f.people p WHERE p.id = :id";
+			String queryString = "SELECT f FROM FlatEntity f JOIN f.people p WHERE p.id = :id ORDER BY f.block, f.number";
 			Query query = em.createQuery(queryString);
 			query.setParameter("id", person.getId());
 			return getModels(query.getResultList());
