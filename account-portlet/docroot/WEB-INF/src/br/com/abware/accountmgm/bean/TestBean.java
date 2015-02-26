@@ -60,8 +60,6 @@ public class TestBean extends BaseBean {
 
 	private Map<Domain, List<PersonType>> types;
 
-	private Membership adminMembership;
-
 	private long selectedDomainId;
 
 	private List<Gender> genders;
@@ -119,9 +117,6 @@ public class TestBean extends BaseBean {
 	public void onPersonSave() {
 		try {
 			person.setPicture(imageUploadBean.getImage());
-			if (adminMembership != null && adminMembership.getId() == 0 && adminMembership.getType() != null) {
-				person.getMemberships().add(adminMembership);
-			}
 
 			if (person.getId() == 0) {
 				person = personService.register(person);
@@ -232,9 +227,9 @@ public class TestBean extends BaseBean {
 	}
 
 	public boolean canEditInfo() throws Exception {
-		return person.equals(personService.getPerson());
+		return person.getId() == 0 || person.equals(personService.getPerson()) || administration != null;
 	}
-	
+
 	@SuppressWarnings("unchecked")
 	public List<Domain> getUnassignedDomains() throws Exception {
 		List<Domain> domains = new ArrayList<Domain>(types.keySet());
@@ -349,14 +344,6 @@ public class TestBean extends BaseBean {
 
 	public void setTypes(Map<Domain, List<PersonType>> types) {
 		this.types = types;
-	}
-
-	public Membership getAdminMembership() {
-		return adminMembership;
-	}
-
-	public void setAdminMembership(Membership adminMembership) {
-		this.adminMembership = adminMembership;
 	}
 
 	public Administration getAdministration() {

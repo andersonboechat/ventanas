@@ -1,6 +1,7 @@
 package br.com.abware.accountmgm.persistence.manager;
 
 import java.util.ArrayList;
+
 import java.util.List;
 
 import javax.persistence.NoResultException;
@@ -8,12 +9,9 @@ import javax.persistence.Query;
 
 import org.apache.commons.lang.StringUtils;
 
-import com.liferay.portal.model.Group;
-import com.liferay.portal.model.GroupConstants;
+import com.liferay.portal.model.ListTypeConstants;
 import com.liferay.portal.model.Organization;
-import com.liferay.portal.model.OrganizationConstants;
 import com.liferay.portal.model.ResourceConstants;
-import com.liferay.portal.service.GroupLocalServiceUtil;
 import com.liferay.portal.service.OrganizationLocalServiceUtil;
 import com.liferay.portal.service.ResourceLocalServiceUtil;
 
@@ -43,10 +41,10 @@ public class FlatManagerImpl extends JCondoManager<FlatEntity, Flat> {
 			String name = flat.getBlock() + "/" + StringUtils.leftPad(String.valueOf(flat.getNumber()), 4, "0");
 			Administration administration = adminManager.findByName("Administration");
 			Organization org = OrganizationLocalServiceUtil.addOrganization(helper.getUserId(), administration.getRelatedId(), name, "flat", 
-																			true, 0, 0, statusId, null, false, null);
-
-			ResourceLocalServiceUtil.addResources(helper.getCompanyId(), group.getGroupId(), helper.getUserId(), 
-												  Flat.class.getName(), f.getId(), false, true, false);
+																			true, 0, 0, ListTypeConstants.ORGANIZATION_STATUS_DEFAULT, null, false, null);
+			
+			ResourceLocalServiceUtil.addResources(helper.getCompanyId(), org.getGroupId(), helper.getUserId(), 
+												  Flat.class.getName(), f.getId(), false, false, false);
 			f.setRelatedId(org.getOrganizationId());
 			f = super.save(f);
 		}
@@ -59,7 +57,7 @@ public class FlatManagerImpl extends JCondoManager<FlatEntity, Flat> {
 		ResourceLocalServiceUtil.deleteResource(helper.getCompanyId(), Flat.class.getName(), ResourceConstants.SCOPE_COMPANY, helper.getCompanyId());
 		ResourceLocalServiceUtil.deleteResource(helper.getCompanyId(), Flat.class.getName(), ResourceConstants.SCOPE_GROUP, flat.getRelatedId());
 		ResourceLocalServiceUtil.deleteResource(helper.getCompanyId(), Flat.class.getName(), ResourceConstants.SCOPE_INDIVIDUAL, flat.getId());
-		GroupLocalServiceUtil.deleteGroup(flat.getRelatedId());
+		OrganizationLocalServiceUtil.deleteOrganization(flat.getRelatedId());
 	}
 
 	@SuppressWarnings("unchecked")

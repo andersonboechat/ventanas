@@ -4,13 +4,16 @@ import java.io.File;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
 
 import br.com.abware.jcondo.core.Gender;
+import br.com.abware.jcondo.core.model.Administration;
 import br.com.abware.jcondo.core.model.Condominium;
 import br.com.abware.jcondo.core.model.Domain;
 import br.com.abware.jcondo.core.model.Flat;
@@ -28,11 +31,14 @@ import com.liferay.portal.model.Group;
 import com.liferay.portal.model.Organization;
 import com.liferay.portal.model.User;
 import com.liferay.portal.model.UserGroupRole;
+import com.liferay.portal.security.permission.ActionKeys;
+import com.liferay.portal.security.permission.PermissionChecker;
 import com.liferay.portal.service.GroupLocalServiceUtil;
 import com.liferay.portal.service.OrganizationLocalServiceUtil;
 import com.liferay.portal.service.ServiceContext;
 import com.liferay.portal.service.UserGroupRoleLocalServiceUtil;
 import com.liferay.portal.service.UserLocalServiceUtil;
+import com.liferay.portal.service.permission.OrganizationPermissionUtil;
 import com.liferay.portal.service.persistence.UserGroupRolePK;
 import com.liferay.portlet.expando.model.ExpandoTableConstants;
 import com.liferay.portlet.expando.model.ExpandoValue;
@@ -211,6 +217,23 @@ public class PersonManagerImpl extends LiferayManager<User, Person> {
 		}
 	}
 
+	public List<Person> findPeople(Person person) throws PersistenceException {
+		try {
+			Set<Person> people = new HashSet<Person>();
+			PermissionChecker checker = helper.getThemeDisplay().getPermissionChecker();
+
+			for (Organization org : OrganizationLocalServiceUtil.getOrganizations(-1, -1)) {
+				if (OrganizationPermissionUtil.contains(checker, org.getOrganizationId(), ActionKeys.VIEW)) {
+					people.addAll(getModels(UserLocalServiceUtil.getOrganizationUsers(org.getOrganizationId()))); 
+				}
+			}
+
+			return new ArrayList<Person>(people);
+		} catch (Exception e) {
+			throw new PersistenceException("");
+		}
+	}
+
 	public List<Person> findPeople(Domain domain) throws PersistenceException {
 		try {
 			List<User> users;
@@ -245,11 +268,13 @@ public class PersonManagerImpl extends LiferayManager<User, Person> {
 
 			for (Organization organization : organizations) {
 				Domain domain;
-				if (organization.getType().equalsIgnoreCase("regular-organization")) {
+				if (organization.getType().equalsIgnoreCase("flat")) {
 					String[] name = organization.getName().split("/");
-					domain = new Flat(organization.getOrganizationId(), Long.parseLong(name[0]), Long.parseLong(name[1]));
+					domain = new Flat(organization.getOrganizationId(), Integer.parseInt(name[0]), Integer.parseInt(name[1]));
 				} else if (organization.getType().equalsIgnoreCase("supplier")) {
 					domain = new Supplier(organization.getOrganizationId(), organization.getName());
+				} else if (organization.getType().equalsIgnoreCase("administration")) {
+					domain = new Administration(organization.getOrganizationId(), organization.getName());
 				} else {
 					throw new SystemException("Organization not supported");
 				}

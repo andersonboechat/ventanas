@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Set;
 
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
 
 import br.com.abware.accountmgm.persistence.manager.NewPersonManagerImpl;
@@ -45,11 +46,12 @@ public class PersonServiceImpl  {
 		PersonType[] ts;
 
 		if (domain instanceof Flat) {
+			//ts = (PersonType[]) ArrayUtils.addAll(PersonType.FLAT_TYPES, PersonType.VISITOR);
 			ts = PersonType.FLAT_TYPES;
 		} else if (domain instanceof Supplier) {
 			ts = PersonType.SUPPLIER_TYPES;
 		} else if (domain instanceof Administration) {
-			ts = PersonType.ADMIN_TYPES;
+			ts = (PersonType[]) ArrayUtils.add(PersonType.ADMIN_TYPES, PersonType.VISITOR);
 		} else {
 			throw new Exception("Unknown domain");
 		}
@@ -68,7 +70,7 @@ public class PersonServiceImpl  {
 
 		try {
 			for (Flat flat : flatService.getFlats(person)) {
-				people.addAll(getPeople(flat));
+				people.addAll(personManager.findPeople(flat));
 			}
 
 			people.addAll(getPeople(adminService.getAdministration("Administration")));
