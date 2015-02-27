@@ -1,9 +1,6 @@
 package br.com.abware.accountmgm.persistence.manager;
 
-import java.util.Arrays;
 import java.util.List;
-
-import org.apache.commons.collections.CollectionUtils;
 
 import com.liferay.faces.portal.context.LiferayPortletHelper;
 import com.liferay.faces.portal.context.LiferayPortletHelperImpl;
@@ -11,6 +8,7 @@ import com.liferay.portal.model.Organization;
 import com.liferay.portal.security.permission.ActionKeys;
 import com.liferay.portal.security.permission.PermissionChecker;
 import com.liferay.portal.service.GroupLocalServiceUtil;
+import com.liferay.portal.service.OrganizationLocalServiceUtil;
 import com.liferay.portal.service.RoleLocalServiceUtil;
 import com.liferay.portal.service.UserGroupRoleLocalServiceUtil;
 import com.liferay.portal.service.UserLocalServiceUtil;
@@ -18,8 +16,6 @@ import com.liferay.portal.service.permission.OrganizationPermissionUtil;
 import com.liferay.portal.service.permission.PortalPermissionUtil;
 import com.liferay.portal.service.permission.UserPermissionUtil;
 
-import br.com.abware.accountmgm.util.PersonTypePredicate;
-import br.com.abware.accountmgm.util.PersonTypeTransformer;
 import br.com.abware.jcondo.core.Permission;
 import br.com.abware.jcondo.core.PersonType;
 import br.com.abware.jcondo.core.model.Administration;
@@ -36,7 +32,7 @@ import br.com.abware.jcondo.exception.SystemException;
 
 public class SecurityManagerImpl {
 	
-	private static NewPersonManagerImpl personManager = new NewPersonManagerImpl();	
+	private static NewPersonManagerImpl personManager = new NewPersonManagerImpl();
 	
 	private LiferayPortletHelper helper = new LiferayPortletHelperImpl();
 	
@@ -110,12 +106,13 @@ public class SecurityManagerImpl {
 		if (membership.getDomain() instanceof Administration) {
 			if (membership.getType() == PersonType.SYNCDIC || membership.getType() == PersonType.SUB_SYNCDIC) {
 				addRole(person, membership.getDomain(), RoleName.ADMIN_MANAGER);
-				addSiteRole(person, RoleName.SITE_ADMIN);
+				//addSiteRole(person, RoleName.SITE_ADMIN);
 			}
 
 			if (membership.getType() == PersonType.ADMIN_ASSISTANT) {
 				addRole(person, membership.getDomain(), RoleName.ADMIN_ASSISTANT);
-				addSiteRole(person, RoleName.SITE_ADMIN);
+				addRole(person, RoleName.SENIOR_USER);
+				//addSiteRole(person, RoleName.SITE_ADMIN);
 				addToSite(person);
 			}
 
@@ -129,10 +126,7 @@ public class SecurityManagerImpl {
 
 			addOrganization(person, membership.getDomain());
 		}
-		
-		if (membership.getType() == PersonType.VISITOR) {
-			addOrganization(person, membership.getDomain());
-		}
+
 	}
 
 	public void removeMembership(Person person, Membership membership) throws Exception {
@@ -259,13 +253,29 @@ public class SecurityManagerImpl {
 	}
 
 	private boolean checkPersonTypePermission(PermissionChecker permissionChecker, PersonType type, Domain domain, Permission permission) throws Exception {
-		long id;
+        Organization organization = OrganizationLocalServiceUtil.getOrganization(domain.getRelatedId());
+        long id;
+
 		try {
 			id = GroupLocalServiceUtil.getOrganizationGroup(helper.getCompanyId(), domain.getRelatedId()).getGroupId();	
+
+			if(permissionChecker.hasPermission(id, PersonType.class.getName(), type.ordinal(), permission.name())) {
+	        	return true;
+	        }
 		} catch (Exception e) {
 			id = 0;
 		}
-		return permissionChecker.hasPermission(id, PersonType.class.getName(), type.ordinal(), permission.name());
+
+        Organization parent;
+
+        for(; !organization.isRoot(); organization = parent) {
+            parent = organization.getParentOrganization();
+            if(permissionChecker.hasPermission(parent.getGroup().getGroupId(), PersonType.class.getName(), type.ordinal(), permission.name())) {
+            	return true;
+            }
+        }
+
+		return false;
 	}
 
 	private boolean checkDomainPermission(PermissionChecker permissionChecker, Domain domain, Permission permission) throws Exception {
