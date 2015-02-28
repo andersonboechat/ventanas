@@ -82,60 +82,56 @@
 				<c:set var="imageUploader" value="#{testBean.imageUploadBean}"/>
 				<p:panelGrid id="model-details" columns="2" columnClasses="my-account-col1,my-account-col2" styleClass="no-border" style="margin: 10px 0px 20px 0px;" cellpadding="10">
 					<p:column>
-						<p:panelGrid columns="1" styleClass="person-image" columnClasses="no-margin">
+						<p:panelGrid columns="1" styleClass="person-image" columnClasses="no-margin" style="text-align: center">
 							<p:graphicImage id="portrait" value="#{imageUploader.image.path}" width="198" height="300"/>
+							<p:panelGrid columns="2" columnClasses="no-margin" style="text-align: center; width: 100%">
+								<p:commandLink value="Enviar Foto" update=":upload-form" oncomplete="PF('uploadDialog').show();" partialSubmit="true" process="@this" style="float: none" styleClass="column" disabled="#{!testBean.canEditInfo()}">
+									<f:setPropertyActionListener target="#{imageUploader.image.path}" value=""/>
+								</p:commandLink>
+								<p:commandLink value="Tirar Foto" update=":upload-form" oncomplete="PF('uploadDialog').show();" partialSubmit="true" process="@this" style="float: none; text_align: center" styleClass="column" disabled="#{!testBean.canEditInfo()}">
+									<f:setPropertyActionListener target="#{imageUploader.image.path}" value=""/>
+								</p:commandLink>
+							</p:panelGrid>
 				        </p:panelGrid>
-						<p:commandLink value="Enviar Foto" update=":upload-form" oncomplete="PF('uploadDialog').show();" partialSubmit="true" process="@this" style="float: right" styleClass="column">
-							<f:setPropertyActionListener target="#{imageUploader.image.path}" value=""/>
-						</p:commandLink>
-						<p:commandLink value="Tirar Foto" update=":upload-form" oncomplete="PF('uploadDialog').show();" partialSubmit="true" process="@this" style="float: right" styleClass="column">
-							<f:setPropertyActionListener target="#{imageUploader.image.path}" value=""/>
-						</p:commandLink>
-						<p:panelGrid columns="2" columnClasses="fieldClm" style="width: 100%; margin: 0px; background-color: transparent !important" rendered="false">
-							<h:outputText value="Função Administrativa: "/>
-							<h:outputText value="#{testBean.getAdminDomain().type}" rendered="#{testBean.adminTypes.size() == 1}"/>
-							<p:selectOneMenu value="#{testBean.getAdminDomain().type}" style="vertical-align: middle;" rendered="#{testBean.adminTypes.size() > 1}">
-								<f:selectItems var="type" value="#{testBean.adminTypes}" itemLabel="#{msg[type.label]}"/>
-							</p:selectOneMenu>
-						</p:panelGrid>
 					</p:column>
 					<p:column>
 						<p:panelGrid columns="1" columnClasses="fieldClm">
-						<p:panelGrid columns="2" columnClasses="labelClm,fieldClm" style="width: 100%; margin: 0px">
-							<p:outputLabel for="email" value="Email: "/>
-							<p:inputText id="email" value="#{testBean.person.emailAddress}" size="40" readonly="#{!testBean.canEditInfo()}"/>
-							<p:outputLabel for="firstName" value="Nome: "/>
-							<p:inputText id="firstName" value="#{testBean.person.firstName}" size="40" readonly="#{!testBean.canEditInfo()}"/>
-							<p:outputLabel for="lastName" value="Sobrenome: "/>
-							<p:inputText id="lastName" value="#{testBean.person.lastName}" size="40" readonly="#{!testBean.canEditInfo()}"/>
-							<p:outputLabel for="identity" value="CPF: "/>
-							<p:inputMask id="identity" value="#{testBean.person.identity}" mask="999.999.999-99" size="40" readonly="#{!testBean.canEditInfo()}"/>
-							<p:outputLabel for="male" value="Sexo:"/>
-							<p:selectOneMenu id="male" value="#{testBean.person.gender}" required="false" disabled="#{!testBean.canEditInfo()}">
-								<f:selectItems var="gender" value="#{testBean.genders}" itemLabel="#{msg[gender.label]}"/>							
-							</p:selectOneMenu>
-						</p:panelGrid>
-						<p:panelGrid columns="2" style="text-align: center; margin: 0px; float: right" styleClass="no-border" rendered="#{testBean.getUnassignedFlats().size() > 0}">
-							<p:selectOneMenu widgetVar="newFlat" id="newFlat" value="#{testBean.selectedFlatId}" filter="true" filterMatchMode="contains">
-								<f:selectItems var="flat" value="#{testBean.getUnassignedFlats()}" itemLabel="Apt. #{flat.number} - Bl. #{flat.block}" itemValue="#{flat.id}"/>
-							</p:selectOneMenu>
-							<p:commandButton value="Incluir" actionListener="#{testBean.onFlatAdd}" update=":register-form:memberships" partialSubmit="true" process="@namingcontainer"/>
-						</p:panelGrid>						
-						<p:dataTable id="memberships" var="membership" rows="2" paginator="true" paginatorAlwaysVisible="false" paginatorPosition="bottom" value="#{testBean.person.memberships}" style="width: 340px; margin-right: 10px;" emptyMessage="">
-							<p:column>
-								<p:panelGrid columns="1" columnClasses="fieldClm" style="width: 100%; margin: 0px; background-color: transparent !important" >
-									<h:outputText value="Apartamento #{membership.domain.number} - Bloco #{membership.domain.block}" />
-									<h:outputText value="#{msg[membership.type.label]}" rendered="#{!testBean.canChangeType(membership)}"/>
-									<p:selectOneMenu value="#{membership.type}" style="vertical-align: middle;" rendered="#{testBean.canChangeType(membership)}">
-										<f:selectItems var="type" value="#{testBean.flatTypes.get(membership.domain)}" itemLabel="#{msg[type.label]}"/>
-									</p:selectOneMenu>
-								</p:panelGrid>
-							</p:column>
-						</p:dataTable>
+							<p:panelGrid columns="2" columnClasses="labelClm,fieldClm" style="width: 100%; margin: 0px">
+								<p:outputLabel for="email" value="Email: "/>
+								<p:inputText id="email" value="#{testBean.person.emailAddress}" size="40" readonly="#{!testBean.canEditInfo()}"/>
+								<p:outputLabel for="firstName" value="Nome: "/>
+								<p:inputText id="firstName" value="#{testBean.person.firstName}" size="40" readonly="#{!testBean.canEditInfo()}"/>
+								<p:outputLabel for="lastName" value="Sobrenome: "/>
+								<p:inputText id="lastName" value="#{testBean.person.lastName}" size="40" readonly="#{!testBean.canEditInfo()}"/>
+								<p:outputLabel for="identity" value="CPF: "/>
+								<p:inputMask id="identity" value="#{testBean.person.identity}" mask="999.999.999-99" size="40" readonly="#{!testBean.canEditInfo()}"/>
+								<p:outputLabel for="male" value="Sexo:"/>
+								<p:selectOneMenu id="male" value="#{testBean.person.gender}" required="false" disabled="#{!testBean.canEditInfo()}">
+									<f:selectItems var="gender" value="#{testBean.genders}" itemLabel="#{msg[gender.label]}"/>
+								</p:selectOneMenu>
+							</p:panelGrid>
+							<p:panelGrid columns="2" style="text-align: center; margin: 0px; float: right" styleClass="no-border" rendered="#{testBean.getUnassignedDomains().size() > 0}">
+								<p:selectOneMenu id="newDomain" value="#{testBean.selectedDomainId}" filter="true" filterMatchMode="contains">
+									<f:selectItems var="domain" value="#{testBean.getUnassignedDomains()}" itemLabel="#{testBean.displayDomain(domain)}" itemValue="#{domain.id}"/>
+								</p:selectOneMenu>
+								<p:commandButton value="Incluir" actionListener="#{testBean.onDomainAdd}" update=":register-form:memberships, newDomain" partialSubmit="true" process="@namingcontainer"/>
+							</p:panelGrid>
+							<p:dataTable id="memberships" var="membership" rows="2" paginator="true" paginatorAlwaysVisible="false" paginatorPosition="bottom" value="#{testBean.person.memberships}" style="width: 340px; margin-right: 10px;" emptyMessage="">
+								<p:column>
+									<p:panelGrid columns="1" columnClasses="fieldClm" style="width: 100%; margin: 0px; background-color: transparent !important" >
+										<h:outputText value="#{testBean.displayDomain(membership.domain)}" />
+										<h:outputText value="#{msg[membership.type.label]}" rendered="#{!testBean.canChangeType(membership)}"/>
+										<p:selectOneMenu value="#{membership.type}" style="vertical-align: middle;" rendered="#{testBean.canChangeType(membership)}">
+											<f:selectItems var="type" value="#{testBean.types.get(membership.domain)}" itemLabel="#{msg[type.label]}"/>
+										</p:selectOneMenu>
+									</p:panelGrid>
+								</p:column>
+							</p:dataTable>
 						</p:panelGrid>
 					</p:column>
 				</p:panelGrid>
-				<p:commandButton value="Salvar" actionListener="#{testBean.onPersonSave}" update=":model-form:personTable, :outputMsg" oncomplete="if (!args.validationFailed) { if(!args.exception) {PF('registerDialog').hide();} else { if(args.alert) {PF('alertDialog').show();}}}" style="float: right; width: 70px; margin: 0px 0px 10px 5px;"/>
+				<p:commandButton value="Salvar" actionListener="#{testBean.onPersonSave}" update=":model-form:personTable, :outputMsg" oncomplete="if (!args.validationFailed) { if(!args.exception) {PF('registerDialog').hide();} else { if(args.alert) {PF('alertDialog').show();}}}" style="float: right; width: 80px; margin: 0px 0px 10px 5px;"/>
+				<p:commandButton value="Cancelar" oncomplete="if (!args.validationFailed) { if(!args.exception) {PF('registerDialog').hide();} else { if(args.alert) {PF('alertDialog').show();}}}" style="float: right; width: 80px; margin: 0px 0px 10px 5px;"/>
 			</ui:define>
 		</ui:composition>
 	</h:body>
