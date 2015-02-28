@@ -1,5 +1,6 @@
 package br.com.abware.accountmgm.service.core;
 
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -16,7 +17,7 @@ public class FlatServiceImpl {
 	private static NewFlatManagerImpl flatManager = new NewFlatManagerImpl();
 
 	private static SecurityManagerImpl securityManager = new SecurityManagerImpl();
-
+	
 	public Flat getFlat(long flatId) throws Exception {
 		return flatManager.findById(flatId);
 	}
@@ -28,17 +29,11 @@ public class FlatServiceImpl {
 	public List<Flat> getFlats(Person person) throws Exception {
 		List<Flat> flats = new ArrayList<Flat>();
 		try {
-			if (securityManager.hasPermission(new Flat(), Permission.VIEW)) {
-				flats = flatManager.findAll();
-			} else {
-				flats = flatManager.findByPerson(person);
+			for (Flat flat : flatManager.findAll()) {
+				if (securityManager.hasPermission(flat, Permission.VIEW)) {
+					flats.add(flat);
+				}
 			}
-
-//			for (Flat flat : flatManager.findAll()) {
-//				if (securityManager.hasPermission(flat, Permission.VIEW)) {
-//					flats.add(flat);
-//				}
-//			}
 		} catch (PersistenceException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

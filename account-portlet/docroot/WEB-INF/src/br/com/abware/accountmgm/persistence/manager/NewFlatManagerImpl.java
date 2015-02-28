@@ -34,7 +34,8 @@ public class NewFlatManagerImpl extends JCondoManager<FlatEntity, Flat> {
 		Flat f = super.save(flat);
 
 		if (flat.getRelatedId() == 0) {
-			Group group = GroupLocalServiceUtil.addGroup(helper.getUserId(), Group.class.getName(), 0, f.toString(), 
+			String name = flat.getBlock() + "/" + StringUtils.leftPad(String.valueOf(flat.getNumber()), 4, "0");
+			Group group = GroupLocalServiceUtil.addGroup(helper.getUserId(), Group.class.getName(), 0, name, 
 														 StringUtils.EMPTY, GroupConstants.TYPE_SITE_PRIVATE, 
 														 "/" + f.getBlock() + "-" + f.getNumber(), true, true, null);
 			ResourceLocalServiceUtil.addResources(helper.getCompanyId(), group.getGroupId(), helper.getUserId(), 
@@ -59,7 +60,7 @@ public class NewFlatManagerImpl extends JCondoManager<FlatEntity, Flat> {
 		String key = generateKey();
 		try {
 			openManager(key);
-			String queryString = "SELECT f FROM FlatEntity f JOIN f.people p WHERE p.id = :id";
+			String queryString = "SELECT f FROM FlatEntity f JOIN f.people p WHERE p.id = :id ORDER BY f.block, f.number";
 			Query query = em.createQuery(queryString);
 			query.setParameter("id", person.getId());
 			return getModels(query.getResultList());

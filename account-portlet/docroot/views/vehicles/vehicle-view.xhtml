@@ -31,10 +31,11 @@
 			<p:panelGrid columns="3" styleClass="menu-cmds" columnClasses="menu-cmds-col1,menu-cmds-col2,menu-cmds-col3" style="width: 100%">
 				<p:column>
 					<p:commandButton value="Cadastrar" actionListener="#{vehicleBean.onVehicleCreate}" 
-									 partialSubmit="true" process="@this" update=":register-form:vehicle-details" oncomplete="PF('vehicleDialog').show();">
+									 partialSubmit="true" process="@this" update=":register-form:vehicle-details" oncomplete="PF('vehicleDialog').show();"
+									 style="font-size: 12px">
 					</p:commandButton>
 					<p:commandButton value="Excluir" actionListener="#{vehicleBean.onVehiclesDelete}" 
-									 partialSubmit="true" process="@this,vehicleTable" update="vehicleTable,:outputMsg">
+									 partialSubmit="true" process="@this,vehicleTable" update="vehicleTable,:outputMsg" style="font-size: 12px">
 						<p:confirm header="#{msg['main.delete.confirm']}" message="#{msg['vehicle.delete.message']}" icon="ui-icon-alert"/>
 					</p:commandButton>
 				</p:column>

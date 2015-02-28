@@ -1,171 +1,94 @@
 package br.com.abware.accountmgm.persistence.manager;
 
-import java.util.Arrays;
+import java.util.ArrayList;
+
 import java.util.List;
+
+import javax.persistence.NoResultException;
+import javax.persistence.Query;
 
 import org.apache.commons.lang.StringUtils;
 
+import com.liferay.portal.model.ListTypeConstants;
+import com.liferay.portal.model.Organization;
+import com.liferay.portal.model.ResourceConstants;
+import com.liferay.portal.service.OrganizationLocalServiceUtil;
+import com.liferay.portal.service.ResourceLocalServiceUtil;
+
+import br.com.abware.accountmgm.persistence.entity.FlatEntity;
+import br.com.abware.jcondo.core.model.Administration;
 import br.com.abware.jcondo.core.model.Flat;
 import br.com.abware.jcondo.core.model.Person;
-import br.com.abware.jcondo.exception.PersistenceException;
 
-import com.liferay.portal.NoSuchOrganizationException;
-import com.liferay.portal.model.Organization;
-import com.liferay.portal.model.OrganizationConstants;
-import com.liferay.portal.service.OrganizationLocalServiceUtil;
-import com.liferay.portlet.expando.model.ExpandoColumn;
-import com.liferay.portlet.expando.model.ExpandoTableConstants;
-import com.liferay.portlet.expando.model.ExpandoValue;
-import com.liferay.portlet.expando.service.ExpandoColumnLocalServiceUtil;
-import com.liferay.portlet.expando.service.ExpandoValueLocalServiceUtil;
+public class FlatManagerImpl extends JCondoManager<FlatEntity, Flat> {
 
-public class FlatManagerImpl extends LiferayManager<Organization, Flat> {
+	private AdministrationManagerImpl adminManager = new AdministrationManagerImpl();
 	
-	private static final String BLOCK = "BLOCK";
-
-	private static final String NUMBER = "NUMBER";	
-
-	private String getCustomField(String fieldName, Organization organization) throws Exception {
-		return (String) ExpandoValueLocalServiceUtil.getData(organization.getCompanyId(), 
-														     organization.getClass().getName(), 
-														     ExpandoTableConstants.DEFAULT_TABLE_NAME, 
-														     fieldName, 
-														     organization.getOrganizationId());
-	}
-
-	private void saveCustomField(String fieldName, String fieldValue, Organization organization) throws Exception {
-		ExpandoValue value = ExpandoValueLocalServiceUtil.getValue(organization.getCompanyId(), 
-																   organization.getClass().getName(), 
-																   ExpandoTableConstants.DEFAULT_TABLE_NAME, 
-																   fieldName, 
-																   organization.getOrganizationId());
-
-		if(value == null) {
-			ExpandoValueLocalServiceUtil.addValue(organization.getCompanyId(), 
-												  organization.getClass().getName(), 
-												  ExpandoTableConstants.DEFAULT_TABLE_NAME, 
-												  fieldName, 
-												  organization.getOrganizationId(),
-												  fieldValue);
-		} else {
-			value.setData(fieldValue);
-			ExpandoValueLocalServiceUtil.updateExpandoValue(value);
-		}
-	}
-
 	@Override
 	protected Class<Flat> getModelClass() {
 		return Flat.class;
 	}
 
 	@Override
-	protected Organization getEntity(Flat flat) throws PersistenceException {
+	protected Class<FlatEntity> getEntityClass() {
+		return FlatEntity.class;
+	}
+
+	public Flat save(Flat flat) throws Exception {
+		Flat f = super.save(flat);
+
+		if (flat.getRelatedId() == 0) {
+			String name = flat.getBlock() + "/" + StringUtils.leftPad(String.valueOf(flat.getNumber()), 4, "0");
+			Administration administration = adminManager.findByName("Administration");
+			Organization org = OrganizationLocalServiceUtil.addOrganization(helper.getUserId(), administration.getRelatedId(), name, "flat", 
+																			true, 0, 0, ListTypeConstants.ORGANIZATION_STATUS_DEFAULT, null, false, null);
+			
+			ResourceLocalServiceUtil.addResources(helper.getCompanyId(), org.getGroupId(), helper.getUserId(), 
+												  Flat.class.getName(), f.getId(), false, false, false);
+			f.setRelatedId(org.getOrganizationId());
+			f = super.save(f);
+		}
+
+		return f;
+	}
+
+	public void delete(Flat flat) throws Exception {
+		super.delete(flat);
+		ResourceLocalServiceUtil.deleteResource(helper.getCompanyId(), Flat.class.getName(), ResourceConstants.SCOPE_COMPANY, helper.getCompanyId());
+		ResourceLocalServiceUtil.deleteResource(helper.getCompanyId(), Flat.class.getName(), ResourceConstants.SCOPE_GROUP, flat.getRelatedId());
+		ResourceLocalServiceUtil.deleteResource(helper.getCompanyId(), Flat.class.getName(), ResourceConstants.SCOPE_INDIVIDUAL, flat.getId());
+		OrganizationLocalServiceUtil.deleteOrganization(flat.getRelatedId());
+	}
+
+	@SuppressWarnings("unchecked")
+	public List<Flat> findByPerson(Person person) throws Exception {
+		String key = generateKey();
 		try {
-			Organization organization;
-
-			try {
-				organization = OrganizationLocalServiceUtil.getOrganization(flat.getId());
-			} catch (NoSuchOrganizationException e) {
-				organization = OrganizationLocalServiceUtil.createOrganization(flat.getId());
-			}
-
-			StringBuffer name = new StringBuffer();
-			name.append(flat.getBlock()).append("/").append(StringUtils.leftPad(String.valueOf(flat.getNumber()), 4, "0"));
-
-			organization.setName(name.toString());
-			organization.setType(OrganizationConstants.TYPE_REGULAR_ORGANIZATION);
-
-			return organization;
-		} catch (Exception e) {
-			throw new PersistenceException(e, "");
+			openManager(key);
+			String queryString = "SELECT f FROM FlatEntity f JOIN f.people p WHERE p.id = :id ORDER BY f.block, f.number";
+			Query query = em.createQuery(queryString);
+			query.setParameter("id", person.getId());
+			return getModels(query.getResultList());
+		} catch (NoResultException e) {
+			return new ArrayList<Flat>();
+		} finally {
+			closeManager(key);
 		}
 	}
-	
-	@Override
-	protected Flat getModel(Organization organization) throws Exception {
-		String[] name = organization.getName().split("/");
-		return new Flat(organization.getOrganizationId(), Integer.parseInt(name[0]), Integer.parseInt(name[1]));
-	}
 
-	public Flat save(Flat flat) throws PersistenceException {
+	public Flat findByNumberAndBlock(int number, int block) throws Exception {
+		String key = generateKey();
 		try {
-			Organization organization = getEntity(flat);
-			organization.persist();
-			return getModel(organization);
-		} catch (Exception e) {
-			throw new PersistenceException(e, "");
-		}
-	}
-
-	public Flat findById(Object id) throws PersistenceException {
-		try {
-			return getModel(OrganizationLocalServiceUtil.getOrganization((Long) id));
-		} catch (NoSuchOrganizationException e) {
+			openManager(key);
+			String queryString = "FROM FlatEntity WHERE number = :number and block = :block";
+			Query query = em.createQuery(queryString);
+			query.setParameter("number", number);
+			query.setParameter("block", block);
+			return getModel((FlatEntity) query.getSingleResult());
+		} catch (NoResultException e) {
 			return null;
-		} catch (Exception e) {
-			throw new PersistenceException(e, "");
+		} finally {
+			closeManager(key);
 		}
 	}
-
-	public List<Flat> findAll() throws PersistenceException {
-		try {
-			return getModels(OrganizationLocalServiceUtil.getOrganizations(-1, -1));
-		} catch (Exception e) {
-			throw new PersistenceException(e, "");
-		}
-	}
-
-	public List<Flat> findByPerson(Person person) throws PersistenceException {
-		try {
-			return getModels(OrganizationLocalServiceUtil.getUserOrganizations(person.getId()));
-		} catch (Exception e) {
-			throw new PersistenceException(e, "");
-		}
-	}	
-
-	public Flat findByBlockAndNumber(long block, long number) throws PersistenceException {
-		try {
-			String name = block + "/" + StringUtils.leftPad(String.valueOf(number), 4, "0");
-			return getModel(OrganizationLocalServiceUtil.getOrganization(helper.getCompanyId(), name));
-		} catch (Exception e) {
-			throw new PersistenceException(e, "");
-		}
-	}
-
-	public List<Integer> findFlatBlocks() {
-		try {
-			ExpandoColumn column;
-			column = ExpandoColumnLocalServiceUtil.getColumn(COMPANY, 
-														     Organization.class.getName(), 
-														     ExpandoTableConstants.DEFAULT_TABLE_NAME, 
-														     BLOCK);
-			String[] datas = column.getDefaultData().split(",");
-			Integer[] blocks = Arrays.copyOf(datas, datas.length, Integer[].class);
-
-			return Arrays.asList(blocks);
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		
-		return null;
-	}
-
-	public List<Integer> findFlatNumbers() {
-		try {
-			ExpandoColumn column;
-			column = ExpandoColumnLocalServiceUtil.getColumn(COMPANY, 
-														     Organization.class.getName(), 
-														     ExpandoTableConstants.DEFAULT_TABLE_NAME, 
-														     NUMBER);
-			String[] datas = column.getDefaultData().split(",");
-			Integer[] numbers = Arrays.copyOf(datas, datas.length, Integer[].class);
-
-			return Arrays.asList(numbers);
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		
-		return null;
-	}
-
 }

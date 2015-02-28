@@ -14,7 +14,7 @@ import javax.persistence.Table;
 
 @Entity
 @Table(name="jco_flat")
-@DiscriminatorValue("1")
+@DiscriminatorValue("2")
 public class FlatEntity extends DomainEntity {
 
 	private static final long serialVersionUID = 1L;

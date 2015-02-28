@@ -19,10 +19,11 @@ import org.apache.commons.collections.CollectionUtils;
 import br.com.abware.accountmgm.bean.model.ModelDataModel;
 import br.com.abware.accountmgm.util.BeanUtils;
 import br.com.abware.accountmgm.util.DomainPredicate;
-import br.com.abware.accountmgm.util.FlatTransformer;
+import br.com.abware.accountmgm.util.DomainTransformer;
+import br.com.abware.accountmgm.util.IdPredicate;
 import br.com.abware.jcondo.core.Gender;
 import br.com.abware.jcondo.core.PersonType;
-import br.com.abware.jcondo.core.model.Condominium;
+import br.com.abware.jcondo.core.model.Administration;
 import br.com.abware.jcondo.core.model.Domain;
 import br.com.abware.jcondo.core.model.Flat;
 import br.com.abware.jcondo.core.model.Image;
@@ -52,30 +53,36 @@ public class TestBean extends BaseBean {
 	private Long number;
 
 	private List<Flat> flats;
-	
+
 	private Person person;
-	
+
 	private Person[] selectedPeople;
 
-	private Map<Domain, List<PersonType>> flatTypes;
+	private Map<Domain, List<PersonType>> types;
 
-	private List<PersonType> adminTypes;
-	
-	private long selectedFlatId;
-	
+	private long selectedDomainId;
+
 	private List<Gender> genders;
+	
+	private Administration administration;
 
 	@PostConstruct
 	public void init() {
 		try {
 			flats = flatService.getFlats(personService.getPerson());
+			administration = adminService.getAdministration("Administration");
+
+			types = new HashMap<Domain, List<PersonType>>();
+			if (administration != null) {
+				types.put(administration, personService.getTypes(administration));
+			}
+
 			blocks = new TreeSet<Integer>();
 			numbers = new TreeSet<Integer>();
-			flatTypes = new HashMap<Domain, List<PersonType>>();
 			for (Flat flat : flats) {
 				blocks.add(flat.getBlock());
 				numbers.add(flat.getNumber());
-				flatTypes.put(flat, personService.getTypes(flat));
+				types.put(flat, personService.getTypes(flat));
 			}
 
 			model = new ModelDataModel<Person>(personService.getPeople(personService.getPerson()));
@@ -85,7 +92,7 @@ public class TestBean extends BaseBean {
 			imageUploadBean.setWidth(198);
 			imageUploadBean.setHeight(300);
 			genders = Arrays.asList(Gender.values());
-			adminTypes = personService.getTypes(new Condominium());
+
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -159,33 +166,49 @@ public class TestBean extends BaseBean {
 		}
 	}
 	
-	public void onFlatAdd() {
-		Flat flat = flats.get(flats.indexOf(new Flat(selectedFlatId, 0, 0)));
-		if (person.getMemberships() == null) {
-			person.setMemberships(new ArrayList<Membership>());
+	public void onDomainAdd() {
+		List<Domain> domains = new ArrayList<Domain>(types.keySet());
+		Domain domain = (Domain) CollectionUtils.find(domains, new IdPredicate(selectedDomainId));
+		
+		if (domain != null) {
+			if (person.getMemberships() == null) {
+				person.setMemberships(new ArrayList<Membership>());
+			}
+
+			if (domain instanceof Flat) {
+				person.getMemberships().add(new Membership(PersonType.VISITOR, domain));			
+			} else if (domain instanceof Administration) {
+				person.getMemberships().add(new Membership(PersonType.EMPLOYEE, domain));
+			}
 		}
-		person.getMemberships().add(new Membership(PersonType.VISITOR, flat));
-		selectedFlatId = 0;
+
+		selectedDomainId = 0;
 	}
 
 	public String displayMembership(Membership membership) {
 		if (membership != null) {
-			if (membership.getDomain() instanceof Flat) {
-				Flat flat = (Flat) membership.getDomain(); 
-				return "Apartamento " + flat.getNumber() + " - Bloco " + flat.getBlock() + " --- " + rb.getString(membership.getType().getLabel());
-			} else if (membership.getDomain() instanceof Supplier) {
-				return ((Supplier) membership.getDomain()).getName() + " --- " + rb.getString(membership.getType().getLabel());
-			} else if (membership.getDomain() instanceof Condominium) {
-				return rb.getString(membership.getType().getLabel());
-			}
+			return displayDomain(membership.getDomain()) + " --- " + rb.getString(membership.getType().getLabel());
+		}
+
+		return null;
+	}
+
+	public String displayDomain(Domain domain) {
+		if (domain instanceof Flat) {
+			Flat flat = (Flat) domain; 
+			return "Apartamento " + flat.getNumber() + " - Bloco " + flat.getBlock();
+		} else if (domain instanceof Supplier) {
+			return ((Supplier) domain).getName();
+		} else if (domain instanceof Administration) {
+			return ((Administration) domain).getName();
 		}
 
 		return null;
 	}
 
 	public boolean canChangeType(Membership membership) throws Exception {
-		List<PersonType> types = flatTypes.get(membership.getDomain());
-		return types != null ? types.contains(membership.getType()) : false;
+		List<PersonType> ts = types.get(membership.getDomain());
+		return ts != null ? ts.contains(membership.getType()) : false;
 	}
 
 	public boolean canEditPerson(Person person) throws Exception {
@@ -204,26 +227,21 @@ public class TestBean extends BaseBean {
 	}
 
 	public boolean canEditInfo() throws Exception {
-		return person.equals(personService.getPerson());
+		return person.getId() == 0 || person.equals(personService.getPerson()) || administration != null;
 	}
-	
+
 	@SuppressWarnings("unchecked")
-	public List<Flat> getUnassignedFlats() throws Exception {
-		if (person != null && person.getMemberships() != null) {
-			List<Flat> fs = (List<Flat>) CollectionUtils.collect(person.getMemberships(), new FlatTransformer());
-			return (List<Flat>) CollectionUtils.subtract(flats, fs);
+	public List<Domain> getUnassignedDomains() throws Exception {
+		List<Domain> domains = new ArrayList<Domain>(types.keySet());
+
+		if (person != null && !CollectionUtils.isEmpty(person.getMemberships())) {
+			List<Domain> ds = new ArrayList<Domain>(CollectionUtils.collect(person.getMemberships(), new DomainTransformer()));
+			return (List<Domain>) CollectionUtils.subtract(domains, ds);
 		} else {
-			return flats;
+			return domains;
 		}
 	}
 
-	public Domain getAdminDomain() throws Exception {
-		if (person != null && person.getMemberships() != null) {
-			return (Domain) CollectionUtils.find(person.getMemberships(), new DomainPredicate(new Condominium(3, "")));
-		}
-		return null;
-	}
-	
 	public ImageUploadBean getImageUploadBean() {
 		return imageUploadBean;
 	}
@@ -304,20 +322,12 @@ public class TestBean extends BaseBean {
 		this.selectedPeople = selectedPeople;
 	}
 
-	public List<PersonType> getAdminTypes() {
-		return adminTypes;
+	public long getSelectedDomainId() {
+		return selectedDomainId;
 	}
 
-	public void setAdminTypes(List<PersonType> types) {
-		this.adminTypes = types;
-	}
-
-	public long getSelectedFlatId() {
-		return selectedFlatId;
-	}
-
-	public void setSelectedFlatId(long selectedFlatId) {
-		this.selectedFlatId = selectedFlatId;
+	public void setSelectedDomainId(long selectedDomainId) {
+		this.selectedDomainId = selectedDomainId;
 	}
 
 	public List<Gender> getGenders() {
@@ -328,12 +338,20 @@ public class TestBean extends BaseBean {
 		this.genders = genders;
 	}
 
-	public Map<Domain, List<PersonType>> getFlatTypes() {
-		return flatTypes;
+	public Map<Domain, List<PersonType>> getTypes() {
+		return types;
 	}
 
-	public void setFlatTypes(Map<Domain, List<PersonType>> typeList) {
-		this.flatTypes = typeList;
+	public void setTypes(Map<Domain, List<PersonType>> types) {
+		this.types = types;
+	}
+
+	public Administration getAdministration() {
+		return administration;
+	}
+
+	public void setAdministration(Administration administration) {
+		this.administration = administration;
 	}
 
 }
