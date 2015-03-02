@@ -1,7 +1,9 @@
 package br.com.abware.accountmgm.persistence.manager;
 
+import java.util.ArrayList;
 import java.util.List;
 
+import javax.persistence.NoResultException;
 import javax.persistence.Query;
 
 import br.com.abware.accountmgm.model.Parking;
@@ -22,14 +24,31 @@ public class ParkingManagerImpl extends JCondoManager<ParkingEntity, Parking> {
 	}
 
 	@SuppressWarnings("unchecked")
-	public List<Parking> findOwnedParkings(Domain domain) throws PersistenceException {
+	public List<Parking> findAvailableParkings() throws Exception {
 		String key = generateKey();
 		try {
 			openManager(key);
-			String queryString = "FROM ParkingEntity WHERE domainId = :domainId";
+			String queryString = "FROM ParkingEntity WHERE ownerDomain IS NULL";
+			Query query = em.createQuery(queryString);
+			return getModels(query.getResultList());
+		} catch (NoResultException e) {
+			return new ArrayList<Parking>();
+		} finally {
+			closeManager(key);
+		}
+	}	
+
+	@SuppressWarnings("unchecked")
+	public List<Parking> findOwnedParkings(Domain domain) throws Exception {
+		String key = generateKey();
+		try {
+			openManager(key);
+			String queryString = "FROM ParkingEntity WHERE ownerDomain IS NOT NULL AND ownerDomain.id = :domainId";
 			Query query = em.createQuery(queryString);
 			query.setParameter("domainId", domain.getId());
 			return getModels(query.getResultList());
+		} catch (NoResultException e) {
+			return new ArrayList<Parking>();
 		} finally {
 			closeManager(key);
 		}
@@ -40,10 +59,12 @@ public class ParkingManagerImpl extends JCondoManager<ParkingEntity, Parking> {
 		String key = generateKey();
 		try {
 			openManager(key);
-			String queryString = "FROM RentedParkingEntity WHERE domainId = :domainId";
+			String queryString = "FROM ParkingEntity WHERE ownerDomain IS NOT NULL AND ownerDomain.id = :domainId AND renterDomain IS NOT NULL";
 			Query query = em.createQuery(queryString);
 			query.setParameter("domainId", domain.getId());
 			return getModels(query.getResultList());
+		} catch (NoResultException e) {
+			return new ArrayList<Parking>();
 		} finally {
 			closeManager(key);
 		}
@@ -54,10 +75,12 @@ public class ParkingManagerImpl extends JCondoManager<ParkingEntity, Parking> {
 		String key = generateKey();
 		try {
 			openManager(key);
-			String queryString = "FROM RentedParkingEntity WHERE renterDomainId = :domainId";
+			String queryString = "FROM ParkingEntity WHERE renterDomain IS NOT NULL AND renterDomain.id = :domainId";
 			Query query = em.createQuery(queryString);
 			query.setParameter("domainId", domain.getId());
 			return getModels(query.getResultList());
+		} catch (NoResultException e) {
+			return new ArrayList<Parking>();
 		} finally {
 			closeManager(key);
 		}

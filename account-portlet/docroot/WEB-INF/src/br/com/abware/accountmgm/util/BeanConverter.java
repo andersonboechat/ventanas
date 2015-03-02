@@ -10,6 +10,10 @@ public class BeanConverter implements Converter {
 	@SuppressWarnings("rawtypes")
 	@Override
 	public Object convert(Class arg0, Object orig) {
+		if (orig == null) {
+			return null;
+		}
+
 		Object dest = null;
 
 		try {

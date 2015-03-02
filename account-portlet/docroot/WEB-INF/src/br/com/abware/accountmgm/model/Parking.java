@@ -11,14 +11,16 @@ public class Parking extends AbstractModel {
 
 	private ParkingType type;
 	
-	private Domain domain;
+	private Domain ownerDomain;
 
+	private Domain renterDomain;
+	
 	@Override
 	public String toString() {
 		StringBuffer sb = new StringBuffer();
 		sb.append("{id:").append(id).append(", code:").append(code)
 		  .append(", type:").append(type.getLabel())
-		  .append(", domain: ").append(domain).append("}");
+		  .append(", domain: ").append(ownerDomain).append("}");
 
 		return sb.toString();
 	}
@@ -51,12 +53,20 @@ public class Parking extends AbstractModel {
 		this.type = type;
 	}
 
-	public Domain getDomain() {
-		return domain;
+	public Domain getOwnerDomain() {
+		return ownerDomain;
 	}
 
-	public void setDomain(Domain domain) {
-		this.domain = domain;
+	public void setOwnerDomain(Domain domain) {
+		this.ownerDomain = domain;
+	}
+
+	public Domain getRenterDomain() {
+		return renterDomain;
+	}
+
+	public void setRenterDomain(Domain renterDomain) {
+		this.renterDomain = renterDomain;
 	}
 
 }

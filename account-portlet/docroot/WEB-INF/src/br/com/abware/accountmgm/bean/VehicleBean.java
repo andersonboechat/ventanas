@@ -86,8 +86,8 @@ public class VehicleBean extends BaseBean {
 			}
 
 			if (vehicle.getId() == 0) {
-				vehicle = vehicleService.register(vehicle);
-				model.addModel(vehicle);
+				Vehicle v = vehicleService.register(vehicle);
+				model.addModel(v);
 			} else {
 				vehicleService.assignTo(vehicle, vehicle.getDomain());
 				vehicleService.updateImage(vehicle, vehicle.getImage());

@@ -7,58 +7,100 @@
 	xmlns:h="http://java.sun.com/jsf/html"
 	xmlns:p="http://primefaces.org/ui"
 	xmlns:ui="http://java.sun.com/jsf/facelets">
-	<h:head></h:head>
+	<h:head>
+		<style>
+			.cropper {padding: 0; height: 300px;}
+			.cropper div {margin: 0 !important; padding: 0 !important;}
+			.cropper .img {height: 300px; margin: 0 !important;}
+			.car-image {background: url("/account-portlet/images/car_icon.png") no-repeat center; text-align: center; margin: 0px auto;}
+			.car-thumb {background-image: url("/account-portlet/images/car_icon.png") ;}
+			.column {padding: 6px; }
+			.column12 {width: 12%; font-weight: bold;}
+			.panel tr {border: none !important; background-color: transparent; font-size: 16px;}
+			.panel td {border: none !important; background-color: transparent; font-size: 16px;}
+			.menu-cmds {width: 100%}
+			.menu-cmds td {border: none !important; margin: 0px; padding: 0px}
+			.menu-cmds-col1 {vertical-align: middle; width: 155px; border: none !important; padding: 0px; margin: 0px}
+			.menu-cmds-col2 {vertical-align: middle; width: 130px;}
+			.menu-cmds-col3 {vertical-align: middle; padding: 0; text-align: right}
+			.my-account-col1 {vertical-align: top; width: 198px; height: 300px}
+			.my-account-col2 {vertical-align: top; padding: 0px !important;}
+			.labelClm {width: 85px; background-color: transparent}
+			.fieldClm {background-color: transparent !important; float: right}
+			.person-image {
+				border: none !important; width: 198px; height: 300px; padding: 0px !important; margin:  0px !important;
+			}
+			.foto img {height: 100px; width: 66px}
+			.person-image div {border: none !important;}
+			.no-border tr {border: none !important;}
+			.no-border td {border: none !important;}
+			.no-margin {margin:  0px !important;padding: 0px !important;}
+		</style>
+	</h:head>
 	<h:body>
-		<ui:composition template="../model-template.xhtml">
-			<ui:define name="model-filters">
-				<p:panelGrid id="model-filters" columns="2" styleClass="menu-cmds" columnClasses="menu-cmds-col1,menu-cmds-col2">
-					<p:column>
-						<p:commandButton value="Cadastrar" actionListener="#{flatBean.onFlatCreate}" 
-										 partialSubmit="true" process="@this" update=":register-form:model-details" oncomplete="PF('registerDialog').show();"/>
-						<p:commandButton value="Excluir" actionListener="#{flatBean.onFlatsDelete}" 
-										partialSubmit="true" process="@this,flatTable" update="flatTable">
-							<p:confirm header="#{msg['main.delete.confirm']}" message="#{msg['person.delete.message']}" icon="ui-icon-alert"/>
-						</p:commandButton>
-					</p:column>
-				    <p:column>
-				    	<p:selectCheckboxMenu label="Apartamentos" filter="true" filterMatchMode="contains">
-							<f:selectItems var="flat" value="#{flatBean.flats}" itemLabel="Apartamento #{flat.number} - Bloco #{flat.block}" itemValue="#{flat.id}"/>
-				    	</p:selectCheckboxMenu>
-				    </p:column>
+		<p:growl id="outputMsg2"/>
+		<f:loadBundle basename="Language_pt_BR" var="msg2"/>
+		<h:form id="flat-form">
+			<p:panelGrid id="model-filters" columns="2" styleClass="menu-cmds" columnClasses="menu-cmds-col1,menu-cmds-col2">
+				<p:column>
+					<p:commandButton value="Cadastrar" actionListener="#{flatBean.onFlatCreate}" 
+									 partialSubmit="true" process="@this" update=":flat-register-form:model-details" oncomplete="PF('flatDialog').show();"/>
+					<p:commandButton value="Excluir" actionListener="#{flatBean.onFlatsDelete}" 
+									partialSubmit="true" process="@this,flatTable" update="flatTable">
+						<p:confirm header="#{msg2['main.delete.confirm']}" message="#{msg2['flat.delete.message']}" icon="ui-icon-alert"/>
+					</p:commandButton>
+				</p:column>
+			    <p:column>
+			    	<p:selectCheckboxMenu label="Apartamentos" filter="true" filterMatchMode="contains">
+						<f:selectItems var="flat" value="#{flatBean.flats}" itemLabel="Apartamento #{flat.number} - Bloco #{flat.block}" itemValue="#{flat.id}"/>
+			    	</p:selectCheckboxMenu>
+			    </p:column>
+			</p:panelGrid>
+
+			<p:dataTable widgetVar="flatTable" id="flatTable" var="flat" value="#{flatBean.model}"  
+			             paginator="true" rows="5" paginatorPosition="bottom" 
+			             paginatorTemplate="{CurrentPageReport} {PreviousPageLink} {PageLinks} {NextPageLink}" 
+			             selection="#{flatBean.selectedFlats}" rowKey="#{flat.id}" >
+				<p:column selectionMode="multiple" style="width: 17px;"/>
+				<p:column style="vertical-align: top">
+        			<h:outputText value="Apartamento #{flat.number} - Bloco #{flat.block}" />
+				</p:column>
+				<p:column style="width: 35px">
+					<p:commandLink update=":flat-register-form:model-details" actionListener="#{flatBean.onFlatEdit}" oncomplete="PF('flatDialog').show();" partialSubmit="true" process="@this" >
+						<h:graphicImage value="../images/edit.png" />
+					</p:commandLink>
+				</p:column>
+				<p:column style="width: 35px">
+					<p:commandLink actionListener="#{flatBean.onFlatDelete}" oncomplete="if (!args.validationFailed &amp;&amp; !args.exception) {PF('flatTable').update();}" partialSubmit="true" process="@this">
+						<h:graphicImage value="../images/delete.png" />
+						<p:confirm header="#{msg2['flat.delete.confirm']}" message="#{msg2['flat.delete.message']}" icon="ui-icon-alert"/>
+						<f:setPropertyActionListener target="#{flatBean.flat}" value="#{flat}"/>
+					</p:commandLink>
+				</p:column>
+			</p:dataTable>
+			<p:confirmDialog global="true" width="600" style="padding: 0px" showEffect="fade" hideEffect="fade" visible="false">
+				<p:commandButton value="#{msg2['no']}" type="button" styleClass="ui-confirmdialog-no" icon="ui-icon-close" style="float: left; width: 200px; margin-left: 14%" />
+				<p:commandButton value="#{msg2['yes']}" type="button" styleClass="ui-confirmdialog-yes" icon="ui-icon-check" style="float: right; width: 200px; margin-right: 14%"/>
+			</p:confirmDialog>
+		</h:form>
+		<p:dialog header="Cadastro de Apartamento" widgetVar="flatDialog" draggable="true" resizable="false" modal="true" closable="false" visible="false">
+			<h:form id="flat-register-form">
+				<p:panelGrid id="model-details" columns="1" styleClass="no-border" style="margin: 10px 0px 20px 0px;" cellpadding="10">
+					<p:panelGrid columns="4" styleClass="no-border" style="margin: 0px 0px 0px 0px;">
+						<p:outputLabel for="number" value="Apartamento: "/>
+						<p:inputText id="number" value="#{flatBean.flat.number}" size="20" maxlength="4"/>
+						<p:outputLabel for="block" value="Bloco: "/>
+						<p:inputText id="block" value="#{flatBean.flat.block}" size="20" maxlength="1"/>
+					</p:panelGrid>
+					<p:outputLabel for="parkings" value="Vagas: "/>
+					<p:pickList id="parkings" value="#{flatBean.parkings}" var="parking" itemLabel="Vaga #{parking.code}" itemValue="#{parking}" converter="parkingConverter">
+						<f:facet name="sourceCaption">Disponíveis</f:facet>
+						<f:facet name="targetCaption">Selecionados</f:facet>					
+					</p:pickList>
 				</p:panelGrid>
-			</ui:define>
-			<ui:define name="model-list">
-				<p:dataTable widgetVar="flatTable" id="flatTable" var="flat" value="#{flatBean.model}"  
-				             paginator="true" rows="5" paginatorPosition="bottom" 
-				             paginatorTemplate="{CurrentPageReport} {PreviousPageLink} {PageLinks} {NextPageLink}" 
-				             selection="#{flatBean.selectedFlats}" rowKey="#{flat.id}" >
-					<p:column selectionMode="multiple" style="width: 17px;"/>
-					<p:column style="vertical-align: top">
-	        			<h:outputText value="Apartamento #{flat.number} - Bloco #{flat.block}" />
-					</p:column>
-					<p:column style="width: 35px">
-						<p:commandLink update=":register-form:model-details" actionListener="#{flatBean.onFlatEdit}" oncomplete="PF('registerDialog').show();" partialSubmit="true" process="@this" >
-							<h:graphicImage value="../images/edit.png" />
-						</p:commandLink>
-					</p:column>
-					<p:column style="width: 35px">
-						<p:commandLink actionListener="#{flatBean.onFlatDelete}" oncomplete="if (!args.validationFailed &amp;&amp; !args.exception) {PF('flatTable').update();}" partialSubmit="true" process="@this">
-							<h:graphicImage value="../images/delete.png" />
-							<p:confirm header="#{msg['flat.delete.confirm']}" message="#{msg['flat.delete.message']}" icon="ui-icon-alert"/>
-							<f:setPropertyActionListener target="#{flatBean.flat}" value="#{flat}"/>
-						</p:commandLink>
-					</p:column>
-				</p:dataTable>
-			</ui:define>
-			<ui:define name="model-details">
-				<p:panelGrid id="model-details" columns="2" styleClass="no-border" style="margin: 10px 0px 20px 0px;" cellpadding="10">
-					<p:outputLabel for="number" value="Apartamento: "/>
-					<p:inputText id="number" value="#{flatBean.flat.number}" size="40"/>
-					<p:outputLabel for="block" value="Bloco: "/>
-					<p:inputText id="block" value="#{flatBean.flat.block}" size="40"/>
-				</p:panelGrid>
-				<p:commandButton value="Salvar" actionListener="#{flatBean.onFlatSave}" update=":model-form:flatTable, :model-form:model-filters, :outputMsg" oncomplete="if (!args.validationFailed) { if(!args.exception) {PF('registerDialog').hide();} else { if(args.alert) {PF('alertDialog').show();}}}" style="float: right; width: 70px; margin: 0px 10px 10px 5px;"/>
-			</ui:define>
-		</ui:composition>
+				<p:commandButton value="Salvar" actionListener="#{flatBean.onFlatSave}" update=":flat-form:flatTable, :flat-form:model-filters, :outputMsg2" oncomplete="if (!args.validationFailed) { if(!args.exception) {PF('flatDialog').hide();} else { if(args.alert) {PF('alertDialog').show();}}}" style="float: right; width: 80px; margin: 0px 10px 10px 5px;"/>
+				<p:commandButton value="Cancelar" oncomplete="if (!args.validationFailed) { if(!args.exception) {PF('flatDialog').hide();} else { if(args.alert) {PF('alertDialog').show();}}}" style="float: right; width: 80px; margin: 0px 10px 10px 5px;"/>
+			</h:form>
+		</p:dialog>
 	</h:body>
 </f:view>

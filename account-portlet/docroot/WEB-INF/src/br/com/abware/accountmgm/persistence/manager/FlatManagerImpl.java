@@ -43,8 +43,8 @@ public class FlatManagerImpl extends JCondoManager<FlatEntity, Flat> {
 			Organization org = OrganizationLocalServiceUtil.addOrganization(helper.getUserId(), administration.getRelatedId(), name, "flat", 
 																			true, 0, 0, ListTypeConstants.ORGANIZATION_STATUS_DEFAULT, null, false, null);
 			
-			ResourceLocalServiceUtil.addResources(helper.getCompanyId(), org.getGroupId(), helper.getUserId(), 
-												  Flat.class.getName(), f.getId(), false, false, false);
+//			ResourceLocalServiceUtil.addResources(helper.getCompanyId(), org.getGroupId(), helper.getUserId(), 
+//												  Flat.class.getName(), f.getId(), false, false, false);
 			f.setRelatedId(org.getOrganizationId());
 			f = super.save(f);
 		}

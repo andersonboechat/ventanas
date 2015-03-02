@@ -1,5 +1,6 @@
 package br.com.abware.accountmgm.bean;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Set;
@@ -11,8 +12,10 @@ import javax.faces.bean.ViewScoped;
 import javax.faces.event.AjaxBehaviorEvent;
 
 import org.apache.log4j.Logger;
+import org.primefaces.model.DualListModel;
 
 import br.com.abware.accountmgm.bean.model.ModelDataModel;
+import br.com.abware.accountmgm.model.Parking;
 import br.com.abware.accountmgm.util.BeanUtils;
 import br.com.abware.jcondo.core.model.Flat;
 
@@ -23,6 +26,8 @@ public class FlatBean extends BaseBean {
 	private static Logger LOGGER = Logger.getLogger(FlatBean.class);
 
 	private ModelDataModel<Flat> model;
+	
+	private DualListModel<Parking> parkings;
 
 	private HashMap<String, Object> filters;	
 
@@ -35,9 +40,9 @@ public class FlatBean extends BaseBean {
 	private int number;
 
 	private List<Flat> flats;
-	
+
 	private Flat flat;
-	
+
 	private Flat[] selectedFlats;
 
 	@PostConstruct
@@ -54,6 +59,8 @@ public class FlatBean extends BaseBean {
 			}
 
 			filters = new HashMap<String, Object>();
+			flat = new Flat();			
+			parkings = new DualListModel<Parking>(parkingService.getAvailableParkings(), new ArrayList<Parking>());
 		} catch (Exception e) {
 			LOGGER.error("", e);
 		}
@@ -71,18 +78,32 @@ public class FlatBean extends BaseBean {
 
 	public void onFlatCreate() {
 		flat = new Flat();
+		parkings.getTarget().clear();
 	}
-	
+
 	public void onFlatSave() {
 		try {
-			boolean isNew = flat.getId() == 0;
-			flat = flatService.register(flat);
+			Flat f;
 
-			if (isNew) {
-				model.addModel(flat);
+			if (flat.getId() == 0) {
+				f = flatService.register(flat);
+				model.addModel(f);
 			} else {
-				model.setModel(flat);
-			}		
+				f = flatService.update(flat);
+				model.setModel(f);
+			}
+
+			for (Parking parking : parkings.getTarget()) {
+				parking.setOwnerDomain(f);
+				parkingService.update(parking);
+			}
+
+			for (Parking parking : parkings.getSource()) {
+				if (parking.getOwnerDomain() != null) {
+					parking.setOwnerDomain(null);
+					parkingService.update(parking);
+				}
+			}
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -100,8 +121,9 @@ public class FlatBean extends BaseBean {
 
 	public void onFlatEdit() {
 		try {
-			flat = new Flat();
 			BeanUtils.copyProperties(flat, model.getRowData());
+			parkings.getTarget().clear();
+			parkings.getTarget().addAll(parkingService.getParkings(flat));
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -109,6 +131,14 @@ public class FlatBean extends BaseBean {
 
 	public ModelDataModel<Flat> getModel() {
 		return model;
+	}
+
+	public DualListModel<Parking> getParkings() {
+		return parkings;
+	}
+
+	public void setParkings(DualListModel<Parking> parkings) {
+		this.parkings = parkings;
 	}
 
 	public Set<Integer> getBlocks() {

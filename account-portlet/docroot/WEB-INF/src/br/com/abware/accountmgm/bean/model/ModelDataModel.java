@@ -31,8 +31,8 @@ public class ModelDataModel<Model extends BaseModel> extends ListDataModel<Model
 
     @SuppressWarnings("unchecked")
 	public void addModel(Model model) {
-    	models.add(model);
-		((List<Model>) getWrappedData()).add(model);
+    	models.add(0, model);
+		((List<Model>) getWrappedData()).add(0, model);
 	}
    
     @SuppressWarnings("unchecked")

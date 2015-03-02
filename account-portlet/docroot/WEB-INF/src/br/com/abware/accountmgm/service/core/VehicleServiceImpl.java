@@ -23,9 +23,9 @@ public class VehicleServiceImpl implements BaseService<Vehicle> {
 	private FlatServiceImpl flatService = new FlatServiceImpl();
 
 	private ParkingServiceImpl parkingService = new ParkingServiceImpl();
-	
+
 	private SecurityManagerImpl securityManager = new SecurityManagerImpl();
-	
+
 	public Vehicle getVehicle(long vehicleId) throws Exception {
 		Vehicle vehicle = vehicleManager.findById(vehicleId);
 
