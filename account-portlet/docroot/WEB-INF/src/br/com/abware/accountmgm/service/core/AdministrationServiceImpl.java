@@ -1,9 +1,13 @@
 package br.com.abware.accountmgm.service.core;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import br.com.abware.accountmgm.persistence.manager.AdministrationManagerImpl;
 import br.com.abware.accountmgm.persistence.manager.SecurityManagerImpl;
 import br.com.abware.jcondo.core.Permission;
 import br.com.abware.jcondo.core.model.Administration;
+import br.com.abware.jcondo.core.model.Person;
 
 public class AdministrationServiceImpl {
 
@@ -21,6 +25,18 @@ public class AdministrationServiceImpl {
 			return null;
 		}
 		return admin;
+	}
+
+	public List<Administration> getAdministrations(Person person) throws Exception {
+		List<Administration> administrations = new ArrayList<Administration>();
+
+		for (Administration administration : adminManager.findAll()) {
+			if (securityManager.hasPermission(administration, Permission.VIEW)) {
+				administrations.add(administration);
+			}
+		}
+
+		return administrations;
 	}
 
 	public Administration register(Administration admin) throws Exception {

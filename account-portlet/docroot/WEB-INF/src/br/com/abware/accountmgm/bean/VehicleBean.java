@@ -36,7 +36,10 @@ public class VehicleBean extends BaseBean {
 
 	@ManagedProperty(value="#{fileUploadBean}")
 	private FileUploadBean fileUploadBean;
-	
+
+	@ManagedProperty(value="#{imageUploadBean}")
+	private ImageUploadBean imageUploadBean;
+
 	private ModelDataModel<Vehicle> model;
 
 	private HashMap<String, Object> filters;
@@ -170,6 +173,11 @@ public class VehicleBean extends BaseBean {
 		model.filter(filters);
 	}
 
+	public void onFlatSearch(Flat flat) throws Exception {
+		filters.put("domain", flat);
+		model.filter(filters);
+	}
+
 	public void onFlatSelect(ValueChangeEvent event) throws Exception {
 		long id = (Long) event.getNewValue();
 		if (id == 0) {
@@ -196,6 +204,14 @@ public class VehicleBean extends BaseBean {
 
 	public void onImageCropp() {
 		fileUploadBean.onCropp();
+	}
+
+	public ImageUploadBean getImageUploadBean() {
+		return imageUploadBean;
+	}
+
+	public void setImageUploadBean(ImageUploadBean imageUploadBean) {
+		this.imageUploadBean = imageUploadBean;
 	}
 
 	public void setFileUploadBean(FileUploadBean fileUploadBean) {

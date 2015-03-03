@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+
+<f:view
+	xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:c="http://java.sun.com/jsp/jstl/core"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:ui="http://java.sun.com/jsf/facelets">
+	<h:head>
+		<style>
+			.cropper {padding: 0;}
+			.cropper div {margin: 0 !important; padding: 0 !important;}
+			.cropper .img { margin: 0 !important;}
+			.car-image {background: url("/account-portlet/images/car_icon.png") no-repeat center; text-align: center; margin: 0px auto;}
+			.car-thumb {background-image: url("/account-portlet/images/car_icon.png") ;}
+			.column {padding: 6px; }
+			.column12 {width: 12%; font-weight: bold;}
+			.panel tr {border: none !important; background-color: transparent; font-size: 16px;}
+			.panel td {border: none !important; background-color: transparent; font-size: 16px;}
+			.menu-cmds {width: 100%}
+			.menu-cmds td {border: none !important; margin: 0px; padding: 0px}
+			.menu-cmds-col1 {vertical-align: middle; width: 155px; border: none !important; padding: 0px; margin: 0px}
+			.menu-cmds-col2 {vertical-align: middle; width: 130px;}
+			.menu-cmds-col3 {vertical-align: middle; padding: 0; text-align: right}
+			.my-account-col1 {vertical-align: top; width: 198px; height: 300px}
+			.my-account-col2 {vertical-align: top; padding: 0px !important;}
+			.labelClm {width: 85px; background-color: transparent}
+			.fieldClm {background-color: transparent !important; float: right}
+			.person-image {
+				border: none !important; width: 198px; height: 300px; padding: 0px !important; margin:  0px !important;
+			}
+			.foto img {height: 100px; width: 66px}
+			.person-image div {border: none !important;}
+			.no-border tr {border: none !important;}
+			.no-border td {border: none !important;}
+			.no-margin {margin:  0px !important;padding: 0px !important;}
+		</style>
+	</h:head>
+	<h:body>
+		<p:growl id="outputMsg"/>
+		<f:loadBundle basename="Language_pt_BR" var="msg"/>
+		<c:set var="personViewer" value="#{flatBean.personBean}"/>
+		<c:set var="imageUploader" value="#{flatBean.personBean.imageUploadBean}"/>
+		<c:set var="vehicleViewer" value="#{flatBean.vehicleBean}"/>
+		<c:set var="vehiclePictureUploader" value="#{vehicleViewer.imageUploadBean}"/>	
+	
+
+		<h:form id="flat-form">
+			<p:panelGrid id="flat-filters" columns="1" styleClass="menu-cmds" columnClasses="menu-cmds-col1,menu-cmds-col2">
+			    <p:column>
+			    	<p:selectOneMenu label="Apartamentos" filter="true" filterMatchMode="contains">
+			    		<f:selectItem itemLabel="Todos" noSelectionOption="true"/>
+						<f:selectItems var="flat" value="#{flatBean.flats}" itemLabel="Apartamento #{flat.number} - Bloco #{flat.block}" itemValue="#{flat.id}"/>
+						<p:ajax event="change" update=":tabs:person-form:personTable,:tabs:vehicle-form:vehicleTable" />
+			    	</p:selectOneMenu>
+			    </p:column>
+			</p:panelGrid>
+
+			<p:panelGrid id="flat-details" columns="2" styleClass="no-border" style="margin: 10px 0px 20px 0px;" cellpadding="10">
+				<p:panelGrid columns="2" styleClass="no-border" style="margin: 0px 0px 0px 0px;">
+					<p:outputLabel for="number" value="Apartamento: "/>
+					<p:inputText id="number" value="#{flatBean.flat.number}" size="20" maxlength="4"/>
+					<p:outputLabel for="block" value="Bloco: "/>
+					<p:inputText id="block" value="#{flatBean.flat.block}" size="20" maxlength="1"/>
+				</p:panelGrid>
+				<p:column>
+					<p:panelGrid columns="1" styleClass="no-border" style="margin: 0px 0px 0px 0px;">
+						<p:outputLabel value="Documentos"/>
+					</p:panelGrid>
+				</p:column>
+			</p:panelGrid>
+		</h:form>
+
+		<p:tabView id="tabs">
+			<p:tab title="Usuários"><ui:include src="person-view2.xhtml"/></p:tab>
+			<p:tab title="Veículos"><ui:include src="vehicle-view.xhtml"/></p:tab>
+		</p:tabView>
+	</h:body>
+</f:view>

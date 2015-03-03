@@ -34,7 +34,7 @@ public class PersonServiceImpl  {
 	
 	private static AdministrationServiceImpl adminService = new AdministrationServiceImpl();
 
-	private FlatServiceImpl flatService = new FlatServiceImpl();
+	private static FlatServiceImpl flatService = new FlatServiceImpl();
 
 	public PersonServiceImpl() {
 		CONDOMINIUM.setRelatedId(10179);
@@ -71,7 +71,9 @@ public class PersonServiceImpl  {
 				people.addAll(personManager.findPeople(flat));
 			}
 
-			people.addAll(getPeople(adminService.getAdministration("Administration")));
+			for (Administration administration : adminService.getAdministrations(person)) {
+				people.addAll(personManager.findPeople(administration));
+			}
 		} catch (PersistenceException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
