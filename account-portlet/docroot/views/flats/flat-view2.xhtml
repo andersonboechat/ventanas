@@ -18,11 +18,12 @@
 			.column12 {width: 12%; font-weight: bold;}
 			.panel tr {border: none !important; background-color: transparent; font-size: 16px;}
 			.panel td {border: none !important; background-color: transparent; font-size: 16px;}
-			.menu-cmds {width: 100%}
-			.menu-cmds td {border: none !important; margin: 0px; padding: 0px}
-			.menu-cmds-col1 {vertical-align: middle; width: 155px; border: none !important; padding: 0px; margin: 0px}
+			.menu-cmds {width: 100%; border: 0px !important}
+			.menu-cmds td {border: 0px !important; margin: 0px; padding: 0px}
+			.menu-cmds tr {border: 0px !important; margin: 0px; padding: 0px; background-color: transparent;}
+			.menu-cmds-col1 {vertical-align: middle; width: 155px; border: none !important; padding: 0px; margin: 0px;}
 			.menu-cmds-col2 {vertical-align: middle; width: 130px;}
-			.menu-cmds-col3 {vertical-align: middle; padding: 0; text-align: right}
+			.menu-cmds-col3 {vertical-align: middle; padding: 0; text-align: right; border: 0px solid red !important}
 			.my-account-col1 {vertical-align: top; width: 198px; height: 300px}
 			.my-account-col2 {vertical-align: top; padding: 0px !important;}
 			.labelClm {width: 85px; background-color: transparent}
@@ -43,16 +44,17 @@
 		<c:set var="personViewer" value="#{flatBean.personBean}"/>
 		<c:set var="imageUploader" value="#{flatBean.personBean.imageUploadBean}"/>
 		<c:set var="vehicleViewer" value="#{flatBean.vehicleBean}"/>
-		<c:set var="vehiclePictureUploader" value="#{vehicleViewer.imageUploadBean}"/>	
-	
+		<c:set var="vehiclePictureUploader" value="#{flatBean.vehicleBean.imageUploadBean}"/>	
+		<c:set var="supplierViewer" value="#{flatBean.supplierBean}"/>
+		<c:set var="supplierPictureUploader" value="#{flatBean.supplierBean.imageUploadBean}"/>
 
 		<h:form id="flat-form">
-			<p:panelGrid id="flat-filters" columns="1" styleClass="menu-cmds" columnClasses="menu-cmds-col1,menu-cmds-col2">
+			<p:panelGrid id="flat-filters" columns="1" styleClass="menu-cmds" columnClasses="menu-cmds-col3">
 			    <p:column>
-			    	<p:selectOneMenu label="Apartamentos" filter="true" filterMatchMode="contains">
+			    	<p:selectOneMenu value="#{flatBean.flat}" label="Apartamentos" filter="true" filterMatchMode="contains" converter="selectItemsConverter">
 			    		<f:selectItem itemLabel="Todos" noSelectionOption="true"/>
-						<f:selectItems var="flat" value="#{flatBean.flats}" itemLabel="Apartamento #{flat.number} - Bloco #{flat.block}" itemValue="#{flat.id}"/>
-						<p:ajax event="change" update=":tabs:person-form:personTable,:tabs:vehicle-form:vehicleTable" />
+						<f:selectItems var="flat" value="#{flatBean.flats}" itemLabel="Apartamento #{flat.number} - Bloco #{flat.block}" itemValue="#{flat}"/>
+						<p:ajax event="change" listener="#{flatBean.onFlatSelect}" update=":tabs:person-form:personTable,:tabs:vehicle-form:vehicleTable" />
 			    	</p:selectOneMenu>
 			    </p:column>
 			</p:panelGrid>
@@ -67,6 +69,7 @@
 				<p:column>
 					<p:panelGrid columns="1" styleClass="no-border" style="margin: 0px 0px 0px 0px;">
 						<p:outputLabel value="Documentos"/>
+						<p:inputTextarea></p:inputTextarea>
 					</p:panelGrid>
 				</p:column>
 			</p:panelGrid>

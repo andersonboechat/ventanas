@@ -173,8 +173,8 @@ public class VehicleBean extends BaseBean {
 		model.filter(filters);
 	}
 
-	public void onFlatSearch(Flat flat) throws Exception {
-		filters.put("domain", flat);
+	public void onDomainSearch(Domain domain) throws Exception {
+		filters.put("domain.id", domain != null ? domain.getId() : null);
 		model.filter(filters);
 	}
 

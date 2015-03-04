@@ -1,4 +1,4 @@
-package br.com.abware.accountmgm.util;
+package br.com.abware.accountmgm.util.faces;
 
 import javax.faces.component.UIComponent;
 import javax.faces.context.FacesContext;
@@ -9,6 +9,7 @@ import org.primefaces.component.picklist.PickList;
 import org.primefaces.model.DualListModel;
 
 import br.com.abware.accountmgm.model.Parking;
+import br.com.abware.accountmgm.util.IdPredicate;
 
 public class ParkingConverter implements Converter {
 

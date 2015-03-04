@@ -12,7 +12,7 @@
 	<converter>
 		<display-name>ParkingConverter</display-name>
 		<converter-id>parkingConverter</converter-id>
-		<converter-class>br.com.abware.accountmgm.util.ParkingConverter</converter-class>
+		<converter-class>br.com.abware.accountmgm.util.faces.ParkingConverter</converter-class>
 	</converter>
 	<lifecycle>
 		<phase-listener>com.liferay.faces.util.lifecycle.DebugPhaseListener</phase-listener>

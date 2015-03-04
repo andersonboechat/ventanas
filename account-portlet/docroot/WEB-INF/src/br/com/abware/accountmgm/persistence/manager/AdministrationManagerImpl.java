@@ -20,6 +20,12 @@ import br.com.abware.jcondo.core.model.Person;
 
 public class AdministrationManagerImpl extends JCondoManager<AdministrationEntity, Administration> {
 
+	public static final Administration ADMINISTRATION = new Administration();
+
+	static {
+	}
+	
+	
 	@Override
 	protected Class<Administration> getModelClass() {
 		return Administration.class;

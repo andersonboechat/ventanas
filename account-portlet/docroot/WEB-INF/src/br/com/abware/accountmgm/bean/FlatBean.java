@@ -1,6 +1,6 @@
 package br.com.abware.accountmgm.bean;
 
-import java.util.HashMap;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -14,6 +14,7 @@ import javax.faces.event.ValueChangeEvent;
 
 import org.apache.log4j.Logger;
 
+import br.com.abware.jcondo.core.model.Domain;
 import br.com.abware.jcondo.core.model.Flat;
 import br.com.abware.jcondo.core.model.Person;
 
@@ -24,10 +25,13 @@ public class FlatBean extends BaseBean {
 	private static Logger LOGGER = Logger.getLogger(FlatBean.class);
 
 	@ManagedProperty(value="#{personBean}")
-	private PersonBean personBean;	
+	private PersonBean personBean;
 
 	@ManagedProperty(value="#{vehicleBean}")
 	private VehicleBean vehicleBean;	
+
+	@ManagedProperty(value="#{supplierBean}")
+	private SupplierBean supplierBean;
 
 	private List<Flat> flats;
 
@@ -37,30 +41,18 @@ public class FlatBean extends BaseBean {
 	public void init() {
 		try {
 			flats = flatService.getFlats(personService.getPerson());
-			flat = flats.get(0);
-			Set<Person> people = new HashSet<Person>();
-
-			for (Flat flat : flats) {
-				people.addAll(personService.getPeople(flat));
-			}
-
 			personBean.init(flats);
+			supplierBean.init(flats);
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
 
-	public void onFlatSelect(ValueChangeEvent event) throws Exception {
-		long id = (Long) event.getNewValue();
-		if (id == 0) {
-			flat = new Flat();
-		} else {
-			flat = flats.get(flats.indexOf(new Flat(id, 0, 0)));
-		}
-
-		personBean.onFlatSearch(flat);
+	public void onFlatSelect() throws Exception {
+		personBean.onDomainSearch(flat);
 		vehicleBean.onFlatSearch(flat);
+		supplierBean.onDomainSearch(flat);
 	}
 	
 	public void onFlatSave() {
@@ -94,6 +86,14 @@ public class FlatBean extends BaseBean {
 
 	public void setVehicleBean(VehicleBean vehicleBean) {
 		this.vehicleBean = vehicleBean;
+	}
+
+	public SupplierBean getSupplierBean() {
+		return supplierBean;
+	}
+
+	public void setSupplierBean(SupplierBean supplierBean) {
+		this.supplierBean = supplierBean;
 	}
 
 	public List<Flat> getFlats() {
