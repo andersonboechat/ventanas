@@ -6,7 +6,6 @@ import java.util.List;
 import java.util.Map;
 
 import javax.faces.bean.ManagedBean;
-import javax.faces.bean.ManagedProperty;
 import javax.faces.bean.ViewScoped;
 import javax.faces.event.AjaxBehaviorEvent;
 
@@ -25,12 +24,6 @@ public class SupplierBean extends BaseBean {
 
 	private static Logger LOGGER = Logger.getLogger(SupplierBean.class);
 
-	@ManagedProperty(value="#{personBean}")
-	private PersonBean personBean;
-
-	@ManagedProperty(value="#{imageUploadBean}")
-	private ImageUploadBean imageUploadBean;	
-
 	private ModelDataModel<Supplier> model = null;
 	
 	private HashMap<String, Object> filters;
@@ -47,6 +40,8 @@ public class SupplierBean extends BaseBean {
 
 	private Supplier[] selectedSuppliers;
 	
+	private Domain domain;
+	
 	public void init(List<? extends Domain> domains) {
 		try {
 			suppliers = new ArrayList<Supplier>();
@@ -59,20 +54,23 @@ public class SupplierBean extends BaseBean {
 
 			model = new ModelDataModel<Supplier>(new ArrayList<Supplier>(suppliers));
 			filters = new HashMap<String, Object>();
-			imageUploadBean.setWidth(198);
-			imageUploadBean.setHeight(300);
-			personBean.init(suppliers);
+			supplier = new Supplier();
 		} catch (Exception e) {
 			LOGGER.error("", e);
 		}
 	}
 
-	public void onSupplierSave(AjaxBehaviorEvent event) throws Exception {
+	public void onSupplierCreate() throws Exception {
+		supplier = new Supplier();
+	}
+	
+	public void onSupplierSave() throws Exception {
 		try {
 			Supplier sup;
-			supplier.setPicture(imageUploadBean.getImage());
+			supplier.setParent(domain);
 
 			if (supplier.getId() == 0) {
+				supplier.setStatus(SupplierStatus.ENABLED);
 				sup = supplierService.register(supplier);
 				model.addModel(sup);
 			} else {
@@ -96,17 +94,17 @@ public class SupplierBean extends BaseBean {
 		}
 	}
 
-	public void onSupplierEdit(AjaxBehaviorEvent event) throws Exception {
+	public void onSupplierEdit() throws Exception {
 		try {
 			BeanUtils.copyProperties(supplier, model.getRowData());
-			imageUploadBean.setImage(supplier.getPicture());
+			//domain = (Domain) BeanUtils.cloneBean(supplier.getParent());
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 	}
 
 	public void onDomainSearch(Domain domain) throws Exception {
-		filters.put("id", domain != null ? domain.getId() : null);
+		filters.put("parent.id", domain != null ? domain.getId() : null);
 		model.filter(filters);
 	}
 
@@ -138,6 +136,46 @@ public class SupplierBean extends BaseBean {
 
 	public void setSuppliers(List<Supplier> suppliers) {
 		this.suppliers = suppliers;
+	}
+
+	public Map<Domain, List<SupplierStatus>> getStatuses() {
+		return statuses;
+	}
+
+	public void setStatuses(Map<Domain, List<SupplierStatus>> statuses) {
+		this.statuses = statuses;
+	}
+
+	public String getName() {
+		return name;
+	}
+
+	public void setName(String name) {
+		this.name = name;
+	}
+
+	public SupplierStatus getStatus() {
+		return status;
+	}
+
+	public void setStatus(SupplierStatus status) {
+		this.status = status;
+	}
+
+	public Supplier[] getSelectedSuppliers() {
+		return selectedSuppliers;
+	}
+
+	public void setSelectedSuppliers(Supplier[] selectedSuppliers) {
+		this.selectedSuppliers = selectedSuppliers;
+	}
+
+	public Domain getDomain() {
+		return domain;
+	}
+
+	public void setDomain(Domain domain) {
+		this.domain = domain;
 	}
 
 }

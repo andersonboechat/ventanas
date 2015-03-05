@@ -15,13 +15,14 @@ import com.liferay.portal.service.ResourceLocalServiceUtil;
 import com.liferay.portal.service.UserLocalServiceUtil;
 
 import br.com.abware.accountmgm.persistence.entity.AdministrationEntity;
+import br.com.abware.accountmgm.persistence.entity.SupplierEntity;
 import br.com.abware.jcondo.core.SupplierStatus;
 import br.com.abware.jcondo.core.model.Administration;
 import br.com.abware.jcondo.core.model.Domain;
 import br.com.abware.jcondo.core.model.Person;
 import br.com.abware.jcondo.core.model.Supplier;
 
-public class SupplierManagerImpl extends JCondoManager<AdministrationEntity, Supplier> {
+public class SupplierManagerImpl extends JCondoManager<SupplierEntity, Supplier> {
 
 	private static AdministrationManagerImpl adminManager = new AdministrationManagerImpl();	
 	
@@ -31,63 +32,56 @@ public class SupplierManagerImpl extends JCondoManager<AdministrationEntity, Sup
 	}
 
 	@Override
-	protected Class<AdministrationEntity> getEntityClass() {
-		return AdministrationEntity.class;
+	protected Class<SupplierEntity> getEntityClass() {
+		return SupplierEntity.class;
 	}
 	
-	public void assignTo(Supplier supplier, Domain domain) throws Exception {
-		Supplier sup = findById(supplier.getId());
-
-		if (sup == null || sup.getRelatedId() > 0) {
-			
-		}
-		
-		if (sup == null || sup.getRelatedId() > 0 domain.getRelatedId() <= 0) {
+	public Supplier save(Supplier supplier) throws Exception {
+		if (supplier.getParent() == null || supplier.getParent().getRelatedId() <= 0) {
 			throw new Exception("dominio invalido");
 		}
 
-		Organization org = OrganizationLocalServiceUtil.addOrganization(helper.getUserId(), domain.getRelatedId(), supplier.getName(), "supplier", 
-																		true, 0, 0, ListTypeConstants.ORGANIZATION_STATUS_DEFAULT, null, false, null);
+		Supplier sup = findById(supplier.getId());
 
-		supplier.setRelatedId(org.getOrganizationId());
-		super.save(supplier);
-	}
-
-	public void removeFrom(Supplier supplier, Domain domain) throws Exception {
-		Organization bin = OrganizationLocalServiceUtil.getOrganization(helper.getCompanyId(), "bin");
-		Organization org = OrganizationLocalServiceUtil.getOrganization(supplier.getRelatedId());
-		org.setParentOrganizationId(bin.getOrganizationId());
-		supplier.setStatus(SupplierStatus.DISABLED);
-		super.save(supplier);
-	}
-
-	public Supplier save(Supplier supplier, Domain domain) throws Exception {
-		if (supplier.getRelatedId() <= 0 && domain.getRelatedId() > 0) {
-			Organization org = OrganizationLocalServiceUtil.addOrganization(helper.getUserId(), domain.getRelatedId(), supplier.getName(), "supplier", 
-																			true, 0, 0, ListTypeConstants.ORGANIZATION_STATUS_DEFAULT, null, false, null);
+		if (sup == null) {
+			Organization org = OrganizationLocalServiceUtil.addOrganization(helper.getUserId(), 
+																			supplier.getParent().getRelatedId(), supplier.getName() + ":" + supplier.getParent().getRelatedId(), 
+																			"supplier", true, 0, 0, ListTypeConstants.ORGANIZATION_STATUS_DEFAULT, null, false, null);
 			supplier.setRelatedId(org.getOrganizationId());
 		}
 
 		return super.save(supplier);
 	}	
 
-	public Supplier save(Supplier supplier) throws Exception {
-		return super.save(supplier);
-	}
-
 	public void delete(Supplier supplier) throws Exception {
 		supplier.setStatus(SupplierStatus.DISABLED);
 		super.save(supplier);
+	}
+
+	@SuppressWarnings("unchecked")
+	public List<Supplier> findByDomain(Domain domain) throws Exception {
+		String key = generateKey();
+		try {
+			openManager(key);
+			String queryString = "FROM SupplierEntity s WHERE s.parent.id = :id";
+			Query query = em.createQuery(queryString);
+			query.setParameter("id", domain.getId());
+			return getModels(query.getResultList());
+		} catch (NoResultException e) {
+			return new ArrayList<Supplier>();
+		} finally {
+			closeManager(key);
+		}
 	}
 
 	public Supplier findByName(String name) throws Exception {
 		String key = generateKey();
 		try {
 			openManager(key);
-			String queryString = "FROM SupplierEntity a WHERE a.name = :name";
+			String queryString = "FROM SupplierEntity s WHERE s.name = :name";
 			Query query = em.createQuery(queryString);
 			query.setParameter("name", name);
-			return getModel((AdministrationEntity) query.getSingleResult());
+			return getModel((SupplierEntity) query.getSingleResult());
 		} catch (NoResultException e) {
 			return null;
 		} finally {
@@ -100,7 +94,7 @@ public class SupplierManagerImpl extends JCondoManager<AdministrationEntity, Sup
 		String key = generateKey();
 		try {
 			openManager(key);
-			String queryString = "SELECT a FROM SupplierEntity a JOIN a.people p WHERE p.id = :id";
+			String queryString = "SELECT a FROM SupplierEntity s JOIN s.people s WHERE s.id = :id";
 			Query query = em.createQuery(queryString);
 			query.setParameter("id", person.getId());
 			return getModels(query.getResultList());

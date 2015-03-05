@@ -58,7 +58,7 @@
 				</p:inputText>
 			</p:column>
 		</p:panelGrid>
-	
+
 		<p:dataTable widgetVar="personTable" id="personTable" var="person" value="#{personViewer.model}"  
 		             paginator="true" rows="5" paginatorPosition="bottom" 
 		             paginatorTemplate="{CurrentPageReport} {PreviousPageLink} {PageLinks} {NextPageLink}" 
@@ -68,8 +68,11 @@
 				<p:graphicImage value="#{person.picture.path}" styleClass="foto" height="80" width="52"/>
 			</p:column>
 			<p:column style="vertical-align: top">
-				<p:panelGrid columns="1">
-	       			<h:outputText value="#{person.firstName} #{person.lastName}" />
+				<p:panelGrid columns="1" styleClass="no-background no-border">
+	       			<h:outputText value="#{person.firstName} #{person.lastName}" style="font-size: 14px; color: black; font-weight: bold;"/>
+	       			<p:dataGrid var="membership" value="#{person.memberships}" columns="1" styleClass="no-background no-border no-margin memberships">
+						<h:outputText value="#{personViewer.displayMembership(membership)}" />
+	       			</p:dataGrid>
 				</p:panelGrid>
 			</p:column>
 			<p:column style="width: 35px">
@@ -81,12 +84,12 @@
 				<p:commandLink actionListener="#{personViewer.onPersonDelete}" oncomplete="if (!args.validationFailed &amp;&amp; !args.exception) {PF('personTable').update();}" partialSubmit="true" process="@this" disabled="#{!personViewer.canEditPerson(person)}">
 					<h:graphicImage value="../images/delete.png" />
 					<p:confirm header="#{msg['person.delete.confirm']}" message="#{msg['person.delete.message']}" icon="ui-icon-alert"/>
-					<f:setPropertyActionListener target="#{personViewer.person}" value="#{model.person}"/>
+					<f:setPropertyActionListener target="#{personViewer.person}" value="#{person}"/>
 				</p:commandLink>
 			</p:column>
 		</p:dataTable>
 	</h:form>
-	
+
 	<p:dialog header="#{msg['dlg.user.signon']}" widgetVar="personDialog" draggable="true" resizable="false" modal="true" closable="false" visible="false">
 		<h:form id="person-details-form">
 			<p:panelGrid id="model-details" columns="2" columnClasses="my-account-col1,my-account-col2" styleClass="no-border" style="margin: 10px 0px 20px 0px;" cellpadding="10">
@@ -123,7 +126,7 @@
 							<p:selectOneMenu id="newDomain" value="#{personViewer.selectedDomainId}" filter="true" filterMatchMode="contains">
 								<f:selectItems var="domain" value="#{personViewer.getUnassignedDomains()}" itemLabel="#{personViewer.displayDomain(domain)}" itemValue="#{domain.id}"/>
 							</p:selectOneMenu>
-							<p:commandButton value="Incluir" icon="fa fa-plus" actionListener="#{personViewer.onDomainAdd}" update=":tabs:person-details-form:memberships, newDomain" partialSubmit="true" process="@namingcontainer"/>
+							<p:commandButton value="Incluir" actionListener="#{personViewer.onDomainAdd}" update=":tabs:person-details-form:memberships, newDomain" partialSubmit="true" process="@namingcontainer"/>
 						</p:panelGrid>
 						<p:dataTable id="memberships" var="membership" rows="2" paginator="true" paginatorAlwaysVisible="false" paginatorPosition="bottom" value="#{personViewer.person.memberships}" style="width: 340px; margin-right: 10px;" emptyMessage="">
 							<p:column>
@@ -139,8 +142,8 @@
 					</p:panelGrid>
 				</p:column>
 			</p:panelGrid>
-			<p:commandButton value="Salvar" icon="fa fa-save" actionListener="#{personViewer.onPersonSave}" update=":tabs:person-form:personTable, :outputMsg" oncomplete="if (!args.validationFailed) { if(!args.exception) {PF('personDialog').hide();} else { if(args.alert) {PF('alertDialog').show();}}}" style="float: right; width: 100px; margin: 0px 0px 10px 5px;"/>
-			<p:commandButton value="Cancelar" icon="fa fa-close" oncomplete="if (!args.validationFailed) { if(!args.exception) {PF('personDialog').hide();} else { if(args.alert) {PF('alertDialog').show();}}}" style="float: right; width: 80px; margin: 0px 0px 10px 5px;"/>
+			<p:commandButton value="Cancelar" oncomplete="if (!args.validationFailed) { if(!args.exception) {PF('personDialog').hide();} else { if(args.alert) {PF('alertDialog').show();}}}" style="float: right; width: 80px; margin: 0px 0px 10px 5px;"/>
+			<p:commandButton value="Salvar" actionListener="#{personViewer.onPersonSave}" update=":tabs:person-form:personTable, :outputMsg" oncomplete="if (!args.validationFailed) { if(!args.exception) {PF('personDialog').hide();} else { if(args.alert) {PF('alertDialog').show();}}}" style="float: right; width: 80px; margin: 0px 0px 10px 5px;"/>
 		</h:form>
 	</p:dialog>
 

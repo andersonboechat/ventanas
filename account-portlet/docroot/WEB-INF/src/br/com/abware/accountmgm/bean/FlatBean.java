@@ -1,22 +1,17 @@
 package br.com.abware.accountmgm.bean;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 import javax.annotation.PostConstruct;
 import javax.faces.bean.ManagedBean;
 import javax.faces.bean.ManagedProperty;
 import javax.faces.bean.ViewScoped;
-import javax.faces.event.AjaxBehaviorEvent;
-import javax.faces.event.ValueChangeEvent;
 
 import org.apache.log4j.Logger;
 
 import br.com.abware.jcondo.core.model.Domain;
 import br.com.abware.jcondo.core.model.Flat;
-import br.com.abware.jcondo.core.model.Person;
 
 @ManagedBean
 @ViewScoped
@@ -41,8 +36,12 @@ public class FlatBean extends BaseBean {
 	public void init() {
 		try {
 			flats = flatService.getFlats(personService.getPerson());
-			personBean.init(flats);
 			supplierBean.init(flats);
+
+			ArrayList<Domain> domains = new ArrayList<Domain>(flats);
+			domains.addAll(supplierBean.getSuppliers());
+
+			personBean.init(domains);
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -51,7 +50,7 @@ public class FlatBean extends BaseBean {
 
 	public void onFlatSelect() throws Exception {
 		personBean.onDomainSearch(flat);
-		vehicleBean.onFlatSearch(flat);
+		vehicleBean.onDomainSearch(flat);
 		supplierBean.onDomainSearch(flat);
 	}
 	
@@ -64,6 +63,7 @@ public class FlatBean extends BaseBean {
 	}
 
 	public void onFlatCreate() throws Exception {
+		flat = new Flat();
 	}
 
 	public void onFlatDelete() throws Exception {

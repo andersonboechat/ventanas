@@ -24,10 +24,10 @@ public class SupplierServiceImpl {
 	public List<Supplier> getSuppliers(Domain domain) throws Exception {
 		List<Supplier> suppliers = new ArrayList<Supplier>();
 
-		for (Supplier supplier : supplierManager.findAll()) {
-			if (securityManager.hasPermission(supplier, Permission.VIEW)) {
+		for (Supplier supplier : supplierManager.findByDomain(domain)) {
+//			if (securityManager.hasPermission(supplier, Permission.VIEW)) {
 				suppliers.add(supplier);
-			}
+//			}
 		}
 
 		return suppliers;
@@ -38,9 +38,9 @@ public class SupplierServiceImpl {
 	}
 	
 	public Supplier register(Supplier supplier) throws Exception {
-		if (!securityManager.hasPermission(supplier, Permission.ADD)) {
-			throw new Exception("sem permissao para cadastrar fornecedor");
-		}
+//		if (!securityManager.hasPermission(supplier, Permission.ADD)) {
+//			throw new Exception("sem permissao para cadastrar fornecedor");
+//		}
 
 //		if (getAdministration(admin.getName()) != null) {
 //			throw new Exception("Já existe uma administração com este nome");
@@ -49,9 +49,8 @@ public class SupplierServiceImpl {
 		return supplierManager.save(supplier);
 	}
 
-	public Supplier update(Supplier supplier) {
-		// TODO Auto-generated method stub
-		return null;
+	public Supplier update(Supplier supplier) throws Exception {
+		return supplierManager.save(supplier);
 	}
 
 	public void delete(Supplier supplier) {

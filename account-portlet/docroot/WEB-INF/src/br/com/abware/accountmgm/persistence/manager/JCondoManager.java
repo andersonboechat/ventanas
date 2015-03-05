@@ -53,8 +53,13 @@ public abstract class JCondoManager<Entity extends BaseEntity, Model extends Bas
 	}
 
 	protected Model getModel(Entity entity) throws Exception {
+		if (entity == null) {
+			return null;
+		}
+
 		Model model = getModelClass().newInstance();
 		BeanUtils.copyProperties(model, entity);
+
 		return model;
 	}
 

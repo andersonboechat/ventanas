@@ -77,7 +77,7 @@ public class PersonBean extends BaseBean {
 			}
 
 			model = new ModelDataModel<Person>(new ArrayList<Person>(people));
-			person = model.getRowData();
+			person = new Person();
 			filters = new HashMap<String, Object>();
 			imageUploadBean.setWidth(198);
 			imageUploadBean.setHeight(300);
@@ -93,7 +93,7 @@ public class PersonBean extends BaseBean {
 	}
 
 	public void onDomainSearch(Domain domain) throws Exception {
-		filters.put("memberships.domain.id", domain != null ? domain.getId() : null);
+		filters.put("memberships.domain", domain != null ? domain : null);
 		model.filter(filters);
 	}	
 
@@ -109,14 +109,15 @@ public class PersonBean extends BaseBean {
 	
 	public void onPersonSave() {
 		try {
+			Person p;
 			person.setPicture(imageUploadBean.getImage());
 
 			if (person.getId() == 0) {
-				person = personService.register(person);
-				model.addModel(person);
+				p = personService.register(person);
+				model.addModel(p);
 			} else {
-				person = personService.update(person);
-				model.setModel(person);
+				p = personService.update(person);
+				model.setModel(p);
 			}
 			
 		} catch (Exception e) {
@@ -171,6 +172,8 @@ public class PersonBean extends BaseBean {
 			if (domain instanceof Flat) {
 				person.getMemberships().add(new Membership(PersonType.VISITOR, domain));			
 			} else if (domain instanceof Administration) {
+				person.getMemberships().add(new Membership(PersonType.EMPLOYEE, domain));
+			} else if (domain instanceof Supplier) {
 				person.getMemberships().add(new Membership(PersonType.EMPLOYEE, domain));
 			}
 		}
