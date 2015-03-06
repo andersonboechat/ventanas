@@ -26,7 +26,7 @@
 			</p:column>
 		</p:panelGrid>
 		<p:dataTable id="vehicleTable" widgetVar="vehicleTable" var="vehicle" value="#{vehicleViewer.model}"  
-		             paginator="true" rows="5" paginatorPosition="bottom" 
+		             paginator="true" rows="5" paginatorPosition="bottom" emptyMessage="Nenhum veículo cadastrado"
 		             paginatorTemplate="{CurrentPageReport} {PreviousPageLink} {PageLinks} {NextPageLink}" 
 		             selection="#{vehicleViewer.selectedVehicles}" rowKey="#{vehicle.id}" >
 		    <p:column selectionMode="multiple" style="width:17px"/>

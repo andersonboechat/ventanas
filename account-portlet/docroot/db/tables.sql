@@ -57,12 +57,14 @@ DROP TABLE IF EXISTS `jco_domain`;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `jco_domain` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `parentId` bigint(20) DEFAULT NULL,
   `relatedId` bigint(20) NOT NULL,
+  `folderId` bigint(20) DEFAULT '0',
   `domain` int(1) DEFAULT NULL,
   `updateDate` datetime NOT NULL,
   `updateUser` bigint(20) NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=13 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=21 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -96,7 +98,7 @@ CREATE TABLE `jco_membership` (
   `updateDate` datetime NOT NULL,
   `updateUser` bigint(20) NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=9 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=10 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -154,6 +156,23 @@ CREATE TABLE `jco_person` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
+-- Table structure for table `jco_supplier`
+--
+
+DROP TABLE IF EXISTS `jco_supplier`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `jco_supplier` (
+  `id` bigint(20) NOT NULL,
+  `name` varchar(45) NOT NULL,
+  `description` varchar(200) DEFAULT NULL,
+  `status` int(2) NOT NULL DEFAULT '0',
+  `identity` varchar(18) DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
 -- Table structure for table `jco_vehicle`
 --
 
@@ -198,4 +217,4 @@ CREATE TABLE `jco_vehicle_access_log` (
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2015-03-02 17:28:13
+-- Dump completed on 2015-03-06 17:26:55

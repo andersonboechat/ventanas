@@ -1,5 +1,6 @@
 package br.com.abware.accountmgm.persistence.entity;
 
+import javax.persistence.Column;
 import javax.persistence.DiscriminatorColumn;
 import javax.persistence.DiscriminatorType;
 import javax.persistence.Entity;
@@ -26,8 +27,11 @@ public abstract class DomainEntity extends BaseEntity {
 	@OneToOne
 	@JoinColumn(name="parentId", nullable=true)	
 	private DomainEntity parent;
-	
+
 	private long relatedId;
+
+	@Column(updatable=false)
+	private long folderId;
 
 	public long getId() {
 		return id;
@@ -51,6 +55,14 @@ public abstract class DomainEntity extends BaseEntity {
 
 	public void setRelatedId(long relatedId) {
 		this.relatedId = relatedId;
+	}
+
+	public long getFolderId() {
+		return folderId;
+	}
+
+	public void setFolderId(long folderId) {
+		this.folderId = folderId;
 	}
 	
 }

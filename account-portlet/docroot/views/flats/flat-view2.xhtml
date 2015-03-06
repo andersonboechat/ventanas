@@ -43,6 +43,8 @@
 			.no-background td {background-color: transparent;}
 			.flats {float: right}
 			.memberships div {border: 0px; border-top: 1px solid grey;}
+			.docs-header {text-align: left;}
+			.docs-cmds {width: 10%}
 		</style>
 	</h:head>
 	<h:body>
@@ -53,6 +55,7 @@
 		<c:set var="vehicleViewer" value="#{flatBean.vehicleBean}"/>
 		<c:set var="vehiclePictureUploader" value="#{flatBean.vehicleBean.imageUploadBean}"/>	
 		<c:set var="supplierViewer" value="#{flatBean.supplierBean}"/>
+		<c:set var="documentViewer" value="#{flatBean.documentBean}"/>
 
 		<h:form id="flat-form">
 			<p:panelGrid id="flat-filters" columns="1" styleClass="no-background no-border flats" columnClasses="menu-cmds-col3">
@@ -60,20 +63,43 @@
 		    	<p:selectOneMenu id="flat" value="#{flatBean.flat}" filter="true" filterMatchMode="contains" converter="selectItemsConverter" rendered="#{flatBean.flats.size() > 1}">
 		    		<f:selectItem itemLabel="Todos Apartamentos" noSelectionOption="true"/>
 					<f:selectItems var="flat" value="#{flatBean.flats}" itemLabel="Apartamento #{flat.number} - Bloco #{flat.block}" itemValue="#{flat}"/>
-					<p:ajax event="change" listener="#{flatBean.onFlatSelect}" update=":tabs:person-form:personTable,:tabs:vehicle-form:vehicleTable,:tabs:supplier-form:supplierTable" />
+					<p:ajax event="change" listener="#{flatBean.onFlatSelect}" update="flat-details,:tabs:person-form:personTable,:tabs:vehicle-form:vehicleTable,:tabs:supplier-form:supplierTable" />
 		    	</p:selectOneMenu>
 			</p:panelGrid>
 			<p:panelGrid id="flat-details" columns="1" styleClass="no-background no-border" style="margin: 10px 0px 20px 0px;" cellpadding="10">
 				<p:column>
-					<p:panelGrid columns="1" styleClass="no-border" style="margin: 0px 0px 0px 0px;">
-						<p:outputLabel value="Documentos"/>
-						<p:inputTextarea></p:inputTextarea>
-					</p:panelGrid>
+					<p:dataTable id="docs" widgetVar="docs" var="doc" value="#{documentViewer.model}" scrollable="true" 
+						emptyMessage="Nenhum documento encontrado para este apartamento">
+						<f:facet name="header">
+							<p:panelGrid columns="2" columnClasses="docs-header,docs-cmds" styleClass="no-background no-border no-margin" style="width: 100%;">
+								<h:outputText value="Documentos"/>
+								<h:outputText value="Incluir" style="width: 8%"/>
+							</p:panelGrid>
+						</f:facet>
+						<p:column>
+							<p:commandLink value="#{doc.name}" partialSubmit="true" process="@this" target="blank">
+								<f:setPropertyActionListener target="#{documentViewer.document}" value="#{doc}"/>
+							</p:commandLink>
+						</p:column>						
+						<p:column style="width: 25%;">
+							<h:outputText value="Apartamento #{doc.domain.number} - Bloco #{doc.domain.block}"/>
+						</p:column>						
+						<p:column style="width: 10%; text-align: center">
+							<p:commandLink value="Alterar" partialSubmit="true" process="@this" target="blank">
+								<f:setPropertyActionListener target="#{documentViewer.document}" value="#{doc}"/>
+							</p:commandLink>
+						</p:column>						
+						<p:column style="width: 10%; text-align: center">
+							<p:commandLink value="Excluir" partialSubmit="true" process="@this" target="blank">
+								<f:setPropertyActionListener target="#{documentViewer.document}" value="#{doc}"/>
+							</p:commandLink>
+						</p:column>						
+					</p:dataTable>
 				</p:column>
 			</p:panelGrid>
 		</h:form>
 
-		<p:tabView id="tabs">
+		<p:tabView id="tabs" style="margin: 10px">
 			<p:tab title="Usuários"><ui:include src="person-view2.xhtml"/></p:tab>
 			<p:tab title="Veículos"><ui:include src="vehicle-view.xhtml"/></p:tab>
 			<p:tab title="Prestadores de Serviço"><ui:include src="supplier-view.xhtml"/></p:tab>

@@ -19,8 +19,12 @@ public abstract class LiferayManager<Entity extends PersistedModel, Model extend
 	
 	protected abstract Class<Model> getModelClass();
 
-	protected abstract Entity getEntity(Model model) throws PersistenceException;
-	
+	protected abstract Entity getEntity(Model model) throws Exception;
+
+	public abstract Model save(Model model) throws Exception;
+
+	public abstract void delete(Model model) throws Exception;
+
 	protected Model getModel(Entity entity) throws Exception {
 		Model model = getModelClass().newInstance();
 		BeanUtils.copyProperties(model, entity);
