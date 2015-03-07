@@ -1,5 +1,6 @@
 package br.com.abware.accountmgm.persistence.manager;
 
+
 import java.util.ArrayList;
 
 import java.util.List;
@@ -23,7 +24,7 @@ import br.com.abware.jcondo.core.model.Person;
 public class FlatManagerImpl extends JCondoManager<FlatEntity, Flat> {
 
 	private AdministrationManagerImpl adminManager = new AdministrationManagerImpl();
-	
+
 	@Override
 	protected Class<Flat> getModelClass() {
 		return Flat.class;
@@ -81,6 +82,21 @@ public class FlatManagerImpl extends JCondoManager<FlatEntity, Flat> {
 			Query query = em.createQuery(queryString);
 			query.setParameter("number", number);
 			query.setParameter("block", block);
+			return getModel((FlatEntity) query.getSingleResult());
+		} catch (NoResultException e) {
+			return null;
+		} finally {
+			closeManager(key);
+		}
+	}
+
+	public Flat findByFolder(long folderId) throws Exception {
+		String key = generateKey();
+		try {
+			openManager(key);
+			String queryString = "FROM FlatEntity WHERE folderId = :id";
+			Query query = em.createQuery(queryString);
+			query.setParameter("id", folderId);
 			return getModel((FlatEntity) query.getSingleResult());
 		} catch (NoResultException e) {
 			return null;

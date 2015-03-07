@@ -19,6 +19,9 @@ public class FlatBean extends BaseBean {
 	
 	private static Logger LOGGER = Logger.getLogger(FlatBean.class);
 
+	@ManagedProperty(value="#{documentBean}")
+	private DocumentBean documentBean;
+
 	@ManagedProperty(value="#{personBean}")
 	private PersonBean personBean;
 
@@ -30,21 +33,25 @@ public class FlatBean extends BaseBean {
 
 	private List<Flat> flats;
 
-	private Flat flat;	
+	private Flat flat;
 
 	@PostConstruct
 	public void init() {
 		try {
 			flats = flatService.getFlats(personService.getPerson());
 			supplierBean.init(flats);
+			documentBean.init(flats);
 
 			ArrayList<Domain> domains = new ArrayList<Domain>(flats);
 			domains.addAll(supplierBean.getSuppliers());
 
 			personBean.init(domains);
+			
+			if (flats.size() == 1) {
+				flat = flats.get(0);
+			}
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			LOGGER.error("", e);
 		}
 	}
 
@@ -52,6 +59,7 @@ public class FlatBean extends BaseBean {
 		personBean.onDomainSearch(flat);
 		vehicleBean.onDomainSearch(flat);
 		supplierBean.onDomainSearch(flat);
+		documentBean.onDomainSearch(flat);
 	}
 	
 	public void onFlatSave() {
@@ -70,6 +78,14 @@ public class FlatBean extends BaseBean {
 	}
 
 	public void onFlatsDelete() throws Exception {
+	}
+
+	public DocumentBean getDocumentBean() {
+		return documentBean;
+	}
+
+	public void setDocumentBean(DocumentBean documentBean) {
+		this.documentBean = documentBean;
 	}
 
 	public PersonBean getPersonBean() {

@@ -60,7 +60,7 @@
 		</p:panelGrid>
 
 		<p:dataTable widgetVar="personTable" id="personTable" var="person" value="#{personViewer.model}"  
-		             paginator="true" rows="5" paginatorPosition="bottom" 
+		             paginator="true" rows="5" paginatorPosition="bottom" emptyMessage="Nenhum usuário cadastrado"
 		             paginatorTemplate="{CurrentPageReport} {PreviousPageLink} {PageLinks} {NextPageLink}" 
 		             selection="#{personViewer.selectedPeople}" rowKey="#{person.id}" >
 	   		<p:column selectionMode="multiple" style="width: 17px;"/>

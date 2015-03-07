@@ -5,6 +5,7 @@ import java.util.ResourceBundle;
 
 import br.com.abware.accountmgm.persistence.manager.SecurityManagerImpl;
 import br.com.abware.accountmgm.service.core.AdministrationServiceImpl;
+import br.com.abware.accountmgm.service.core.DocumentServiceImpl;
 import br.com.abware.accountmgm.service.core.FlatServiceImpl;
 import br.com.abware.accountmgm.service.core.ParkingServiceImpl;
 import br.com.abware.accountmgm.service.core.PersonServiceImpl;
@@ -27,6 +28,8 @@ public abstract class BaseBean {
 	protected static final ParkingServiceImpl parkingService = new ParkingServiceImpl();
 	
 	protected static final SecurityManagerImpl securityManager = new SecurityManagerImpl();
+	
+	protected static final DocumentServiceImpl documentService = new DocumentServiceImpl();
 
 	protected static final Condominium CONDOMINIUM = new Condominium();
 	
