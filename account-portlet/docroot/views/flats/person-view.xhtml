@@ -73,7 +73,7 @@
 						<p:commandLink actionListener="#{testBean.onPersonDelete}" oncomplete="if (!args.validationFailed &amp;&amp; !args.exception) {PF('personTable').update();}" partialSubmit="true" process="@this" disabled="#{!testBean.canEditPerson(person)}">
 							<h:graphicImage value="../images/delete.png" />
 							<p:confirm header="#{msg['person.delete.confirm']}" message="#{msg['person.delete.message']}" icon="ui-icon-alert"/>
-							<f:setPropertyActionListener target="#{testBean.person}" value="#{model.person}"/>
+							<f:setPropertyActionListener target="#{testBean.person}" value="#{person}"/>
 						</p:commandLink>
 					</p:column>
 				</p:dataTable>

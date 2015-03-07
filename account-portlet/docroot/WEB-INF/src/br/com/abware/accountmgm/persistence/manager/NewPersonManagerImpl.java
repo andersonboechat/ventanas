@@ -34,7 +34,7 @@ public class NewPersonManagerImpl extends JCondoManager<PersonEntity, Person> {
 
 	private String getPath(long imageId) {
 		return helper.getPortalURL() + helper.getThemeDisplay().getPathImage() + "/user_male_portrait?img_id=" + imageId; 
-	}	
+	}
 
 	@Override
 	protected Class<PersonEntity> getEntityClass() {

@@ -3,6 +3,7 @@ package br.com.abware.accountmgm.bean;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -69,11 +70,12 @@ public class TestBean extends BaseBean {
 	@PostConstruct
 	public void init() {
 		try {
-			flats = flatService.getFlats(personService.getPerson());
+			Person person = personService.getPerson();
+			flats = flatService.getFlats(person);
 			administration = adminService.getAdministration("Administration");
 
 			types = new HashMap<Domain, List<PersonType>>();
-			if (administration != null) {
+			for (Administration administration : adminService.getAdministrations(person)) {
 				types.put(administration, personService.getTypes(administration));
 			}
 
@@ -85,14 +87,18 @@ public class TestBean extends BaseBean {
 				types.put(flat, personService.getTypes(flat));
 			}
 
-			model = new ModelDataModel<Person>(personService.getPeople(personService.getPerson()));
+			Set<Person> people = new HashSet<Person>();
+			for (Domain domain : types.keySet()) {
+				people.addAll(personService.getPeople(domain));
+			}
+
+			model = new ModelDataModel<Person>(new ArrayList<Person>(people));
 			person = new Person();
 			person.setPicture(new Image());
 			filters = new HashMap<String, Object>();
 			imageUploadBean.setWidth(198);
 			imageUploadBean.setHeight(300);
 			genders = Arrays.asList(Gender.values());
-
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

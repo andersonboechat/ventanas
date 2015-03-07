@@ -1,14 +1,12 @@
 package br.com.abware.accountmgm.persistence.entity;
 
-import javax.persistence.DiscriminatorColumn;
-import javax.persistence.DiscriminatorType;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
-import javax.persistence.Inheritance;
-import javax.persistence.InheritanceType;
+import javax.persistence.JoinColumn;
+import javax.persistence.OneToOne;
 import javax.persistence.Table;
 
 import br.com.abware.accountmgm.model.ParkingType;
@@ -20,8 +18,6 @@ import br.com.abware.accountmgm.model.ParkingType;
  */
 @Entity
 @Table(name="jco_parking")
-@Inheritance(strategy=InheritanceType.JOINED)
-@DiscriminatorColumn(name="ID", discriminatorType=DiscriminatorType.INTEGER)
 public class ParkingEntity extends BaseEntity {
 
 	private static final long serialVersionUID = 1L;
@@ -32,7 +28,13 @@ public class ParkingEntity extends BaseEntity {
 
 	private String code;
 
-	private long domainId;
+	@OneToOne
+	@JoinColumn(name="ownerDomainId", nullable=true)
+	private DomainEntity ownerDomain;
+
+	@OneToOne
+	@JoinColumn(name="renterDomainId", nullable=true)
+	private DomainEntity renterDomain;
 
 	@Enumerated(EnumType.ORDINAL)
 	private ParkingType type;
@@ -56,12 +58,20 @@ public class ParkingEntity extends BaseEntity {
 		this.code = code;
 	}
 
-	public long getDomainId() {
-		return this.domainId;
+	public DomainEntity getOwnerDomain() {
+		return ownerDomain;
 	}
 
-	public void setDomainId(long domainId) {
-		this.domainId = domainId;
+	public void setOwnerDomain(DomainEntity ownerDomain) {
+		this.ownerDomain = ownerDomain;
+	}
+
+	public DomainEntity getRenterDomain() {
+		return renterDomain;
+	}
+
+	public void setRenterDomain(DomainEntity renterDomain) {
+		this.renterDomain = renterDomain;
 	}
 
 	public ParkingType getType() {

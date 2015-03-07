@@ -1,146 +1,99 @@
 package br.com.abware.accountmgm.bean;
 
-import java.util.HashMap;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
-import java.util.TreeSet;
 
 import javax.annotation.PostConstruct;
 import javax.faces.bean.ManagedBean;
+import javax.faces.bean.ManagedProperty;
 import javax.faces.bean.ViewScoped;
-import javax.faces.event.AjaxBehaviorEvent;
 
 import org.apache.log4j.Logger;
 
-import br.com.abware.accountmgm.bean.model.ModelDataModel;
-import br.com.abware.accountmgm.util.BeanUtils;
+import br.com.abware.jcondo.core.model.Domain;
 import br.com.abware.jcondo.core.model.Flat;
 
 @ManagedBean
 @ViewScoped
 public class FlatBean extends BaseBean {
-
+	
 	private static Logger LOGGER = Logger.getLogger(FlatBean.class);
 
-	private ModelDataModel<Flat> model;
+	@ManagedProperty(value="#{personBean}")
+	private PersonBean personBean;
 
-	private HashMap<String, Object> filters;	
+	@ManagedProperty(value="#{vehicleBean}")
+	private VehicleBean vehicleBean;	
 
-	private Set<Integer> blocks;
-
-	private int block;
-
-	private Set<Integer> numbers;
-
-	private int number;
+	@ManagedProperty(value="#{supplierBean}")
+	private SupplierBean supplierBean;
 
 	private List<Flat> flats;
-	
-	private Flat flat;
-	
-	private Flat[] selectedFlats;
+
+	private Flat flat;	
 
 	@PostConstruct
 	public void init() {
 		try {
 			flats = flatService.getFlats(personService.getPerson());
-			model = new ModelDataModel<Flat>(flats);
+			supplierBean.init(flats);
 
-			blocks = new TreeSet<Integer>();
-			numbers = new TreeSet<Integer>();
-			for (Flat flat : flats) {
-				blocks.add(flat.getBlock());
-				numbers.add(flat.getNumber());
-			}
+			ArrayList<Domain> domains = new ArrayList<Domain>(flats);
+			domains.addAll(supplierBean.getSuppliers());
 
-			filters = new HashMap<String, Object>();
+			personBean.init(domains);
 		} catch (Exception e) {
-			LOGGER.error("", e);
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
 	}
 
-	public void onBlockSelect(AjaxBehaviorEvent event) throws Exception {
-		filters.put("block", block);
-		model.filter(filters);
-	}
-
-	public void onNumberSelect(AjaxBehaviorEvent event) throws Exception {
-		filters.put("number", number);
-		model.filter(filters);
-	}
-
-	public void onFlatCreate() {
-		flat = new Flat();
+	public void onFlatSelect() throws Exception {
+		personBean.onDomainSearch(flat);
+		vehicleBean.onDomainSearch(flat);
+		supplierBean.onDomainSearch(flat);
 	}
 	
 	public void onFlatSave() {
 		try {
-			boolean isNew = flat.getId() == 0;
-			flat = flatService.register(flat);
-
-			if (isNew) {
-				model.addModel(flat);
-			} else {
-				model.setModel(flat);
-			}		
 		} catch (Exception e) {
-			e.printStackTrace();
-		}
-	}
-	
-	public void onFlatDelete() {
-		flatService.delete(flat);
-	}
-
-	public void onFlatsDelete() {
-		for (Flat flat : selectedFlats) {
-			flatService.delete(flat);
-		}
-	}
-
-	public void onFlatEdit() {
-		try {
-			flat = new Flat();
-			BeanUtils.copyProperties(flat, model.getRowData());
-		} catch (Exception e) {
+			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
 
-	public ModelDataModel<Flat> getModel() {
-		return model;
+	public void onFlatCreate() throws Exception {
+		flat = new Flat();
 	}
 
-	public Set<Integer> getBlocks() {
-		return blocks;
+	public void onFlatDelete() throws Exception {
 	}
 
-	public void setBlocks(Set<Integer> blocks) {
-		this.blocks = blocks;
+	public void onFlatsDelete() throws Exception {
 	}
 
-	public Integer getBlock() {
-		return block;
+	public PersonBean getPersonBean() {
+		return personBean;
 	}
 
-	public void setBlock(Integer block) {
-		this.block = block;
+	public void setPersonBean(PersonBean personBean) {
+		this.personBean = personBean;
 	}
 
-	public Set<Integer> getNumbers() {
-		return numbers;
+	public VehicleBean getVehicleBean() {
+		return vehicleBean;
 	}
 
-	public void setNumbers(Set<Integer> numbers) {
-		this.numbers = numbers;
+	public void setVehicleBean(VehicleBean vehicleBean) {
+		this.vehicleBean = vehicleBean;
 	}
 
-	public int getNumber() {
-		return number;
+	public SupplierBean getSupplierBean() {
+		return supplierBean;
 	}
 
-	public void setNumber(int number) {
-		this.number = number;
+	public void setSupplierBean(SupplierBean supplierBean) {
+		this.supplierBean = supplierBean;
 	}
 
 	public List<Flat> getFlats() {
@@ -157,14 +110,6 @@ public class FlatBean extends BaseBean {
 
 	public void setFlat(Flat flat) {
 		this.flat = flat;
-	}
-
-	public Flat[] getSelectedFlats() {
-		return selectedFlats;
-	}
-
-	public void setSelectedFlats(Flat[] selectedFlats) {
-		this.selectedFlats = selectedFlats;
 	}
 
 }

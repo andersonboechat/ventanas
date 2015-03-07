@@ -1,0 +1,166 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+
+<f:view
+	xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:c="http://java.sun.com/jsp/jstl/core"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:ui="http://java.sun.com/jsf/facelets">
+	<h:head>
+		<style>
+			.cropper2 {padding: 0;}
+			.cropper2 div {margin: 0 !important; padding: 0 !important;}
+			.cropper2 .img {margin: 0 !important;}
+			.car-image {background: url("/account-portlet/images/car_icon.png") no-repeat center; text-align: center; margin: 0px auto;}
+			.car-thumb {background-image: url("/account-portlet/images/car_icon.png") ;}
+			.column {padding: 6px; }
+			.column12 {width: 12%; font-weight: bold;}
+			.panel tr {border: none !important; background-color: transparent; font-size: 16px;}
+			.panel td {border: none !important; background-color: transparent; font-size: 16px;}
+			.menu-cmds {width: 100%}
+			.menu-cmds td {border: none !important; margin: 0px; padding: 0px}
+			.menu-cmds-col1 {vertical-align: middle; width: 155px; border: none !important; padding: 0px; margin: 0px}
+			.menu-cmds-col2 {vertical-align: middle; width: 130px;}
+			.menu-cmds-col3 {vertical-align: middle; padding: 0; text-align: right}
+			.my-account-col1 {vertical-align: top; width: 198px; height: 300px}
+			.my-account-col2 {vertical-align: top; padding: 0px !important;}
+			.labelClm {width: 85px; background-color: transparent}
+			.fieldClm {background-color: transparent !important; float: right}
+			.person-image {
+				border: none !important; width: 198px; height: 300px; padding: 0px !important; margin:  0px !important;
+				background: url("/image/user_male_portrait?img_id=0") no-repeat;  
+			}
+			.foto img {height: 100px; width: 66px}
+			.person-image div {border: none !important;}
+			.no-border tr {border: none !important;}
+			.no-border td {border: none !important;}
+			.no-margin {margin:  0px !important;padding: 0px !important;}
+		</style>
+	</h:head>
+	<p:growl id="outputMsg"/>
+	<f:loadBundle basename="Language_pt_BR" var="msg"/>
+
+	<h:form id="person-form">	
+		<p:panelGrid columns="2" styleClass="menu-cmds" columnClasses="menu-cmds-col1,menu-cmds-col2">
+			<p:column>
+				<p:commandButton value="Cadastrar" actionListener="#{personViewer.onPersonCreate}" 
+								 partialSubmit="true" process="@this" update=":tabs:person-details-form:model-details" oncomplete="PF('personDialog').show();"
+								 style="font-size: 12px"/>
+				<p:commandButton value="Excluir" actionListener="#{personViewer.onPeopleDelete}" 
+								partialSubmit="true" process="@this,personTable" update="personTable" style="font-size: 12px">
+					<p:confirm header="#{msg['main.delete.confirm']}" message="#{msg['person.delete.message']}" icon="ui-icon-alert"/>
+				</p:commandButton>
+			</p:column>
+			<p:column>
+				<p:inputText id="personName" value="#{personViewer.personName}" placeholder="Buscar pelo nome" style="font-style: italic; width: 100%">
+					<p:ajax event="change" listener="#{personViewer.onPersonSearch}" update="personTable" partialSubmit="true" process="@this"/>
+				</p:inputText>
+			</p:column>
+		</p:panelGrid>
+
+		<p:dataTable widgetVar="personTable" id="personTable" var="person" value="#{personViewer.model}"  
+		             paginator="true" rows="5" paginatorPosition="bottom" 
+		             paginatorTemplate="{CurrentPageReport} {PreviousPageLink} {PageLinks} {NextPageLink}" 
+		             selection="#{personViewer.selectedPeople}" rowKey="#{person.id}" >
+	   		<p:column selectionMode="multiple" style="width: 17px;"/>
+			<p:column style="width: 53px;">
+				<p:graphicImage value="#{person.picture.path}" styleClass="foto" height="80" width="52"/>
+			</p:column>
+			<p:column style="vertical-align: top">
+				<p:panelGrid columns="1" styleClass="no-background no-border">
+	       			<h:outputText value="#{person.firstName} #{person.lastName}" style="font-size: 14px; color: black; font-weight: bold;"/>
+	       			<p:dataGrid var="membership" value="#{person.memberships}" columns="1" styleClass="no-background no-border no-margin memberships">
+						<h:outputText value="#{personViewer.displayMembership(membership)}" />
+	       			</p:dataGrid>
+				</p:panelGrid>
+			</p:column>
+			<p:column style="width: 35px">
+				<p:commandLink update=":tabs:person-details-form:model-details" actionListener="#{personViewer.onPersonEdit}" oncomplete="PF('personDialog').show();" partialSubmit="true" process="@this" disabled="#{!personViewer.canEditPerson(person)}">
+					<h:graphicImage value="../images/edit.png" />
+				</p:commandLink>
+			</p:column>
+			<p:column style="width: 35px">
+				<p:commandLink actionListener="#{personViewer.onPersonDelete}" oncomplete="if (!args.validationFailed &amp;&amp; !args.exception) {PF('personTable').update();}" partialSubmit="true" process="@this" disabled="#{!personViewer.canEditPerson(person)}">
+					<h:graphicImage value="../images/delete.png" />
+					<p:confirm header="#{msg['person.delete.confirm']}" message="#{msg['person.delete.message']}" icon="ui-icon-alert"/>
+					<f:setPropertyActionListener target="#{personViewer.person}" value="#{person}"/>
+				</p:commandLink>
+			</p:column>
+		</p:dataTable>
+	</h:form>
+
+	<p:dialog header="#{msg['dlg.user.signon']}" widgetVar="personDialog" draggable="true" resizable="false" modal="true" closable="false" visible="false">
+		<h:form id="person-details-form">
+			<p:panelGrid id="model-details" columns="2" columnClasses="my-account-col1,my-account-col2" styleClass="no-border" style="margin: 10px 0px 20px 0px;" cellpadding="10">
+				<p:column>
+					<p:panelGrid columns="1" columnClasses="person-image" style="text-align: center">
+						<p:graphicImage id="portrait" value="#{imageUploader.image.path}" width="198" height="300"/>
+			        </p:panelGrid>
+					<p:panelGrid columns="2" columnClasses="no-margin" style="text-align: center; width: 100%;">
+						<p:commandLink value="Enviar Foto" update=":tabs:person-picture-form" oncomplete="PF('personPictureDialog').show();" partialSubmit="true" process="@this" styleClass="column" disabled="#{!personViewer.canEditInfo()}">
+							<f:setPropertyActionListener target="#{imageUploader.image.path}" value=""/>
+						</p:commandLink>
+						<p:commandLink value="Tirar Foto" update=":tabs:person-picture-form" oncomplete="PF('personPictureDialog').show();" partialSubmit="true" process="@this" styleClass="column" disabled="#{!personViewer.canEditInfo()}">
+							<f:setPropertyActionListener target="#{imageUploader.image.path}" value=""/>
+						</p:commandLink>
+					</p:panelGrid>
+				</p:column>
+				<p:column>
+					<p:panelGrid columns="1" columnClasses="fieldClm">
+						<p:panelGrid columns="2" columnClasses="labelClm,fieldClm" style="width: 100%; margin: 0px">
+							<p:outputLabel for="email" value="Email: "/>
+							<p:inputText id="email" value="#{personViewer.person.emailAddress}" size="40" readonly="#{!personViewer.canEditInfo()}"/>
+							<p:outputLabel for="firstName" value="Nome: "/>
+							<p:inputText id="firstName" value="#{personViewer.person.firstName}" size="40" readonly="#{!personViewer.canEditInfo()}"/>
+							<p:outputLabel for="lastName" value="Sobrenome: "/>
+							<p:inputText id="lastName" value="#{personViewer.person.lastName}" size="40" readonly="#{!personViewer.canEditInfo()}"/>
+							<p:outputLabel for="identity" value="CPF: "/>
+							<p:inputMask id="identity" value="#{personViewer.person.identity}" mask="999.999.999-99" size="40" readonly="#{!personViewer.canEditInfo()}"/>
+							<p:outputLabel for="male" value="Sexo:"/>
+							<p:selectOneMenu id="male" value="#{personViewer.person.gender}" required="false" disabled="#{!personViewer.canEditInfo()}">
+								<f:selectItems var="gender" value="#{personViewer.genders}" itemLabel="#{msg[gender.label]}"/>
+							</p:selectOneMenu>
+						</p:panelGrid>
+						<p:panelGrid columns="2" style="text-align: center; margin: 0px; float: right" styleClass="no-border" rendered="#{personViewer.getUnassignedDomains().size() > 0}">
+							<p:selectOneMenu id="newDomain" value="#{personViewer.selectedDomainId}" filter="true" filterMatchMode="contains">
+								<f:selectItems var="domain" value="#{personViewer.getUnassignedDomains()}" itemLabel="#{personViewer.displayDomain(domain)}" itemValue="#{domain.id}"/>
+							</p:selectOneMenu>
+							<p:commandButton value="Incluir" actionListener="#{personViewer.onDomainAdd}" update=":tabs:person-details-form:memberships, newDomain" partialSubmit="true" process="@namingcontainer"/>
+						</p:panelGrid>
+						<p:dataTable id="memberships" var="membership" rows="2" paginator="true" paginatorAlwaysVisible="false" paginatorPosition="bottom" value="#{personViewer.person.memberships}" style="width: 340px; margin-right: 10px;" emptyMessage="">
+							<p:column>
+								<p:panelGrid columns="1" columnClasses="fieldClm" style="width: 100%; margin: 0px; background-color: transparent !important" >
+									<h:outputText value="#{personViewer.displayDomain(membership.domain)}" />
+									<h:outputText value="#{msg[membership.type.label]}" rendered="#{!personViewer.canChangeType(membership)}"/>
+									<p:selectOneMenu value="#{membership.type}" style="vertical-align: middle;" rendered="#{personViewer.canChangeType(membership)}">
+										<f:selectItems var="type" value="#{personViewer.types.get(membership.domain)}" itemLabel="#{msg[type.label]}"/>
+									</p:selectOneMenu>
+								</p:panelGrid>
+							</p:column>
+						</p:dataTable>
+					</p:panelGrid>
+				</p:column>
+			</p:panelGrid>
+			<p:commandButton value="Cancelar" oncomplete="if (!args.validationFailed) { if(!args.exception) {PF('personDialog').hide();} else { if(args.alert) {PF('alertDialog').show();}}}" style="float: right; width: 80px; margin: 0px 0px 10px 5px;"/>
+			<p:commandButton value="Salvar" actionListener="#{personViewer.onPersonSave}" update=":tabs:person-form:personTable, :outputMsg" oncomplete="if (!args.validationFailed) { if(!args.exception) {PF('personDialog').hide();} else { if(args.alert) {PF('alertDialog').show();}}}" style="float: right; width: 80px; margin: 0px 0px 10px 5px;"/>
+		</h:form>
+	</p:dialog>
+
+	<p:dialog id="personPictureDialog" widgetVar="personPictureDialog" modal="true" header="Upload de Imagem">
+		<h:form id="person-picture-form" enctype="multipart/form-data">
+			<p:fileUpload id="image" label="Selecionar Foto" fileUploadListener="#{imageUploader.onImageUpload}" auto="true" update="person-picture-form" rendered="#{empty imageUploader.image.path}"/>
+			<p:panel rendered="#{!(empty imageUploader.image.path)}" style="border: 0px !important;">
+				<p:panel styleClass="cropper">
+					<p:imageCropper value="#{imageUploader.croppedImage}" image="#{imageUploader.image.path}" initialCoords="0,0,#{imageUploader.width},#{imageUploader.height}" minSize="#{imageUploader.width},#{imageUploader.height}" maxSize="#{imageUploader.width},#{imageUploader.height}"/>
+				</p:panel>
+				<p:panel style="margin: 0px auto; text-align: center; padding: 15px 0px; border: none;">
+					<p:commandButton value="Recortar" actionListener="#{imageUploader.onImageCropp}" update=":tabs:person-details-form:portrait" oncomplete="PF('personPictureDialog').hide();"/>
+					<p:commandButton value="Cancelar" oncomplete="PF('personPictureDialog').hide();" partialSubmit="true" process="@this">
+						<f:setPropertyActionListener target="#{imageUploader.image.path}" value=""/>
+					</p:commandButton>
+				</p:panel>
+			</p:panel>
+		</h:form>
+	</p:dialog>
+</f:view>

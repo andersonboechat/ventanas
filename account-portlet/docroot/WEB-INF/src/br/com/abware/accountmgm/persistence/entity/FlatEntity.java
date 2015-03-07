@@ -10,6 +10,7 @@ import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
 @Entity
@@ -29,6 +30,14 @@ public class FlatEntity extends DomainEntity {
 	@JoinTable(name="jco_membership", joinColumns={@JoinColumn(name="domainId", referencedColumnName="id")}, inverseJoinColumns={@JoinColumn(name="personId", referencedColumnName="id")})
 	private List<PersonEntity> people;
 
+	@OneToMany(cascade=CascadeType.ALL, fetch=FetchType.LAZY)
+	@JoinColumn(name="ownerDomainId", referencedColumnName="id")
+	private List<ParkingEntity> parkings;
+
+	@OneToMany(cascade=CascadeType.ALL, fetch=FetchType.LAZY)
+	@JoinColumn(name="renterDomainId", referencedColumnName="id")
+	private List<ParkingEntity> rentedParkings;
+
 	public int getBlock() {
 		return block;
 	}
@@ -43,6 +52,22 @@ public class FlatEntity extends DomainEntity {
 
 	public void setNumber(int number) {
 		this.number = number;
+	}
+
+	public List<ParkingEntity> getParkings() {
+		return parkings;
+	}
+
+	public void setParkings(List<ParkingEntity> parkings) {
+		this.parkings = parkings;
+	}
+
+	public List<ParkingEntity> getRentedParkings() {
+		return rentedParkings;
+	}
+
+	public void setRentedParkings(List<ParkingEntity> rentedParkings) {
+		this.rentedParkings = rentedParkings;
 	}
 
 }

@@ -7,6 +7,8 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.Inheritance;
 import javax.persistence.InheritanceType;
+import javax.persistence.JoinColumn;
+import javax.persistence.OneToOne;
 import javax.persistence.Table;
 
 @Entity
@@ -20,6 +22,10 @@ public abstract class DomainEntity extends BaseEntity {
 	@Id
 	@GeneratedValue
 	private long id;
+
+	@OneToOne
+	@JoinColumn(name="parentId", nullable=true)	
+	private DomainEntity parent;
 	
 	private long relatedId;
 
@@ -29,6 +35,14 @@ public abstract class DomainEntity extends BaseEntity {
 
 	public void setId(long id) {
 		this.id = id;
+	}
+
+	public DomainEntity getParent() {
+		return parent;
+	}
+
+	public void setParent(DomainEntity parent) {
+		this.parent = parent;
 	}
 
 	public long getRelatedId() {

@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+
+<f:view
+	xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:c="http://java.sun.com/jsp/jstl/core"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:ui="http://java.sun.com/jsf/facelets">
+
+	<h:form id="supplier-form">	
+		<p:panelGrid columns="2" styleClass="menu-cmds" columnClasses="menu-cmds-col1,menu-cmds-col2">
+			<p:column>
+				<p:commandButton value="Cadastrar" actionListener="#{supplierViewer.onSupplierCreate}" 
+								 partialSubmit="true" process="@this" update=":tabs:supplier-details-form:model-details" oncomplete="PF('supplierDialog').show();"
+								 style="font-size: 12px">
+					<f:setPropertyActionListener target="#{supplierViewer.domain}" value="#{flatBean.flat}"/>
+				</p:commandButton>
+				<p:commandButton value="Excluir" actionListener="#{supplierViewer.onPeopleDelete}" 
+								partialSubmit="true" process="@this,supplierTable" update="supplierTable" style="font-size: 12px">
+					<p:confirm header="#{msg['main.delete.confirm']}" message="#{msg['supplier.delete.message']}" icon="ui-icon-alert"/>
+				</p:commandButton>
+			</p:column>
+			<p:column>
+				<p:inputText id="supplierName" value="#{supplierViewer.name}" placeholder="Buscar pelo nome" style="font-style: italic; width: 100%">
+					<p:ajax event="change" listener="#{supplierViewer.onNameSearch}" update="supplierTable" partialSubmit="true" process="@this"/>
+				</p:inputText>
+			</p:column>
+		</p:panelGrid>
+
+		<p:dataTable widgetVar="supplierTable" id="supplierTable" var="supplier" value="#{supplierViewer.model}"  
+		             paginator="true" rows="5" paginatorPosition="bottom" 
+		             paginatorTemplate="{CurrentPageReport} {PreviousPageLink} {PageLinks} {NextPageLink}" 
+		             selection="#{supplierViewer.selectedSuppliers}" rowKey="#{supplier.id}" emptyMessage="Nenhum prestador de serviço cadastrado">
+	   		<p:column selectionMode="multiple" style="width: 17px;"/>
+			<p:column style="vertical-align: top">
+				<p:panelGrid columns="1" styleClass="no-background no-border no-margin">
+	       			<h:outputText value="#{supplier.name}" style="font-size: 14px; color: black; font-weight: bold;"/>
+	       			<h:outputText value="Apartamento #{supplier.parent.number} - Bloco #{supplier.parent.block}" />
+	       			<h:outputText value="#{supplier.description}" />
+				</p:panelGrid>
+			</p:column>
+			<p:column style="width: 35px">
+				<p:commandLink update=":tabs:supplier-details-form:model-details" actionListener="#{supplierViewer.onSupplierEdit}" oncomplete="PF('supplierDialog').show();" partialSubmit="true" process="@this">
+					<h:graphicImage value="../images/edit.png" />
+					<f:setPropertyActionListener target="#{supplierViewer.domain}" value="#{supplier.parent}"/>
+				</p:commandLink>
+			</p:column>
+			<p:column style="width: 35px">
+				<p:commandLink actionListener="#{supplierViewer.onSupplierDelete}" oncomplete="if (!args.validationFailed &amp;&amp; !args.exception) {PF('supplierTable').update();}" partialSubmit="true" process="@this">
+					<h:graphicImage value="../images/delete.png" />
+					<p:confirm header="#{msg['supplier.delete.confirm']}" message="#{msg['supplier.delete.message']}" icon="ui-icon-alert"/>
+					<f:setPropertyActionListener target="#{supplierViewer.supplier}" value="#{model.supplier}"/>
+				</p:commandLink>
+			</p:column>
+		</p:dataTable>
+	</h:form>
+	
+	<p:dialog header="Cadastro de Prestador de Serviço" widgetVar="supplierDialog" draggable="true" resizable="false" modal="true" closable="false" visible="false">
+		<h:form id="supplier-details-form">
+			<p:panelGrid id="model-details" columns="1" styleClass="no-border" style="margin: 10px 0px 20px 0px;" cellpadding="10">
+		    	<h:outputText value="Apartamento #{supplierViewer.domain.number} - Bloco #{supplierViewer.domain.block}" rendered="#{!empty(supplierViewer.domain)}"/>
+		    	<p:outputLabel for="domain" value="Apartamento: " rendered="#{empty(supplierViewer.domain)}"/>
+		    	<p:selectOneMenu id="domain" value="#{supplierViewer.domain}" converter="selectItemsConverter" rendered="#{empty(supplierViewer.domain)}">
+		    		<f:selectItem itemLabel="Selecione" noSelectionOption="true"/>
+					<f:selectItems var="flat" value="#{flatBean.flats}" itemLabel="Apartamento #{flat.number} - Bloco #{flat.block}" itemValue="#{flat}"/>
+		    	</p:selectOneMenu>
+				<p:outputLabel for="name" value="Nome: "/>
+				<p:inputText id="name" value="#{supplierViewer.supplier.name}" size="40" required="true"/>
+				<p:outputLabel for="description" value="Descrição: "/>
+				<p:inputTextarea id="description" value="#{supplierViewer.supplier.description}" cols="40" rows="5"/>
+			</p:panelGrid>
+			<p:commandButton value="Cancelar" onclick="PF('supplierDialog').hide();" style="float: right; width: 80px; margin: 0px 0px 10px 5px;">
+				<f:setPropertyActionListener target="#{supplierViewer.domain}" value=""/>
+			</p:commandButton>
+			<p:commandButton value="Salvar" actionListener="#{supplierViewer.onSupplierSave}" update=":tabs:supplier-form:supplierTable, :outputMsg" oncomplete="if (!args.validationFailed) { if(!args.exception) {PF('supplierDialog').hide();} else { if(args.alert) {PF('alertDialog').show();}}}" style="float: right; width: 80px; margin: 0px 0px 10px 5px;"/>
+		</h:form>
+	</p:dialog>
+
+</f:view>
