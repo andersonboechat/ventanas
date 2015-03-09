@@ -46,7 +46,7 @@ public class FlatBean extends BaseBean {
 			domains.addAll(supplierBean.getSuppliers());
 
 			personBean.init(domains);
-			
+			supplierBean.addObserver(personBean);
 			if (flats.size() == 1) {
 				flat = flats.get(0);
 			}

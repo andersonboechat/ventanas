@@ -18,7 +18,7 @@
 			.column12 {width: 12%; font-weight: bold;}
 			.panel tr {border: none !important; background-color: transparent; font-size: 16px;}
 			.panel td {border: none !important; background-color: transparent; font-size: 16px;}
-			.menu-cmds {width: 100%}
+			.menu-cmds {width: 100%; margin: 0px}
 			.menu-cmds td {border: none !important; margin: 0px; padding: 0px}
 			.menu-cmds-col1 {vertical-align: middle; width: 155px; border: none !important; padding: 0px; margin: 0px}
 			.menu-cmds-col2 {vertical-align: middle; width: 130px;}
@@ -36,13 +36,15 @@
 			.no-border tr {border: none !important;}
 			.no-border td {border: none !important;}
 			.no-margin {margin:  0px !important;padding: 0px !important;}
+			.ui-tabs-panel {margin: 0 !important;padding: 0 !important}
+			.datatable { margin: 0px -1px -1px -1px}
 		</style>
 	</h:head>
 	<p:growl id="outputMsg"/>
 	<f:loadBundle basename="Language_pt_BR" var="msg"/>
 
 	<h:form id="person-form">	
-		<p:panelGrid columns="2" styleClass="menu-cmds" columnClasses="menu-cmds-col1,menu-cmds-col2">
+		<p:panelGrid columns="2" styleClass="menu-cmds no-border" columnClasses="menu-cmds-col1,menu-cmds-col2">
 			<p:column>
 				<p:commandButton value="Cadastrar" actionListener="#{personViewer.onPersonCreate}" 
 								 partialSubmit="true" process="@this" update=":tabs:person-details-form:model-details" oncomplete="PF('personDialog').show();"
@@ -62,7 +64,7 @@
 		<p:dataTable widgetVar="personTable" id="personTable" var="person" value="#{personViewer.model}"  
 		             paginator="true" rows="5" paginatorPosition="bottom" emptyMessage="Nenhum usuário cadastrado"
 		             paginatorTemplate="{CurrentPageReport} {PreviousPageLink} {PageLinks} {NextPageLink}" 
-		             selection="#{personViewer.selectedPeople}" rowKey="#{person.id}" >
+		             selection="#{personViewer.selectedPeople}" rowKey="#{person.id}" styleClass="datatable">
 	   		<p:column selectionMode="multiple" style="width: 17px;"/>
 			<p:column style="width: 53px;">
 				<p:graphicImage value="#{person.picture.path}" styleClass="foto" height="80" width="52"/>

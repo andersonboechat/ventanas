@@ -28,7 +28,7 @@
 		<portlet-class>javax.portlet.faces.GenericFacesPortlet</portlet-class>
 		<init-param>
 			<name>javax.portlet.faces.defaultViewId.view</name>
-			<value>/views/flats/flat-view2.xhtml</value>
+			<value>/views/flats/flat-view.xhtml</value>
 		</init-param>
 		<expiration-cache>0</expiration-cache>
 		<supports>
@@ -38,6 +38,27 @@
 			<title>Cadastro de Apartamentos</title>
 			<short-title>Apartamentos</short-title>
 			<keywords>Flat Management</keywords>
+		</portlet-info>
+		<security-role-ref>
+			<role-name>administrator</role-name>
+		</security-role-ref>
+	</portlet>
+	<portlet>
+		<portlet-name>flat-viewer</portlet-name>
+		<display-name>Apartamento</display-name>
+		<portlet-class>javax.portlet.faces.GenericFacesPortlet</portlet-class>
+		<init-param>
+			<name>javax.portlet.faces.defaultViewId.view</name>
+			<value>/views/flats/flat-view2.xhtml</value>
+		</init-param>
+		<expiration-cache>0</expiration-cache>
+		<supports>
+			<mime-type>text/html</mime-type>
+		</supports>
+		<portlet-info>
+			<title>Apartamento</title>
+			<short-title>Apartamento</short-title>
+			<keywords>Apartamento</keywords>
 		</portlet-info>
 		<security-role-ref>
 			<role-name>administrator</role-name>

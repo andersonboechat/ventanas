@@ -53,7 +53,7 @@
 		<c:set var="personViewer" value="#{flatBean.personBean}"/>
 		<c:set var="imageUploader" value="#{flatBean.personBean.imageUploadBean}"/>
 		<c:set var="vehicleViewer" value="#{flatBean.vehicleBean}"/>
-		<c:set var="vehiclePictureUploader" value="#{flatBean.vehicleBean.imageUploadBean}"/>	
+		<c:set var="vehiclePictureUploader" value="#{flatBean.vehicleBean.imageUploadBean2}"/>	
 		<c:set var="supplierViewer" value="#{flatBean.supplierBean}"/>
 		<c:set var="documentViewer" value="#{flatBean.documentBean}"/>
 
@@ -99,7 +99,7 @@
 			</p:panelGrid>
 		</h:form>
 
-		<p:tabView id="tabs" style="margin: 10px">
+		<p:tabView id="tabs" style="margin: 10px; padding: 0">
 			<p:tab title="Usuários"><ui:include src="person-view2.xhtml"/></p:tab>
 			<p:tab title="Veículos"><ui:include src="vehicle-view.xhtml"/></p:tab>
 			<p:tab title="Prestadores de Serviço"><ui:include src="supplier-view.xhtml"/></p:tab>

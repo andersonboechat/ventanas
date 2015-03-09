@@ -7,7 +7,6 @@ import java.util.Map;
 
 import javax.faces.bean.ManagedBean;
 import javax.faces.bean.ViewScoped;
-import javax.faces.event.AjaxBehaviorEvent;
 
 import org.apache.log4j.Logger;
 
@@ -23,7 +22,7 @@ import br.com.abware.jcondo.core.model.Supplier;
 public class SupplierBean extends BaseBean {
 
 	private static Logger LOGGER = Logger.getLogger(SupplierBean.class);
-
+	
 	private ModelDataModel<Supplier> model = null;
 	
 	private HashMap<String, Object> filters;
@@ -77,7 +76,9 @@ public class SupplierBean extends BaseBean {
 				sup = supplierService.update(supplier);
 				model.setModel(sup);
 			}
-			
+
+			this.setChanged();
+			this.notifyObservers(sup);
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

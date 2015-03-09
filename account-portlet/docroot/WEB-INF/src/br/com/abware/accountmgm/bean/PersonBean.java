@@ -6,6 +6,8 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Observable;
+import java.util.Observer;
 import java.util.Set;
 
 import javax.faces.bean.ManagedBean;
@@ -33,7 +35,7 @@ import br.com.abware.jcondo.core.model.Supplier;
 
 @ManagedBean
 @ViewScoped
-public class PersonBean extends BaseBean {
+public class PersonBean extends BaseBean implements Observer {
 
 	private static Logger LOGGER = Logger.getLogger(PersonBean.class);
 
@@ -223,7 +225,7 @@ public class PersonBean extends BaseBean {
 	}
 
 	public boolean canEditInfo() throws Exception {
-		return person.getId() == 0 || person.equals(personService.getPerson());
+		return person != null && (person.getId() == 0 || person.equals(personService.getPerson()));
 	}
 
 	@SuppressWarnings("unchecked")
@@ -340,6 +342,15 @@ public class PersonBean extends BaseBean {
 
 	public void setTypes(Map<Domain, List<PersonType>> types) {
 		this.types = types;
+	}
+
+	@Override
+	public void update(Observable o, Object arg) {
+		try {
+			types.put((Domain) arg, personService.getTypes((Domain) arg));
+		} catch (Exception e) {
+			LOGGER.warn("fail to update domain person types");
+		}
 	}
 
 }

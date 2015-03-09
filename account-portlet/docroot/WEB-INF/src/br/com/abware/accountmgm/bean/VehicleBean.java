@@ -37,8 +37,8 @@ public class VehicleBean extends BaseBean {
 	@ManagedProperty(value="#{fileUploadBean}")
 	private FileUploadBean fileUploadBean;
 
-	@ManagedProperty(value="#{imageUploadBean}")
-	private ImageUploadBean imageUploadBean;
+	@ManagedProperty(value="#{imageUploadBean}", name="imageUploadBean2")
+	private ImageUploadBean imageUploadBean2;
 
 	private ModelDataModel<Vehicle> model;
 
@@ -77,6 +77,8 @@ public class VehicleBean extends BaseBean {
 				numbers.add(flat.getNumber());
 			}
 			filters = new HashMap<String, Object>();
+			imageUploadBean2.setWidth(640);
+			imageUploadBean2.setHeight(480);			
 		} catch (Exception e) {
 			LOGGER.error("", e);
 		}
@@ -206,12 +208,12 @@ public class VehicleBean extends BaseBean {
 		fileUploadBean.onCropp();
 	}
 
-	public ImageUploadBean getImageUploadBean() {
-		return imageUploadBean;
+	public ImageUploadBean getImageUploadBean2() {
+		return imageUploadBean2;
 	}
 
-	public void setImageUploadBean(ImageUploadBean imageUploadBean) {
-		this.imageUploadBean = imageUploadBean;
+	public void setImageUploadBean2(ImageUploadBean imageUploadBean) {
+		this.imageUploadBean2 = imageUploadBean;
 	}
 
 	public void setFileUploadBean(FileUploadBean fileUploadBean) {

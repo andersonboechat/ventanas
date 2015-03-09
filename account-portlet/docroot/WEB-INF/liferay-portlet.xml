@@ -19,6 +19,13 @@
 		<header-portlet-css>/css/main.css</header-portlet-css>
 	</portlet>
 	<portlet>
+		<portlet-name>flat-viewer</portlet-name>
+		<icon>/icon.png</icon>
+		<instanceable>false</instanceable>
+		<ajaxable>false</ajaxable>
+		<header-portlet-css>/css/main.css</header-portlet-css>
+	</portlet>
+	<portlet>
 		<portlet-name>person-management</portlet-name>
 		<icon>/icon.png</icon>
 		<instanceable>false</instanceable>

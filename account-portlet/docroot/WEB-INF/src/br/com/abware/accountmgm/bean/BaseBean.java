@@ -1,6 +1,7 @@
 package br.com.abware.accountmgm.bean;
 
 import java.util.Locale;
+import java.util.Observable;
 import java.util.ResourceBundle;
 
 import br.com.abware.accountmgm.persistence.manager.SecurityManagerImpl;
@@ -13,7 +14,7 @@ import br.com.abware.accountmgm.service.core.SupplierServiceImpl;
 import br.com.abware.accountmgm.service.core.VehicleServiceImpl;
 import br.com.abware.jcondo.core.model.Condominium;
 
-public abstract class BaseBean {
+public abstract class BaseBean extends Observable {
 
 	protected static final AdministrationServiceImpl adminService = new AdministrationServiceImpl();
 	
@@ -34,5 +35,9 @@ public abstract class BaseBean {
 	protected static final Condominium CONDOMINIUM = new Condominium();
 	
 	protected static ResourceBundle rb = ResourceBundle.getBundle("Language", new Locale("pt", "BR"));
+	
+	public BaseBean() {
+		super();
+	}
 	
 }

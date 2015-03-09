@@ -53,7 +53,8 @@ public class SupplierServiceImpl {
 		return supplierManager.save(supplier);
 	}
 
-	public void delete(Supplier supplier) {
+	public void delete(Supplier supplier) throws Exception {
+		supplierManager.delete(supplier);
 	}
 
 }

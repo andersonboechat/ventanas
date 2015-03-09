@@ -43,38 +43,38 @@
 		<h:form id="flat-form">
 			<p:panelGrid id="model-filters" columns="2" styleClass="menu-cmds" columnClasses="menu-cmds-col1,menu-cmds-col2">
 				<p:column>
-					<p:commandButton value="Cadastrar" actionListener="#{flatBean.onFlatCreate}" 
+					<p:commandButton value="Cadastrar" actionListener="#{adminBean.onFlatCreate}" 
 									 partialSubmit="true" process="@this" update=":flat-register-form:model-details" oncomplete="PF('flatDialog').show();"/>
-					<p:commandButton value="Excluir" actionListener="#{flatBean.onFlatsDelete}" 
+					<p:commandButton value="Excluir" actionListener="#{adminBean.onFlatsDelete}" 
 									partialSubmit="true" process="@this,flatTable" update="flatTable">
 						<p:confirm header="#{msg2['main.delete.confirm']}" message="#{msg2['flat.delete.message']}" icon="ui-icon-alert"/>
 					</p:commandButton>
 				</p:column>
 			    <p:column>
 			    	<p:selectCheckboxMenu label="Apartamentos" filter="true" filterMatchMode="contains">
-						<f:selectItems var="flat" value="#{flatBean.flats}" itemLabel="Apartamento #{flat.number} - Bloco #{flat.block}" itemValue="#{flat.id}"/>
+						<f:selectItems var="flat" value="#{adminBean.flats}" itemLabel="Apartamento #{flat.number} - Bloco #{flat.block}" itemValue="#{flat.id}"/>
 			    	</p:selectCheckboxMenu>
 			    </p:column>
 			</p:panelGrid>
 
-			<p:dataTable widgetVar="flatTable" id="flatTable" var="flat" value="#{flatBean.model}"  
+			<p:dataTable widgetVar="flatTable" id="flatTable" var="flat" value="#{adminBean.model}"  
 			             paginator="true" rows="5" paginatorPosition="bottom" 
 			             paginatorTemplate="{CurrentPageReport} {PreviousPageLink} {PageLinks} {NextPageLink}" 
-			             selection="#{flatBean.selectedFlats}" rowKey="#{flat.id}" >
+			             selection="#{adminBean.selectedFlats}" rowKey="#{flat.id}" >
 				<p:column selectionMode="multiple" style="width: 17px;"/>
 				<p:column style="vertical-align: top">
         			<h:outputText value="Apartamento #{flat.number} - Bloco #{flat.block}" />
 				</p:column>
 				<p:column style="width: 35px">
-					<p:commandLink update=":flat-register-form:model-details" actionListener="#{flatBean.onFlatEdit}" oncomplete="PF('flatDialog').show();" partialSubmit="true" process="@this" >
+					<p:commandLink update=":flat-register-form:model-details" actionListener="#{adminBean.onFlatEdit}" oncomplete="PF('flatDialog').show();" partialSubmit="true" process="@this" >
 						<h:graphicImage value="../images/edit.png" />
 					</p:commandLink>
 				</p:column>
 				<p:column style="width: 35px">
-					<p:commandLink actionListener="#{flatBean.onFlatDelete}" oncomplete="if (!args.validationFailed &amp;&amp; !args.exception) {PF('flatTable').update();}" partialSubmit="true" process="@this">
+					<p:commandLink actionListener="#{adminBean.onFlatDelete}" oncomplete="if (!args.validationFailed &amp;&amp; !args.exception) {PF('flatTable').update();}" partialSubmit="true" process="@this">
 						<h:graphicImage value="../images/delete.png" />
 						<p:confirm header="#{msg2['flat.delete.confirm']}" message="#{msg2['flat.delete.message']}" icon="ui-icon-alert"/>
-						<f:setPropertyActionListener target="#{flatBean.flat}" value="#{flat}"/>
+						<f:setPropertyActionListener target="#{adminBean.flat}" value="#{flat}"/>
 					</p:commandLink>
 				</p:column>
 			</p:dataTable>
@@ -88,17 +88,17 @@
 				<p:panelGrid id="model-details" columns="1" styleClass="no-border" style="margin: 10px 0px 20px 0px;" cellpadding="10">
 					<p:panelGrid columns="4" styleClass="no-border" style="margin: 0px 0px 0px 0px;">
 						<p:outputLabel for="number" value="Apartamento: "/>
-						<p:inputText id="number" value="#{flatBean.flat.number}" size="20" maxlength="4"/>
+						<p:inputText id="number" value="#{adminBean.flat.number}" size="20" maxlength="4"/>
 						<p:outputLabel for="block" value="Bloco: "/>
-						<p:inputText id="block" value="#{flatBean.flat.block}" size="20" maxlength="1"/>
+						<p:inputText id="block" value="#{adminBean.flat.block}" size="20" maxlength="1"/>
 					</p:panelGrid>
 					<p:outputLabel for="parkings" value="Vagas: "/>
-					<p:pickList id="parkings" value="#{flatBean.parkings}" var="parking" itemLabel="Vaga #{parking.code}" itemValue="#{parking}" converter="parkingConverter">
+					<p:pickList id="parkings" value="#{adminBean.parkings}" var="parking" itemLabel="Vaga #{parking.code}" itemValue="#{parking}" converter="parkingConverter">
 						<f:facet name="sourceCaption">Disponíveis</f:facet>
 						<f:facet name="targetCaption">Selecionados</f:facet>					
 					</p:pickList>
 				</p:panelGrid>
-				<p:commandButton value="Salvar" actionListener="#{flatBean.onFlatSave}" update=":flat-form:flatTable, :flat-form:model-filters, :outputMsg2" oncomplete="if (!args.validationFailed) { if(!args.exception) {PF('flatDialog').hide();} else { if(args.alert) {PF('alertDialog').show();}}}" style="float: right; width: 80px; margin: 0px 10px 10px 5px;"/>
+				<p:commandButton value="Salvar" actionListener="#{adminBean.onFlatSave}" update=":flat-form:flatTable, :flat-form:model-filters, :outputMsg2" oncomplete="if (!args.validationFailed) { if(!args.exception) {PF('flatDialog').hide();} else { if(args.alert) {PF('alertDialog').show();}}}" style="float: right; width: 80px; margin: 0px 10px 10px 5px;"/>
 				<p:commandButton value="Cancelar" oncomplete="if (!args.validationFailed) { if(!args.exception) {PF('flatDialog').hide();} else { if(args.alert) {PF('alertDialog').show();}}}" style="float: right; width: 80px; margin: 0px 10px 10px 5px;"/>
 			</h:form>
 		</p:dialog>
