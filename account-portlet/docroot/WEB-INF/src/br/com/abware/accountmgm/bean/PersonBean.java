@@ -11,7 +11,6 @@ import java.util.Observer;
 import java.util.Set;
 
 import javax.faces.bean.ManagedBean;
-import javax.faces.bean.ManagedProperty;
 import javax.faces.bean.ViewScoped;
 import javax.faces.event.AjaxBehaviorEvent;
 
@@ -39,7 +38,6 @@ public class PersonBean extends BaseBean implements Observer {
 
 	private static Logger LOGGER = Logger.getLogger(PersonBean.class);
 
-	@ManagedProperty(value="#{imageUploadBean}")
 	private ImageUploadBean imageUploadBean;
 
 	private ModelDataModel<Person> model;
@@ -81,8 +79,7 @@ public class PersonBean extends BaseBean implements Observer {
 			model = new ModelDataModel<Person>(new ArrayList<Person>(people));
 			person = new Person();
 			filters = new HashMap<String, Object>();
-			imageUploadBean.setWidth(198);
-			imageUploadBean.setHeight(300);
+			imageUploadBean = new ImageUploadBean(198, 300);
 			genders = Arrays.asList(Gender.values());
 		} catch (Exception e) {
 			LOGGER.error("", e);

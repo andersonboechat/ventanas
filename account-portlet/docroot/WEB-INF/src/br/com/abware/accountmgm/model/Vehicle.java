@@ -7,11 +7,11 @@ public class Vehicle extends AbstractModel {
 
 	private long id;
 
-	private Image image;
+	private VehicleType type;
 	
-	private String picture;
-
 	private String license;
+
+	private Image image;
 
 	private Domain domain;
 
@@ -37,20 +37,12 @@ public class Vehicle extends AbstractModel {
 		this.id = id;
 	}
 
-	public Image getImage() {
-		return image;
+	public VehicleType getType() {
+		return type;
 	}
 
-	public void setImage(Image image) {
-		this.image = image;
-	}
-
-	public String getPicture() {
-		return picture;
-	}
-
-	public void setPicture(String picture) {
-		this.picture = picture;
+	public void setType(VehicleType type) {
+		this.type = type;
 	}
 
 	public String getLicense() {
@@ -58,7 +50,15 @@ public class Vehicle extends AbstractModel {
 	}
 
 	public void setLicense(String license) {
-		this.license = license.toUpperCase();
+		this.license = license;
+	}
+
+	public Image getImage() {
+		return image;
+	}
+
+	public void setImage(Image image) {
+		this.image = image;
 	}
 
 	public Domain getDomain() {

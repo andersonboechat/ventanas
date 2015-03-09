@@ -12,6 +12,7 @@ import com.liferay.counter.service.CounterLocalServiceUtil;
 import com.liferay.portal.service.ImageLocalServiceUtil;
 
 import br.com.abware.accountmgm.model.Vehicle;
+import br.com.abware.accountmgm.model.VehicleType;
 import br.com.abware.accountmgm.persistence.entity.VehicleEntity;
 import br.com.abware.jcondo.core.model.Domain;
 import br.com.abware.jcondo.core.model.Flat;
@@ -81,7 +82,7 @@ public class VehicleManagerImpl extends JCondoManager<VehicleEntity, Vehicle>{
 		String key = generateKey();
 		try {
 			openManager(key);
-			String queryString = "FROM VehicleEntity WHERE domainId = :domainId";
+			String queryString = "FROM VehicleEntity WHERE domainId = :domainId ORDER BY license";
 			Query query = em.createQuery(queryString);
 			query.setParameter("domainId", domain.getId());
 			return getModels(query.getResultList());
@@ -89,6 +90,21 @@ public class VehicleManagerImpl extends JCondoManager<VehicleEntity, Vehicle>{
 			closeManager(key);
 		}
 	}
+
+	@SuppressWarnings("unchecked")
+	public List<Vehicle> findVehicles(Domain domain, VehicleType type) throws PersistenceException {
+		String key = generateKey();
+		try {
+			openManager(key);
+			String queryString = "FROM VehicleEntity WHERE type := type AND domainId = :domainId ORDER BY license";
+			Query query = em.createQuery(queryString);
+			query.setParameter("type", type);
+			query.setParameter("domainId", domain.getId());
+			return getModels(query.getResultList());
+		} finally {
+			closeManager(key);
+		}
+	}	
 
 	public Vehicle findByLicense(String license) throws Exception {
 		String key = generateKey();

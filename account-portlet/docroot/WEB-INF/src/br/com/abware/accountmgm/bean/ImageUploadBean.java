@@ -33,10 +33,14 @@ public class ImageUploadBean {
 
 	private File file;
 
+	public ImageUploadBean(int width, int height) {
+		this();
+		this.width = width;
+		this.height = height;
+	}
+
 	public ImageUploadBean() {
 		image = new Image();
-		this.width = 640;
-		this.height = 480;
 	}
 	
 	public void onImageUpload(FileUploadEvent event) {

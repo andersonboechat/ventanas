@@ -30,6 +30,9 @@ public class FlatBean extends BaseBean {
 
 	@ManagedProperty(value="#{supplierBean}")
 	private SupplierBean supplierBean;
+	
+	@ManagedProperty(value="#{parkingBean}")
+	private ParkingBean parkingBean;
 
 	private List<Flat> flats;
 
@@ -39,8 +42,10 @@ public class FlatBean extends BaseBean {
 	public void init() {
 		try {
 			flats = flatService.getFlats(personService.getPerson());
+			vehicleBean.init(flats);
 			supplierBean.init(flats);
 			documentBean.init(flats);
+			parkingBean.init(flats);
 
 			ArrayList<Domain> domains = new ArrayList<Domain>(flats);
 			domains.addAll(supplierBean.getSuppliers());
@@ -60,6 +65,7 @@ public class FlatBean extends BaseBean {
 		vehicleBean.onDomainSearch(flat);
 		supplierBean.onDomainSearch(flat);
 		documentBean.onDomainSearch(flat);
+		parkingBean.onDomainSearch(flat);
 	}
 	
 	public void onFlatSave() {
@@ -110,6 +116,14 @@ public class FlatBean extends BaseBean {
 
 	public void setSupplierBean(SupplierBean supplierBean) {
 		this.supplierBean = supplierBean;
+	}
+
+	public ParkingBean getParkingBean() {
+		return parkingBean;
+	}
+
+	public void setParkingBean(ParkingBean parkingBean) {
+		this.parkingBean = parkingBean;
 	}
 
 	public List<Flat> getFlats() {

@@ -8,7 +8,7 @@
 	xmlns:p="http://primefaces.org/ui"
 	xmlns:ui="http://java.sun.com/jsf/facelets">
 	<h:form id="vehicle-form">
-		<p:panelGrid columns="2" styleClass="menu-cmds no-border" columnClasses="menu-cmds-col1,menu-cmds-col2" style="width: 100%">
+		<p:panelGrid columns="2" styleClass="menu-cmds" columnClasses="menu-cmds-col1,menu-cmds-col2" style="width: 100%">
 			<p:column>
 				<p:commandButton value="Cadastrar" actionListener="#{vehicleViewer.onVehicleCreate}" 
 								 partialSubmit="true" process="@this" update=":tabs:vehicle-details-form:vehicle-details" oncomplete="PF('vehicleDialog').show();"
@@ -74,20 +74,15 @@
 			        <p:graphicImage id="portrait" value="#{vehicleViewer.vehicle.image.path}" style="border: 0px solid black;"/>
 				</h:panelGrid>
 				<p:spacer style="border: 0px solid black; background: grey" width="100%" height="1px"/>
-				<h:panelGrid columns="6" style="border: 0px solid black; margin: 5px auto 5px;" columnClasses="column,column,column,column,column,column">
+				<h:panelGrid columns="3" style="border: 0px solid black; margin: 5px auto 5px;" columnClasses="column,column,column">
 			    	<p:outputLabel value="Placa:"/>
 			        <p:inputText value="#{vehicleViewer.vehicle.license}" maxlength="7" style="width: 100px;" readonly="#{vehicleViewer.vehicle.id > 0}"/>
-			    	<p:outputLabel value="Apartamento"/>
-					<p:selectOneMenu id="flat" value="#{vehicleViewer.vehicle.domain.id}" valueChangeListener="#{vehicleViewer.onFlatSelect}" filter="true" 
-									 rendered="#{vehicleViewer.flats.size() > 1}" disabled="#{vehicleViewer.visitor}" required="true" requiredMessage="Selecione um apartamento" style="width: 100px;">
-						<f:selectItem itemLabel="Selecione" noSelectionOption="true"/>
-						<f:selectItems var="flat" value="#{vehicleViewer.flats}" itemLabel="#{flat.block}/#{flat.number}" itemValue="#{flat.id}"/>
+					<p:selectOneMenu id="flat" value="#{vehicleViewer.vehicle.domain}" valueChangeListener="#{vehicleViewer.onFlatSelect}" filter="true" 
+									 rendered="#{vehicleViewer.flats.size() > 1}" disabled="#{vehicleViewer.visitor}" required="true" requiredMessage="Selecione um apartamento" converter="selectItemsConverter">
+						<f:selectItem itemLabel="Selecione o apartamento" noSelectionOption="true"/>
+						<f:selectItems var="flat" value="#{vehicleViewer.flats}" itemLabel="Apartamento #{flat.number} - Bloco #{flat.block}" itemValue="#{flat}"/>
 					</p:selectOneMenu>
-					<h:outputText value="#{vehicleViewer.vehicle.domain.block}/#{vehicleViewer.vehicle.domain.number}" rendered="#{vehicleViewer.flats.size() == 1}"/>
-					<p:outputLabel for="visitor" value="Visitante"/>
-					<p:selectBooleanCheckbox id="visitor" value="#{vehicleViewer.visitor}">
-						<p:ajax update="flat"/>
-					</p:selectBooleanCheckbox>
+					<h:outputText value="Apartamento #{vehicleViewer.flats.get(0).number} - Bloco #{vehicleViewer.flats.get(0).block}" rendered="#{vehicleViewer.flats.size() == 1}"/>
 		        </h:panelGrid>
 				<h:panelGrid columns="2" style="border: 0px solid black; float: right; margin: 10px 0px 5px">
 					<p:commandButton value="Salvar" actionListener="#{vehicleViewer.onVehicleSave}" update=":tabs:vehicle-form:vehicleTable,:outputMsg" oncomplete="if (!args.validationFailed) { if(!args.exception) {PF('vehicleDialog').hide();} else { if(args.alert) {PF('alertDialog').show();}}}" style="float: right; width: 80px; margin: 0px 0px 0px 5px;"/>
@@ -101,7 +96,7 @@
 		<h:form id="vehicle-picture-form" enctype="multipart/form-data">
 			<p:fileUpload id="image" label="Selecionar Foto" fileUploadListener="#{vehiclePictureUploader.onImageUpload}" auto="true" update="vehicle-picture-form" rendered="#{empty vehiclePictureUploader.image.path}"/>
 			<p:panel rendered="#{!(empty vehiclePictureUploader.image.path)}" style="border: 0px !important;">
-				<p:panel styleClass="cropper">
+				<p:panel styleClass="cropper2">
 					<p:imageCropper value="#{vehiclePictureUploader.croppedImage}" image="#{vehiclePictureUploader.image.path}" initialCoords="0,0,#{vehiclePictureUploader.width},#{vehiclePictureUploader.height}" minSize="#{vehiclePictureUploader.width},#{vehiclePictureUploader.height}" maxSize="#{vehiclePictureUploader.width},#{vehiclePictureUploader.height}"/>
 				</p:panel>
 				<p:panel style="margin: 0px auto; text-align: center; padding: 15px 0px; border: none;">

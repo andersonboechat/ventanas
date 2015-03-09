@@ -8,8 +8,11 @@ import org.apache.commons.lang.StringUtils;
 
 import br.com.abware.accountmgm.exception.ModelExistException;
 import br.com.abware.accountmgm.model.Vehicle;
+import br.com.abware.accountmgm.model.VehicleType;
 import br.com.abware.accountmgm.persistence.manager.SecurityManagerImpl;
 import br.com.abware.accountmgm.persistence.manager.VehicleManagerImpl;
+import br.com.abware.jcondo.core.Permission;
+import br.com.abware.jcondo.core.model.Administration;
 import br.com.abware.jcondo.core.model.Domain;
 import br.com.abware.jcondo.core.model.Flat;
 import br.com.abware.jcondo.core.model.Image;
@@ -25,6 +28,18 @@ public class VehicleServiceImpl implements BaseService<Vehicle> {
 	private ParkingServiceImpl parkingService = new ParkingServiceImpl();
 
 	private SecurityManagerImpl securityManager = new SecurityManagerImpl();
+
+	public List<VehicleType> getTypes(Domain domain) {
+		List<VehicleType> types = new ArrayList<VehicleType>();
+
+		for (VehicleType type : VehicleType.values()) {
+//			if (securityManager.hasPermission(type, Permission.VIEW)) {
+				types.add(type);
+//			}
+		}
+
+		return types;
+	}
 
 	public Vehicle getVehicle(long vehicleId) throws Exception {
 		Vehicle vehicle = vehicleManager.findById(vehicleId);
@@ -56,6 +71,10 @@ public class VehicleServiceImpl implements BaseService<Vehicle> {
 		return vehicle;
 	}
 
+	public List<Vehicle> getVehicles(Domain domain) throws Exception {
+		return vehicleManager.findVehicles(domain);
+	}
+
 	public List<Vehicle> getVehicles(Person person) throws Exception {
 		List<Vehicle> vehicles = new ArrayList<Vehicle>();
 
@@ -80,7 +99,7 @@ public class VehicleServiceImpl implements BaseService<Vehicle> {
 			throw new Exception("placa nao especificada");
 		}
 
-		if(!vehicle.getLicense().matches("[A-Za-z]{3,3}[0-9]{4,4}")) {
+		if(vehicle.getType() != VehicleType.BIKE && !vehicle.getLicense().matches("[A-Za-z]{3,3}[0-9]{4,4}")) {
 			throw new Exception("placa invalida");
 		}
 

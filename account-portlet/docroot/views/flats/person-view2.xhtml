@@ -7,44 +7,12 @@
 	xmlns:h="http://java.sun.com/jsf/html"
 	xmlns:p="http://primefaces.org/ui"
 	xmlns:ui="http://java.sun.com/jsf/facelets">
-	<h:head>
-		<style>
-			.cropper2 {padding: 0;}
-			.cropper2 div {margin: 0 !important; padding: 0 !important;}
-			.cropper2 .img {margin: 0 !important;}
-			.car-image {background: url("/account-portlet/images/car_icon.png") no-repeat center; text-align: center; margin: 0px auto;}
-			.car-thumb {background-image: url("/account-portlet/images/car_icon.png") ;}
-			.column {padding: 6px; }
-			.column12 {width: 12%; font-weight: bold;}
-			.panel tr {border: none !important; background-color: transparent; font-size: 16px;}
-			.panel td {border: none !important; background-color: transparent; font-size: 16px;}
-			.menu-cmds {width: 100%; margin: 0px}
-			.menu-cmds td {border: none !important; margin: 0px; padding: 0px}
-			.menu-cmds-col1 {vertical-align: middle; width: 155px; border: none !important; padding: 0px; margin: 0px}
-			.menu-cmds-col2 {vertical-align: middle; width: 130px;}
-			.menu-cmds-col3 {vertical-align: middle; padding: 0; text-align: right}
-			.my-account-col1 {vertical-align: top; width: 198px; height: 300px}
-			.my-account-col2 {vertical-align: top; padding: 0px !important;}
-			.labelClm {width: 85px; background-color: transparent}
-			.fieldClm {background-color: transparent !important; float: right}
-			.person-image {
-				border: none !important; width: 198px; height: 300px; padding: 0px !important; margin:  0px !important;
-				background: url("/image/user_male_portrait?img_id=0") no-repeat;  
-			}
-			.foto img {height: 100px; width: 66px}
-			.person-image div {border: none !important;}
-			.no-border tr {border: none !important;}
-			.no-border td {border: none !important;}
-			.no-margin {margin:  0px !important;padding: 0px !important;}
-			.ui-tabs-panel {margin: 0 !important;padding: 0 !important}
-			.datatable { margin: 0px -1px -1px -1px}
-		</style>
-	</h:head>
+
 	<p:growl id="outputMsg"/>
 	<f:loadBundle basename="Language_pt_BR" var="msg"/>
 
 	<h:form id="person-form">	
-		<p:panelGrid columns="2" styleClass="menu-cmds no-border" columnClasses="menu-cmds-col1,menu-cmds-col2">
+		<p:panelGrid columns="2" styleClass="menu-cmds" columnClasses="menu-cmds-col1,menu-cmds-col2">
 			<p:column>
 				<p:commandButton value="Cadastrar" actionListener="#{personViewer.onPersonCreate}" 
 								 partialSubmit="true" process="@this" update=":tabs:person-details-form:model-details" oncomplete="PF('personDialog').show();"
@@ -64,7 +32,7 @@
 		<p:dataTable widgetVar="personTable" id="personTable" var="person" value="#{personViewer.model}"  
 		             paginator="true" rows="5" paginatorPosition="bottom" emptyMessage="Nenhum usuário cadastrado"
 		             paginatorTemplate="{CurrentPageReport} {PreviousPageLink} {PageLinks} {NextPageLink}" 
-		             selection="#{personViewer.selectedPeople}" rowKey="#{person.id}" styleClass="datatable">
+		             selection="#{personViewer.selectedPeople}" rowKey="#{person.id}">
 	   		<p:column selectionMode="multiple" style="width: 17px;"/>
 			<p:column style="width: 53px;">
 				<p:graphicImage value="#{person.picture.path}" styleClass="foto" height="80" width="52"/>

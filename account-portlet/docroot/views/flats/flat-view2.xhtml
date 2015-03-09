@@ -9,16 +9,21 @@
 	xmlns:ui="http://java.sun.com/jsf/facelets">
 	<h:head>
 		<style>
-			.cropper {padding: 0;}
-			.cropper div {margin: 0 !important; padding: 0 !important;}
-			.cropper .img { margin: 0 !important;}
+			.cropper2 {padding: 0;}
+			.cropper2 div {margin: 0 !important; padding: 0 !important;}
+			.cropper2 .img { margin: 0 !important;}
 			.car-image {background: url("/account-portlet/images/car_icon.png") no-repeat center; text-align: center; margin: 0px auto;}
 			.car-thumb {background-image: url("/account-portlet/images/car_icon.png") ;}
 			.column {padding: 6px; }
 			.column12 {width: 12%; font-weight: bold;}
 			.panel tr {border: none !important; background-color: transparent; font-size: 16px;}
 			.panel td {border: none !important; background-color: transparent; font-size: 16px;}
-			.menu-cmds {width: 100%; border: 0px !important}
+			.menu-cmds tr {
+				width: 100%; border-bottom: 0px !important; 	
+				-webkit-border-top-right-radius: 3px !important;
+				-moz-border-radius-topright: 3px !important;
+				border-top-right-radius: 3px !important;
+			}
 			.menu-cmds-col1 {vertical-align: middle; width: 155px; border: none !important; padding: 0px; margin: 0px;}
 			.menu-cmds-col2 {vertical-align: middle; width: 130px;}
 			.menu-cmds-col3 {vertical-align: middle; padding: 0; text-align: right; border: 0px solid red !important}
@@ -45,6 +50,9 @@
 			.memberships div {border: 0px; border-top: 1px solid grey;}
 			.docs-header {text-align: left;}
 			.docs-cmds {width: 10%}
+			.ui-tabs {background: none; padding: 0 !important; border: 0px !important;}
+			.ui-tabs-nav {background: none !important; }
+			.ui-tabs-panel {margin: 0 !important; padding: 0 !important}
 		</style>
 	</h:head>
 	<h:body>
@@ -53,9 +61,10 @@
 		<c:set var="personViewer" value="#{flatBean.personBean}"/>
 		<c:set var="imageUploader" value="#{flatBean.personBean.imageUploadBean}"/>
 		<c:set var="vehicleViewer" value="#{flatBean.vehicleBean}"/>
-		<c:set var="vehiclePictureUploader" value="#{flatBean.vehicleBean.imageUploadBean2}"/>	
+		<c:set var="vehiclePictureUploader" value="#{flatBean.vehicleBean.imageUploadBean}"/>	
 		<c:set var="supplierViewer" value="#{flatBean.supplierBean}"/>
 		<c:set var="documentViewer" value="#{flatBean.documentBean}"/>
+		<c:set var="parkingViewer" value="#{flatBean.parkingBean}"/>
 
 		<h:form id="flat-form">
 			<p:panelGrid id="flat-filters" columns="1" styleClass="no-background no-border flats" columnClasses="menu-cmds-col3">
@@ -67,6 +76,30 @@
 		    	</p:selectOneMenu>
 			</p:panelGrid>
 			<p:panelGrid id="flat-details" columns="1" styleClass="no-background no-border" style="margin: 10px 0px 20px 0px;" cellpadding="10">
+				<p:column>
+					<p:dataTable id="parkings" widgetVar="parkings" var="parking" value="#{parkingViewer.model}" scrollable="true" 
+						emptyMessage="Nenhuma vaga associada a este apartamento">
+						<f:facet name="header">
+							<p:panelGrid columns="1" columnClasses="docs-header" styleClass="no-background no-border no-margin" style="width: 100%;">
+								<h:outputText value="Vagas"/>
+							</p:panelGrid>
+						</f:facet>
+						<p:column><h:outputText value="Apartamento #{parking.ownerDomain.number} - Bloco #{parking.ownerDomain.block}"/></p:column>
+						<p:column rendered="#{!empty(parking.renterDomain) and !flatBean.flats.contains(parking.ownerDomain)}">
+							<h:outputText value="Alugada"/>
+						</p:column>
+						<p:column rendered="#{empty(parking.renterDomain) and flatBean.flats.contains(parking.ownerDomain)}">
+							<p:commandLink value="Alugar" actionListener="#{parkingViewer.onParkingRent}" partialSubmit="true" process="@this" target="blank">
+								<f:setPropertyActionListener target="#{parkingViewer.parking}" value="#{parking}"/>
+							</p:commandLink>
+						</p:column>
+						<p:column rendered="#{!empty(parking.renterDomain) and flatBean.flats.contains(parking.ownerDomain)}">
+							<p:commandLink value="Cancelar Aluguel" actionListener="#{parkingViewer.onParkingRentalCancel}" partialSubmit="true" process="@this" target="blank">
+								<f:setPropertyActionListener target="#{parkingViewer.parking}" value="#{parking}"/>
+							</p:commandLink>
+						</p:column>
+					</p:dataTable>
+				</p:column>
 				<p:column>
 					<p:dataTable id="docs" widgetVar="docs" var="doc" value="#{documentViewer.model}" scrollable="true" 
 						emptyMessage="Nenhum documento encontrado para este apartamento">

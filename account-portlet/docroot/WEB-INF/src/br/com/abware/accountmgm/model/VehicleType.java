@@ -2,8 +2,9 @@ package br.com.abware.accountmgm.model;
 
 public enum VehicleType {
 
-	RESIDENT("vehicle.type.resident"),
-	VISITOR("vehicle.type.visitor");
+	CAR("vehicle.type.car"),
+	MOTO("vehicle.type.moto"),
+	BIKE("vehicle.type.bike");
 
 	private String label;
 

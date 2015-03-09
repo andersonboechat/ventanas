@@ -1,29 +1,23 @@
 package br.com.abware.accountmgm.bean;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 
 import javax.faces.application.FacesMessage;
 import javax.faces.bean.ManagedBean;
-import javax.faces.bean.ManagedProperty;
 import javax.faces.bean.ViewScoped;
 import javax.faces.context.FacesContext;
 import javax.faces.event.AjaxBehaviorEvent;
 import javax.faces.event.ValueChangeEvent;
 
-import org.apache.commons.collections.CollectionUtils;
 import org.apache.log4j.Logger;
 import org.primefaces.context.RequestContext;
-import org.primefaces.event.FileUploadEvent;
 
 import br.com.abware.accountmgm.bean.model.ModelDataModel;
 import br.com.abware.accountmgm.exception.ModelExistException;
 import br.com.abware.accountmgm.model.Vehicle;
-import br.com.abware.accountmgm.model.VehicleType;
 import br.com.abware.accountmgm.util.BeanUtils;
 import br.com.abware.jcondo.core.model.Condominium;
 import br.com.abware.jcondo.core.model.Domain;
@@ -33,12 +27,9 @@ import br.com.abware.jcondo.core.model.Supplier;
 
 @ViewScoped
 @ManagedBean
-public class VehicleBean extends BaseBean {
+public class BikeBean extends BaseBean {
 
-	private static Logger LOGGER = Logger.getLogger(VehicleBean.class);
-
-	@ManagedProperty(value="#{fileUploadBean}")
-	private FileUploadBean fileUploadBean;
+	private static Logger LOGGER = Logger.getLogger(BikeBean.class);
 
 	private ImageUploadBean imageUploadBean;
 
@@ -61,37 +52,24 @@ public class VehicleBean extends BaseBean {
 	private Set<Integer> blocks;
 
 	private Set<Integer> numbers;
-	
+
 	private boolean visitor;
-	
-	private Map<Domain, List<VehicleType>> types;
-	
+
 	public void init(List<Flat> flats) {
 		try {
-			ArrayList<Vehicle> vehicles;
 			this.flats = flats;
-			types = new HashMap<Domain, List<VehicleType>>();
-
-			if (!CollectionUtils.isEmpty(flats)) {
-				vehicles = new ArrayList<Vehicle>();
-				blocks = new TreeSet<Integer>();
-				numbers = new TreeSet<Integer>();
-
-				for (Flat flat : flats) {
-					blocks.add(flat.getBlock());
-					numbers.add(flat.getNumber());
-					vehicles.addAll(vehicleService.getVehicles(flat));
-					types.put(flat, vehicleService.getTypes(flat));
-				}
-				
-				model = new ModelDataModel<Vehicle>(vehicles);
-			}
-
+			model = new ModelDataModel<Vehicle>(vehicleService.getVehicles(personService.getPerson()));
 			vehicle = new Vehicle();
 			vehicle.setDomain(new Flat());
 			vehicle.setImage(new Image());
+			blocks = new TreeSet<Integer>();
+			numbers = new TreeSet<Integer>();
+			for (Flat flat : flats) {
+				blocks.add(flat.getBlock());
+				numbers.add(flat.getNumber());
+			}
 			filters = new HashMap<String, Object>();
-			imageUploadBean = new ImageUploadBean(420, 315);
+			imageUploadBean = new ImageUploadBean();
 		} catch (Exception e) {
 			LOGGER.error("", e);
 		}
@@ -214,15 +192,6 @@ public class VehicleBean extends BaseBean {
 		model.filter(filters);
 	}
 
-	public void onImageUpload(FileUploadEvent event) {
-		fileUploadBean.onFileUpload(event);
-		vehicle.getImage().setPath(fileUploadBean.getImagePath());
-	}
-
-	public void onImageCropp() {
-		fileUploadBean.onCropp();
-	}
-
 	public ImageUploadBean getImageUploadBean() {
 		return imageUploadBean;
 	}
@@ -231,10 +200,6 @@ public class VehicleBean extends BaseBean {
 		this.imageUploadBean = imageUploadBean;
 	}
 
-	public void setFileUploadBean(FileUploadBean fileUploadBean) {
-		this.fileUploadBean = fileUploadBean;
-	}
-	
 	public String displayDomain(Domain domain) {
 		if (domain != null && domain.getId() > 0) {
 			if (domain instanceof Flat) {
