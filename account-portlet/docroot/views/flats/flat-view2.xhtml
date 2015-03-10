@@ -77,32 +77,33 @@
 			</p:panelGrid>
 			<p:panelGrid id="flat-details" columns="1" styleClass="no-background no-border" style="margin: 10px 0px 20px 0px;" cellpadding="10">
 				<p:column>
-					<p:dataTable id="parkings" widgetVar="parkings" var="parking" value="#{parkingViewer.model}" scrollable="true" 
-						emptyMessage="Nenhuma vaga associada a este apartamento">
+					<p:dataTable id="parkingTable" widgetVar="parkingTable" var="parking" value="#{parkingViewer.model}" rows="4" paginator="true" paginatorAlwaysVisible="false" paginatorPosition="bottom" paginatorTemplate="{PreviousPageLink} {CurrentPageReport} {NextPageLink}"
+						emptyMessage="Nenhuma vaga associada a este apartamento" style="width: 50%;">
 						<f:facet name="header">
 							<p:panelGrid columns="1" columnClasses="docs-header" styleClass="no-background no-border no-margin" style="width: 100%;">
-								<h:outputText value="Vagas"/>
+								<h:outputText value="Estacionamento"/>
 							</p:panelGrid>
 						</f:facet>
 						<p:column><h:outputText value="Apartamento #{parking.ownerDomain.number} - Bloco #{parking.ownerDomain.block}"/></p:column>
-						<p:column rendered="#{!empty(parking.renterDomain) and !flatBean.flats.contains(parking.ownerDomain)}">
-							<h:outputText value="Alugada"/>
-						</p:column>
-						<p:column rendered="#{empty(parking.renterDomain) and flatBean.flats.contains(parking.ownerDomain)}">
-							<p:commandLink value="Alugar" actionListener="#{parkingViewer.onParkingRent}" partialSubmit="true" process="@this" target="blank">
+						<p:column style="width: 20%; text-align: center">
+							<h:graphicImage value="../images/cancel3.png" rendered="#{flatBean.flats.contains(parking.ownerDomain) and empty(parking.renterDomain) and !empty(parking.vehicle)}" title="Ocupada" width="27" height="27"/>
+							<p:commandLink title="Alugar esta vaga" onclick="PF('parkingDialog').show();" partialSubmit="true" process="@this" rendered="#{flatBean.flats.contains(parking.ownerDomain) and empty(parking.renterDomain) and empty(parking.vehicle)}">
+								<h:graphicImage value="../images/handshake.png"/>
 								<f:setPropertyActionListener target="#{parkingViewer.parking}" value="#{parking}"/>
 							</p:commandLink>
-						</p:column>
-						<p:column rendered="#{!empty(parking.renterDomain) and flatBean.flats.contains(parking.ownerDomain)}">
-							<p:commandLink value="Cancelar Aluguel" actionListener="#{parkingViewer.onParkingRentalCancel}" partialSubmit="true" process="@this" target="blank">
+							<p:commandLink title="Vaga alugada para o apartamento #{parking.renterDomain.number} - bloco #{parking.renterDomain.block}" onclick="PF('rentalCancel').show();" rendered="#{flatBean.flats.contains(parking.ownerDomain) and !empty(parking.renterDomain)}">
+								<h:graphicImage value="../images/cancel2.png" width="26" height="26"/>
 								<f:setPropertyActionListener target="#{parkingViewer.parking}" value="#{parking}"/>
+								<f:setPropertyActionListener target="#{parkingViewer.parking.renterDomain}" value=""/>
 							</p:commandLink>
+							<h:graphicImage value="../images/cancel3.png" rendered="#{!flatBean.flats.contains(parking.ownerDomain) and !empty(parking.vehicle)}" title="Vaga ocupada" width="27" height="27"/>
+							<h:graphicImage value="../images/ok.png" rendered="#{!flatBean.flats.contains(parking.ownerDomain) and empty(parking.vehicle)}" title="Vaga disponível" width="27" height="27"/>
 						</p:column>
 					</p:dataTable>
 				</p:column>
 				<p:column>
 					<p:dataTable id="docs" widgetVar="docs" var="doc" value="#{documentViewer.model}" scrollable="true" 
-						emptyMessage="Nenhum documento encontrado para este apartamento">
+						emptyMessage="Nenhum documento encontrado para este apartamento" style="margin-top: 15px">
 						<f:facet name="header">
 							<p:panelGrid columns="2" columnClasses="docs-header,docs-cmds" styleClass="no-background no-border no-margin" style="width: 100%;">
 								<h:outputText value="Documentos"/>
@@ -113,23 +114,32 @@
 							<p:commandLink value="#{doc.name}" partialSubmit="true" process="@this" target="blank">
 								<f:setPropertyActionListener target="#{documentViewer.document}" value="#{doc}"/>
 							</p:commandLink>
-						</p:column>						
-						<p:column style="width: 25%;">
+						</p:column>
+						<p:column style="width: 29%; text-align: center">
 							<h:outputText value="Apartamento #{doc.domain.number} - Bloco #{doc.domain.block}"/>
 						</p:column>						
-						<p:column style="width: 10%; text-align: center">
-							<p:commandLink value="Alterar" partialSubmit="true" process="@this" target="blank">
+						<p:column style="width: 8%; text-align: center">
+							<p:commandLink title="Alterar" partialSubmit="true" process="@this" target="blank">
+								<h:graphicImage value="../images/edit.png" width="30" height="30"/>
 								<f:setPropertyActionListener target="#{documentViewer.document}" value="#{doc}"/>
 							</p:commandLink>
 						</p:column>						
-						<p:column style="width: 10%; text-align: center">
-							<p:commandLink value="Excluir" partialSubmit="true" process="@this" target="blank">
+						<p:column style="width: 8%; text-align: center">
+							<p:commandLink title="Excluir" partialSubmit="true" process="@this" target="blank">
+								<h:graphicImage value="../images/cancel2.png" width="26" height="26"/>
+								<p:confirm header="Após a exclusão, não será possível recuperar este documento. Você confirma a exclusão deste documento?" message="#{msg['person.delete.message']}" icon="ui-icon-alert"/>
 								<f:setPropertyActionListener target="#{documentViewer.document}" value="#{doc}"/>
 							</p:commandLink>
 						</p:column>						
 					</p:dataTable>
 				</p:column>
 			</p:panelGrid>
+			<p:confirmDialog widgetVar="rentalCancel" header="Cancelamento de aluguel de garagem" message="Você confirma o cancelamento do aluguel desta vaga?" severity="alert" showEffect="fade" hideEffect="fade">
+				<p:panel style="text-align: center; border: none;">
+					<p:commandButton value="#{msg['no']}" type="button" styleClass="ui-confirmdialog-no" onclick="PF('rentalCancel').hide();" icon="ui-icon-close" style="float: left; width: 50px; margin-left: 14%" />
+					<p:commandButton value="#{msg['yes']}" actionListener="#{parkingViewer.onRentalCancel}" partialSubmit="true" process="@this" update=":flat-form:parkingTable" oncomplete="PF('rentalCancel').hide();" styleClass="ui-confirmdialog-yes" icon="ui-icon-check" style="float: right; width: 50px; margin-right: 14%"/>
+				</p:panel>
+			</p:confirmDialog>			
 		</h:form>
 
 		<p:tabView id="tabs" style="margin: 10px; padding: 0">
@@ -137,5 +147,21 @@
 			<p:tab title="Veículos"><ui:include src="vehicle-view.xhtml"/></p:tab>
 			<p:tab title="Prestadores de Serviço"><ui:include src="supplier-view.xhtml"/></p:tab>
 		</p:tabView>
+		
+	<p:dialog header="Aluguel de vaga de garagem" widgetVar="parkingDialog" draggable="true" resizable="false" modal="true" closable="false" visible="false">
+		<h:form id="parking-rent-form">
+			<p:panelGrid id="model-details" columns="1" styleClass="no-border" style="margin: 10px 0px 20px 0px;" cellpadding="10">
+		    	<h:outputText value="Escolha o apartamento para o qual deseja alugar esta vaga e confirme clicando no botão Alugar"/>
+		    	<p:selectOneMenu id="parkingDomain" value="#{parkingViewer.parking.renterDomain}" converter="selectItemsConverter">
+		    		<f:selectItem itemLabel="Selecione" noSelectionOption="true"/>
+					<f:selectItems var="flat" value="#{flatBean.flats}" itemLabel="Apartamento #{flat.number} - Bloco #{flat.block}" itemValue="#{flat}"/>
+		    	</p:selectOneMenu>
+			</p:panelGrid>
+			<p:commandButton value="Cancelar" oncomplete="PF('parkingDialog').hide();" partialSubmit="true" process="@this" style="float: right; width: 80px; margin: 0px 0px 10px 5px;">
+				<f:setPropertyActionListener target="#{parkingViewer.parking}" value=""/>
+			</p:commandButton>
+			<p:commandButton value="Alugar" actionListener="#{parkingViewer.onRent}" update=":flat-form:parkingTable, :outputMsg" oncomplete="if (!args.validationFailed &amp;&amp; !args.exception) {PF('parkingDialog').hide();}" style="float: right; width: 80px; margin: 0px 0px 10px 5px;"/>
+		</h:form>
+	</p:dialog>
 	</h:body>
 </f:view>

@@ -4,6 +4,8 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.OneToOne;
 import javax.persistence.Table;
 
 
@@ -21,9 +23,11 @@ public class VehicleEntity extends BaseEntity {
 	@GeneratedValue
 	private long id;
 
-	private long domainId;
-
 	private long imageId;
+
+	@OneToOne
+	@JoinColumn(name="domainId", nullable=true)
+	private DomainEntity domain;
 
 	@Column(updatable=false)
 	private String license;
@@ -39,20 +43,20 @@ public class VehicleEntity extends BaseEntity {
 		this.id = id;
 	}
 
-	public long getDomainId() {
-		return domainId;
-	}
-
-	public void setDomainId(long domainId) {
-		this.domainId = domainId;
-	}
-
 	public long getImageId() {
 		return imageId;
 	}
 
 	public void setImageId(long imageId) {
 		this.imageId = imageId;
+	}
+
+	public DomainEntity getDomain() {
+		return domain;
+	}
+
+	public void setDomain(DomainEntity domain) {
+		this.domain = domain;
 	}
 
 	public String getLicense() {

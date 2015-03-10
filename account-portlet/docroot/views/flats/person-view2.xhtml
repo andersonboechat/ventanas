@@ -52,7 +52,7 @@
 			</p:column>
 			<p:column style="width: 35px">
 				<p:commandLink actionListener="#{personViewer.onPersonDelete}" oncomplete="if (!args.validationFailed &amp;&amp; !args.exception) {PF('personTable').update();}" partialSubmit="true" process="@this" disabled="#{!personViewer.canEditPerson(person)}">
-					<h:graphicImage value="../images/delete.png" />
+					<h:graphicImage value="../images/cancel2.png" />
 					<p:confirm header="#{msg['person.delete.confirm']}" message="#{msg['person.delete.message']}" icon="ui-icon-alert"/>
 					<f:setPropertyActionListener target="#{personViewer.person}" value="#{person}"/>
 				</p:commandLink>

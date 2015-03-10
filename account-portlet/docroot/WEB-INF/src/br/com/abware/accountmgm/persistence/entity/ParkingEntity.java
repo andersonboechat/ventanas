@@ -36,6 +36,10 @@ public class ParkingEntity extends BaseEntity {
 	@JoinColumn(name="renterDomainId", nullable=true)
 	private DomainEntity renterDomain;
 
+	@OneToOne
+	@JoinColumn(name="vehicleId", nullable=true)
+	private VehicleEntity vehicle;
+	
 	@Enumerated(EnumType.ORDINAL)
 	private ParkingType type;
 
@@ -72,6 +76,14 @@ public class ParkingEntity extends BaseEntity {
 
 	public void setRenterDomain(DomainEntity renterDomain) {
 		this.renterDomain = renterDomain;
+	}
+
+	public VehicleEntity getVehicle() {
+		return vehicle;
+	}
+
+	public void setVehicle(VehicleEntity vehicle) {
+		this.vehicle = vehicle;
 	}
 
 	public ParkingType getType() {

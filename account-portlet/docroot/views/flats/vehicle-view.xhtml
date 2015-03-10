@@ -47,9 +47,9 @@
 				</p:commandLink>
 			</p:column>
 			<p:column style="width: 35px">
-				<p:commandLink actionListener="#{vehicleViewer.onVehicleDelete}" update="vehicleTable,:outputMsg" partialSubmit="true" process="@this">
-					<h:graphicImage value="../images/delete.png" />
-					<p:confirm header="#{msg['person.delete.confirm']}" message="#{msg['person.delete.message']}" icon="ui-icon-alert"/>
+				<p:commandLink actionListener="#{vehicleViewer.onVehicleDelete}" update="vehicleTable,:flat-form:parkingTable,:outputMsg" partialSubmit="true" process="@this">
+					<h:graphicImage value="../images/cancel2.png" />
+					<p:confirm header="Exclusão de veículo" message="Você confirma a exclusão do veículo, deste apartamento?" icon="ui-icon-alert"/>
 				</p:commandLink>
 			</p:column>
 		</p:dataTable>
@@ -70,19 +70,22 @@
 				<p:commandLink value="Alterar Foto" update=":tabs:vehicle-picture-form" oncomplete="PF('vehiclePictureDialog').show();" partialSubmit="true" process="@this">
 					<f:setPropertyActionListener target="#{vehicleViewer.vehicle.image.path}" value=""/>
 				</p:commandLink>
-				<h:panelGrid columns="1" style="border: 0px solid black; width: 640px; height: 480px;" columnClasses="car-image">
+				<h:panelGrid columns="1" style="border: 0px solid black; width: 420px; height: 315px;" columnClasses="car-image">
 			        <p:graphicImage id="portrait" value="#{vehicleViewer.vehicle.image.path}" style="border: 0px solid black;"/>
 				</h:panelGrid>
 				<p:spacer style="border: 0px solid black; background: grey" width="100%" height="1px"/>
 				<h:panelGrid columns="3" style="border: 0px solid black; margin: 5px auto 5px;" columnClasses="column,column,column">
 			    	<p:outputLabel value="Placa:"/>
 			        <p:inputText value="#{vehicleViewer.vehicle.license}" maxlength="7" style="width: 100px;" readonly="#{vehicleViewer.vehicle.id > 0}"/>
-					<p:selectOneMenu id="flat" value="#{vehicleViewer.vehicle.domain}" valueChangeListener="#{vehicleViewer.onFlatSelect}" filter="true" 
-									 rendered="#{vehicleViewer.flats.size() > 1}" disabled="#{vehicleViewer.visitor}" required="true" requiredMessage="Selecione um apartamento" converter="selectItemsConverter">
+					<p:selectOneMenu id="flat" value="#{vehicleViewer.vehicle.domain}" filter="true" required="true" requiredMessage="Selecione um apartamento"
+									 rendered="#{vehicleViewer.flats.size() > 1}" converter="selectItemsConverter">
 						<f:selectItem itemLabel="Selecione o apartamento" noSelectionOption="true"/>
 						<f:selectItems var="flat" value="#{vehicleViewer.flats}" itemLabel="Apartamento #{flat.number} - Bloco #{flat.block}" itemValue="#{flat}"/>
 					</p:selectOneMenu>
-					<h:outputText value="Apartamento #{vehicleViewer.flats.get(0).number} - Bloco #{vehicleViewer.flats.get(0).block}" rendered="#{vehicleViewer.flats.size() == 1}"/>
+					<c:if test="#{vehicleViewer.flats.size() == 1}">
+						<c:set target="#{vehicleViewer.vehicle}" property="domain" value="#{vehicleViewer.flats.get(0)}"></c:set>
+						<h:outputText value="Apartamento #{vehicleViewer.flats.get(0).number} - Bloco #{vehicleViewer.flats.get(0).block}"/>
+					</c:if>
 		        </h:panelGrid>
 				<h:panelGrid columns="2" style="border: 0px solid black; float: right; margin: 10px 0px 5px">
 					<p:commandButton value="Salvar" actionListener="#{vehicleViewer.onVehicleSave}" update=":tabs:vehicle-form:vehicleTable,:outputMsg" oncomplete="if (!args.validationFailed) { if(!args.exception) {PF('vehicleDialog').hide();} else { if(args.alert) {PF('alertDialog').show();}}}" style="float: right; width: 80px; margin: 0px 0px 0px 5px;"/>

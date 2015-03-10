@@ -2,7 +2,9 @@ package br.com.abware.accountmgm.bean;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import javax.faces.bean.ManagedBean;
 import javax.faces.bean.ViewScoped;
@@ -31,17 +33,18 @@ public class ParkingBean extends BaseBean {
 
 	public void init(List<Flat> flats) {
 		try {
-			ArrayList<Parking> parkings;
+			Set<Parking> parkings;
 			this.flats = flats;
 
 			if (!CollectionUtils.isEmpty(flats)) {
-				parkings = new ArrayList<Parking>();
+				parkings = new HashSet<Parking>();
 
 				for (Flat flat : flats) {
 					parkings.addAll(parkingService.getParkings(flat));
+					parkings.addAll(parkingService.getRentedParkings(flat));
 				}
 				
-				model = new ModelDataModel<Parking>(parkings);
+				model = new ModelDataModel<Parking>(new ArrayList<Parking>(parkings));
 			}
 
 			filters = new HashMap<String, Object>();
@@ -50,6 +53,27 @@ public class ParkingBean extends BaseBean {
 		}
 	}
 
+	
+	public void onCreate() {
+		
+	}
+	
+	public void onSave() {
+		
+	}
+	
+	public void onEdit() {
+		
+	}
+
+	public void onRent() throws Exception {
+		parkingService.update(parking);
+	}
+
+	public void onRentalCancel() throws Exception {
+		parkingService.update(parking);
+	}
+	
 	@SuppressWarnings("unchecked")
 	public void onDomainSearch(Domain domain) throws Exception {
 		List<Parking> parkings;

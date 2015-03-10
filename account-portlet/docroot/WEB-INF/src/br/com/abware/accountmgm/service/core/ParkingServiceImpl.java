@@ -33,11 +33,12 @@ public class ParkingServiceImpl implements BaseService<Parking> {
 		}
 	}
 
+	public List<Parking> getRentedParkings(Domain renterDomain) throws Exception {
+		return parkingManager.findRentedParkings(renterDomain);
+	}
+
 	public List<Parking> getParkings(Domain domain) throws Exception {
-		List<Parking> parkings = parkingManager.findOwnedParkings(domain);
-		parkings.removeAll(parkingManager.findGrantedParkings(domain));
-		parkings.addAll(parkingManager.findRentedParkings(domain));
-		return parkings;
+		return parkingManager.findOwnedParkings(domain);
 	}
 
 	public List<Parking> getAvailableParkings() throws Exception {
@@ -49,10 +50,25 @@ public class ParkingServiceImpl implements BaseService<Parking> {
 	}
 
 	public Parking update(Parking parking) throws Exception {
+		if (parking.getId() <= 0) {
+			throw new Exception("vaga inexistente");
+		}
+
+		Parking p = parkingManager.findById(parking.getId());
+
+		if (p == null) {
+			throw new Exception("vaga nao encontrada");
+		}
+
 		if (parking.getOwnerDomain() != null) {
-			Parking p = parkingManager.findById(parking.getId());
-			if (p.getOwnerDomain() != null) {
-				throw new Exception("vaga associada a outro dominio");
+			if (p.getOwnerDomain() != null && !p.getOwnerDomain().equals(parking.getOwnerDomain())) {
+				throw new Exception("vaga ja associada a outro apartamento");
+			}
+		}
+
+		if (parking.getRenterDomain() != null) {
+			if (p.getRenterDomain() != null && !p.getRenterDomain().equals(parking.getRenterDomain())) {
+				throw new Exception("vaga ja alugada para outro apartamento");
 			}
 		}
 

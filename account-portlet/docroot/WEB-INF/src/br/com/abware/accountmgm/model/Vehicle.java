@@ -14,7 +14,7 @@ public class Vehicle extends AbstractModel {
 	private Image image;
 
 	private Domain domain;
-
+	
 	public boolean equals(Object obj) {
 		return super.equals(obj) || (license != null && license.equalsIgnoreCase(((Vehicle) obj).getLicense()));
 	}

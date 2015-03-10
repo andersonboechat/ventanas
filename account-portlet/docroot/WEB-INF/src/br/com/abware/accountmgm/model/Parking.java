@@ -6,15 +6,17 @@ import br.com.abware.jcondo.core.model.Domain;
 public class Parking extends AbstractModel {
 
 	private long id;
-	
+
 	private String code;
 
 	private ParkingType type;
-	
+
 	private Domain ownerDomain;
 
 	private Domain renterDomain;
-	
+
+	private Vehicle vehicle;
+
 	@Override
 	public String toString() {
 		StringBuffer sb = new StringBuffer();
@@ -67,6 +69,14 @@ public class Parking extends AbstractModel {
 
 	public void setRenterDomain(Domain renterDomain) {
 		this.renterDomain = renterDomain;
+	}
+
+	public Vehicle getVehicle() {
+		return vehicle;
+	}
+
+	public void setVehicle(Vehicle vehicle) {
+		this.vehicle = vehicle;
 	}
 
 }

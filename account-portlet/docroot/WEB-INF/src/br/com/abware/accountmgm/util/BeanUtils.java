@@ -5,11 +5,15 @@ import java.lang.reflect.InvocationTargetException;
 import org.apache.commons.beanutils.BeanUtilsBean;
 import org.apache.commons.beanutils.ConvertUtilsBean;
 
+import br.com.abware.accountmgm.model.Parking;
+import br.com.abware.accountmgm.model.Vehicle;
 import br.com.abware.accountmgm.persistence.entity.AdministrationEntity;
 import br.com.abware.accountmgm.persistence.entity.DomainEntity;
 import br.com.abware.accountmgm.persistence.entity.FlatEntity;
 import br.com.abware.accountmgm.persistence.entity.MembershipEntity;
+import br.com.abware.accountmgm.persistence.entity.ParkingEntity;
 import br.com.abware.accountmgm.persistence.entity.PersonEntity;
+import br.com.abware.accountmgm.persistence.entity.VehicleEntity;
 import br.com.abware.jcondo.core.PersonStatus;
 import br.com.abware.jcondo.core.model.Administration;
 import br.com.abware.jcondo.core.model.Domain;
@@ -31,6 +35,10 @@ public class BeanUtils extends org.apache.commons.beanutils.BeanUtils {
 		 cub.register(bc, AdministrationEntity.class);
 		 cub.register(bc, Flat.class);
 		 cub.register(bc, FlatEntity.class);
+		 cub.register(bc, Vehicle.class);
+		 cub.register(bc, VehicleEntity.class);		 
+		 cub.register(bc, Parking.class);
+		 cub.register(bc, ParkingEntity.class);
 		 cub.register(bc, Image.class);
 
 		 DomainConverter dc = new DomainConverter();

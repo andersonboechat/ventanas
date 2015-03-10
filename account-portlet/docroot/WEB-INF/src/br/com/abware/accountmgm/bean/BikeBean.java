@@ -141,12 +141,12 @@ public class BikeBean extends BaseBean {
 
 	public void onVehiclesDelete() throws Exception {
 		for (Vehicle vehicle : selectedVehicles) {
-			vehicleService.removeFrom(vehicle, vehicle.getDomain());
+			vehicleService.assignTo(vehicle, null);
 		}
 	}
 
 	public void onVehicleDelete() throws Exception {
-		vehicleService.removeFrom(model.getRowData(), model.getRowData().getDomain());
+		vehicleService.assignTo(model.getRowData(), null);
 		model.removeModel(model.getRowData());
 		FacesContext context = FacesContext.getCurrentInstance();
 		String component = context.getViewRoot().findComponent("outputMsg").getClientId();

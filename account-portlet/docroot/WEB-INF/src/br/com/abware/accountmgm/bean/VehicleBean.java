@@ -99,8 +99,8 @@ public class VehicleBean extends BaseBean {
 
 	public void onVehicleSave() {
 		try {
-			if (visitor && vehicle.getDomain().getId() > 0) {
-				vehicle.setDomain(new Flat());
+			if (visitor && vehicle.getDomain() != null && vehicle.getDomain().getId() > 0) {
+				vehicle.setDomain(null);
 			}
 
 			if (vehicle.getId() == 0) {
@@ -119,7 +119,7 @@ public class VehicleBean extends BaseBean {
 			Vehicle v = vehicleService.getVehicle(vehicle.getLicense());
 
 			// Veiculo esta associado a um apartamento
-			if (v.getDomain().getId() > 0) {
+			if (v.getDomain() != null) {
 				String details;
 
 				if (flats.indexOf(v.getDomain()) >= 0) {
@@ -134,9 +134,7 @@ public class VehicleBean extends BaseBean {
 			} else {
 			// Veiculo eh visitante
 				try {
-					Domain domain = vehicle.getDomain();
 					BeanUtils.copyProperties(vehicle, v);
-					vehicle.setDomain(domain);
 				} catch (Exception ex) {
 					LOGGER.error("Falha ao clonar veiculo", ex);
 				}
@@ -163,12 +161,12 @@ public class VehicleBean extends BaseBean {
 
 	public void onVehiclesDelete() throws Exception {
 		for (Vehicle vehicle : selectedVehicles) {
-			vehicleService.removeFrom(vehicle, vehicle.getDomain());
+			vehicleService.assignTo(vehicle, null);
 		}
 	}
 
 	public void onVehicleDelete() throws Exception {
-		vehicleService.removeFrom(model.getRowData(), model.getRowData().getDomain());
+		vehicleService.assignTo(model.getRowData(), null);
 		model.removeModel(model.getRowData());
 		FacesContext context = FacesContext.getCurrentInstance();
 		String component = context.getViewRoot().findComponent("outputMsg").getClientId();
@@ -178,7 +176,7 @@ public class VehicleBean extends BaseBean {
 	public void onVehicleEdit() {
 		try {
 			BeanUtils.copyProperties(vehicle, model.getRowData());
-			visitor = vehicle.getDomain().getId() == 0 ? true : false;
+			visitor = vehicle.getDomain() == null ? true : false;
 			imageUploadBean.setImage(vehicle.getImage());
 		} catch (Exception e) {
 			LOGGER.error("Falha ao editar veiculo", e);

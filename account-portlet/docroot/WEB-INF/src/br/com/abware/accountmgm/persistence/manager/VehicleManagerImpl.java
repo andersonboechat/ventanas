@@ -15,14 +15,11 @@ import br.com.abware.accountmgm.model.Vehicle;
 import br.com.abware.accountmgm.model.VehicleType;
 import br.com.abware.accountmgm.persistence.entity.VehicleEntity;
 import br.com.abware.jcondo.core.model.Domain;
-import br.com.abware.jcondo.core.model.Flat;
 import br.com.abware.jcondo.core.model.Image;
 import br.com.abware.jcondo.exception.PersistenceException;
 
 public class VehicleManagerImpl extends JCondoManager<VehicleEntity, Vehicle>{
 
-	private FlatManagerImpl flatManager = new FlatManagerImpl();
-	
 	@Override	
 	protected Class<Vehicle> getModelClass() {
 		return Vehicle.class;
@@ -36,7 +33,6 @@ public class VehicleManagerImpl extends JCondoManager<VehicleEntity, Vehicle>{
 	@Override
 	protected VehicleEntity getEntity(Vehicle model) throws Exception {
 		VehicleEntity vehicle = super.getEntity(model);
-		vehicle.setDomainId(model.getDomain().getId());
 		vehicle.setImageId(model.getImage().getId());
 		return vehicle;
 	}
@@ -48,12 +44,6 @@ public class VehicleManagerImpl extends JCondoManager<VehicleEntity, Vehicle>{
 	@Override
 	protected Vehicle getModel(VehicleEntity entity) throws Exception {
 		Vehicle vehicle = super.getModel(entity);
-
-		if (entity.getDomainId() != 0) {
-			vehicle.setDomain(flatManager.findById(entity.getDomainId()));
-		} else {
-			vehicle.setDomain(new Flat());
-		}
 
 		String path = getPath(entity.getImageId());
 		vehicle.setImage(new Image(entity.getImageId(), path, null, null));
@@ -82,7 +72,8 @@ public class VehicleManagerImpl extends JCondoManager<VehicleEntity, Vehicle>{
 		String key = generateKey();
 		try {
 			openManager(key);
-			String queryString = "FROM VehicleEntity WHERE domainId = :domainId ORDER BY license";
+			//String queryString = "FROM VehicleEntity WHERE domainId = :domainId ORDER BY license";
+			String queryString = "FROM VehicleEntity WHERE domain IS NOT NULL AND domain.id = :domainId ORDER BY license";
 			Query query = em.createQuery(queryString);
 			query.setParameter("domainId", domain.getId());
 			return getModels(query.getResultList());
@@ -96,7 +87,7 @@ public class VehicleManagerImpl extends JCondoManager<VehicleEntity, Vehicle>{
 		String key = generateKey();
 		try {
 			openManager(key);
-			String queryString = "FROM VehicleEntity WHERE type := type AND domainId = :domainId ORDER BY license";
+			String queryString = "FROM VehicleEntity WHERE type := type AND domain IS NOT NULL AND domainId = :domainId ORDER BY license";
 			Query query = em.createQuery(queryString);
 			query.setParameter("type", type);
 			query.setParameter("domainId", domain.getId());
@@ -104,7 +95,7 @@ public class VehicleManagerImpl extends JCondoManager<VehicleEntity, Vehicle>{
 		} finally {
 			closeManager(key);
 		}
-	}	
+	}
 
 	public Vehicle findByLicense(String license) throws Exception {
 		String key = generateKey();

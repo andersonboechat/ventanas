@@ -7,6 +7,7 @@ import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 
 import br.com.abware.accountmgm.exception.ModelExistException;
+import br.com.abware.accountmgm.model.Parking;
 import br.com.abware.accountmgm.model.Vehicle;
 import br.com.abware.accountmgm.model.VehicleType;
 import br.com.abware.accountmgm.persistence.manager.SecurityManagerImpl;
@@ -131,34 +132,35 @@ public class VehicleServiceImpl implements BaseService<Vehicle> {
 
 		Vehicle v = getVehicle(vehicle.getId());
 
-		if (domain instanceof Flat && !domain.equals(v.getDomain())) {
-			if (domain.getId() > 0) {
-				if (flatService.getFlat(domain.getId()) == null) {
-					throw new Exception("apartamento nao encontrado");
-				} else if (parkingService.getParkingAmount(domain) <= 0){
-					throw new Exception("nao ha vagas disponíveis");
-				}
+		if (domain != null)  {
+			if (domain.equals(v.getDomain())) {
+				return;
+			} else if (domain instanceof Flat && flatService.getFlat(domain.getId()) == null) {
+				throw new Exception("apartamento nao encontrado");
+			} else if (parkingService.getParkingAmount(domain) <= 0){
+				throw new Exception("nao ha vagas disponíveis");
 			}
 
-			v.setDomain(domain);
-			vehicleManager.save(v);
-			vehicle.setDomain(domain);
-		}
-	}
+			
+		} else { 
+			if (v.getDomain() == null) {
+				return;
+			}
 
-	public void removeFrom(Vehicle vehicle, Domain domain) throws Exception {
-//		if (!securityManager.hasPermission(vehicle, Permission.UPDATE)) {
-//			throw new Exception("sem permissao para cadastrar veiculos");
-//		}
-
-		Vehicle v = getVehicle(vehicle.getId());
-
-		if (!domain.equals(v.getDomain())) {
-			throw new Exception("veiculo associado a outro apartamento");
+			List<Parking> parkings = parkingService.getParkings(v.getDomain());
+			parkings.addAll(parkingService.getRentedParkings(v.getDomain()));
+			for (Parking parking : parkings) {
+				if (parking.getVehicle().equals(v)) {
+					parking.setVehicle(null);
+					parkingService.update(parking);
+				}
+			}
 		}
 
 		v.setDomain(domain);
 		vehicleManager.save(v);
+		vehicle.setDomain(domain);
+		
 	}
 
 	public void updateImage(Vehicle vehicle, Image image) throws Exception {

@@ -121,7 +121,7 @@ public class ModelDataModel<Model extends BaseModel> extends ListDataModel<Model
 		} else {
 			try {
 				String fieldValue = BeanUtils.getProperty(obj, filterProperty);
-				if (filterValue == null || fieldValue.toLowerCase().contains(filterValue.toString().toLowerCase())) {
+				if (filterValue == null || (fieldValue != null && fieldValue.toLowerCase().contains(filterValue.toString().toLowerCase()))) {
 					return true;
 				}
 			} catch (Exception e) {
