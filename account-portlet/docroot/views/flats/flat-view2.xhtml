@@ -18,6 +18,8 @@
 			.column12 {width: 12%; font-weight: bold;}
 			.panel tr {border: none !important; background-color: transparent; font-size: 16px;}
 			.panel td {border: none !important; background-color: transparent; font-size: 16px;}
+			.menu-cmds {width: 100%}
+			.menu-cmds td {border: none !important; margin: 0px; padding: 0px}
 			.menu-cmds tr {
 				width: 100%; border-bottom: 0px !important; 	
 				-webkit-border-top-right-radius: 3px !important;
@@ -26,7 +28,7 @@
 			}
 			.menu-cmds-col1 {vertical-align: middle; width: 155px; border: none !important; padding: 0px; margin: 0px;}
 			.menu-cmds-col2 {vertical-align: middle; width: 130px;}
-			.menu-cmds-col3 {vertical-align: middle; padding: 0; text-align: right; border: 0px solid red !important}
+			.menu-cmds-col3 {vertical-align: middle; padding: 0; margin: 0; text-align: right; border: 0px solid red !important}
 			.my-account-col1 {vertical-align: top; width: 198px; height: 300px}
 			.my-account-col2 {vertical-align: top; padding: 0px !important;}
 			.labelClm {width: 85px; background-color: transparent}
@@ -40,19 +42,25 @@
 
 			.no-border tr {border: none !important;}
 			.no-border td {border: none !important;}
-			.no-margin {margin:  0px !important;padding: 0px !important;}
-			.no-margin td {margin:  0px !important;padding: 0px !important;}
+			.no-margin {margin:  0px !important; padding: 0px !important;}
+			.no-margin td {margin:  0px !important; padding: 0px !important;}
 			.no-background {background-color: transparent;}
 			.no-background div {background-color: transparent;}
 			.no-background tr {background-color: transparent;}
 			.no-background td {background-color: transparent;}
-			.flats {float: right}
+			.flats {float: right; margin: 0px; padding: 0;}
+			.flats tr {margin: 0px; padding: 0;}
+			.flats td {margin: 0px; padding: 0;}
 			.memberships div {border: 0px; border-top: 1px solid grey;}
 			.docs-header {text-align: left;}
-			.docs-cmds {width: 10%}
+			.docs-header td {padding: 0; margin: 0;}
+			.docs-cmds {width: 15%;}
+			.docs-cmds td {padding: 0; margin: 0;}
 			.ui-tabs {background: none; padding: 0 !important; border: 0px !important;}
 			.ui-tabs-nav {background: none !important; }
 			.ui-tabs-panel {margin: 0 !important; padding: 0 !important}
+			.parkings {width: 50%; vertical-align: top}
+			.documents {width: 50%; vertical-align: top}
 		</style>
 	</h:head>
 	<h:body>
@@ -67,18 +75,25 @@
 		<c:set var="parkingViewer" value="#{flatBean.parkingBean}"/>
 
 		<h:form id="flat-form">
-			<p:panelGrid id="flat-filters" columns="1" styleClass="no-background no-border flats" columnClasses="menu-cmds-col3">
-		    	<h:outputText value="Apartamento #{flatBean.flats.get(0).number} - Bloco #{flatBean.flats.get(0).block}" rendered="#{flatBean.flats.size() == 1}" style="font-size: 14px; color: black; font-weight: bold;"/>
-		    	<p:selectOneMenu id="flat" value="#{flatBean.flat}" filter="true" filterMatchMode="contains" converter="selectItemsConverter" rendered="#{flatBean.flats.size() > 1}">
-		    		<f:selectItem itemLabel="Todos Apartamentos" noSelectionOption="true"/>
-					<f:selectItems var="flat" value="#{flatBean.flats}" itemLabel="Apartamento #{flat.number} - Bloco #{flat.block}" itemValue="#{flat}"/>
-					<p:ajax event="change" listener="#{flatBean.onFlatSelect}" update="flat-details,:tabs:person-form:personTable,:tabs:vehicle-form:vehicleTable,:tabs:supplier-form:supplierTable" />
-		    	</p:selectOneMenu>
-			</p:panelGrid>
-			<p:panelGrid id="flat-details" columns="1" styleClass="no-background no-border" style="margin: 10px 0px 20px 0px;" cellpadding="10">
+			<p:menubar>
+				<p:menuitem value="Enviar Documento" url="#" icon="ui-icon-document"/>
+				<p:menuitem value="Solicitar Carteira" url="#" icon="ui-icon-document"/>
+				<f:facet name="options">
+					<p:panelGrid id="flat-filters" columns="1" styleClass="no-background no-border flats" columnClasses="menu-cmds-col3">
+				    	<h:outputText value="Apartamento #{flatBean.flats.get(0).number} - Bloco #{flatBean.flats.get(0).block}" rendered="#{flatBean.flats.size() == 1}" style="font-size: 14px; color: black; font-weight: bold;"/>
+				    	<p:selectOneMenu id="flat" value="#{flatBean.flat}" filter="true" filterMatchMode="contains" converter="selectItemsConverter" rendered="#{flatBean.flats.size() > 1}">
+				    		<f:selectItem itemLabel="Todos Apartamentos" noSelectionOption="true"/>
+							<f:selectItems var="flat" value="#{flatBean.flats}" itemLabel="Apartamento #{flat.number} - Bloco #{flat.block}" itemValue="#{flat}"/>
+							<p:ajax event="change" listener="#{flatBean.onFlatSelect}" update="flat-details,:tabs:person-form:personTable,:tabs:vehicle-form:vehicleTable,:tabs:supplier-form:supplierTable" />
+				    	</p:selectOneMenu>
+					</p:panelGrid>			
+				</f:facet>
+			</p:menubar>
+			<p:panelGrid id="flat-details" columns="2" columnClasses="parkings,documents" styleClass="no-background no-border" style="margin: 10px 0px 20px 0px;" cellpadding="10">
 				<p:column>
-					<p:dataTable id="parkingTable" widgetVar="parkingTable" var="parking" value="#{parkingViewer.model}" rows="4" paginator="true" paginatorAlwaysVisible="false" paginatorPosition="bottom" paginatorTemplate="{PreviousPageLink} {CurrentPageReport} {NextPageLink}"
-						emptyMessage="Nenhuma vaga associada a este apartamento" style="width: 50%;">
+					<p:dataTable id="parkingTable" widgetVar="parkingTable" var="parking" value="#{parkingViewer.model}" rows="4" 
+						paginator="true" paginatorAlwaysVisible="false" paginatorPosition="bottom" paginatorTemplate="{PreviousPageLink} {CurrentPageReport} {NextPageLink}"
+						emptyMessage="Nenhuma vaga associada">
 						<f:facet name="header">
 							<p:panelGrid columns="1" columnClasses="docs-header" styleClass="no-background no-border no-margin" style="width: 100%;">
 								<h:outputText value="Estacionamento"/>
@@ -102,12 +117,12 @@
 					</p:dataTable>
 				</p:column>
 				<p:column>
-					<p:dataTable id="docs" widgetVar="docs" var="doc" value="#{documentViewer.model}" scrollable="true" 
-						emptyMessage="Nenhum documento encontrado para este apartamento" style="margin-top: 15px">
+					<p:dataTable id="documentTable" widgetVar="documentTable" var="doc" value="#{documentViewer.model}" scrollable="true" 
+						paginator="true" paginatorAlwaysVisible="false" paginatorPosition="bottom" paginatorTemplate="{PreviousPageLink} {CurrentPageReport} {NextPageLink}"
+						emptyMessage="Nenhum documento encontrado">
 						<f:facet name="header">
-							<p:panelGrid columns="2" columnClasses="docs-header,docs-cmds" styleClass="no-background no-border no-margin" style="width: 100%;">
+							<p:panelGrid columns="1" columnClasses="docs-header" styleClass="no-background no-border no-margin" style="width: 100%;">
 								<h:outputText value="Documentos"/>
-								<h:outputText value="Incluir" style="width: 8%"/>
 							</p:panelGrid>
 						</f:facet>
 						<p:column>
@@ -116,28 +131,15 @@
 							</p:commandLink>
 						</p:column>
 						<p:column style="width: 29%; text-align: center">
-							<h:outputText value="Apartamento #{doc.domain.number} - Bloco #{doc.domain.block}"/>
-						</p:column>						
-						<p:column style="width: 8%; text-align: center">
-							<p:commandLink title="Alterar" partialSubmit="true" process="@this" target="blank">
-								<h:graphicImage value="../images/edit.png" width="30" height="30"/>
-								<f:setPropertyActionListener target="#{documentViewer.document}" value="#{doc}"/>
-							</p:commandLink>
-						</p:column>						
-						<p:column style="width: 8%; text-align: center">
-							<p:commandLink title="Excluir" partialSubmit="true" process="@this" target="blank">
-								<h:graphicImage value="../images/cancel2.png" width="26" height="26"/>
-								<p:confirm header="Após a exclusão, não será possível recuperar este documento. Você confirma a exclusão deste documento?" message="#{msg['person.delete.message']}" icon="ui-icon-alert"/>
-								<f:setPropertyActionListener target="#{documentViewer.document}" value="#{doc}"/>
-							</p:commandLink>
+							<h:outputText value="Apt. #{doc.domain.number} - Bl. #{doc.domain.block}"/>
 						</p:column>						
 					</p:dataTable>
 				</p:column>
 			</p:panelGrid>
-			<p:confirmDialog widgetVar="rentalCancel" header="Cancelamento de aluguel de garagem" message="Você confirma o cancelamento do aluguel desta vaga?" severity="alert" showEffect="fade" hideEffect="fade">
+			<p:confirmDialog widgetVar="rentalCancel" header="Aluguel de Estacionamento" message="Você confirma o cancelamento do aluguel desta vaga?" severity="alert" showEffect="fade" hideEffect="fade">
 				<p:panel style="text-align: center; border: none;">
-					<p:commandButton value="#{msg['no']}" type="button" styleClass="ui-confirmdialog-no" onclick="PF('rentalCancel').hide();" icon="ui-icon-close" style="float: left; width: 50px; margin-left: 14%" />
-					<p:commandButton value="#{msg['yes']}" actionListener="#{parkingViewer.onRentalCancel}" partialSubmit="true" process="@this" update=":flat-form:parkingTable" oncomplete="PF('rentalCancel').hide();" styleClass="ui-confirmdialog-yes" icon="ui-icon-check" style="float: right; width: 50px; margin-right: 14%"/>
+					<p:commandButton value="#{msg['no']}" type="button" styleClass="ui-confirmdialog-no" onclick="PF('rentalCancel').hide();" icon="ui-icon-close" style="float: left; width: 80px; margin-left: 14%" />
+					<p:commandButton value="#{msg['yes']}" actionListener="#{parkingViewer.onRentalCancel}" partialSubmit="true" process="@this" update=":flat-form:parkingTable" oncomplete="PF('rentalCancel').hide();" styleClass="ui-confirmdialog-yes" icon="ui-icon-check" style="float: right; width: 80px; margin-right: 14%"/>
 				</p:panel>
 			</p:confirmDialog>			
 		</h:form>
@@ -148,20 +150,36 @@
 			<p:tab title="Prestadores de Serviço"><ui:include src="supplier-view.xhtml"/></p:tab>
 		</p:tabView>
 		
-	<p:dialog header="Aluguel de vaga de garagem" widgetVar="parkingDialog" draggable="true" resizable="false" modal="true" closable="false" visible="false">
-		<h:form id="parking-rent-form">
-			<p:panelGrid id="model-details" columns="1" styleClass="no-border" style="margin: 10px 0px 20px 0px;" cellpadding="10">
-		    	<h:outputText value="Escolha o apartamento para o qual deseja alugar esta vaga e confirme clicando no botão Alugar"/>
-		    	<p:selectOneMenu id="parkingDomain" value="#{parkingViewer.parking.renterDomain}" converter="selectItemsConverter">
-		    		<f:selectItem itemLabel="Selecione" noSelectionOption="true"/>
-					<f:selectItems var="flat" value="#{flatBean.flats}" itemLabel="Apartamento #{flat.number} - Bloco #{flat.block}" itemValue="#{flat}"/>
-		    	</p:selectOneMenu>
-			</p:panelGrid>
-			<p:commandButton value="Cancelar" oncomplete="PF('parkingDialog').hide();" partialSubmit="true" process="@this" style="float: right; width: 80px; margin: 0px 0px 10px 5px;">
-				<f:setPropertyActionListener target="#{parkingViewer.parking}" value=""/>
-			</p:commandButton>
-			<p:commandButton value="Alugar" actionListener="#{parkingViewer.onRent}" update=":flat-form:parkingTable, :outputMsg" oncomplete="if (!args.validationFailed &amp;&amp; !args.exception) {PF('parkingDialog').hide();}" style="float: right; width: 80px; margin: 0px 0px 10px 5px;"/>
-		</h:form>
-	</p:dialog>
+		<p:dialog header="Aluguel de Estacionamento" widgetVar="parkingDialog" draggable="true" resizable="false" modal="true" closable="false" visible="false" width="300px">
+			<h:form id="parking-rent-form">
+				<p:panelGrid id="model-details" columns="1" styleClass="no-border" style="margin: 10px 0px 20px 0px; text-align: justify" cellpadding="10">
+			    	<h:outputText value="Escolha o apartamento para o qual deseja alugar esta vaga e confirme clicando no botão Alugar."/>
+			    	<p:selectOneMenu id="parkingDomain" value="#{parkingViewer.parking.renterDomain}" converter="selectItemsConverter">
+			    		<f:selectItem itemLabel="Selecione" noSelectionOption="true"/>
+						<f:selectItems var="flat" value="#{flatBean.flats}" itemLabel="Apartamento #{flat.number} - Bloco #{flat.block}" itemValue="#{flat}"/>
+			    	</p:selectOneMenu>
+				</p:panelGrid>
+				<p:commandButton value="Cancelar" oncomplete="PF('parkingDialog').hide();" partialSubmit="true" process="@this" style="float: right; width: 80px; margin: 0px 0px 10px 5px;">
+					<f:setPropertyActionListener target="#{parkingViewer.parking}" value=""/>
+				</p:commandButton>
+				<p:commandButton value="Alugar" actionListener="#{parkingViewer.onRent}" update=":flat-form:parkingTable, :outputMsg" oncomplete="if (!args.validationFailed &amp;&amp; !args.exception) {PF('parkingDialog').hide();}" style="float: right; width: 80px; margin: 0px 0px 10px 5px;"/>
+			</h:form>
+		</p:dialog>
+
+		<p:dialog header="Documentos" widgetVar="documentDialog" draggable="true" resizable="false" modal="true" closable="false" visible="false">
+			<h:form id="document-form">
+				<p:panelGrid id="model-details" columns="1" styleClass="no-border" style="margin: 10px 0px 20px 0px; text-align: justify" cellpadding="10">
+			    	<h:outputText value="Escolha o apartamento para o qual deseja alugar esta vaga e confirme clicando no botão Alugar."/>
+			    	<p:selectOneMenu id="parkingDomain" value="#{documentViewer.document}" converter="selectItemsConverter">
+			    		<f:selectItem itemLabel="Selecione" noSelectionOption="true"/>
+						<f:selectItems var="flat" value="#{flatBean.flats}" itemLabel="Apartamento #{flat.number} - Bloco #{flat.block}" itemValue="#{flat}"/>
+			    	</p:selectOneMenu>
+				</p:panelGrid>
+				<p:commandButton value="Cancelar" oncomplete="PF('documentDialog').hide();" partialSubmit="true" process="@this" style="float: right; width: 80px; margin: 0px 0px 10px 5px;">
+					<f:setPropertyActionListener target="#{documentViewer.document}" value=""/>
+				</p:commandButton>
+				<p:commandButton value="Enviar" actionListener="#{documentViewer.onSend}" update=":flat-form:documentTable, :outputMsg" oncomplete="if (!args.validationFailed &amp;&amp; !args.exception) {PF('documentDialog').hide();}" style="float: right; width: 80px; margin: 0px 0px 10px 5px;"/>
+			</h:form>
+		</p:dialog>
 	</h:body>
 </f:view>

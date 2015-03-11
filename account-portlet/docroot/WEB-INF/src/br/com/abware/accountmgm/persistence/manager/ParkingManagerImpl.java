@@ -24,7 +24,7 @@ public class ParkingManagerImpl extends JCondoManager<ParkingEntity, Parking> {
 	}
 
 	@SuppressWarnings("unchecked")
-	public List<Parking> findAvailableParkings() throws Exception {
+	public List<Parking> findNotOwnedParkings() throws Exception {
 		String key = generateKey();
 		try {
 			openManager(key);

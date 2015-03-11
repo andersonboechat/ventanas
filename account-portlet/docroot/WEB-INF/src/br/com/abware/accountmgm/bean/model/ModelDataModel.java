@@ -53,7 +53,17 @@ public class ModelDataModel<Model extends BaseModel> extends ListDataModel<Model
     		models.set(index, model);
     	}
 	}
-	
+
+	public void update(Model model) {
+		int index = models.indexOf(model);
+
+		if (index >= 0) {
+			setModel(model);
+		} else {
+			addModel(model);
+		}
+	}
+
     @Override
     public Model getRowData(String rowKey) {
         for(Model model : models) {

@@ -60,7 +60,7 @@ public class AdminBean extends BaseBean {
 
 			filters = new HashMap<String, Object>();
 			flat = new Flat();			
-			parkings = new DualListModel<Parking>(parkingService.getAvailableParkings(), new ArrayList<Parking>());
+			parkings = new DualListModel<Parking>(parkingService.getNotOwnedParkings(), new ArrayList<Parking>());
 		} catch (Exception e) {
 			LOGGER.error("", e);
 		}
@@ -123,7 +123,7 @@ public class AdminBean extends BaseBean {
 		try {
 			BeanUtils.copyProperties(flat, model.getRowData());
 			parkings.getTarget().clear();
-			parkings.getTarget().addAll(parkingService.getParkings(flat));
+			parkings.getTarget().addAll(parkingService.getOwnedParkings(flat));
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

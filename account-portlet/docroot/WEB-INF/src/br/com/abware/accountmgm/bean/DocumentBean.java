@@ -23,9 +23,9 @@ public class DocumentBean extends BaseBean {
 	private ModelDataModel<Document> model;
 
 	private HashMap<String, Object> filters;
-	
+
 	private Document document;
-	
+
 	private Document[] selectedDocuments;
 
 	public void init(List<? extends Domain> domains) {

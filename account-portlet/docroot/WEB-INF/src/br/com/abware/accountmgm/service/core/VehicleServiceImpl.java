@@ -112,13 +112,20 @@ public class VehicleServiceImpl implements BaseService<Vehicle> {
 
 		// Verifica se tem vaga para o apartamento especificado
 		// Visitantes podem acessar o condominio apenas para deixar/buscar passageiros
-		if (vehicle.getDomain() != null && vehicle.getDomain() instanceof Flat) {
-			if (vehicle.getDomain().getId() > 0) {
-				if (flatService.getFlat(vehicle.getDomain().getId()) == null) {
-					throw new Exception("apartamento nao encontrado");
-				} else if (parkingService.getParkingAmount(vehicle.getDomain()) <= 0){
+		if (vehicle.getDomain() != null) {
+			if (vehicle.getDomain().getId() <= 0 || 
+					(vehicle.getDomain() instanceof Flat && flatService.getFlat(vehicle.getDomain().getId()) == null)) {
+				throw new Exception("dominio nao encontrado");
+			} else {
+				List<Parking> parkings = parkingService.getFreeParkings(vehicle.getDomain());
+				
+				if (CollectionUtils.isEmpty(parkings)) {
 					throw new Exception("nao ha vagas disponíveis");
 				}
+
+				Parking parking = parkings.get(0);
+				parking.setVehicle(v);
+				parkingService.update(parking);
 			}
 		}
 
@@ -135,21 +142,27 @@ public class VehicleServiceImpl implements BaseService<Vehicle> {
 		if (domain != null)  {
 			if (domain.equals(v.getDomain())) {
 				return;
+			} else if (v.getDomain() != null) {
+				throw new Exception("veiculo ja associado a outro dominio");
 			} else if (domain instanceof Flat && flatService.getFlat(domain.getId()) == null) {
 				throw new Exception("apartamento nao encontrado");
-			} else if (parkingService.getParkingAmount(domain) <= 0){
-				throw new Exception("nao ha vagas disponíveis");
-			}
+			} else { 
+				List<Parking> parkings = parkingService.getFreeParkings(domain);
+				
+				if (CollectionUtils.isEmpty(parkings)) {
+					throw new Exception("nao ha vagas disponíveis");
+				}
 
-			
+				Parking parking = parkings.get(0);
+				parking.setVehicle(v);
+				parkingService.update(parking);
+			}
 		} else { 
 			if (v.getDomain() == null) {
 				return;
 			}
 
-			List<Parking> parkings = parkingService.getParkings(v.getDomain());
-			parkings.addAll(parkingService.getRentedParkings(v.getDomain()));
-			for (Parking parking : parkings) {
+			for (Parking parking : parkingService.getBusyParkings(v.getDomain())) {
 				if (parking.getVehicle().equals(v)) {
 					parking.setVehicle(null);
 					parkingService.update(parking);
@@ -160,7 +173,6 @@ public class VehicleServiceImpl implements BaseService<Vehicle> {
 		v.setDomain(domain);
 		vehicleManager.save(v);
 		vehicle.setDomain(domain);
-		
 	}
 
 	public void updateImage(Vehicle vehicle, Image image) throws Exception {

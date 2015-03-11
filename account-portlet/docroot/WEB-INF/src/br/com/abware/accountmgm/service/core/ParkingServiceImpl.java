@@ -1,5 +1,6 @@
 package br.com.abware.accountmgm.service.core;
 
+import java.util.Iterator;
 import java.util.List;
 
 import br.com.abware.accountmgm.model.Parking;
@@ -37,12 +38,52 @@ public class ParkingServiceImpl implements BaseService<Parking> {
 		return parkingManager.findRentedParkings(renterDomain);
 	}
 
-	public List<Parking> getParkings(Domain domain) throws Exception {
+	public List<Parking> getOwnedParkings(Domain domain) throws Exception {
 		return parkingManager.findOwnedParkings(domain);
 	}
 
-	public List<Parking> getAvailableParkings() throws Exception {
-		return parkingManager.findAvailableParkings();
+	public List<Parking> getParkings(Domain domain) throws Exception {
+		List<Parking> parkings = getOwnedParkings(domain); 
+		parkings.addAll(getRentedParkings(domain));
+		return parkings;
+	}	
+
+	public List<Parking> getAvailableParkings(Domain domain) throws Exception {
+		List<Parking> parkings = parkingManager.findOwnedParkings(domain); 
+		parkings.addAll(parkingManager.findRentedParkings(domain));
+		parkings.removeAll(parkingManager.findGrantedParkings(domain));
+		return parkings;
+	}
+
+	public List<Parking> getFreeParkings(Domain domain) throws Exception {
+		List<Parking> parkings = getAvailableParkings(domain);
+
+		for(int i = parkings.size() - 1; i >= 0; i--){
+			Parking parking = parkings.get(i);
+			if (parking.getVehicle() != null) {
+				parkings.remove(parking);
+			}
+		}
+
+		return parkings;
+	}
+
+	public List<Parking> getBusyParkings(Domain domain) throws Exception {
+		List<Parking> parkings = getAvailableParkings(domain);
+
+		for(int i = parkings.size() - 1; i >= 0; i--){
+			Parking parking = parkings.get(i);
+			if (parking.getVehicle() == null) {
+				parkings.remove(parking);
+			}
+		}
+
+		return parkings;
+	}
+	
+	
+	public List<Parking> getNotOwnedParkings() throws Exception {
+		return parkingManager.findNotOwnedParkings();
 	}
 	
 	public Parking register(Parking parking) throws Exception {

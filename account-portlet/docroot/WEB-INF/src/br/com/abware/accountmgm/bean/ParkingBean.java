@@ -41,7 +41,6 @@ public class ParkingBean extends BaseBean {
 
 				for (Flat flat : flats) {
 					parkings.addAll(parkingService.getParkings(flat));
-					parkings.addAll(parkingService.getRentedParkings(flat));
 				}
 				
 				model = new ModelDataModel<Parking>(new ArrayList<Parking>(parkings));

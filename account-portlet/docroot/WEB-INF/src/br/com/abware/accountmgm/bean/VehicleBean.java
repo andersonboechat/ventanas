@@ -109,7 +109,7 @@ public class VehicleBean extends BaseBean {
 			} else {
 				vehicleService.assignTo(vehicle, vehicle.getDomain());
 				vehicleService.updateImage(vehicle, vehicle.getImage());
-				model.setModel(vehicle);
+				model.update(vehicle);
 			}
 
 			FacesContext context = FacesContext.getCurrentInstance();
@@ -134,7 +134,9 @@ public class VehicleBean extends BaseBean {
 			} else {
 			// Veiculo eh visitante
 				try {
+					Domain domain = vehicle.getDomain();
 					BeanUtils.copyProperties(vehicle, v);
+					vehicle.setDomain(domain);
 				} catch (Exception ex) {
 					LOGGER.error("Falha ao clonar veiculo", ex);
 				}
