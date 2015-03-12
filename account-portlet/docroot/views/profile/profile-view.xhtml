@@ -7,28 +7,35 @@
 	xmlns:h="http://java.sun.com/jsf/html"
 	xmlns:p="http://primefaces.org/ui"
 	xmlns:ui="http://java.sun.com/jsf/facelets">
+	<h:head>
+		<style>
+
+		</style>	
+	</h:head>
 
 	<p:growl id="outputMsg"/>
 	<f:loadBundle basename="Language_pt_BR" var="msg"/>
 	<c:set var="profilePictureUploader" value="#{profileBean.imageUploadBean}"/>
 
 	<h:form id="profile-form">	
-		<p:panelGrid id="person-details" columns="2" columnClasses="my-account-col1,my-account-col2" styleClass="no-border" style="margin: 10px 0px 20px 0px;" cellpadding="10">
-			<p:column>
-				<p:panelGrid columns="1" columnClasses="person-image" style="text-align: center">
-					<p:graphicImage id="portrait" value="#{profilePictureUploader.image.path}" width="198" height="300"/>
-		        </p:panelGrid>
-				<p:panelGrid columns="2" columnClasses="no-margin" style="text-align: center; width: 100%;">
-					<p:commandLink value="Enviar Foto" update=":tabs:profile-picture-form" oncomplete="PF('profilePictureDialog').show();" partialSubmit="true" process="@this" styleClass="column">
-						<f:setPropertyActionListener target="#{profilePictureUploader.image.path}" value=""/>
-					</p:commandLink>
-					<p:commandLink value="Tirar Foto" update=":tabs:profile-picture-form" oncomplete="PF('profilePictureDialog').show();" partialSubmit="true" process="@this" styleClass="column">
-						<f:setPropertyActionListener target="#{profilePictureUploader.image.path}" value=""/>
-					</p:commandLink>
-				</p:panelGrid>
-			</p:column>
-			<p:column>
-				<p:panelGrid columns="1" columnClasses="fieldClm">
+		<p:panelGrid id="person-details" styleClass="no-background no-border" style="margin: 10px 0px 20px 0px; width: 100%" cellpadding="10">
+			<p:row>
+				<p:column styleClass="my-account-col1">
+					<p:panelGrid columns="1" columnClasses="person-image" style="text-align: center">
+						<p:graphicImage id="portrait" value="#{profilePictureUploader.image.path}" width="198" height="300"/>
+			        </p:panelGrid>
+					<p:panelGrid columns="2" columnClasses="picture" styleClass="pic-cmds" style="text-align: center; float: right">
+						<p:commandLink title="Enviar um foto" update=":profile-picture-form" oncomplete="PF('profilePictureDialog').show();" partialSubmit="true" process="@this" styleClass="column">
+							<h:graphicImage value="../images/send-pic.png"/>
+							<f:setPropertyActionListener target="#{profilePictureUploader.image.path}" value=""/>
+						</p:commandLink>
+						<p:commandLink title="Tirar uma foto" update=":profile-picture-form" oncomplete="PF('profilePictureDialog').show();" partialSubmit="true" process="@this" styleClass="column">
+							<h:graphicImage value="../images/take-pic.png" width="38" height="31"/>
+							<f:setPropertyActionListener target="#{profilePictureUploader.image.path}" value=""/>
+						</p:commandLink>
+					</p:panelGrid>
+				</p:column>
+				<p:column styleClass="my-account-col2">
 					<p:panelGrid columns="2" columnClasses="labelClm,fieldClm" style="width: 100%; margin: 0px">
 						<p:outputLabel for="email" value="Email: "/>
 						<p:inputText id="email" value="#{profileBean.person.emailAddress}" size="40"/>
@@ -43,11 +50,91 @@
 							<f:selectItems var="gender" value="#{profileBean.genders}" itemLabel="#{msg[gender.label]}"/>
 						</p:selectOneMenu>
 					</p:panelGrid>
-				</p:panelGrid>
-			</p:column>
+					<p:fieldset id="parents" legend="Parentes" style="margin: 0px 9px" styleClass="no-background" rendered="#{profileBean.kinships != null}">
+						<p:panelGrid style="width: 100%; margin: 0px">
+							<p:row>
+								<p:column styleClass="labelClm"><p:outputLabel for="father" value="Pai: "/></p:column>
+								<p:column styleClass="fieldClm">
+									<p:selectOneMenu id="father" value="#{profileBean.father}" converter="selectItemsConverter" style="width: 130px">
+										<f:selectItem itemLabel="Selecione" noSelectionOption="true"/>
+										<f:selectItems var="relative" value="#{profileBean.people}" itemLabel="#{relative.fullName}" itemValue="#{relative}"/>
+										<p:ajax event="change" update=":profile-form:mother,:profile-form:childTable,:profile-form:grandChildTable"/>
+									</p:selectOneMenu>
+								</p:column>
+								<p:column styleClass="labelClm"><p:outputLabel for="mother" value="Mãe: "/></p:column>
+								<p:column styleClass="fieldClm">
+									<p:selectOneMenu id="mother" value="#{profileBean.mother}" converter="selectItemsConverter" style="width: 130px">
+										<f:selectItem itemLabel="Selecione" noSelectionOption="true"/>
+										<f:selectItems var="relative" value="#{profileBean.people}" itemLabel="#{relative.fullName}" itemValue="#{relative}"/>
+										<p:ajax event="change" update=":profile-form:father,:profile-form:childTable,:profile-form:grandChildTable"/>
+									</p:selectOneMenu>
+								</p:column>
+							</p:row>
+							<p:row>
+								<p:column colspan="4">
+									<p:dataTable id="childTable" widgetVar="childTable" value="#{profileBean.getChildren()}" var="child" styleClass="no-header" rows="4"
+										paginator="true" paginatorAlwaysVisible="false" paginatorPosition="bottom" paginatorTemplate="{PreviousPageLink} {CurrentPageReport} {NextPageLink}"
+										emptyMessage="Nenhum filho informado">
+										<f:facet name="header">
+											<p:panelGrid columns="3" columnClasses="docs-header,docs-header,docs-cmds" styleClass="no-background no-border no-margin" style="width: 100%;">
+												<h:outputText value="Filhos"/>
+												<p:selectOneMenu value="#{profileBean.relative}" converter="selectItemsConverter" style="font-size: 10px; margin-left: 10px; vertical-align: middle; float: right; width: 130px">
+													<f:selectItem itemLabel="Selecione" noSelectionOption="true"/>
+													<f:selectItems var="relative" value="#{profileBean.people}" itemLabel="#{relative.fullName}" itemValue="#{relative}"/>
+												</p:selectOneMenu>
+												<p:commandLink title="Incluir filho" actionListener="#{profileBean.onAddChild}" update=":profile-form:parents" partialSubmit="true" process="@namingcontainer">
+													<h:graphicImage value="../images/plus.png" width="18" height="18"/>
+												</p:commandLink>
+											</p:panelGrid>
+										</f:facet>
+										<p:column><h:outputText value="#{child.fullName}"/></p:column>
+										<p:column style="width: 12%; text-align: center;">
+											<p:commandLink title="Excluir este parente" actionListener="#{profileBean.onRemoveChild}" oncomplete="if (!args.validationFailed &amp;&amp; !args.exception) {PF('childTable').update(); PF('grandChildTable').update();}" partialSubmit="true" process="@this">
+												<h:graphicImage value="../images/cancel2.png" width="25" height="25" style="vertical-align: middle"/>
+												<f:setPropertyActionListener target="#{profileBean.relative}" value="#{child}"/>
+											</p:commandLink>										
+										</p:column>
+									</p:dataTable>
+								</p:column>
+							</p:row>
+							<p:row>
+								<p:column colspan="4">
+									<p:dataTable id="grandChildTable" widgetVar="grandChildTable" value="#{profileBean.getGrandChildren()}" var="grandChild" styleClass="no-header" rows="4"
+										paginator="true" paginatorAlwaysVisible="false" paginatorPosition="bottom" paginatorTemplate="{PreviousPageLink} {CurrentPageReport} {NextPageLink}"
+										emptyMessage="Nenhum neto informado">
+										<f:facet name="header">
+											<p:panelGrid columns="3" columnClasses="docs-header,docs-header,docs-cmds" styleClass="no-background no-border no-margin" style="width: 100%;">
+												<h:outputText value="Netos"/>
+												<p:selectOneMenu value="#{profileBean.relative}" converter="selectItemsConverter" style="font-size: 10px; margin-left: 5px; vertical-align: middle; float: right; width: 130px">
+													<f:selectItem itemLabel="Selecione" noSelectionOption="true"/>
+													<f:selectItems var="relative" value="#{profileBean.people}" itemLabel="#{relative.fullName}" itemValue="#{relative}"/>
+												</p:selectOneMenu>
+												<p:commandLink title="Incluir neto" actionListener="#{profileBean.onAddChild}" update=":profile-form:parents" partialSubmit="true" process="@namingcontainer">
+													<h:graphicImage value="../images/plus.png" width="18" height="18"/>
+												</p:commandLink>
+											</p:panelGrid>
+										</f:facet>
+										<p:column><h:outputText value="#{grandChild.fullName}"/></p:column>
+										<p:column style="width: 12%; text-align: center;">
+											<p:commandLink title="Excluir este parente" actionListener="#{profileBean.onRemoveChild}" oncomplete="if (!args.validationFailed &amp;&amp; !args.exception) {PF('childTable').update(); PF('grandChildTable').update();}" partialSubmit="true" process="@this">
+												<h:graphicImage value="../images/cancel2.png" width="25" height="25" style="vertical-align: middle"/>
+												<f:setPropertyActionListener target="#{profileBean.relative}" value="#{grandChild}"/>
+											</p:commandLink>										
+										</p:column>
+									</p:dataTable>
+								</p:column>
+							</p:row>
+						</p:panelGrid>
+					</p:fieldset>
+				</p:column>
+			</p:row>
+			<p:row>
+				<p:column colspan="2">
+					<p:commandButton value="Cancelar" update="profile-form" style="float: right; width: 80px; margin: 10px 0px 10px 5px;"/>
+					<p:commandButton value="Salvar" actionListener="#{profileBean.onSave}" update=":outputMsg" style="float: right; width: 80px; margin: 10px 0px 10px 5px;"/>
+				</p:column>
+			</p:row>
 		</p:panelGrid>
-		<p:commandButton value="Cancelar" update="profile-form" style="float: right; width: 80px; margin: 0px 0px 10px 5px;"/>
-		<p:commandButton value="Salvar" actionListener="#{profileBean.onSave}" update=":outputMsg" style="float: right; width: 80px; margin: 0px 0px 10px 5px;"/>
 	</h:form>
 
 	<p:dialog id="profilePictureDialog" widgetVar="profilePictureDialog" modal="true" header="Retrato">

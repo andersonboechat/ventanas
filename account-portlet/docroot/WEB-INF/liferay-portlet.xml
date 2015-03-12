@@ -51,6 +51,12 @@
 		<instanceable>false</instanceable>
 		<ajaxable>false</ajaxable>
 	</portlet>
+	<portlet>
+		<portlet-name>profile-management</portlet-name>
+		<icon>/icon.png</icon>
+		<instanceable>false</instanceable>
+		<ajaxable>false</ajaxable>
+	</portlet>
 	<role-mapper>
 		<role-name>administrator</role-name>
 		<role-link>Administrator</role-link>

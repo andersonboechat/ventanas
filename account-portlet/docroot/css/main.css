@@ -1,0 +1,32 @@
+.portlet-profile .portlet-body section {
+	border: 0px solid !important;
+}
+
+.portlet-profile .portlet-content {
+	padding: 0;
+	margin: 0;
+	border: none;
+}
+
+.portlet-profile .portlet-topper {
+	background: none;
+	border: none;
+	box-shadow: none;
+}
+
+.portlet-profile .portlet-title-text {
+	font-size: 16px;
+}
+
+.portlet-profile .portlet-title .icon {
+	display: none;
+}
+
+.portlet-profile .portlet-minimize-icon, .portlet-profile .portlet-maximize-icon {
+	display: none;
+}
+
+.portlet-profile .portlet-title {
+	background: none;
+	border: none;
+}

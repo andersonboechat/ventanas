@@ -148,4 +148,25 @@
 			<role-name>administrator</role-name>
 		</security-role-ref>
 	</portlet>
+	<portlet>
+		<portlet-name>profile-management</portlet-name>
+		<display-name>Perfil de Usuário</display-name>
+		<portlet-class>javax.portlet.faces.GenericFacesPortlet</portlet-class>
+		<init-param>
+			<name>javax.portlet.faces.defaultViewId.view</name>
+			<value>/views/profile/profile-view.xhtml</value>
+		</init-param>
+		<expiration-cache>0</expiration-cache>
+		<supports>
+			<mime-type>text/html</mime-type>
+		</supports>
+		<portlet-info>
+			<title>Perfil de Usuário</title>
+			<short-title>Perfil de Usuário</short-title>
+			<keywords>Perfil de Usuário</keywords>
+		</portlet-info>
+		<security-role-ref>
+			<role-name>administrator</role-name>
+		</security-role-ref>
+	</portlet>
 </portlet-app>

@@ -9,6 +9,11 @@
 	xmlns:ui="http://java.sun.com/jsf/facelets">
 	<h:head>
 		<style>
+			.picture {margin: 0px !important; padding: 0px !important; vertical-align: top;}
+			.picture td {margin: 0px !important; padding: 0px !important; vertical-align: top;}
+			.pic-cmds {margin: 5px 0px 0px !important;}
+			.pic-cmds td {margin: 0px !important; padding: 0px !important; vertical-align: top;}
+			.no-header thead {display: none}
 			.cropper2 {padding: 0;}
 			.cropper2 div {margin: 0 !important; padding: 0 !important;}
 			.cropper2 .img { margin: 0 !important;}
@@ -54,8 +59,9 @@
 			.memberships div {border: 0px; border-top: 1px solid grey;}
 			.docs-header {text-align: left;}
 			.docs-header td {padding: 0; margin: 0;}
-			.docs-cmds {width: 15%;}
-			.docs-cmds td {padding: 0; margin: 0;}
+			.docs-cmds {width: 8%; vertical-align: middle;}
+			.docs-cmds td {vertical-align: middle;}
+			.docs-cmds img {padding: 0; margin: 0px 0px 0px 7px; vertical-align: middle;}
 			.ui-tabs {background: none; padding: 0 !important; border: 0px !important;}
 			.ui-tabs-nav {background: none !important; }
 			.ui-tabs-panel {margin: 0 !important; padding: 0 !important}
@@ -93,7 +99,7 @@
 				<p:column>
 					<p:dataTable id="parkingTable" widgetVar="parkingTable" var="parking" value="#{parkingViewer.model}" rows="4" 
 						paginator="true" paginatorAlwaysVisible="false" paginatorPosition="bottom" paginatorTemplate="{PreviousPageLink} {CurrentPageReport} {NextPageLink}"
-						emptyMessage="Nenhuma vaga associada">
+						emptyMessage="Nenhuma vaga associada" styleClass="no-header">
 						<f:facet name="header">
 							<p:panelGrid columns="1" columnClasses="docs-header" styleClass="no-background no-border no-margin" style="width: 100%;">
 								<h:outputText value="Estacionamento"/>
@@ -119,7 +125,7 @@
 				<p:column>
 					<p:dataTable id="documentTable" widgetVar="documentTable" var="doc" value="#{documentViewer.model}" scrollable="true" 
 						paginator="true" paginatorAlwaysVisible="false" paginatorPosition="bottom" paginatorTemplate="{PreviousPageLink} {CurrentPageReport} {NextPageLink}"
-						emptyMessage="Nenhum documento encontrado">
+						emptyMessage="Nenhum documento encontrado" styleClass="no-header">
 						<f:facet name="header">
 							<p:panelGrid columns="1" columnClasses="docs-header" styleClass="no-background no-border no-margin" style="width: 100%;">
 								<h:outputText value="Documentos"/>
