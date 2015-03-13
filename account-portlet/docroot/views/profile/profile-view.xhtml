@@ -36,20 +36,48 @@
 					</p:panelGrid>
 				</p:column>
 				<p:column styleClass="my-account-col2">
-					<p:panelGrid columns="2" columnClasses="labelClm,fieldClm" style="width: 100%; margin: 0px">
+					<p:panelGrid columns="2" columnClasses="labelClm,fieldClm" style="width: 100%; margin: 0px; border: 0px solid black">
 						<p:outputLabel for="email" value="Email: "/>
-						<p:inputText id="email" value="#{profileBean.person.emailAddress}" size="40"/>
+						<p:inputText id="email" value="#{profileBean.person.emailAddress}"/>
 						<p:outputLabel for="firstName" value="Nome: "/>
-						<p:inputText id="firstName" value="#{profileBean.person.firstName}" size="40"/>
+						<p:inputText id="firstName" value="#{profileBean.person.firstName}"/>
 						<p:outputLabel for="lastName" value="Sobrenome: "/>
-						<p:inputText id="lastName" value="#{profileBean.person.lastName}" size="40"/>
+						<p:inputText id="lastName" value="#{profileBean.person.lastName}"/>
 						<p:outputLabel for="identity" value="CPF: "/>
-						<p:inputMask id="identity" value="#{profileBean.person.identity}" mask="999.999.999-99" size="40"/>
+						<p:inputMask id="identity" value="#{profileBean.person.identity}" mask="999.999.999-99"/>
+					</p:panelGrid>
+					<p:panelGrid columns="4" columnClasses="labelClm,fieldClm,labelClm,fieldClm" style="width: 100%; margin: 0px">
 						<p:outputLabel for="male" value="Sexo:"/>
-						<p:selectOneMenu id="male" value="#{profileBean.person.gender}" required="false">
+						<p:selectOneMenu id="male" value="#{profileBean.person.gender}" required="false" style="vertical-align: middle">
 							<f:selectItems var="gender" value="#{profileBean.genders}" itemLabel="#{msg[gender.label]}"/>
 						</p:selectOneMenu>
-					</p:panelGrid>
+						<p:outputLabel for="birthday" value="Nascimento:"/>
+						<p:calendar id="birthday" mode="popup" pattern="dd/MM/yyyy"
+									navigator="true" yearRange="c-100:c+0" showButtonPanel="true" lang="pt" styleClass="birthday"/>
+					</p:panelGrid>					
+					<p:dataTable id="phoneTable" widgetVar="phoneTable" var="phone" styleClass="no-header" rows="4"
+						paginator="true" paginatorAlwaysVisible="false" paginatorPosition="bottom" paginatorTemplate="{PreviousPageLink} {CurrentPageReport} {NextPageLink}"
+						emptyMessage="Nenhum telefone informado" style="margin: 10px 9px">
+						<f:facet name="header">
+							<p:panelGrid columns="4" columnClasses="docs-header,docs-header,docs-header,docs-cmds" styleClass="no-background no-border no-margin" style="width: 100%;">
+								<h:outputText value="Telefones"/>
+								<p:inputMask mask="(99) 99999-9999" value="#{profileBean.phoneNumber}" style=" width: 110px; height: 12px; padding-left: 3px" placeholder="Número"/>
+								<p:selectOneMenu value="#{profileBean.phoneType}" style="font-size: 10px; margin-left: 10px; vertical-align: middle; float: right; width: 100px;">
+									<f:selectItem itemLabel="Tipo" noSelectionOption="true"/>
+									<f:selectItems var="type" value="#{profileBean.phoneTypes}" itemLabel="#{msg[type.label]}"/>
+								</p:selectOneMenu>
+								<p:commandLink title="Incluir telefone" actionListener="#{profileBean.onPhoneAdd}" partialSubmit="true" process="@namingcontainer">
+									<h:graphicImage value="../images/plus.png" width="18" height="18"/>
+								</p:commandLink>
+							</p:panelGrid>
+						</f:facet>
+						<p:column><h:outputText value="#{phone.number}"><f:convertNumber pattern="(99) 99999-9999"/></h:outputText></p:column>
+						<p:column style="width: 12%; text-align: right;">
+							<p:commandLink title="Excluir este telefone" actionListener="#{profileBean.onPhoneDelete(phone)}" partialSubmit="true" process="@this">
+								<h:graphicImage value="../images/cancel2.png" width="25" height="25" style="vertical-align: middle"/>
+							</p:commandLink>										
+						</p:column>
+					</p:dataTable>
 					<p:fieldset id="parents" legend="Parentes" style="margin: 0px 9px" styleClass="no-background" rendered="#{profileBean.kinships != null}">
 						<p:panelGrid style="width: 100%; margin: 0px">
 							<p:row>
@@ -57,7 +85,7 @@
 								<p:column styleClass="fieldClm">
 									<p:selectOneMenu id="father" value="#{profileBean.father}" converter="selectItemsConverter" style="width: 130px">
 										<f:selectItem itemLabel="Selecione" noSelectionOption="true"/>
-										<f:selectItems var="relative" value="#{profileBean.people}" itemLabel="#{relative.fullName}" itemValue="#{relative}"/>
+										<f:selectItems var="relative" value="#{profileBean.getFathers()}" itemLabel="#{relative.fullName}" itemValue="#{relative}"/>
 										<p:ajax event="change" update=":profile-form:mother,:profile-form:childTable,:profile-form:grandChildTable"/>
 									</p:selectOneMenu>
 								</p:column>
@@ -65,7 +93,7 @@
 								<p:column styleClass="fieldClm">
 									<p:selectOneMenu id="mother" value="#{profileBean.mother}" converter="selectItemsConverter" style="width: 130px">
 										<f:selectItem itemLabel="Selecione" noSelectionOption="true"/>
-										<f:selectItems var="relative" value="#{profileBean.people}" itemLabel="#{relative.fullName}" itemValue="#{relative}"/>
+										<f:selectItems var="relative" value="#{profileBean.getMothers()}" itemLabel="#{relative.fullName}" itemValue="#{relative}"/>
 										<p:ajax event="change" update=":profile-form:father,:profile-form:childTable,:profile-form:grandChildTable"/>
 									</p:selectOneMenu>
 								</p:column>
@@ -88,10 +116,9 @@
 											</p:panelGrid>
 										</f:facet>
 										<p:column><h:outputText value="#{child.fullName}"/></p:column>
-										<p:column style="width: 12%; text-align: center;">
-											<p:commandLink title="Excluir este parente" actionListener="#{profileBean.onRemoveChild}" oncomplete="if (!args.validationFailed &amp;&amp; !args.exception) {PF('childTable').update(); PF('grandChildTable').update();}" partialSubmit="true" process="@this">
+										<p:column style="width: 12%; text-align: right;">
+											<p:commandLink title="Excluir este parente" actionListener="#{profileBean.onRemoveChild(child)}" update=":profile-form:parents" partialSubmit="true" process="@this">
 												<h:graphicImage value="../images/cancel2.png" width="25" height="25" style="vertical-align: middle"/>
-												<f:setPropertyActionListener target="#{profileBean.relative}" value="#{child}"/>
 											</p:commandLink>										
 										</p:column>
 									</p:dataTable>
@@ -109,16 +136,15 @@
 													<f:selectItem itemLabel="Selecione" noSelectionOption="true"/>
 													<f:selectItems var="relative" value="#{profileBean.people}" itemLabel="#{relative.fullName}" itemValue="#{relative}"/>
 												</p:selectOneMenu>
-												<p:commandLink title="Incluir neto" actionListener="#{profileBean.onAddChild}" update=":profile-form:parents" partialSubmit="true" process="@namingcontainer">
+												<p:commandLink title="Incluir neto" actionListener="#{profileBean.onAddGrandChild}" update=":profile-form:parents" partialSubmit="true" process="@namingcontainer">
 													<h:graphicImage value="../images/plus.png" width="18" height="18"/>
 												</p:commandLink>
 											</p:panelGrid>
 										</f:facet>
 										<p:column><h:outputText value="#{grandChild.fullName}"/></p:column>
-										<p:column style="width: 12%; text-align: center;">
-											<p:commandLink title="Excluir este parente" actionListener="#{profileBean.onRemoveChild}" oncomplete="if (!args.validationFailed &amp;&amp; !args.exception) {PF('childTable').update(); PF('grandChildTable').update();}" partialSubmit="true" process="@this">
+										<p:column style="width: 12%; text-align: right;">
+											<p:commandLink title="Excluir este parente" actionListener="#{profileBean.onRemoveGrandChild(grandChild)}" update=":profile-form:parents" partialSubmit="true" process="@this">
 												<h:graphicImage value="../images/cancel2.png" width="25" height="25" style="vertical-align: middle"/>
-												<f:setPropertyActionListener target="#{profileBean.relative}" value="#{grandChild}"/>
 											</p:commandLink>										
 										</p:column>
 									</p:dataTable>

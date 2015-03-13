@@ -6,22 +6,26 @@ import java.util.HashSet;
 import java.util.List;
 
 import javax.annotation.PostConstruct;
+import javax.faces.application.FacesMessage;
 import javax.faces.bean.ManagedBean;
 import javax.faces.bean.ViewScoped;
+import javax.faces.context.FacesContext;
 
 import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.collections.Transformer;
 import org.apache.log4j.Logger;
 
-import br.com.abware.accountmgm.service.core.KinshipServiceImpl;
+import br.com.abware.accountmgm.service.core.PersonDetailServiceImpl;
 import br.com.abware.accountmgm.util.KinTypePredicate;
 import br.com.abware.accountmgm.util.RelativeTransformer;
 import br.com.abware.jcondo.core.Gender;
+import br.com.abware.jcondo.core.PersonDetail;
 import br.com.abware.jcondo.core.PersonType;
 import br.com.abware.jcondo.core.model.KinType;
 import br.com.abware.jcondo.core.model.Kinship;
 import br.com.abware.jcondo.core.model.Membership;
 import br.com.abware.jcondo.core.model.Person;
+import br.com.abware.jcondo.core.model.Phone;
+import br.com.abware.jcondo.core.model.PhoneType;
 
 @ManagedBean
 @ViewScoped
@@ -29,11 +33,13 @@ public class ProfileBean extends BaseBean {
 
 	private static Logger LOGGER = Logger.getLogger(ProfileBean.class);
 	
-	protected static final KinshipServiceImpl kinshipService = new KinshipServiceImpl();
+	private static final PersonDetailServiceImpl personDetailService = new PersonDetailServiceImpl();
 
 	private ImageUploadBean imageUploadBean;
 
 	private Person person;
+
+	private PersonDetail personDetail;
 
 	private Person father;
 
@@ -47,7 +53,13 @@ public class ProfileBean extends BaseBean {
 
 	private List<Gender> genders;
 
-	private List<KinType> types;
+	private List<Phone> phones;
+
+	private List<PhoneType> phoneTypes;	
+
+	private Long phoneNumber;
+
+	private PhoneType phoneType;
 
 	@SuppressWarnings("unchecked")
 	@PostConstruct
@@ -55,6 +67,9 @@ public class ProfileBean extends BaseBean {
 		try {
 			HashSet<Person> ps = new HashSet<Person>();
 			person = personService.getPerson();
+			personDetail = personDetailService.getPersonDetail(person);
+			kinships = personDetail.getKinships();
+			phones = personDetail.getPhones();
 
 			for (Membership membership : person.getMemberships()) {
 				if (membership.getType() == PersonType.OWNER || membership.getType() == PersonType.RENTER) {
@@ -65,54 +80,52 @@ public class ProfileBean extends BaseBean {
 			ps.remove(person);
 			people = new ArrayList<Person>(ps);
 
-			if (!CollectionUtils.isEmpty(people)) {
-				kinships = kinshipService.getKinships(person);
-				types = Arrays.asList(KinType.values());
-			}
-
-			List<Person> relatives = (List<Person>) CollectionUtils.collect(kinships, new Transformer() {
-																				@Override
-																				public Object transform(Object obj) {
-																					if (obj != null && obj instanceof Kinship) {
-																						return ((Kinship) obj).getRelative();
-																					}
-																					return null;
-																				}
-																			});
+			List<Person> relatives = (List<Person>) CollectionUtils.collect(kinships, new RelativeTransformer());
 
 			people.removeAll(relatives);
-			father = findRelative(KinType.FATHER);
-			mother = findRelative(KinType.MOTHER);
+			father = getParent(KinType.FATHER);
+			mother = getParent(KinType.MOTHER);
 			people.remove(father);
 			people.remove(mother);
 
 			imageUploadBean = new ImageUploadBean(198, 300);
 			imageUploadBean.setImage(person.getPicture());
 			genders = Arrays.asList(Gender.values());
+			phoneTypes = Arrays.asList(PhoneType.values());
 		} catch (Exception e) {
 			LOGGER.error("", e);
 		}
 	}
 	
-	@SuppressWarnings("unchecked")
 	public void onSave() {
 		try {
 			person.setPicture(imageUploadBean.getImage());
 			person = personService.update(person);
 
-			List<Kinship> oldKinships = kinshipService.getKinships(person);
+			personDetailService.update(personDetail);
 
-			for (Kinship kinship : (List<Kinship>) CollectionUtils.subtract(oldKinships, kinships)) {
-				kinshipService.delete(kinship);
-			}
-
-			for (Kinship kinship : (List<Kinship>) CollectionUtils.subtract(kinships, oldKinships)) {
-				kinshipService.register(kinship);
-			}
-
+			FacesContext context = FacesContext.getCurrentInstance();
+			String component = context.getViewRoot().findComponent("outputMsg").getClientId();
+			context.addMessage(component, new FacesMessage(FacesMessage.SEVERITY_INFO, "Informações salvas com sucesso", ""));
 		} catch (Exception e) {
 			LOGGER.error("", e);
 		}
+	}
+
+	public void onPhoneAdd() {
+		Phone phone = new Phone(phoneNumber, phoneType);
+		phoneNumber = null;
+		phoneType = null;
+
+		if (phones.contains(phone)) {
+			return;
+		}
+
+		phones.add(phone);
+	}
+
+	public void onPhoneDelete(Phone phone) {
+		phones.remove(phone);
 	}
 
 	public void onAddChild() {
@@ -125,17 +138,38 @@ public class ProfileBean extends BaseBean {
 		relative = null;
 	}	
 
-	public void onRemoveChild() {
+	public void onRemoveChild(Person relative) {
 		if (relative == null) {
 			return;
 		}
 
 		kinships.remove(new Kinship(person, relative, KinType.CHILD));
 		people.add(relative);
-		relative = null;
 	}
 
-	public Person findRelative(KinType type) {
+	public void onAddGrandChild() {
+		if (relative == null) {
+			return;
+		}
+
+		kinships.add(new Kinship(person, relative, KinType.GRANDCHILD));
+		people.remove(relative);
+		relative = null;
+	}	
+
+	public void onRemoveGrandChild(Person relative) {
+		if (relative == null) {
+			return;
+		}
+
+		kinships.remove(new Kinship(person, relative, KinType.GRANDCHILD));
+		people.add(relative);
+	}
+	
+	public Person getParent(KinType type) {
+		if (type != KinType.FATHER && type != KinType.MOTHER) {
+			return null;
+		}
 		Kinship kinship = (Kinship) CollectionUtils.find(kinships, new KinTypePredicate(type)); 
 		return kinship != null ? kinship.getRelative() : null;
 	}
@@ -150,6 +184,18 @@ public class ProfileBean extends BaseBean {
 	public List<Person> getGrandChildren() {
 		List<Kinship> ks = (List<Kinship>) CollectionUtils.select(kinships, new KinTypePredicate(KinType.GRANDCHILD));
 		return (List<Person>) CollectionUtils.collect(ks, new RelativeTransformer());
+	}
+
+	public List<Person> getMothers() {
+		List<Person> mothers = new ArrayList<Person>(people);
+		CollectionUtils.addIgnoreNull(mothers, mother);
+		return mothers;
+	}
+
+	public List<Person> getFathers() {
+		List<Person> fathers = new ArrayList<Person>(people);
+		CollectionUtils.addIgnoreNull(fathers, father);
+		return fathers;
 	}
 
 	public ImageUploadBean getImageUploadBean() {
@@ -173,10 +219,19 @@ public class ProfileBean extends BaseBean {
 	}
 
 	public void setFather(Person father) {
-		if (this.father != null) {
-			people.add(this.father);
-		}
+		CollectionUtils.addIgnoreNull(people, this.father);
 		people.remove(father);
+
+		Kinship kinship = (Kinship) CollectionUtils.find(kinships, new KinTypePredicate(KinType.FATHER));
+
+		if (kinship != null) {
+			kinships.remove(kinship);
+		}
+
+		if (father != null) {
+			kinships.add(new Kinship(person, father, KinType.FATHER));
+		}
+
 		this.father = father;
 	}
 
@@ -185,10 +240,19 @@ public class ProfileBean extends BaseBean {
 	}
 
 	public void setMother(Person mother) {
-		if (this.mother != null) {
-			people.add(this.mother);
-		}
+		CollectionUtils.addIgnoreNull(people, this.mother);
 		people.remove(mother);
+
+		Kinship kinship = (Kinship) CollectionUtils.find(kinships, new KinTypePredicate(KinType.MOTHER));
+
+		if (kinship != null) {
+			kinships.remove(kinship);
+		}
+
+		if (mother != null) {
+			kinships.add(new Kinship(person, mother, KinType.MOTHER));
+		}
+
 		this.mother = mother;
 	}
 
@@ -224,12 +288,36 @@ public class ProfileBean extends BaseBean {
 		this.genders = genders;
 	}
 
-	public List<KinType> getTypes() {
-		return types;
+	public List<Phone> getPhones() {
+		return phones;
 	}
 
-	public void setTypes(List<KinType> types) {
-		this.types = types;
+	public void setPhones(List<Phone> phones) {
+		this.phones = phones;
+	}
+
+	public List<PhoneType> getPhoneTypes() {
+		return phoneTypes;
+	}
+
+	public void setPhoneTypes(List<PhoneType> phoneTypes) {
+		this.phoneTypes = phoneTypes;
+	}
+
+	public Long getPhoneNumber() {
+		return phoneNumber;
+	}
+
+	public void setPhoneNumber(Long phoneNumber) {
+		this.phoneNumber = phoneNumber;
+	}
+
+	public PhoneType getPhoneType() {
+		return phoneType;
+	}
+
+	public void setPhoneType(PhoneType phoneType) {
+		this.phoneType = phoneType;
 	}
 
 

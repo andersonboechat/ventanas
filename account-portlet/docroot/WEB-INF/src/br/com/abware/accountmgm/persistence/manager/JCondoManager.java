@@ -122,14 +122,13 @@ public abstract class JCondoManager<Entity extends BaseEntity, Model extends Bas
 		String key = generateKey();
 		try {
 			openManager(key);
-			Date date = new Date();
-			Entity entity = getEntity(model);
-			entity.setUpdateDate(date);
-			entity.setUpdateUser(helper.getUserId());
-	
-			em.getTransaction().begin();
-			em.remove(entity);
-			em.getTransaction().commit();
+			Entity entity = em.find(getEntityClass(), model.getId());
+
+			if (entity != null) {
+				em.getTransaction().begin();
+				em.remove(entity);
+				em.getTransaction().commit();
+			}
 		} finally {
 			closeManager(key);
 		}

@@ -1,6 +1,5 @@
 package br.com.abware.accountmgm.service.core;
 
-import java.util.Iterator;
 import java.util.List;
 
 import br.com.abware.accountmgm.model.Parking;
