@@ -13,25 +13,36 @@
 		</style>	
 	</h:head>
 
+	<p:ajaxStatus oncomplete="PF('dialogAguarde').show();">
+		<f:facet name="start">Aguarde, sua imagem está sendo capturada</f:facet>
+	</p:ajaxStatus>
+	<p:dialog widgetVar="dialogAguarde" id="dialogAguarde">
+		<h:form id="nada">
+			Imagem Capturada.
+			<p:commandButton value="OK" update=":profile-camera-form:capturedImage" oncomplete="PF('dialogAguarde').hide(); PF('janela').hide();" global="false"/>
+		</h:form>
+	</p:dialog>
+
 	<p:growl id="outputMsg"/>
 	<f:loadBundle basename="Language_pt_BR" var="msg"/>
 	<c:set var="profilePictureUploader" value="#{profileBean.imageUploadBean}"/>
+	<c:set var="profileCamera" value="#{profileBean.cameraBean}"/>
 
 	<h:form id="profile-form">	
 		<p:panelGrid id="person-details" styleClass="no-background no-border" style="margin: 10px 0px 20px 0px; width: 100%" cellpadding="10">
 			<p:row>
 				<p:column styleClass="my-account-col1">
 					<p:panelGrid columns="1" columnClasses="person-image" style="text-align: center">
-						<p:graphicImage id="portrait" value="#{profilePictureUploader.image.path}" width="198" height="300"/>
+						<p:graphicImage id="portrait" value="#{profileBean.person.picture.path}" width="198" height="300"/>
 			        </p:panelGrid>
 					<p:panelGrid columns="2" columnClasses="picture" styleClass="pic-cmds" style="text-align: center; float: right">
 						<p:commandLink title="Enviar um foto" update=":profile-picture-form" oncomplete="PF('profilePictureDialog').show();" partialSubmit="true" process="@this" styleClass="column">
 							<h:graphicImage value="../images/send-pic.png"/>
-							<f:setPropertyActionListener target="#{profilePictureUploader.image.path}" value=""/>
+							<f:setPropertyActionListener target="#{profileBean.person.picture.path}" value=""/>
 						</p:commandLink>
-						<p:commandLink title="Tirar uma foto" update=":profile-picture-form" oncomplete="PF('profilePictureDialog').show();" partialSubmit="true" process="@this" styleClass="column">
+						<p:commandLink title="Tirar uma foto" update=":profile-picture-form" oncomplete="PF('profileCameraDialog').show();" partialSubmit="true" process="@this" styleClass="column">
 							<h:graphicImage value="../images/take-pic.png" width="38" height="31"/>
-							<f:setPropertyActionListener target="#{profilePictureUploader.image.path}" value=""/>
+							<f:setPropertyActionListener target="#{profileBean.person.picture.path}" value=""/>
 						</p:commandLink>
 					</p:panelGrid>
 				</p:column>
@@ -78,7 +89,7 @@
 							</p:commandLink>										
 						</p:column>
 					</p:dataTable>
-					<p:fieldset id="parents" legend="Parentes" style="margin: 0px 9px" styleClass="no-background" rendered="#{profileBean.kinships != null}">
+					<p:fieldset id="parents" legend="Parentes" style="margin: 0px 9px" styleClass="no-background" rendered="#{profileBean.people != null}">
 						<p:panelGrid style="width: 100%; margin: 0px">
 							<p:row>
 								<p:column styleClass="labelClm"><p:outputLabel for="father" value="Pai: "/></p:column>
@@ -163,6 +174,9 @@
 		</p:panelGrid>
 	</h:form>
 
+
+
+
 	<p:dialog id="profilePictureDialog" widgetVar="profilePictureDialog" modal="true" header="Retrato">
 		<h:form id="profile-picture-form" enctype="multipart/form-data">
 			<p:fileUpload id="image" label="Selecionar Foto" fileUploadListener="#{profilePictureUploader.onImageUpload}" auto="true" update="profile-picture-form" rendered="#{empty profilePictureUploader.image.path}"/>
@@ -171,12 +185,29 @@
 					<p:imageCropper value="#{profilePictureUploader.croppedImage}" image="#{profilePictureUploader.image.path}" initialCoords="0,0,#{profilePictureUploader.width},#{profilePictureUploader.height}" minSize="#{profilePictureUploader.width},#{profilePictureUploader.height}" maxSize="#{profilePictureUploader.width},#{profilePictureUploader.height}"/>
 				</p:panel>
 				<p:panel style="margin: 0px auto; text-align: center; padding: 15px 0px; border: none;">
-					<p:commandButton value="Recortar" actionListener="#{profilePictureUploader.onImageCropp}" update=":profile-form:portrait" oncomplete="PF('profilePictureDialog').hide();"/>
-					<p:commandButton value="Cancelar" oncomplete="PF('personPictureDialog').hide();" partialSubmit="true" process="@this">
-						<f:setPropertyActionListener target="#{profilePictureUploader.image.path}" value=""/>
+					<p:commandButton value="Recortar" actionListener="#{profilePictureUploader.onImageCropp}" update=":profile-form:portrait" oncomplete="PF('profilePictureDialog').hide();">
+						<f:setPropertyActionListener target="#{profileBean.person.picture}" value="#{profilePictureUploader.image}"/>
 					</p:commandButton>
+					<p:commandButton value="Cancelar" oncomplete="PF('personPictureDialog').hide();" partialSubmit="true" process="@this"/>
 				</p:panel>
 			</p:panel>
+		</h:form>
+	</p:dialog>
+	<p:dialog id="profileCameraDialog" widgetVar="profileCameraDialog" modal="true" header="Retrato" visible="true">
+		<h:form id="profile-camera-form">
+			<p:imageCropper id="capturedImage" value="#{profileBean.cameraBean.croppedImage}" image="#{profileBean.cameraBean.image.path}" initialCoords="0,0,198,300" minSize="198,300" maxSize="198,300" />
+			<p:commandButton value="Capturar" type="button" onclick="PF('janela').show();" global="false"/>
+			<p:commandButton value="Recortar" actionListener="#{profileBean.cameraBean.onImageCropp}" update=":profile-form:portrait" global="false" oncomplete="PF('profileCameraDialog').hide();">
+				<f:setPropertyActionListener value="#{profileBean.cameraBean.image}" target="#{profileBean.person.picture}"></f:setPropertyActionListener>
+			</p:commandButton>
+		</h:form>
+	</p:dialog>
+	<p:dialog widgetVar="janela">
+		<h:form id="aform" >
+		<p:panel>
+			<p:photoCam id="pc" widgetVar="pc" listener="#{profileBean.cameraBean.onCapture}"/>
+			<p:commandButton value="Capturar" onclick="PF('pc').capture();" update=":profile-camera-form:capturedImage"/>
+		</p:panel>
 		</h:form>
 	</p:dialog>
 </f:view>

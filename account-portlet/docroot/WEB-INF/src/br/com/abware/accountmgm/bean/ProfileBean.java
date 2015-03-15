@@ -37,6 +37,8 @@ public class ProfileBean extends BaseBean {
 
 	private ImageUploadBean imageUploadBean;
 
+	private CameraBean cameraBean;
+
 	private Person person;
 
 	private PersonDetail personDetail;
@@ -68,30 +70,33 @@ public class ProfileBean extends BaseBean {
 			HashSet<Person> ps = new HashSet<Person>();
 			person = personService.getPerson();
 			personDetail = personDetailService.getPersonDetail(person);
-			kinships = personDetail.getKinships();
 			phones = personDetail.getPhones();
-
+			phoneTypes = Arrays.asList(PhoneType.values());
+			
 			for (Membership membership : person.getMemberships()) {
 				if (membership.getType() == PersonType.OWNER || membership.getType() == PersonType.RENTER) {
 					ps.addAll(personService.getPeople(membership.getDomain()));
 				}
 			}
 
-			ps.remove(person);
-			people = new ArrayList<Person>(ps);
+			if (!CollectionUtils.isEmpty(ps)) {
+				kinships = personDetail.getKinships();
 
-			List<Person> relatives = (List<Person>) CollectionUtils.collect(kinships, new RelativeTransformer());
+				ps.remove(person);
+				people = new ArrayList<Person>(ps);
 
-			people.removeAll(relatives);
-			father = getParent(KinType.FATHER);
-			mother = getParent(KinType.MOTHER);
-			people.remove(father);
-			people.remove(mother);
+				List<Person> relatives = (List<Person>) CollectionUtils.collect(kinships, new RelativeTransformer());
 
+				people.removeAll(relatives);
+				father = getParent(KinType.FATHER);
+				mother = getParent(KinType.MOTHER);
+				people.remove(father);
+				people.remove(mother);
+			}
+			
 			imageUploadBean = new ImageUploadBean(198, 300);
-			imageUploadBean.setImage(person.getPicture());
+			cameraBean = new CameraBean(198, 300);
 			genders = Arrays.asList(Gender.values());
-			phoneTypes = Arrays.asList(PhoneType.values());
 		} catch (Exception e) {
 			LOGGER.error("", e);
 		}
@@ -204,6 +209,14 @@ public class ProfileBean extends BaseBean {
 
 	public void setImageUploadBean(ImageUploadBean imageUploadBean) {
 		this.imageUploadBean = imageUploadBean;
+	}
+
+	public CameraBean getCameraBean() {
+		return cameraBean;
+	}
+
+	public void setCameraBean(CameraBean cameraBean) {
+		this.cameraBean = cameraBean;
 	}
 
 	public Person getPerson() {
