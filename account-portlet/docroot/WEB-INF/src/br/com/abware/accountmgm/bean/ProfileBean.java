@@ -12,6 +12,7 @@ import javax.faces.bean.ViewScoped;
 import javax.faces.context.FacesContext;
 
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 
 import br.com.abware.accountmgm.service.core.PersonDetailServiceImpl;
@@ -59,7 +60,7 @@ public class ProfileBean extends BaseBean {
 
 	private List<PhoneType> phoneTypes;	
 
-	private Long phoneNumber;
+	private String phoneNumber;
 
 	private PhoneType phoneType;
 
@@ -118,7 +119,11 @@ public class ProfileBean extends BaseBean {
 	}
 
 	public void onPhoneAdd() {
-		Phone phone = new Phone(phoneNumber, phoneType);
+		String pn = phoneNumber.replaceAll("[^0-9]*", "");
+		String extension = StringUtils.left(pn, 2);
+		String number = StringUtils.right(pn, 9);
+
+		Phone phone = new Phone(extension, number, phoneType);
 		phoneNumber = null;
 		phoneType = null;
 
@@ -317,11 +322,11 @@ public class ProfileBean extends BaseBean {
 		this.phoneTypes = phoneTypes;
 	}
 
-	public Long getPhoneNumber() {
+	public String getPhoneNumber() {
 		return phoneNumber;
 	}
 
-	public void setPhoneNumber(Long phoneNumber) {
+	public void setPhoneNumber(String phoneNumber) {
 		this.phoneNumber = phoneNumber;
 	}
 

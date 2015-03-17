@@ -45,8 +45,7 @@ public class PhoneManagerImpl extends LiferayManager<com.liferay.portal.model.Ph
 
 	@Override
 	protected Phone getModel(com.liferay.portal.model.Phone entity)	throws Exception {
-		long number = Long.valueOf(entity.getExtension()) * 1000000000 + Long.valueOf(entity.getNumber()); 
-		return new Phone(number, getPhoneType(entity.getType().getName()));
+		return new Phone(entity.getExtension(), entity.getNumber(), getPhoneType(entity.getType().getName()));
 	}
 
 	@Override
