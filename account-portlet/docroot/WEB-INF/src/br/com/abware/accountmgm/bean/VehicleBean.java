@@ -99,6 +99,8 @@ public class VehicleBean extends BaseBean {
 
 	public void onVehicleSave() {
 		try {
+			vehicle.setLicense(vehicle.getLicense().replaceAll("[^A-Za-z0-9]", ""));
+
 			if (visitor && vehicle.getDomain() != null && vehicle.getDomain().getId() > 0) {
 				vehicle.setDomain(null);
 			}
@@ -325,6 +327,14 @@ public class VehicleBean extends BaseBean {
 
 	public void setVisitor(boolean visitor) {
 		this.visitor = visitor;
+	}
+
+	public Map<Domain, List<VehicleType>> getTypes() {
+		return types;
+	}
+
+	public void setTypes(Map<Domain, List<VehicleType>> types) {
+		this.types = types;
 	}
 
 	

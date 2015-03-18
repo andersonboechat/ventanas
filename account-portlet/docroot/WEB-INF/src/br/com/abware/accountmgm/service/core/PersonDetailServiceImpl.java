@@ -3,6 +3,7 @@ package br.com.abware.accountmgm.service.core;
 import java.util.List;
 
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang.math.NumberUtils;
 
 import br.com.abware.accountmgm.persistence.manager.KinshipManagerImpl;
 import br.com.abware.accountmgm.persistence.manager.PhoneManagerImpl;
@@ -36,12 +37,16 @@ public class PersonDetailServiceImpl {
 		}
 
 		for (Phone phone : (List<Phone>) CollectionUtils.subtract(detail.getPhones(), oldPhones)) {
+			if (!NumberUtils.isDigits(phone.getExtension()) || !NumberUtils.isDigits(phone.getNumber())) {
+				throw new Exception("numero de telefone invalido");
+			}
 			phoneManager.save(phone);
 		}
 	}
 	
 	public PersonDetail getPersonDetail(Person person) throws Exception {
 		PersonDetail detail = new PersonDetail();
+		detail.setPerson(person);
 		detail.setKinships(kinshipManager.findByPerson(person));
 		detail.setPhones(phoneManager.findPhones(person));
 		return detail;

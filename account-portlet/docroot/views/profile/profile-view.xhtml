@@ -63,7 +63,7 @@
 							<f:selectItems var="gender" value="#{profileBean.genders}" itemLabel="#{msg[gender.label]}"/>
 						</p:selectOneMenu>
 						<p:outputLabel for="birthday" value="Nascimento:"/>
-						<p:calendar id="birthday" mode="popup" pattern="dd/MM/yyyy"
+						<p:calendar id="birthday" mode="popup" pattern="dd/MM/yyyy" value="#{profileBean.person.birthday}"
 									navigator="true" yearRange="c-100:c+0" showButtonPanel="true" lang="pt" styleClass="birthday"/>
 					</p:panelGrid>					
 					<p:dataTable id="phoneTable" widgetVar="phoneTable" var="phone" value="#{profileBean.phones}" styleClass="no-header" rows="4"
@@ -72,7 +72,7 @@
 						<f:facet name="header">
 							<p:panelGrid columns="4" columnClasses="docs-header,docs-header,docs-header,docs-cmds" styleClass="no-background no-border no-margin" style="width: 100%;">
 								<h:outputText value="Telefones"/>
-								<p:inputMask id="phoneNumber" mask="(99) 9999-99999" value="#{profileBean.phoneNumber}" style=" width: 110px; height: 12px; padding-left: 3px" placeholder="Número"/>
+								<p:inputMask id="phoneNumber" mask="(99) 99999999?9" value="#{profileBean.phoneNumber}" style=" width: 105px; height: 12px; padding-left: 3px" placeholder="Número"/>
 								<p:selectOneMenu id="phoneType" value="#{profileBean.phoneType}" style="font-size: 10px; margin-left: 10px; vertical-align: middle; float: right; width: 100px;">
 									<f:selectItem itemLabel="Tipo" noSelectionOption="true"/>
 									<f:selectItems var="type" value="#{profileBean.phoneTypes}" itemLabel="#{msg[type.label]}"/>

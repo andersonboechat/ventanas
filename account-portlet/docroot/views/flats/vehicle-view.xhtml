@@ -12,7 +12,7 @@
 			<p:column>
 				<p:commandButton value="Cadastrar" actionListener="#{vehicleViewer.onVehicleCreate}" 
 								 partialSubmit="true" process="@this" update=":tabs:vehicle-details-form:vehicle-details" oncomplete="PF('vehicleDialog').show();"
-								 style="font-size: 12px">
+								 style="font-size: 12px" global="false">
 				</p:commandButton>
 				<p:commandButton value="Excluir" actionListener="#{vehicleViewer.onVehiclesDelete}" 
 								 partialSubmit="true" process="@this,vehicleTable" update="vehicleTable,:outputMsg" style="font-size: 12px">
@@ -35,11 +35,13 @@
 				<p:graphicImage value="#{vehicle.image.path}" style="width: 100px; height: 90px;" rendered="#{not (empty vehicle.image.path)}"/>
 			</p:column>
 			<p:column style="vertical-align: top">
-				<p:panelGrid columns="2" columnClasses="column12" styleClass="panel">
-					<p:outputLabel value="Placa:"/>
+				<h:outputText value="#{msg[vehicle.type.label]}" style="font-size: 15px; font-weight: bold;"/>
+				<p:panelGrid columns="2" columnClasses="column12" styleClass="no-border no-margin no-background">
+					<p:outputLabel value="Placa:" rendered="#{vehicle.type != 'BIKE'}"/>
+					<p:outputLabel value="Serial:" rendered="#{vehicle.type == 'BIKE'}"/>
         			<h:outputText value="#{vehicle.license}"/>
 				</p:panelGrid>
-  					<h:outputText value="#{vehicleViewer.displayDomain(vehicle.domain)}" style="margin-left: 10px;"/>
+  				<h:outputText value="#{vehicleViewer.displayDomain(vehicle.domain)}"/>
 			</p:column>
 			<p:column style="width: 35px">
 				<p:commandLink update=":tabs:vehicle-details-form:vehicle-details" actionListener="#{vehicleViewer.onVehicleEdit}" oncomplete="PF('vehicleDialog').show();" partialSubmit="true" process="@this">
@@ -66,38 +68,59 @@
 
 	<p:dialog header="Cadastro de Veículo" widgetVar="vehicleDialog" draggable="false" resizable="false" modal="true" visible="false" style=" width: 520px; padding: 3px">
 		<h:form id="vehicle-details-form" enctype="multipart/form-data">
-			<h:panelGrid id="vehicle-details" columns="1" style="border: 0px solid black; width: 100%;" columnClasses="column">
-				<p:commandLink value="Alterar Foto" update=":tabs:vehicle-picture-form" oncomplete="PF('vehiclePictureDialog').show();" partialSubmit="true" process="@this">
-					<f:setPropertyActionListener target="#{vehicleViewer.vehicle.image.path}" value=""/>
-				</p:commandLink>
-				<h:panelGrid columns="1" style="border: 0px solid black; width: 420px; height: 315px;" columnClasses="car-image">
+			<p:panelGrid id="vehicle-details" columns="1" styleClass="no-border" style="width: 100%;">
+				<h:panelGrid columns="1" columnClasses="car-image" styleClass="no-border" style="width: 420px; height: 315px;">
 			        <p:graphicImage id="portrait" value="#{vehicleViewer.vehicle.image.path}" style="border: 0px solid black;"/>
 				</h:panelGrid>
-				<p:spacer style="border: 0px solid black; background: grey" width="100%" height="1px"/>
-				<h:panelGrid columns="3" style="border: 0px solid black; margin: 5px auto 5px;" columnClasses="column,column,column">
-			    	<p:outputLabel value="Placa:"/>
-			        <p:inputText value="#{vehicleViewer.vehicle.license}" maxlength="7" style="width: 100px;" readonly="#{vehicleViewer.vehicle.id > 0}"/>
-					<p:selectOneMenu id="flat" value="#{vehicleViewer.vehicle.domain}" filter="true" required="true" requiredMessage="Selecione um apartamento"
-									 rendered="#{vehicleViewer.flats.size() > 1}" converter="selectItemsConverter">
-						<f:selectItem itemLabel="Selecione o apartamento" noSelectionOption="true"/>
-						<f:selectItems var="flat" value="#{vehicleViewer.flats}" itemLabel="Apartamento #{flat.number} - Bloco #{flat.block}" itemValue="#{flat}"/>
-					</p:selectOneMenu>
-					<c:if test="#{vehicleViewer.flats.size() == 1}">
-						<c:set target="#{vehicleViewer.vehicle}" property="domain" value="#{vehicleViewer.flats.get(0)}"></c:set>
-						<h:outputText value="Apartamento #{vehicleViewer.flats.get(0).number} - Bloco #{vehicleViewer.flats.get(0).block}"/>
-					</c:if>
-		        </h:panelGrid>
+				<p:commandLink title="Enviar foto" update=":tabs:vehicle-picture-form" oncomplete="PF('vehiclePictureDialog').show();" partialSubmit="true" process="@this" style="float: right; margin: 0;">
+					<h:graphicImage value="../images/send-pic.png" styleClass="no-margin"/>
+					<f:setPropertyActionListener target="#{vehicleViewer.vehicle.image.path}" value=""/>
+				</p:commandLink>
+				<p:spacer style="background: grey;" width="100%;" height="1px" styleClass="no-margin no-border"/>
+				<p:panelGrid style="width: 100%; margin: 5px auto 5px;">
+					<p:row>
+						<p:column colspan="4" style="text-align: right; padding-right: 20px">
+							<p:selectOneMenu id="flat" value="#{vehicleViewer.vehicle.domain}" filter="true" required="true" requiredMessage="Selecione um apartamento"
+											 rendered="#{vehicleViewer.flats.size() > 1}" converter="selectItemsConverter">
+								<f:selectItem itemLabel="Selecione o apartamento" noSelectionOption="true"/>
+								<f:selectItems var="flat" value="#{vehicleViewer.flats}" itemLabel="Apartamento #{flat.number} - Bloco #{flat.block}" itemValue="#{flat}"/>
+								<p:ajax event="change" update="vehicleType" partialSubmit="true" process="@this" global="false"/>
+							</p:selectOneMenu>
+							<c:if test="#{vehicleViewer.flats.size() == 1}">
+								<c:set target="#{vehicleViewer.vehicle}" property="domain" value="#{vehicleViewer.flats.get(0)}"></c:set>
+								<h:outputText value="Apartamento #{vehicleViewer.flats.get(0).number} - Bloco #{vehicleViewer.flats.get(0).block}" style="float: right"/>
+							</c:if>
+						</p:column>
+					</p:row>
+					<p:row>
+						<p:column><p:outputLabel for="vehicleType" value="Tipo:"/></p:column>
+						<p:column>
+							<p:selectOneMenu id="vehicleType" value="#{vehicleViewer.vehicle.type}" required="true" requiredMessage="Selecione o tipo do veículo">
+								<f:selectItem itemLabel="Selecione" noSelectionOption="true"/>
+								<f:selectItems var="type" value="#{vehicleViewer.types.get(flatBean.vehicleBean.vehicle.domain)}" itemLabel="#{msg[type.label]}"/>
+								<p:ajax event="change" update="license" global="false"/>
+							</p:selectOneMenu>
+						</p:column>
+						<p:column><p:outputLabel for="license" value="Placa / Número de Serie:"/></p:column>
+						<p:column>
+					    	<p:panel id="license" styleClass="no-border no-margin">
+						    	<p:inputMask mask="aaa?-9999" value="#{vehicleViewer.vehicle.license}" style="width: 100px; text-transform: uppercase;" readonly="#{vehicleViewer.vehicle.id > 0}" rendered="#{vehicleViewer.vehicle.type != 'BIKE'}" required="true"/>
+						        <p:inputText value="#{vehicleViewer.vehicle.license}" maxlength="15" style="width: 100px;" readonly="#{vehicleViewer.vehicle.id > 0}" rendered="#{vehicleViewer.vehicle.type == 'BIKE'}"/>
+							</p:panel>
+						</p:column>
+					</p:row>
+		        </p:panelGrid>
 				<h:panelGrid columns="2" style="border: 0px solid black; float: right; margin: 10px 0px 5px">
 					<p:commandButton value="Salvar" actionListener="#{vehicleViewer.onVehicleSave}" update=":tabs:vehicle-form:vehicleTable,:outputMsg" oncomplete="if (!args.validationFailed) { if(!args.exception) {PF('vehicleDialog').hide();} else { if(args.alert) {PF('alertDialog').show();}}}" style="float: right; width: 80px; margin: 0px 0px 0px 5px;"/>
 					<p:commandButton value="Cancelar" type="button" onclick="PF('vehicleDialog').hide();" style="float: right; width: 80px; margin: 0px 0px 0px 5px;" global="false"/>
 				</h:panelGrid>
-			</h:panelGrid>
+			</p:panelGrid>
 		</h:form>		
 	</p:dialog>
 	
 	<p:dialog id="vehiclePictureDialog" widgetVar="vehiclePictureDialog" modal="true" header="Upload de Imagem">
 		<h:form id="vehicle-picture-form" enctype="multipart/form-data">
-			<p:fileUpload id="image" label="Selecionar Foto" fileUploadListener="#{vehiclePictureUploader.onImageUpload}" auto="true" update="vehicle-picture-form" rendered="#{empty vehiclePictureUploader.image.path}"/>
+			<p:fileUpload id="image" label="Selecionar Foto" fileUploadListener="#{vehiclePictureUploader.onImageUpload}" mode="simple" auto="true" allowTypes="/(\.|\/)(gif|jpe?g|png)$/" update="vehicle-picture-form" rendered="#{empty vehiclePictureUploader.image.path}"/>
 			<p:panel rendered="#{!(empty vehiclePictureUploader.image.path)}" style="border: 0px !important;">
 				<p:panel styleClass="cropper2">
 					<p:imageCropper value="#{vehiclePictureUploader.croppedImage}" image="#{vehiclePictureUploader.image.path}" initialCoords="0,0,#{vehiclePictureUploader.width},#{vehiclePictureUploader.height}" minSize="#{vehiclePictureUploader.width},#{vehiclePictureUploader.height}" maxSize="#{vehiclePictureUploader.width},#{vehiclePictureUploader.height}"/>

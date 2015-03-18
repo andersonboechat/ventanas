@@ -121,7 +121,7 @@ public class ProfileBean extends BaseBean {
 	public void onPhoneAdd() {
 		String pn = phoneNumber.replaceAll("[^0-9]*", "");
 		String extension = StringUtils.left(pn, 2);
-		String number = StringUtils.right(pn, 9);
+		String number = StringUtils.right(pn, pn.length() - 2);
 
 		Phone phone = new Phone(extension, number, phoneType);
 		phoneNumber = null;

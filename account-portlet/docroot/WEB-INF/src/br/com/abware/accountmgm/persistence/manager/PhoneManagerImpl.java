@@ -2,8 +2,6 @@ package br.com.abware.accountmgm.persistence.manager;
 
 import java.util.List;
 
-import org.apache.commons.lang.StringUtils;
-
 import com.liferay.portal.model.Contact;
 import com.liferay.portal.model.ListType;
 import com.liferay.portal.model.ListTypeConstants;
@@ -45,15 +43,14 @@ public class PhoneManagerImpl extends LiferayManager<com.liferay.portal.model.Ph
 
 	@Override
 	protected Phone getModel(com.liferay.portal.model.Phone entity)	throws Exception {
-		return new Phone(entity.getExtension(), entity.getNumber(), getPhoneType(entity.getType().getName()));
+		Phone phone = new Phone(entity.getExtension(), entity.getNumber(), getPhoneType(entity.getType().getName()));
+		phone.setId(entity.getPhoneId());
+		return phone;
 	}
 
 	@Override
 	public Phone save(Phone phone) throws Exception {
 		long classPK = UserLocalServiceUtil.getUserById(helper.getUserId()).getContactId();
-		String fullNumber = String.valueOf(phone.getNumber());
-		String extension = StringUtils.left(fullNumber, 2);
-		String number = StringUtils.right(fullNumber, 9);
 		int typeId = 0;
 
 		for (ListType listType : ListTypeServiceUtil.getListTypes(ListTypeConstants.CONTACT_PHONE)) {
@@ -63,7 +60,8 @@ public class PhoneManagerImpl extends LiferayManager<com.liferay.portal.model.Ph
 			}
 		}
 
-		return getModel(PhoneLocalServiceUtil.addPhone(helper.getUserId(), Contact.class.getName(), classPK, number, extension, typeId, false));
+		return getModel(PhoneLocalServiceUtil.addPhone(helper.getUserId(), Contact.class.getName(), classPK, 
+													   phone.getNumber(), phone.getExtension(), typeId, false));
 	}
 
 	@Override

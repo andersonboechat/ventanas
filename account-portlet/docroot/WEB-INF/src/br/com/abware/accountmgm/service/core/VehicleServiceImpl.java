@@ -112,20 +112,22 @@ public class VehicleServiceImpl implements BaseService<Vehicle> {
 
 		// Verifica se tem vaga para o apartamento especificado
 		// Visitantes podem acessar o condominio apenas para deixar/buscar passageiros
-		if (vehicle.getDomain() != null) {
-			if (vehicle.getDomain().getId() <= 0 || 
-					(vehicle.getDomain() instanceof Flat && flatService.getFlat(vehicle.getDomain().getId()) == null)) {
-				throw new Exception("dominio nao encontrado");
-			} else {
-				List<Parking> parkings = parkingService.getFreeParkings(vehicle.getDomain());
-				
-				if (CollectionUtils.isEmpty(parkings)) {
-					throw new Exception("nao ha vagas disponíveis");
-				}
+		if(vehicle.getType() != VehicleType.BIKE) {
+			if (vehicle.getDomain() != null) {
+				if (vehicle.getDomain().getId() <= 0 || 
+						(vehicle.getDomain() instanceof Flat && flatService.getFlat(vehicle.getDomain().getId()) == null)) {
+					throw new Exception("dominio nao encontrado");
+				} else {
+					List<Parking> parkings = parkingService.getFreeParkings(vehicle.getDomain());
 
-				Parking parking = parkings.get(0);
-				parking.setVehicle(v);
-				parkingService.update(parking);
+					if (CollectionUtils.isEmpty(parkings)) {
+						throw new Exception("nao ha vagas disponíveis");
+					}
+
+					Parking parking = parkings.get(0);
+					parking.setVehicle(v);
+					parkingService.update(parking);
+				}
 			}
 		}
 

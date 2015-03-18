@@ -2,11 +2,15 @@ package br.com.abware.accountmgm.persistence.entity;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
+
+import br.com.abware.accountmgm.model.VehicleType;
 
 
 /**
@@ -29,6 +33,9 @@ public class VehicleEntity extends BaseEntity {
 	@JoinColumn(name="domainId", nullable=true)
 	private DomainEntity domain;
 
+	@Enumerated(EnumType.ORDINAL)
+	private VehicleType type;
+	
 	@Column(updatable=false)
 	private String license;
 
@@ -57,6 +64,14 @@ public class VehicleEntity extends BaseEntity {
 
 	public void setDomain(DomainEntity domain) {
 		this.domain = domain;
+	}
+
+	public VehicleType getType() {
+		return type;
+	}
+
+	public void setType(VehicleType type) {
+		this.type = type;
 	}
 
 	public String getLicense() {

@@ -52,19 +52,21 @@ public class VehicleManagerImpl extends JCondoManager<VehicleEntity, Vehicle>{
 	}
 
 	@Override
-	public Vehicle save(Vehicle model) throws Exception {
-		if(StringUtils.isEmpty(model.getImage().getPath())) {
-			if (model.getImage().getId() > 0) {
-				ImageLocalServiceUtil.deleteImage(model.getImage().getId());
+	public Vehicle save(Vehicle vehicle) throws Exception {
+		vehicle.setLicense(vehicle.getLicense().toUpperCase());
+
+		if(StringUtils.isEmpty(vehicle.getImage().getPath())) {
+			if (vehicle.getImage().getId() > 0) {
+				ImageLocalServiceUtil.deleteImage(vehicle.getImage().getId());
 			}
-		} else if (!model.getImage().getPath().equals(getPath(model.getImage().getId()))) {
-			URL url = new URL(model.getImage().getPath());
-			long imageId = model.getImage().getId() == 0 ? CounterLocalServiceUtil.increment() : model.getImage().getId();
+		} else if (!vehicle.getImage().getPath().equals(getPath(vehicle.getImage().getId()))) {
+			URL url = new URL(vehicle.getImage().getPath());
+			long imageId = vehicle.getImage().getId() == 0 ? CounterLocalServiceUtil.increment() : vehicle.getImage().getId();
 			ImageLocalServiceUtil.updateImage(imageId, url.openStream());
-			model.getImage().setId(imageId);
+			vehicle.getImage().setId(imageId);
 		}
 
-		return super.save(model);
+		return super.save(vehicle);
 	}
 	
 	@SuppressWarnings("unchecked")
