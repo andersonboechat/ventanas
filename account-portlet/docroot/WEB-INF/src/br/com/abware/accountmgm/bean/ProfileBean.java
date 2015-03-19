@@ -14,6 +14,7 @@ import javax.faces.context.FacesContext;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
+import org.apache.myfaces.commons.util.MessageUtils;
 
 import br.com.abware.accountmgm.service.core.PersonDetailServiceImpl;
 import br.com.abware.accountmgm.util.KinTypePredicate;
@@ -118,7 +119,35 @@ public class ProfileBean extends BaseBean {
 		}
 	}
 
+	public boolean validatePhoneNumber() {
+		if (StringUtils.isEmpty(phoneNumber)) {
+			FacesContext context = FacesContext.getCurrentInstance();
+			String component = context.getViewRoot().findComponent("outputMsg").getClientId();
+			MessageUtils.addMessage(FacesMessage.SEVERITY_WARN, "profile.empty.phone.number", null, component, context);
+			return false;
+		}
+
+		if (phoneNumber.replaceAll("[^0-9]*", "").length() < 8) {
+			MessageUtils.addMessage(FacesMessage.SEVERITY_WARN, "profile.invalid.phone.number", null);
+			return false;
+		}
+
+		return true;
+	} 
+	
+	public boolean validatePhoneType() {
+		if (phoneType == null) {
+			MessageUtils.addMessage(FacesMessage.SEVERITY_WARN, "profile.empty.phone.type", null);
+			return false;
+		}
+		
+		return true;
+	}
+	
 	public void onPhoneAdd() {
+		if (!validatePhoneNumber() || !validatePhoneType()) {
+			return;
+		}
 		String pn = phoneNumber.replaceAll("[^0-9]*", "");
 		String extension = StringUtils.left(pn, 2);
 		String number = StringUtils.right(pn, pn.length() - 2);
@@ -131,7 +160,7 @@ public class ProfileBean extends BaseBean {
 			return;
 		}
 
-		phones.add(phone);
+		phones.add(0, phone);
 	}
 
 	public void onPhoneDelete(Phone phone) {

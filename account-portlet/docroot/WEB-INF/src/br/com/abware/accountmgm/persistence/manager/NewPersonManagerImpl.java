@@ -86,7 +86,7 @@ public class NewPersonManagerImpl extends JCondoManager<PersonEntity, Person> {
 			person.setGender(user.isMale() ? Gender.MALE : Gender.FEMALE);
 			person.setStatus(user.getStatus() == WorkflowConstants.STATUS_APPROVED ? PersonStatus.ACTIVE : PersonStatus.INACTIVE);
 			person.setPicture(new Image(user.getPortraitId(), getPath(user.getPortraitId()), null, null));
-			//person.setBirthday(new java.sql.Date(user.getBirthday().getTime()));
+			person.setBirthday(user.getBirthday());
 
 			return person;
 		} catch (Exception e) {
@@ -104,11 +104,10 @@ public class NewPersonManagerImpl extends JCondoManager<PersonEntity, Person> {
 			}
 
 			boolean isMale = person.getGender().equals(Gender.MALE);
-
 			Calendar calendar = Calendar.getInstance();
-			calendar.setTime(person.getBirthday());
 
 			if (user == null) {
+				calendar.setTime(person.getBirthday() == null ? new Date() : person.getBirthday());
 				user = UserLocalServiceUtil.addUser(helper.getUser().getUserId(), helper.getCompanyId(), true, 
 											 		StringUtils.EMPTY, StringUtils.EMPTY, true, StringUtils.EMPTY, 
 											 		person.getEmailAddress(), 0, StringUtils.EMPTY, helper.getUser().getLocale(), 
@@ -118,12 +117,13 @@ public class NewPersonManagerImpl extends JCondoManager<PersonEntity, Person> {
 											 		false, new ServiceContext());
 				person.setUserId(user.getUserId());
 			} else {
+				calendar.setTime(person.getBirthday() == null ? user.getBirthday() : person.getBirthday());
 				user = UserLocalServiceUtil.updateUser(person.getUserId(), user.getPassword(), StringUtils.EMPTY, StringUtils.EMPTY, false, 
 													   user.getReminderQueryQuestion(), user.getReminderQueryAnswer(), user.getScreenName(), 
 													   person.getEmailAddress(), user.getFacebookId(), user.getOpenId(), user.getLanguageId(), 
 													   user.getTimeZoneId(), user.getGreeting(), user.getComments(), person.getFirstName(), 
-													   StringUtils.EMPTY, person.getLastName(), 0, 0, isMale, calendar.get(Calendar.DAY_OF_MONTH), 
-													   calendar.get(Calendar.MONTH), calendar.get(Calendar.YEAR), StringUtils.EMPTY, StringUtils.EMPTY, 
+													   StringUtils.EMPTY, person.getLastName(), 0, 0, isMale, calendar.get(Calendar.MONTH), 
+													   calendar.get(Calendar.DAY_OF_MONTH), calendar.get(Calendar.YEAR), StringUtils.EMPTY, StringUtils.EMPTY, 
 													   StringUtils.EMPTY, StringUtils.EMPTY, StringUtils.EMPTY, StringUtils.EMPTY, StringUtils.EMPTY, 
 													   StringUtils.EMPTY, StringUtils.EMPTY, StringUtils.EMPTY, user.getJobTitle(), null, null, null, 
 													   null, null, new ServiceContext());

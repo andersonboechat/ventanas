@@ -7,7 +7,7 @@
     xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-facesconfig_2_0.xsd"
 >
 	<application>
-		<message-bundle>Language_pt_BR</message-bundle>
+		<message-bundle>Language</message-bundle>
 	</application>
 	<converter>
 		<display-name>ParkingConverter</display-name>
