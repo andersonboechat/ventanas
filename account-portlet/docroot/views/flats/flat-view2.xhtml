@@ -7,74 +7,8 @@
 	xmlns:h="http://java.sun.com/jsf/html"
 	xmlns:p="http://primefaces.org/ui"
 	xmlns:ui="http://java.sun.com/jsf/facelets">
-	<h:head>
-		<style>
-			.picture {margin: 0px !important; padding: 0px !important; vertical-align: top;}
-			.picture td {margin: 0px !important; padding: 0px !important; vertical-align: top;}
-			.pic-cmds {margin: 5px 0px 0px !important;}
-			.pic-cmds td {margin: 0px !important; padding: 0px !important; vertical-align: top;}
-			.no-header thead {display: none}
-			.cropper2 {padding: 0;}
-			.cropper2 div {margin: 0 !important; padding: 0 !important;}
-			.cropper2 .img { margin: 0 !important;}
-			.car-image {background: url("/account-portlet/images/car_icon.png") no-repeat center; text-align: center; margin: 0px auto;}
-			.car-thumb {background-image: url("/account-portlet/images/car_icon.png") ;}
-			.column {padding: 6px; }
-			.column12 {width: 40px; font-size: 13px;}
-			.panel tr {border: none !important; background-color: transparent; font-size: 16px;}
-			.panel td {border: none !important; background-color: transparent; font-size: 16px;}
-			.menu-cmds {width: 100%}
-			.menu-cmds td {border: none !important; margin: 0px; padding: 0px}
-			.menu-cmds tr {
-				width: 100%; border-bottom: 0px !important; 	
-				-webkit-border-top-right-radius: 3px !important;
-				-moz-border-radius-topright: 3px !important;
-				border-top-right-radius: 3px !important;
-			}
-			.menu-cmds-col1 {vertical-align: middle; width: 155px; border: none !important; padding: 0px; margin: 0px;}
-			.menu-cmds-col2 {vertical-align: middle; width: 130px;}
-			.menu-cmds-col3 {vertical-align: middle; padding: 0; margin: 0; text-align: right; border: 0px solid red !important}
-			.my-account-col1 {vertical-align: top; width: 198px; height: 300px}
-			.my-account-col2 {vertical-align: top; padding: 0px !important;}
-			.labelClm {width: 80px; background-color: transparent}
-			.fieldClm {background-color: transparent !important; float: left; width: 90%;}
-			.fieldClm input {width: 100%}
-			.person-image {
-				border: none !important; width: 198px; height: 300px; padding: 0px !important; margin:  0px !important;
-			}
-			.foto img {height: 100px; width: 66px}
-			.person-image div {border: none !important;}
-			.no-border {border: none !important;}
-
-			.no-border tr {border: none !important;}
-			.no-border td {border: none !important;}
-			.no-margin {margin:  0px !important; padding: 0px !important;}
-			.no-margin td {margin:  0px !important; padding: 0px !important;}
-			.no-background {background-color: transparent;}
-			.no-background div {background-color: transparent;}
-			.no-background tr {background-color: transparent;}
-			.no-background td {background-color: transparent;}
-			.flats {float: right; margin: 0px; padding: 0;}
-			.flats tr {margin: 0px; padding: 0;}
-			.flats td {margin: 0px; padding: 0;}
-			.memberships div {border: 0px; border-top: 1px solid grey;}
-			.docs-header {text-align: left;}
-			.docs-header td {padding: 0; margin: 0;}
-			.docs-cmds {width: 8%; vertical-align: middle;}
-			.docs-cmds td {vertical-align: middle;}
-			.docs-cmds img {padding: 0; margin: 0px 0px 0px 7px; vertical-align: middle;}
-			.ui-tabs {background: none; padding: 0 !important; border: 0px !important;}
-			.ui-tabs-nav {background: none !important; }
-			.ui-tabs-panel {margin: 0 !important; padding: 0 !important}
-			.parkings {width: 50%; vertical-align: top}
-			.documents {width: 50%; vertical-align: top}
-			
-			.birthday input {width: 80px;}
-		</style>
-	</h:head>
-	<h:body>
-		<p:growl id="outputMsg"/>
-		<f:loadBundle basename="Language_pt_BR" var="msg"/>
+<ui:composition template="../main-template.xhtml">
+	<ui:define name="app-view">
 		<c:set var="personViewer" value="#{flatBean.personBean}"/>
 		<c:set var="imageUploader" value="#{flatBean.personBean.imageUploadBean}"/>
 		<c:set var="vehicleViewer" value="#{flatBean.vehicleBean}"/>
@@ -93,7 +27,7 @@
 				    	<p:selectOneMenu id="flat" value="#{flatBean.flat}" filter="true" filterMatchMode="contains" converter="selectItemsConverter" rendered="#{flatBean.flats.size() > 1}">
 				    		<f:selectItem itemLabel="Todos Apartamentos" noSelectionOption="true"/>
 							<f:selectItems var="flat" value="#{flatBean.flats}" itemLabel="Apartamento #{flat.number} - Bloco #{flat.block}" itemValue="#{flat}"/>
-							<p:ajax event="change" listener="#{flatBean.onFlatSelect}" update="flat-details,:tabs:person-form:personTable,:tabs:vehicle-form:vehicleTable,:tabs:supplier-form:supplierTable" />
+							<p:ajax event="change" listener="#{flatBean.onFlatSelect}" update="flat-details,:tabs:person-form:personTable,:tabs:vehicle-form:vehicleTable,:tabs:supplier-form:supplierTable" global="false"/>
 				    	</p:selectOneMenu>
 					</p:panelGrid>			
 				</f:facet>
@@ -111,11 +45,11 @@
 						<p:column><h:outputText value="Apartamento #{parking.ownerDomain.number} - Bloco #{parking.ownerDomain.block}"/></p:column>
 						<p:column style="width: 20%; text-align: center">
 							<h:graphicImage value="../images/cancel3.png" rendered="#{flatBean.flats.contains(parking.ownerDomain) and empty(parking.renterDomain) and !empty(parking.vehicle)}" title="Ocupada" width="27" height="27"/>
-							<p:commandLink title="Alugar esta vaga" onclick="PF('parkingDialog').show();" partialSubmit="true" process="@this" rendered="#{flatBean.flats.contains(parking.ownerDomain) and empty(parking.renterDomain) and empty(parking.vehicle)}">
+							<p:commandLink title="Alugar esta vaga" onclick="PF('parkingDialog').show();" partialSubmit="true" process="@this" rendered="#{flatBean.flats.contains(parking.ownerDomain) and empty(parking.renterDomain) and empty(parking.vehicle)}" global="false">
 								<h:graphicImage value="../images/handshake.png"/>
 								<f:setPropertyActionListener target="#{parkingViewer.parking}" value="#{parking}"/>
 							</p:commandLink>
-							<p:commandLink title="Vaga alugada para o apartamento #{parking.renterDomain.number} - bloco #{parking.renterDomain.block}" onclick="PF('rentalCancel').show();" rendered="#{flatBean.flats.contains(parking.ownerDomain) and !empty(parking.renterDomain)}">
+							<p:commandLink title="Vaga alugada para o apartamento #{parking.renterDomain.number} - bloco #{parking.renterDomain.block}" onclick="PF('rentalCancel').show();" rendered="#{flatBean.flats.contains(parking.ownerDomain) and !empty(parking.renterDomain)}" global="false">
 								<h:graphicImage value="../images/cancel2.png" width="26" height="26"/>
 								<f:setPropertyActionListener target="#{parkingViewer.parking}" value="#{parking}"/>
 								<f:setPropertyActionListener target="#{parkingViewer.parking.renterDomain}" value=""/>
@@ -147,7 +81,7 @@
 			</p:panelGrid>
 			<p:confirmDialog widgetVar="rentalCancel" header="Aluguel de Estacionamento" message="Você confirma o cancelamento do aluguel desta vaga?" severity="alert" showEffect="fade" hideEffect="fade">
 				<p:panel style="text-align: center; border: none;">
-					<p:commandButton value="#{msg['no']}" type="button" styleClass="ui-confirmdialog-no" onclick="PF('rentalCancel').hide();" icon="ui-icon-close" style="float: left; width: 80px; margin-left: 14%" />
+					<p:commandButton value="#{msg['no']}" type="button" global="false" styleClass="ui-confirmdialog-no" onclick="PF('rentalCancel').hide();" icon="ui-icon-close" style="float: left; width: 80px; margin-left: 14%"/>
 					<p:commandButton value="#{msg['yes']}" actionListener="#{parkingViewer.onRentalCancel}" partialSubmit="true" process="@this" update=":flat-form:parkingTable" oncomplete="PF('rentalCancel').hide();" styleClass="ui-confirmdialog-yes" icon="ui-icon-check" style="float: right; width: 80px; margin-right: 14%"/>
 				</p:panel>
 			</p:confirmDialog>			
@@ -168,7 +102,7 @@
 						<f:selectItems var="flat" value="#{flatBean.flats}" itemLabel="Apartamento #{flat.number} - Bloco #{flat.block}" itemValue="#{flat}"/>
 			    	</p:selectOneMenu>
 				</p:panelGrid>
-				<p:commandButton value="Cancelar" oncomplete="PF('parkingDialog').hide();" partialSubmit="true" process="@this" style="float: right; width: 80px; margin: 0px 0px 10px 5px;">
+				<p:commandButton value="Cancelar" oncomplete="PF('parkingDialog').hide();" partialSubmit="true" process="@this" global="false" style="float: right; width: 80px; margin: 0px 0px 10px 5px;">
 					<f:setPropertyActionListener target="#{parkingViewer.parking}" value=""/>
 				</p:commandButton>
 				<p:commandButton value="Alugar" actionListener="#{parkingViewer.onRent}" update=":flat-form:parkingTable, :outputMsg" oncomplete="if (!args.validationFailed &amp;&amp; !args.exception) {PF('parkingDialog').hide();}" style="float: right; width: 80px; margin: 0px 0px 10px 5px;"/>
@@ -190,5 +124,6 @@
 				<p:commandButton value="Enviar" actionListener="#{documentViewer.onSend}" update=":flat-form:documentTable, :outputMsg" oncomplete="if (!args.validationFailed &amp;&amp; !args.exception) {PF('documentDialog').hide();}" style="float: right; width: 80px; margin: 0px 0px 10px 5px;"/>
 			</h:form>
 		</p:dialog>
-	</h:body>
+	</ui:define>
+</ui:composition>
 </f:view>

@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+
+<f:view
+	xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:c="http://java.sun.com/jsp/jstl/core"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:ui="http://java.sun.com/jsf/facelets">
+	<h:head>
+		<style>
+			.picture {margin: 0px !important; padding: 0px !important; vertical-align: top;}
+			.picture td {margin: 0px !important; padding: 0px !important; vertical-align: top;}
+			.pic-cmds {margin: 5px 0px 0px !important;}
+			.pic-cmds td {margin: 0px !important; padding: 0px !important; vertical-align: top;}
+			.no-header thead {display: none}
+			.cropper2 {padding: 0;}
+			.cropper2 div {margin: 0 !important; padding: 0 !important;}
+			.cropper2 .img { margin: 0 !important;}
+			.car-image {background: url("/account-portlet/images/car_icon.png") no-repeat center; text-align: center; margin: 0px auto;}
+			.car-thumb {background-image: url("/account-portlet/images/car_icon.png") ;}
+			.column {padding: 6px; }
+			.column12 {width: 40px; font-size: 13px;}
+			.panel tr {border: none !important; background-color: transparent; font-size: 16px;}
+			.panel td {border: none !important; background-color: transparent; font-size: 16px;}
+			.menu-cmds {width: 100%}
+			.menu-cmds td {border: none !important; margin: 0px; padding: 0px}
+			.menu-cmds tr {
+				width: 100%; border-bottom: 0px !important; 	
+				-webkit-border-top-right-radius: 3px !important;
+				-moz-border-radius-topright: 3px !important;
+				border-top-right-radius: 3px !important;
+			}
+			.menu-cmds-col1 {vertical-align: middle; width: 155px; border: none !important; padding: 0px; margin: 0px;}
+			.menu-cmds-col2 {vertical-align: middle; width: 130px;}
+			.menu-cmds-col3 {vertical-align: middle; padding: 0; margin: 0; text-align: right; border: 0px solid red !important}
+			.my-account-col1 {vertical-align: top; width: 198px; height: 300px}
+			.my-account-col2 {vertical-align: top; padding: 0px !important;}
+			.labelClm {width: 80px; background-color: transparent; padding: 0; margin: 0;}
+			.fieldClm {background-color: transparent !important; padding: 0; margin: 0;}
+			.fieldClm input {width: 100%;}
+			.person-image {
+				border: none !important; width: 198px; height: 300px; padding: 0px !important; margin:  0px !important;
+			}
+			.foto img {height: 100px; width: 66px}
+			.person-image div {border: none !important;}
+			.no-border {border: none !important;}
+			.no-border tr {border: none !important;}
+			.no-border td {border: none !important;}
+			.no-margin {margin:  0px !important; padding: 0px !important;}
+			.no-margin td {margin:  0px !important; padding: 0px !important;}
+			.no-background {background-color: transparent;}
+			.no-background div {background-color: transparent;}
+			.no-background tr {background-color: transparent;}
+			.no-background td {background-color: transparent;}
+			.flats {float: right; margin: 0px; padding: 0;}
+			.flats tr {margin: 0px; padding: 0;}
+			.flats td {margin: 0px; padding: 0;}
+			.memberships div {border: 0px; border-top: 1px solid grey;}
+			.docs-header {text-align: left;}
+			.docs-header td {padding: 0; margin: 0;}
+			.docs-cmds {width: 8%; vertical-align: middle;}
+			.docs-cmds td {vertical-align: middle;}
+			.docs-cmds img {padding: 0; margin: 0px 0px 0px 7px; vertical-align: middle;}
+			.ui-tabs {background: none; padding: 0 !important; border: 0px !important;}
+			.ui-tabs-nav {background: none !important; }
+			.ui-tabs-panel {margin: 0 !important; padding: 0 !important}
+			.parkings {width: 50%; vertical-align: top}
+			.documents {width: 50%; vertical-align: top}
+			.birthday input {width: 80px;}
+
+			.userPanel td {padding-top: 2px !important; padding-bottom: 2px !important; padding-right: 14px !important;}
+		</style>
+	</h:head>
+	<h:body>
+		<p:growl id="outputMsg"/>
+		<f:loadBundle basename="Language_pt_BR" var="msg"/>
+
+		<p:ajaxStatus>
+			<f:facet name="start"><p:messages id="statusStartMsg" /> Aguarde por favor...</f:facet>
+		</p:ajaxStatus>
+
+		<p:dialog widgetVar="dialogAguarde" id="dialogAguarde">
+			<h:form id="nada">
+				<p:messages id="statusCompleteMsg" />
+			</h:form>
+		</p:dialog>
+
+		<ui:insert name="app-view"/>
+	</h:body>
+</f:view>

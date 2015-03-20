@@ -38,6 +38,8 @@ public class TestBean extends BaseBean {
 	
 	@ManagedProperty(value="#{imageUploadBean}")
 	private ImageUploadBean imageUploadBean;
+	
+	private CameraBean cameraBean;	
 
 	private ModelDataModel<Person> model;
 
@@ -93,11 +95,12 @@ public class TestBean extends BaseBean {
 			}
 
 			model = new ModelDataModel<Person>(new ArrayList<Person>(people));
-			person = new Person();
-			person.setPicture(new Image());
+			this.person = new Person();
+			this.person.setPicture(new Image());
 			filters = new HashMap<String, Object>();
 			imageUploadBean.setWidth(198);
 			imageUploadBean.setHeight(300);
+			cameraBean = new CameraBean(198, 300);
 			genders = Arrays.asList(Gender.values());
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
@@ -122,14 +125,15 @@ public class TestBean extends BaseBean {
 	
 	public void onPersonSave() {
 		try {
+			Person p;
 			person.setPicture(imageUploadBean.getImage());
 
 			if (person.getId() == 0) {
-				person = personService.register(person);
-				model.addModel(person);
+				p = personService.register(person);
+				model.addModel(p);
 			} else {
-				person = personService.update(person);
-				model.setModel(person);
+				p = personService.update(person);
+				model.setModel(p);
 			}
 			
 		} catch (Exception e) {
@@ -193,7 +197,11 @@ public class TestBean extends BaseBean {
 
 	public String displayMembership(Membership membership) {
 		if (membership != null) {
-			return displayDomain(membership.getDomain()) + " --- " + rb.getString(membership.getType().getLabel());
+			if (membership.getDomain() instanceof Administration) {
+				return rb.getString(membership.getType().getLabel());				
+			} else {
+				return displayDomain(membership.getDomain()) + " --- " + rb.getString(membership.getType().getLabel());	
+			}
 		}
 
 		return null;
@@ -233,7 +241,7 @@ public class TestBean extends BaseBean {
 	}
 
 	public boolean canEditInfo() throws Exception {
-		return person.getId() == 0 || person.equals(personService.getPerson()) || administration != null;
+		return person != null && (person.getId() == 0 || person.equals(personService.getPerson()) || administration != null);
 	}
 
 	@SuppressWarnings("unchecked")
@@ -254,6 +262,14 @@ public class TestBean extends BaseBean {
 
 	public void setImageUploadBean(ImageUploadBean imageUploadBean) {
 		this.imageUploadBean = imageUploadBean;
+	}
+
+	public CameraBean getCameraBean() {
+		return cameraBean;
+	}
+
+	public void setCameraBean(CameraBean cameraBean) {
+		this.cameraBean = cameraBean;
 	}
 
 	public ModelDataModel<Person> getModel() {

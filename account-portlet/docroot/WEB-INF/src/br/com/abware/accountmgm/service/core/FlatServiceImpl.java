@@ -26,6 +26,23 @@ public class FlatServiceImpl {
 		return null; //flatManager.findAll();
 	}
 
+	public List<Flat> getPersonFlats(Person person) throws Exception {
+		List<Flat> flats = new ArrayList<Flat>();
+		try {
+			for (Flat flat : flatManager.findByPerson(person)) {
+				if (securityManager.hasPermission(flat, Permission.VIEW)) {
+					flats.add(flat);
+				}
+			}
+		} catch (PersistenceException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+		return flats;
+		
+	}
+	
 	public List<Flat> getFlats(Person person) throws Exception {
 		List<Flat> flats = new ArrayList<Flat>();
 		try {

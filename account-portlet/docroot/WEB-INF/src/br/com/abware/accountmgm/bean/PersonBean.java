@@ -39,6 +39,8 @@ public class PersonBean extends BaseBean implements Observer {
 	private static Logger LOGGER = Logger.getLogger(PersonBean.class);
 
 	private ImageUploadBean imageUploadBean;
+	
+	private CameraBean cameraBean;
 
 	private ModelDataModel<Person> model;
 
@@ -80,6 +82,7 @@ public class PersonBean extends BaseBean implements Observer {
 			person = new Person();
 			filters = new HashMap<String, Object>();
 			imageUploadBean = new ImageUploadBean(198, 300);
+			cameraBean = new CameraBean(198, 300);
 			genders = Arrays.asList(Gender.values());
 		} catch (Exception e) {
 			LOGGER.error("", e);
@@ -182,7 +185,11 @@ public class PersonBean extends BaseBean implements Observer {
 
 	public String displayMembership(Membership membership) {
 		if (membership != null) {
-			return displayDomain(membership.getDomain()) + " --- " + rb.getString(membership.getType().getLabel());
+			if (membership.getDomain() instanceof Administration) {
+				return rb.getString(membership.getType().getLabel());				
+			} else {
+				return displayDomain(membership.getDomain()) + " --- " + rb.getString(membership.getType().getLabel());	
+			}
 		}
 
 		return null;
@@ -243,6 +250,14 @@ public class PersonBean extends BaseBean implements Observer {
 
 	public void setImageUploadBean(ImageUploadBean imageUploadBean) {
 		this.imageUploadBean = imageUploadBean;
+	}
+
+	public CameraBean getCameraBean() {
+		return cameraBean;
+	}
+
+	public void setCameraBean(CameraBean cameraBean) {
+		this.cameraBean = cameraBean;
 	}
 
 	public ModelDataModel<Person> getModel() {

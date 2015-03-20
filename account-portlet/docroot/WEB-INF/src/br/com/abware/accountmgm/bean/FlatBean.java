@@ -41,7 +41,7 @@ public class FlatBean extends BaseBean {
 	@PostConstruct
 	public void init() {
 		try {
-			flats = flatService.getFlats(personService.getPerson());
+			flats = flatService.getPersonFlats(personService.getPerson());
 			vehicleBean.init(flats);
 			supplierBean.init(flats);
 			documentBean.init(flats);

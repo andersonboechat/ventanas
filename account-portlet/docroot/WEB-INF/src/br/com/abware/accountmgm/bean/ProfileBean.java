@@ -9,7 +9,6 @@ import javax.annotation.PostConstruct;
 import javax.faces.application.FacesMessage;
 import javax.faces.bean.ManagedBean;
 import javax.faces.bean.ViewScoped;
-import javax.faces.context.FacesContext;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
@@ -108,40 +107,12 @@ public class ProfileBean extends BaseBean {
 		try {
 			person.setPicture(imageUploadBean.getImage());
 			person = personService.update(person);
-
 			personDetailService.update(personDetail);
-
-			FacesContext context = FacesContext.getCurrentInstance();
-			String component = context.getViewRoot().findComponent("outputMsg").getClientId();
-			context.addMessage(component, new FacesMessage(FacesMessage.SEVERITY_INFO, "Informações salvas com sucesso", ""));
+			MessageUtils.addMessage(FacesMessage.SEVERITY_INFO, "profile.save.success", null);
 		} catch (Exception e) {
+			MessageUtils.addMessage(FacesMessage.SEVERITY_ERROR, "profile.save.failure", null);
 			LOGGER.error("", e);
 		}
-	}
-
-	public boolean validatePhoneNumber() {
-		if (StringUtils.isEmpty(phoneNumber)) {
-			FacesContext context = FacesContext.getCurrentInstance();
-			String component = context.getViewRoot().findComponent("outputMsg").getClientId();
-			MessageUtils.addMessage(FacesMessage.SEVERITY_WARN, "profile.empty.phone.number", null, component, context);
-			return false;
-		}
-
-		if (phoneNumber.replaceAll("[^0-9]*", "").length() < 8) {
-			MessageUtils.addMessage(FacesMessage.SEVERITY_WARN, "profile.invalid.phone.number", null);
-			return false;
-		}
-
-		return true;
-	} 
-	
-	public boolean validatePhoneType() {
-		if (phoneType == null) {
-			MessageUtils.addMessage(FacesMessage.SEVERITY_WARN, "profile.empty.phone.type", null);
-			return false;
-		}
-		
-		return true;
 	}
 	
 	public void onPhoneAdd() {
@@ -157,6 +128,7 @@ public class ProfileBean extends BaseBean {
 		phoneType = null;
 
 		if (phones.contains(phone)) {
+			MessageUtils.addMessage(FacesMessage.SEVERITY_INFO, "profile.phone.already.added", null);
 			return;
 		}
 
@@ -205,6 +177,29 @@ public class ProfileBean extends BaseBean {
 		people.add(relative);
 	}
 	
+	public boolean validatePhoneNumber() {
+		if (StringUtils.isEmpty(phoneNumber)) {
+			MessageUtils.addMessage(FacesMessage.SEVERITY_WARN, "profile.empty.phone.number", null);
+			return false;
+		}
+
+		if (phoneNumber.replaceAll("[^0-9]*", "").length() < 8) {
+			MessageUtils.addMessage(FacesMessage.SEVERITY_WARN, "profile.invalid.phone.number", null);
+			return false;
+		}
+
+		return true;
+	} 
+	
+	public boolean validatePhoneType() {
+		if (phoneType == null) {
+			MessageUtils.addMessage(FacesMessage.SEVERITY_WARN, "profile.empty.phone.type", null);
+			return false;
+		}
+		
+		return true;
+	}
+
 	public Person getParent(KinType type) {
 		if (type != KinType.FATHER && type != KinType.MOTHER) {
 			return null;
