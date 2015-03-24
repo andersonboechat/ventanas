@@ -64,6 +64,12 @@ public class ProfileBean extends BaseBean {
 
 	private PhoneType phoneType;
 
+	private String password;
+
+	private String newPassword;
+
+	private String confirmPassword;
+
 	@SuppressWarnings("unchecked")
 	@PostConstruct
 	public void init() {
@@ -113,6 +119,11 @@ public class ProfileBean extends BaseBean {
 			MessageUtils.addMessage(FacesMessage.SEVERITY_ERROR, "profile.save.failure", null);
 			LOGGER.error("", e);
 		}
+	}
+
+	public void onPasswordChange() throws Exception {
+		personService.updatePassword(person, password, newPassword);
+		MessageUtils.addMessage(FacesMessage.SEVERITY_INFO, "profile.pwd.change.success", null);
 	}
 	
 	public void onPhoneAdd() {
@@ -360,6 +371,30 @@ public class ProfileBean extends BaseBean {
 
 	public void setPhoneType(PhoneType phoneType) {
 		this.phoneType = phoneType;
+	}
+
+	public String getPassword() {
+		return password;
+	}
+
+	public void setPassword(String password) {
+		this.password = password;
+	}
+
+	public String getNewPassword() {
+		return newPassword;
+	}
+
+	public void setNewPassword(String newPassword) {
+		this.newPassword = newPassword;
+	}
+
+	public String getConfirmPassword() {
+		return confirmPassword;
+	}
+
+	public void setConfirmPassword(String confirmPassword) {
+		this.confirmPassword = confirmPassword;
 	}
 
 

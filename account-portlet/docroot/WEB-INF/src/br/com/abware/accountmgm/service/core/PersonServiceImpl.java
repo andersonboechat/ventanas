@@ -1,7 +1,6 @@
 package br.com.abware.accountmgm.service.core;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -154,6 +153,16 @@ public class PersonServiceImpl  {
 		return p;
 	}
 
+	public void updatePassword(Person person, String password, String newPassword) throws Exception {
+//		Person p = getPerson(person.getIdentity());
+//
+//		if (p == null) {
+//			throw new Exception("Person not found");
+//		}
+
+		securityManager.updatePassword(person, password, newPassword);
+	}
+	
 	@SuppressWarnings("unchecked")
 	public Person update(Person person) throws Exception {
 		if (!securityManager.hasPermission(person, Permission.UPDATE)) {
@@ -240,43 +249,5 @@ public class PersonServiceImpl  {
 
 		personManager.delete(person);
 	}
-
-	@SuppressWarnings("unchecked")
-	public List<Person> getOwners(Flat flat) throws Exception {
-		List<Person> people;
-		try {
-			people = personManager.findPeople(flat);
-			for (Person p : people) {
-				Collection<Membership> c = CollectionUtils.select(p.getMemberships(), new MembershipPredicate(flat, PersonType.OWNER));
-				if (c.isEmpty()) {
-					people.remove(p);
-				}
-			}
-		} catch (ApplicationException e) {
-			e.printStackTrace();
-			people = new ArrayList<Person>();
-		}
-
-		return people;
-	}	
-
-	@SuppressWarnings("unchecked")
-	public List<Person> getRenters(Flat flat) throws Exception {
-		List<Person> people;
-		try {
-			people = personManager.findPeople(flat);
-			for (Person p : people) {
-				Collection<Membership> c = CollectionUtils.select(p.getMemberships(), new MembershipPredicate(flat, PersonType.RENTER));
-				if (c.isEmpty()) {
-					people.remove(p);
-				}
-			}
-		} catch (ApplicationException e) {
-			e.printStackTrace();
-			people = new ArrayList<Person>();
-		}
-
-		return people;
-	}	
 
 }

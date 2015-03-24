@@ -9,7 +9,6 @@ import br.com.abware.accountmgm.persistence.manager.SecurityManagerImpl;
 import br.com.abware.jcondo.core.Permission;
 import br.com.abware.jcondo.core.model.Flat;
 import br.com.abware.jcondo.core.model.Person;
-import br.com.abware.jcondo.exception.BusinessException;
 import br.com.abware.jcondo.exception.PersistenceException;
 
 public class FlatServiceImpl {
@@ -22,8 +21,8 @@ public class FlatServiceImpl {
 		return flatManager.findById(flatId);
 	}
 
-	public List<Flat> getFlats() throws BusinessException {
-		return null; //flatManager.findAll();
+	public List<Flat> getFlats() throws Exception {
+		return flatManager.findAll();
 	}
 
 	public List<Flat> getPersonFlats(Person person) throws Exception {

@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+
+<f:view xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:c="http://java.sun.com/jsp/jstl/core"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:ui="http://java.sun.com/jsf/facelets">
+	<h:form id="rooms-dialog-form">
+		<p:dialog widgetVar="roomDialog" header="Espaço" visible="false"  modal="true" showEffect="fade" hideEffect="fade">
+			<p:panelGrid id="roomInfo" columns="2" style="width: 400px;">
+				<p:column>
+					<p:inplace editor="true" styleClass="icon #{adminBean.getRoomStyleClass(adminBean.room.id)}">
+						<p:inputText value="#{adminBean.room.name}"/>
+					</p:inplace>
+					<p:panelGrid columns="2">
+						<p:outputLabel for="capacity" value="Capacidade" title="Quantidade máxima de pessoas permitida no espaço"/>
+						<p:spinner id="capacity" value="#{adminBean.room.capacity}" required="true"/>
+
+						<p:outputLabel for="price" value="Valor" title="Valor do aluguel do espaço"/>
+						<p:inputMask id="price" value="#{adminBean.room.price}" mask="999,99" required="true"/>
+
+						<p:outputLabel for="available" value="Disponível" title="Torna o espaço disponível para alugar"/>
+						<p:selectBooleanCheckbox id="available" value="#{adminBean.room.available}"/>
+
+						<p:outputLabel for="agreement" value="Termo" title="Termo de Responsabilidade de uso do espaço"/>
+						<p:fileUpload id="agreement" value="#{adminBean.room.agreement}" required="true"/>
+
+						<p:outputLabel for="detail" value="Detalhes" title="Qualquer outra informação do espaço"/>
+						<p:inputTextarea id="detail" value="#{adminBean.room.detail}"/>
+					</p:panelGrid>
+				</p:column>
+				<p:column>
+					<p:outputLabel for="imagesFolder" value="Pasta" title="Caminho da pasta onde as imagens do espaço são armazenadas"/>
+					<p:inputText id="imagesFolder" value="#{adminBean.room.detail}"/>
+					<p:outputPanel id="selectedImage" autoUpdate="true">
+						<p:graphicImage value="#{adminBean.image.path}" style="width: 448px;"/>
+					</p:outputPanel>
+					<p:outputLabel for="imageTitle" value="Título" title="Título da imagem acima em dastaque"/>
+					<p:inplace editor="true">
+						<p:inputText id="imageTitle" value="#{adminBean.image.title}"/>
+					</p:inplace>
+					<p:outputLabel for="imageDesc" value="Descrição" title="Descrição da imagem acima em destaque"/>
+					<p:inplace editor="true">
+						<p:inputText id="imageDesc" value="#{adminBean.image.description}"/>
+					</p:inplace>
+					<p:dataGrid var="image" value="#{adminBean.room.images}" columns="3" style="border: 0px;">
+						<p:commandLink title="${image.title}" style="margin:0 auto;">
+							<p:graphicImage value="${image.path}" style="width: 80px; padding: 0; "/>
+							<f:setPropertyActionListener value="${image}" target="#{adminBean.image}" />
+						</p:commandLink>
+					</p:dataGrid>
+				</p:column>
+			</p:panelGrid>
+		</p:dialog>
+	</h:form>
+</f:view>

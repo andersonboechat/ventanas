@@ -97,9 +97,9 @@
 			<h:form id="parking-rent-form">
 				<p:panelGrid id="model-details" columns="1" styleClass="no-border" style="margin: 10px 0px 20px 0px; text-align: justify" cellpadding="10">
 			    	<h:outputText value="Escolha o apartamento para o qual deseja alugar esta vaga e confirme clicando no botão Alugar."/>
-			    	<p:selectOneMenu id="parkingDomain" value="#{parkingViewer.parking.renterDomain}" converter="selectItemsConverter">
+			    	<p:selectOneMenu id="parkingDomain" value="#{parkingViewer.parking.renterDomain}" filter="true" filterMatchMode="contains" converter="selectItemsConverter">
 			    		<f:selectItem itemLabel="Selecione" noSelectionOption="true"/>
-						<f:selectItems var="flat" value="#{flatBean.flats}" itemLabel="Apartamento #{flat.number} - Bloco #{flat.block}" itemValue="#{flat}"/>
+						<f:selectItems var="flat" value="#{parkingViewer.getAllFlats()}" itemLabel="Apartamento #{flat.number} - Bloco #{flat.block}" itemValue="#{flat}"/>
 			    	</p:selectOneMenu>
 				</p:panelGrid>
 				<p:commandButton value="Cancelar" oncomplete="PF('parkingDialog').hide();" partialSubmit="true" process="@this" global="false" style="float: right; width: 80px; margin: 0px 0px 10px 5px;">
