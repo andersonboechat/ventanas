@@ -7,59 +7,64 @@
 	xmlns:p="http://primefaces.org/ui"
 	xmlns:ui="http://java.sun.com/jsf/facelets">
 	<h:form id="booking-dialog-form-#{tabId}">
-		<p:dialog widgetVar="bookingDialog-#{tabId}" header="#{msg['booking.dialog.header']}" styleClass="agenda" modal="true" resizable="false" showEffect="fade" hideEffect="fade">
-			<h:panelGrid id="bookingDetails-#{tabId}" columns="1">
-				<h:panelGrid columns="3" columnClasses="colTitle,colDate,colHour" style="width: 900px; overflow: hidden; margin: 5px 0px 5px 0px;" styleClass="agenda">				
-					<h:outputText value="#{msg['room']}: #{calendarBean.booking.room.name} " style="font-size: 14px; margin-top: 15px;"/>
+		<p:dialog widgetVar="bookingDialog-#{tabId}" header="#{msg['booking.dialog.header']}" modal="true" resizable="false" showEffect="fade" hideEffect="fade">
+			<p:panelGrid id="bookingDetails-#{tabId}" columns="1" styleClass="no-margin no-border">
+				<p:panelGrid columns="2" styleClass="no-margin no-border" style="width: 100%;">
+					<p:column>
+						<h:outputText value="#{msg['room']}: #{calendarBean.booking.resource.name} " style="font-size: 14px;"/>
+						<p:panelGrid columns="5" style="font-size: 14px; margin-bottom: 10px;">
+							<h:outputText value="#{calendarBean.booking.date}" style="margin: 0px 3px 0px 0px;">
+								<f:convertDateTime pattern="'#{msg['day']}:' dd/MM/yyyy" />
+							</h:outputText>
+							<h:outputText value="das" style="margin: 0px 3px 0px 0px"/>
+							<h:outputText value="#{calendarBean.beginTime}:00h" style="margin: 0px 3px 0px 0px;" rendered="#{not calendarBean.isTimeSelectionEnabled()}"/>
+							<p:selectOneMenu id="startTime" value="#{calendarBean.beginTime}" required="true" requiredMessage="#{msg['hour.begin.not.selected']}"
+											 rendered="#{calendarBean.isTimeSelectionEnabled()}" style="margin: 0px 3px 0px 0px; font-size: 12px;">
+								<f:selectItem itemLabel="#{msg['start']}" noSelectionOption="true"/>
+								<c:forEach var="i" begin="10" end="21">
+									<f:selectItem itemLabel="${i}:00h" itemValue="${i}"/>
+								</c:forEach>
+							</p:selectOneMenu>
+							<h:outputText value="às" style="margin: 0px 3px 0px 0px"/>
+							<h:outputText value="#{calendarBean.endTime}:00h" style="margin: 0px 3px 0px 0px" rendered="#{not calendarBean.isTimeSelectionEnabled()}"/>
+							<p:selectOneMenu id="endTime" value="#{calendarBean.endTime}" required="true" requiredMessage="#{msg['hour.end.not.selected']}"
+											 rendered="#{calendarBean.isTimeSelectionEnabled()}" style="font-size: 12px;">
+								<f:selectItem itemLabel="#{msg['end']}" noSelectionOption="true"/>
+								<c:forEach var="i" begin="11" end="22">
+									<f:selectItem itemLabel="${i}:00h" itemValue="${i}"/>
+								</c:forEach>
+							</p:selectOneMenu>
+						</p:panelGrid>
+					</p:column>
+					<p:column>
+						<p:selectOneMenu value="#{calendarBean.booking.flat}" rendered="#{calendarBean.flats.size() > 1}" required="true" requiredMessage="#{msg['flat.not.selected']}" 
+										 converter="selectItemsConverter" style="float: right; vertical-align: top">
+							<f:selectItem itemLabel="#{msg['flat']}" noSelectionOption="true"/>
+							<f:selectItems value="#{calendarBean.flats}" var="flat" itemLabel="Apartamento #{flat.number} - Bloco #{flat.block}" itemValue="#{flat}"/>
+						</p:selectOneMenu>
+						<h:outputText value="Apartamento #{calendarBean.flats.get(0).number} - Bloco #{calendarBean.flats.get(0).block}" 
+									  rendered="#{calendarBean.flats.size() == 1}" style=" float: right; font-size: 14px;"/>
+					</p:column>
+				</p:panelGrid>
 
-					<h:outputText value="#{calendarBean.booking.dateIn}">
-						<f:convertDateTime pattern="'#{msg['day']}:' dd/MM/yyyy" />
-					</h:outputText>
-	
-					<h:panelGrid columns="4" style="margin: 5px 0px 5px 0px;" rendered="#{calendarBean.isTimeSelectionEnabled()}">
-						<h:outputText value="das" style="margin: 0px 5px"/>
-						
-						<h:selectOneMenu id="startTime" value="#{calendarBean.startTime}" required="true" requiredMessage="#{msg['hour.begin.not.selected']}">
-							<f:selectItem itemLabel="#{msg['start']}" noSelectionOption="true"/>
-							<c:forEach var="i" begin="10" end="21">
-								<f:selectItem itemLabel="${i}" itemValue="${i}"/>
-							</c:forEach>								
-						</h:selectOneMenu>
-	
-						<h:outputText value="às" style="margin: 0px 5px"/>
-		
-						<h:selectOneMenu id="endTime" value="#{calendarBean.endTime}" required="true" requiredMessage="#{msg['hour.end.not.selected']}">
-							<f:selectItem itemLabel="#{msg['end']}" noSelectionOption="true"/>
-							<c:forEach var="i" begin="11" end="22">
-								<f:selectItem itemLabel="${i}" itemValue="${i}"/>
-							</c:forEach>					
-						</h:selectOneMenu>
-					</h:panelGrid>
-				</h:panelGrid>
-
-				<p:selectOneMenu value="#{calendarBean.booking.flat}" rendered="#{calendarBean.flats.size() > 1}" required="true" requiredMessage="#{msg['flat.not.selected']}" converter="selectItemsConverter">
-					<f:selectItem itemLabel="#{msg['flat']}" noSelectionOption="true"/>
-					<f:selectItems value="#{calendarBean.flats}" var="flat" itemLabel="Apartamento #{flat.number} - Bloco #{flat.block}" itemValue="#{flat}"/>
-				</p:selectOneMenu>
-
-				<h:outputText value="Apartamento #{calendarBean.flats.get(0).number} - Bloco #{calendarBean.flats.get(0).block}" rendered="#{calendarBean.flats.size() == 1}"/>
-
-				<p:panel header="#{msg['agreement.term']}">
-					<p:media id="agreement" width="900px" height="350px" style="margin: 10px 0px 10px;" value="/..#{calendarBean.booking.room.agreement}" player="pdf">  
+				<p:panel header="#{msg['agreement.term']}" styleClass="no-margin">
+					<p:media id="agreement" width="900px" height="350px" style="margin: 0px 0px 0px;" value="/..#{calendarBean.booking.resource.agreement}" player="pdf">  
 						<h:outputText value="#{msg['media.not.supported']}" escape="false"/>
 					</p:media>
 				</p:panel>
 
-				<p:selectBooleanCheckbox id="deal" value="#{calendarBean.deal}" itemLabel="#{msg['agreement.user.deal']}" validator="#{calendarBean.validateCheckbox}" validatorMessage="#{msg['agreement.deal.unchecked']}"/>
+				<p:selectBooleanCheckbox id="deal" value="#{calendarBean.deal}" itemLabel="#{msg['agreement.user.deal']}" 
+										 validator="#{calendarBean.validateCheckbox}" validatorMessage="#{msg['agreement.deal.unchecked']}"
+										 style="margin: 10px 0px 0px"/>
 
-				<h:panelGrid columns="2" style="float: right; height: 30px; overflow: hidden; margin: 20px 0px 10px 0px;">
+				<p:panelGrid columns="2" style="float: right; height: 30px; overflow: hidden; margin: 20px 0px 10px 0px;">
 					<p:commandButton id="bookingConfirmBtn" value="#{msg.book}" actionListener="#{calendarBean.onBook}" rendered="#{not(calendarBean.isCancelEnable())}" oncomplete="if (!args.validationFailed &amp;&amp; !args.exception) {if(PF('calendar-#{tabId}').update) {PF('calendar-#{tabId}').update()} PF('bookingDialog-#{tabId}').hide();}" style="margin: 0px 5px; width: 85px" update=":outputMsg">
 						<p:confirm header="#{msg['confirm.dialog.header']}" message="#{msg['register.deadline']}" icon="ui-icon-alert"/>
 					</p:commandButton>
 					<p:commandButton id="bookingBtn" value="#{msg.book}" actionListener="#{calendarBean.onBook}" rendered="#{calendarBean.isCancelEnable()}" oncomplete="if (!args.validationFailed &amp;&amp; !args.exception) {if(PF('calendar-#{tabId}').update) {PF('calendar-#{tabId}').update()} PF('bookingDialog-#{tabId}').hide();}" style="margin: 0px 5px; width: 85px" update=":outputMsg"/>
 					<p:commandButton id="cancelBookingBtn" value="#{msg.cancel}" type="button" onclick="PF('bookingDialog-#{tabId}').hide();" global="false" style="margin: 0px 0px 0px 5px; width: 85px"/>
-				</h:panelGrid>
-			</h:panelGrid>
+				</p:panelGrid>
+			</p:panelGrid>
 		</p:dialog>
 		<p:confirmDialog global="true" width="600" style="padding: 0px" showEffect="fade" hideEffect="fade" visible="false">
 			<p:commandButton value="#{msg['no']}" type="button" styleClass="ui-confirmdialog-no" icon="ui-icon-close" style="float: left; width: 200px; margin-left: 14%" />

@@ -1,5 +1,6 @@
 package br.com.atilo.jcondo.booking.bean;
 
+import java.sql.Time;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -30,7 +31,7 @@ import br.com.abware.jcondo.booking.model.RoomBooking;
 import br.com.abware.jcondo.core.model.Flat;
 import br.com.abware.jcondo.core.model.Person;
 import br.com.abware.jcondo.exception.BusinessException;
-import br.com.atilo.jcondo.booking.service.BookingServiceImpl;
+import br.com.atilo.jcondo.booking.service.RoomBookingServiceImpl;
 import br.com.atilo.jcondo.booking.service.RoomServiceImpl;
 
 @ManagedBean
@@ -89,18 +90,16 @@ public class CalendarBean extends BaseBean {
 
 		try {
 			if (deal) {
-				DateUtils.setHours(booking.getDateIn(), beginTime);
-				DateUtils.setHours(booking.getDateOut(), endTime);
-				
-				
-				
+				booking.getBeginTime().setTime(DateUtils.setHours(booking.getBeginTime(), beginTime).getTime());
+				booking.getEndTime().setTime(DateUtils.setHours(booking.getEndTime(), endTime).getTime());
+
 				booking = bookingService.book(booking);
 				model.addEvent(model.createEvent(booking));
 
 				MessageUtils.addMessage(FacesMessage.SEVERITY_INFO, "register.success", null);
 
 				if (isCancelEnable()) {
-					Date deadline = DateUtils.addDays(booking.getDateIn(), -BookingServiceImpl.BKG_CANCEL_DEADLINE);
+					Date deadline = DateUtils.addDays(booking.getDate(), -RoomBookingServiceImpl.BKG_CANCEL_DEADLINE);
 					MessageUtils.addMessage(FacesMessage.SEVERITY_INFO, "register.cancel.notify", 
 											new String[] {DateFormatUtils.format(deadline, "dd/MM/yyyy")});
 				}
@@ -121,7 +120,7 @@ public class CalendarBean extends BaseBean {
 		LOGGER.trace("Method out");
 	}
 
-	public void onCancel(int modelIndex) {
+	public void onCancel() {
 		try { 
 			if (booking != null) {
 				bookingService.cancel(booking);
@@ -133,7 +132,7 @@ public class CalendarBean extends BaseBean {
 		}
 	}
 
-	public void onDelete(int modelIndex) {
+	public void onDelete() {
 		try {
 			bookingService.delete(booking);
 			MessageUtils.addMessage(FacesMessage.SEVERITY_INFO, "register.delete.success", null);
@@ -164,8 +163,16 @@ public class CalendarBean extends BaseBean {
 			RequestContext.getCurrentInstance().addCallbackParam("exception", true);
 		}
 
-		booking = new RoomBooking(person, model.getRoom(), bookingDate, (Date) bookingDate.clone());
-		booking.setFlat(flats.size() > 1 ? null : flats.get(0));
+		booking = new RoomBooking(person, flats.size() > 1 ? null : flats.get(0), model.getRoom(), 
+								 (Date) bookingDate.clone(), Time.valueOf("00:00:00"), Time.valueOf("00:00:00"));
+
+		if (!isTimeSelectionEnabled()) {
+			beginTime = RoomBookingServiceImpl.BKG_MIN_HOUR;
+			endTime = RoomBookingServiceImpl.BKG_MAX_HOUR;
+		} else {
+			beginTime = 0;
+			endTime = 0;
+		}
 	}
 
 	public void onTabChange(TabChangeEvent event) {
@@ -182,9 +189,9 @@ public class CalendarBean extends BaseBean {
 	}  
 
 	public boolean isCancelEnable() {
-		if (booking.getDateIn() != null) {
+		if (booking != null && booking.getDate() != null) {
 			Date today = new Date();
-			Date deadline = DateUtils.addDays(booking.getDateIn(), -BookingServiceImpl.BKG_CANCEL_DEADLINE);
+			Date deadline = DateUtils.addDays(booking.getDate(), -RoomBookingServiceImpl.BKG_CANCEL_DEADLINE);
 			return deadline.after(today);
 		}
 
@@ -201,10 +208,6 @@ public class CalendarBean extends BaseBean {
 
 	public List<Room> getRooms() {
 		return rooms;
-	}
-
-	public void setRooms(List<Room> rooms) {
-		this.rooms = rooms;
 	}
 
 	public Person getPerson() {

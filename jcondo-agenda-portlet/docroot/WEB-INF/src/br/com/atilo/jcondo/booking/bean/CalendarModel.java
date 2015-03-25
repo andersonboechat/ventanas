@@ -10,17 +10,17 @@ import br.com.abware.jcondo.booking.model.BookingStatus;
 import br.com.abware.jcondo.booking.model.Room;
 import br.com.abware.jcondo.booking.model.RoomBooking;
 
-import br.com.atilo.jcondo.booking.service.BookingServiceImpl;
+import br.com.atilo.jcondo.booking.service.RoomBookingServiceImpl;
 
 public class CalendarModel extends LazyScheduleModel {
 
 	private static final long serialVersionUID = 1L;
 	
-	private BookingServiceImpl bookingService;
+	private RoomBookingServiceImpl bookingService;
 	
 	private Room room;
 	 
-	public CalendarModel(BookingServiceImpl bookingService, Room room) {
+	public CalendarModel(RoomBookingServiceImpl bookingService, Room room) {
 		super();
 		this.bookingService = bookingService;
 		this.room = room;
@@ -29,12 +29,16 @@ public class CalendarModel extends LazyScheduleModel {
 	@Override
     public void loadEvents(Date start, Date end) {
     	clear();
-		for (RoomBooking b : bookingService.getBookings(room, start, end)) {
-			try {
-				addEvent(createEvent(b));
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
+    	try {
+    		for (RoomBooking b : bookingService.getBookings(room, start, end)) {
+    			try {
+    				addEvent(createEvent(b));
+    			} catch (Exception e) {
+    				e.printStackTrace();
+    			}
+    		}
+		} catch (Exception e) {
+			// TODO: handle exception
 		}
 	}
 	
@@ -49,10 +53,7 @@ public class CalendarModel extends LazyScheduleModel {
 		  .append(StringUtils.leftPad(String.valueOf(booking.getFlat().getNumber()), 4, "0"))
 		  .append(" ").append(booking.getStatus().getLabel()); 
 
-		event = new DefaultScheduleEvent(sb.toString(), 
-										 booking.getDateIn(), 
-										 booking.getDateOut(), 
-										 getBookingStyleClass(booking));
+		event = new DefaultScheduleEvent(sb.toString(), booking.getDate(), booking.getDate(), getBookingStyleClass(booking));
 		event.setData(booking);
 		return event;
 	}

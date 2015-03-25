@@ -30,12 +30,12 @@ public class RoomEntity extends BaseEntity {
 
 	private long agreementId;
 
-	@Column(nullable=false, columnDefinition = "BIT", length = 1)
-	private boolean available;
+	private String name;
 
 	private String detail;
 
-	private String name;
+	@Column(nullable=false, columnDefinition = "BIT", length = 1)
+	private boolean available;
 
 	private double price;
 	

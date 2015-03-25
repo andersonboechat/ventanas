@@ -4,7 +4,6 @@ import br.com.abware.jcondo.booking.model.BookingStatus;
 import br.com.atilo.jcondo.core.persistence.entity.BaseEntity;
 import br.com.atilo.jcondo.core.persistence.entity.PersonEntity;
 
-import java.sql.Time;
 import java.util.Date;
 
 import javax.persistence.Entity;
@@ -16,6 +15,8 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
+import javax.persistence.Temporal;
+import javax.persistence.TemporalType;
 
 
 /**
@@ -32,13 +33,22 @@ public class BookingEntity extends BaseEntity {
 	@GeneratedValue
 	private long id;
 
+	@Temporal(TemporalType.DATE)
+	private Date date;
+	
+	@Temporal(TemporalType.TIME)
+	private Date beginTime;
+	
+	@Temporal(TemporalType.TIME)
+	private Date endTime;
+
 	@Enumerated(EnumType.ORDINAL)
 	private BookingStatus status;
 	
 	private double price;
 	
 	@OneToOne
-	@JoinColumn(name="resourceId", updatable=false)
+	@JoinColumn(name="personId", updatable=false)
 	private PersonEntity person;
 
 	@ManyToOne
@@ -56,6 +66,30 @@ public class BookingEntity extends BaseEntity {
 		this.id = id;
 	}
 
+	public Date getDate() {
+		return date;
+	}
+
+	public void setDate(Date date) {
+		this.date = date;
+	}
+
+	public Date getBeginTime() {
+		return beginTime;
+	}
+
+	public void setBeginTime(Date beginTime) {
+		this.beginTime = beginTime;
+	}
+
+	public Date getEndTime() {
+		return endTime;
+	}
+
+	public void setEndTime(Date endTime) {
+		this.endTime = endTime;
+	}
+
 	public BookingStatus getStatus() {
 		return this.status;
 	}
@@ -70,6 +104,14 @@ public class BookingEntity extends BaseEntity {
 
 	public void setPrice(double price) {
 		this.price = price;
+	}
+
+	public PersonEntity getPerson() {
+		return person;
+	}
+
+	public void setPerson(PersonEntity person) {
+		this.person = person;
 	}
 
 	public RoomEntity getRoom() {

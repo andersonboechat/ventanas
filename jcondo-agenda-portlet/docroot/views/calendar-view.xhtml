@@ -19,13 +19,13 @@
 								<f:convertNumber type="currency"/> 
 							</h:outputText>
 							<h:outputLabel value="Capacidade:" style="border: 0px solid red;padding-left: 0px; margin-left: 15px"/>
-							<h:outputText value="#{calendarBean.rooms.get(i.index).detail}"/>
+							<h:outputText value="#{calendarBean.rooms.get(i.index).description}"/>
 						</h:panelGrid>
 						<h:form id="agenda-form-#{i.index}">
 							<p:schedule id="calendar-#{i.index}" value="#{calendarBean.getModel(i.index)}" editable="true" widgetVar="calendar-#{i.index}" 
 										locale="pt" draggable="false" resizable="false" styleClass="agenda" aspectRatio="1.2" style="width: 100%" 
 										 leftHeaderTemplate="" centerHeaderTemplate="title" rightHeaderTemplate="prev,next"> <!-- timeZone="America/Sao_Paulo"-->
-								<p:ajax event="dateSelect" listener="#{calendarBean.onDateSelect}" update=":tabs:booking-dialog-form-#{i.index}:bookingDetails-#{i.index}, :globalMsgs" oncomplete="if (!args.exception) {PF('bookingDialog-#{i.index}').show();}"/>
+								<p:ajax event="dateSelect" listener="#{calendarBean.onDateSelect}" update=":tabs:booking-dialog-form-#{i.index}:bookingDetails-#{i.index}, :outputMsg" oncomplete="if (!args.exception) {PF('bookingDialog-#{i.index}').show();}"/>
 								<p:ajax event="eventSelect" listener="#{calendarBean.onSelect}" update=":tabs:event-dialog-form-#{i.index}:eventDetails-#{i.index}" oncomplete="PF('eventDialog-#{i.index}').show();"/>
 							</p:schedule>
 						</h:form>
@@ -40,14 +40,13 @@
 										<h:outputLabel value="#{msg['room']}:"/>
 										<h:outputText value="#{calendarBean.booking.room.name}"/>
 										<h:outputLabel value="#{msg['date']}:"/>
-										<h:outputText value="#{calendarBean.booking.dateIn}"><f:convertDateTime pattern="EEEEE, dd/MM/yyyy" /></h:outputText>
+										<h:outputText value="#{calendarBean.booking.beginDate}"><f:convertDateTime pattern="EEEEE, dd/MM/yyyy" /></h:outputText>
 										<h:outputLabel value="#{msg['time']}:"/>
 										<p:outputPanel>
-											<h:outputText value="#{calendarBean.booking.dateIn}"><f:convertDateTime pattern="'das' HH:mm'h'" /></h:outputText>
-											<h:outputText value="#{calendarBean.booking.dateOut}"><f:convertDateTime pattern=" 'às' HH:mm'h'" /></h:outputText>
+											<h:outputText value="#{calendarBean.booking.endDate}"><f:convertDateTime pattern=" 'às' HH:mm'h'" /></h:outputText>
 										</p:outputPanel>
 										<h:outputLabel value="#{msg['flat']}:"/>
-										<h:outputText value="#{calendarBean.booking.flat.number} - Bloco #{calendarBean.booking.flat.block}"/>
+										<h:outputText value="#{calendarBean.booking.domain.number} - Bloco #{calendarBean.booking.domain.block}"/>
 										<h:outputLabel value="#{msg['resident']}:"/>
 										<h:outputText value="#{calendarBean.booking.person.fullName}"/>
 										<h:outputLabel value="#{msg['status']}:"/>
@@ -58,11 +57,11 @@
 										</h:outputText>
 									</h:panelGrid>
 									<h:panelGrid columns="2" style="width: 100%; overflow: hidden; margin: 20px 0px 20px 0px;">
-										<p:commandButton id="cancelBkgConfirmBtn" value="#{msg['book.cancel']}" actionListener="#{calendarBean.onCancel(i.index)}" oncomplete="if (!args.validationFailed) {if(PF('calendar-#{i.index}').update) {PF('calendar-#{i.index}').update();} PF('eventDialog-#{i.index}').hide();}" update=":globalMsgs" style="float: right; margin: 0px 5px 5px; width: 145px" rendered="#{calendarBean.booking.status != 'CANCELLED' and not(calendarBean.isCancelEnable())}">
+										<p:commandButton id="cancelBkgConfirmBtn" value="#{msg['book.cancel']}" actionListener="#{calendarBean.onCancel(i.index)}" oncomplete="if (!args.validationFailed) {if(PF('calendar-#{i.index}').update) {PF('calendar-#{i.index}').update();} PF('eventDialog-#{i.index}').hide();}" update=":outputMsg" style="float: right; margin: 0px 5px 5px; width: 145px" rendered="#{calendarBean.booking.status != 'CANCELLED' and not(calendarBean.isCancelEnable())}">
 											<p:confirm header="#{msg['confirm.dialog.header']}" message="#{msg['register.cancel.deadline']}" icon="ui-icon-alert"/>
 										</p:commandButton>
-										<p:commandButton id="cancelBkgBtn" value="#{msg['book.cancel']}" actionListener="#{calendarBean.onCancel(i.index)}" oncomplete="if (!args.validationFailed) {if(PF('calendar-#{i.index}').update) {PF('calendar-#{i.index}').update();} PF('eventDialog-#{i.index}').hide();}" update=":globalMsgs" style="float: right; margin: 0px 5px 5px; width: 145px" rendered="#{calendarBean.booking.status != 'CANCELLED' and calendarBean.isCancelEnable()}"/>
-										<p:commandButton id="deleteBkgBtn" value="#{msg['book.delete']}" actionListener="#{calendarBean.onDelete(i.index)}" onerror="alert('Deu Pau!')" oncomplete="if (!args.validationFailed &amp;&amp; !args.exception) {if(PF('calendar-#{i.index}').update) {PF('calendar-#{i.index}').update();} PF('eventDialog-#{i.index}').hide();}" update=":globalMsgs" style="float: right; margin: 0px 5px 5px; width: 145px" rendered="#{calendarBean.booking.status == 'CANCELLED'}"/>
+										<p:commandButton id="cancelBkgBtn" value="#{msg['book.cancel']}" actionListener="#{calendarBean.onCancel(i.index)}" oncomplete="if (!args.validationFailed) {if(PF('calendar-#{i.index}').update) {PF('calendar-#{i.index}').update();} PF('eventDialog-#{i.index}').hide();}" update=":outputMsg" style="float: right; margin: 0px 5px 5px; width: 145px" rendered="#{calendarBean.booking.status != 'CANCELLED' and calendarBean.isCancelEnable()}"/>
+										<p:commandButton id="deleteBkgBtn" value="#{msg['book.delete']}" actionListener="#{calendarBean.onDelete(i.index)}" onerror="alert('Deu Pau!')" oncomplete="if (!args.validationFailed &amp;&amp; !args.exception) {if(PF('calendar-#{i.index}').update) {PF('calendar-#{i.index}').update();} PF('eventDialog-#{i.index}').hide();}" update=":outputMsg" style="float: right; margin: 0px 5px 5px; width: 145px" rendered="#{calendarBean.booking.status == 'CANCELLED'}"/>
 										<p:commandButton id="closeBtn" type="button" value="#{msg['close']}" onclick="PF('eventDialog-#{i.index}').hide();" style="float: left; margin: 0px 0px 5px 5px; width: 145px" global="false" />
 									</h:panelGrid>
 								</h:panelGrid>

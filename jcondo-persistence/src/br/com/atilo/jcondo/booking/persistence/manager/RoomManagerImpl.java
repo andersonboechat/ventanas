@@ -1,7 +1,9 @@
 package br.com.atilo.jcondo.booking.persistence.manager;
 
+import java.util.ArrayList;
 import java.util.List;
 
+import javax.persistence.NoResultException;
 import javax.persistence.Query;
 
 import br.com.abware.jcondo.booking.model.Room;
@@ -21,10 +23,18 @@ public class RoomManagerImpl extends JCondoManager<RoomEntity, Room> {
 	}
 
 	@SuppressWarnings("unchecked")
-	public List<Room> findAvailableRooms() {
-		String queryString = "FROM RoomEntity WHERE available = 1";
-		Query query = em.createQuery(queryString);
-		return query.getResultList();
+	public List<Room> findAvailableRooms() throws Exception {
+		String key = generateKey();
+		try {
+			openManager(key);
+			String queryString = "FROM RoomEntity WHERE available = 1";
+			Query query = em.createQuery(queryString);
+			return getModels(query.getResultList());
+		} catch (NoResultException e) {
+			return new ArrayList<Room>();
+		} finally {
+			closeManager(key);
+		}
 	}	
 
 }
