@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="Aluguel de Espaços - Espaços Reservados" language="groovy" pageWidth="595" pageHeight="842" whenNoDataType="AllSectionsNoDetail" columnWidth="555" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="51f23d78-c37f-44b7-b82b-3562ef40c5b7">
+	<property name="ireport.zoom" value="3.0"/>
+	<property name="ireport.x" value="0"/>
+	<property name="ireport.y" value="0"/>
+	<parameter name="startDate" class="java.lang.String">
+		<property name="input_type" value="date"/>
+		<property name="label" value="Data Inicial"/>
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="endDate" class="java.lang.String">
+		<property name="input_type" value="date"/>
+		<property name="label" value="Data Final"/>
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="datasource" class="java.lang.String">
+		<parameterDescription><![CDATA[java:comp/env/jdbc/aperte-reports]]></parameterDescription>
+	</parameter>
+	<queryString>
+		<![CDATA[SELECT o.name Apartamento, r.name Espaço, b.date Data FROM rb_booking b, Organization_ o, rb_room r WHERE b.flatId = o.organizationId AND b.roomId = r.id AND
+b.date >= DATE_FORMAT(STR_TO_DATE($P{startDate},'%d-%m-%Y %H:%i'), '%Y-%m-%d') and b.date <= DATE_FORMAT(STR_TO_DATE($P{endDate},'%d-%m-%Y %H:%i'), '%Y-%m-%d')
+ORDER BY b.date, r.name]]>
+	</queryString>
+	<field name="Apartamento" class="java.lang.String"/>
+	<field name="Espaço" class="java.lang.String"/>
+	<field name="Data" class="java.sql.Date"/>
+	<group name="day">
+		<groupExpression><![CDATA[$F{Data}]]></groupExpression>
+		<groupHeader>
+			<band height="30">
+				<textField isStretchWithOverflow="true" pattern="EEEE, dd/MM/yyyy" isBlankWhenNull="true">
+					<reportElement positionType="Float" x="0" y="4" width="447" height="23" uuid="489d5695-0a13-4daa-8688-b4ec1d93d5a5"/>
+					<textElement verticalAlignment="Bottom">
+						<font fontName="Arial" size="14" isBold="true" pdfFontName="Helvetica"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{Data}]]></textFieldExpression>
+				</textField>
+				<line>
+					<reportElement x="0" y="28" width="555" height="1" uuid="87d1b102-9cbb-4cb0-9717-9a9bb653d9fa">
+						<property name="local_mesure_unitheight" value="pixel"/>
+						<property name="com.jaspersoft.studio.unit.height" value="px"/>
+					</reportElement>
+				</line>
+			</band>
+		</groupHeader>
+		<groupFooter>
+			<band height="4"/>
+		</groupFooter>
+	</group>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<title>
+		<band height="55" splitType="Stretch">
+			<staticText>
+				<reportElement x="0" y="0" width="365" height="38" uuid="749c82c9-f157-4128-a67b-043549acb7b8">
+					<property name="local_mesure_unitheight" value="pixel"/>
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
+				<textElement>
+					<font size="24" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Espaços Reservados]]></text>
+			</staticText>
+			<textField pattern="&apos;Atualizado em: &apos; dd &apos;de&apos; MMMMM &apos;de&apos; yyyy">
+				<reportElement x="0" y="38" width="332" height="17" uuid="34838e1b-1760-4c30-b864-a5ec84ce70ff"/>
+				<textElement>
+					<font size="11"/>
+				</textElement>
+				<textFieldExpression><![CDATA[new java.util.Date()]]></textFieldExpression>
+			</textField>
+			<image>
+				<reportElement x="439" y="2" width="115" height="40" uuid="dfbbb999-07ec-4298-b0e1-35e074a50f8a"/>
+				<imageExpression><![CDATA["http://www.ventanasresidencial.com.br/documents/10179/11610/logo-150x41.png"]]></imageExpression>
+			</image>
+		</band>
+	</title>
+	<pageHeader>
+		<band height="4" splitType="Stretch"/>
+	</pageHeader>
+	<columnHeader>
+		<band height="5" splitType="Stretch"/>
+	</columnHeader>
+	<detail>
+		<band height="25" splitType="Stretch">
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement positionType="Float" x="258" y="2" width="295" height="21" uuid="2e6f7689-6720-4b45-acd8-336c5e47336e"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Arial" size="14" isBold="false" pdfFontName="Helvetica"/>
+				</textElement>
+				<textFieldExpression><![CDATA["Apt. " + Integer.valueOf($F{Apartamento}.split("/")[1]) + " - Bloco " + $F{Apartamento}.split("/")[0]]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement positionType="Float" x="6" y="2" width="244" height="21" uuid="05a2e2c8-9668-474a-b715-3597bd3ce4ae"/>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Arial" size="14" isBold="false" pdfFontName="Helvetica"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{Espaço}]]></textFieldExpression>
+			</textField>
+		</band>
+	</detail>
+	<columnFooter>
+		<band height="4" splitType="Stretch"/>
+	</columnFooter>
+	<pageFooter>
+		<band height="7" splitType="Stretch"/>
+	</pageFooter>
+	<summary>
+		<band height="71" splitType="Stretch">
+			<staticText>
+				<reportElement x="92" y="36" width="370" height="31" uuid="8a24fe9b-8eb3-44d1-bffb-0b5c180897ae"/>
+				<textElement textAlignment="Center">
+					<font size="10"/>
+				</textElement>
+				<text><![CDATA[Ventanas Nature Resort - Condomínio Residencial
+Av. Ruy Antunes Correa, 150 - Rio de Janeiro - RJ - 22793-355]]></text>
+			</staticText>
+		</band>
+	</summary>
+</jasperReport>

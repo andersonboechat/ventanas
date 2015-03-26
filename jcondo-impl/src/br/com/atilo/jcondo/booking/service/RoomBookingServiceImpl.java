@@ -3,7 +3,6 @@ package br.com.atilo.jcondo.booking.service;
 import java.sql.Time;
 
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
@@ -78,7 +77,8 @@ public class RoomBookingServiceImpl {
 		}
 
 		checkAvailability(booking);
-		
+
+		booking.setStatus(BookingStatus.BOOKED);
 		return bookingManager.save(booking);
 	}
 
@@ -119,7 +119,7 @@ public class RoomBookingServiceImpl {
 		}
 	}
 
-	public void cancel(RoomBooking booking) throws Exception {
+	public RoomBooking cancel(RoomBooking booking) throws Exception {
 		RoomBooking b = bookingManager.findById(booking.getId());
 
 		if (b == null) {
@@ -127,11 +127,22 @@ public class RoomBookingServiceImpl {
 		}
 
 		if (BookingStatus.CANCELLED.equals(b.getStatus())) {
-			return;
+			return booking;
 		}
 
-		booking.setStatus(BookingStatus.CANCELLED);
-		bookingManager.save(booking);
+		b.setStatus(BookingStatus.CANCELLED);
+		b = bookingManager.save(b);
+
+		LOGGER.info("Booking cancelled: " + booking);
+
+		Date today = new Date();
+		if (!today.after(DateUtils.addDays(b.getDate(), -BKG_CANCEL_DEADLINE))) {
+			LOGGER.info("Booking cancelled within deadline on " + DateFormatUtils.format(today, "dd/MM/yyyy"));
+			delete(b);
+			return null;
+		}
+
+		return b;
 	}
 
 	public void delete(RoomBooking booking) throws Exception {
@@ -141,7 +152,12 @@ public class RoomBookingServiceImpl {
 			throw new BusinessException(null, "register.booking.not.cancelled");			
 		}
 
-		bookingManager.delete(booking);
+		b.setStatus(BookingStatus.DELETED);
+		bookingManager.save(b);
+		LOGGER.info("Booking set as deleted: " + booking);
+
+		bookingManager.delete(b);
+		LOGGER.info("Booking deleted: " + booking);
 	}
 
 }

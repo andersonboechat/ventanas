@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
 	<classpathentry kind="src" path="src"/>
-	<classpathentry kind="lib" path="C:/dev/tools/liferay-portal-6.1.2-ce-ga3/jboss-7.1.1/modules/br/com/jcondo/main/jcondo-api.jar"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/jcondo-persistence"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/jcondo-commons"/>
 	<classpathentry kind="con" path="org.eclipse.jst.j2ee.internal.module.container"/>

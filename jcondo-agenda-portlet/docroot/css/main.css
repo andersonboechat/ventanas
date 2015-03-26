@@ -1,5 +1,234 @@
+.agenda-admin-portlet .portlet-title-text {
+	display: none;
+}
+	
+.agenda	label {
+	margin: 45px 5px 45px 5px;
+	padding: 40px 0px 40px 40px;
+}
+
+/* ---------- Booking Icons ---------- */
+
+.agenda	.barbe {
+	background: url("../images/barbe.png") no-repeat 0px 0px;
+}
+
+.agenda	.cinema {
+	background: url("../images/cinema.png") no-repeat 0px 0px;
+}
+
+.agenda	.oven {
+	background: url("../images/oven.png") no-repeat  0px 0px;
+}
+
+.agenda	.gourmet {
+	background: url("../images/gourmet.png") no-repeat  0px 0px;
+}
+
+.agenda	.party {
+	background: url("../images/party.png") no-repeat  0px 0px;	
+}
+
+.agenda	.sound {
+	background: url("../images/sound.png") no-repeat  0px 0px;	
+}
+
+/* ---------- Cancelled Booking Icons ---------- */
+
+.agenda	.cld-barbe {
+	background: url("../images/barbe.png") no-repeat 0px -34px;
+}
+
+.agenda	.cld-oven {
+	background: url("../images/oven.png") no-repeat 0px -34px;
+}
+
+.agenda	.cld-cinema {
+	background: url("../images/cinema.png") no-repeat 0px -34px;
+}
+
+.agenda	.cld-gourmet {
+	background: url("../images/gourmet.png") no-repeat 0px -34px;
+}
+
+.agenda	.cld-party {
+	background: url("../images/party.png") no-repeat 0px -34px;	
+}
+
+.agenda	.cld-sound {
+	background: url("../images/sound.png") no-repeat 0px -34px;	
+}
+
+.agenda .left {
+	width: 74%; 
+	text-align: left;
+	border: 0px solid black;
+	padding: 0px 20px 0px 0px;
+	padding-bottom: 12px;
+} 
+
+.agenda .right {
+	text-align: left;
+	border: 0px solid black;
+	margin: 0 !important;
+	padding-bottom: 12px;
+	vertical-align: top;
+}
+
+.colTitle {
+	width: 60%;
+}
+
+.colDate {
+	width: 20%;
+	text-align: right;
+	border: 0px solid black;
+	font-size: 14px;
+} 
+
+.colHour {
+	width: 20%;
+	text-align: right;
+	border: 0px solid black;
+	margin: 0 !important;
+	padding-left: 0px;
+}
+
+.colFlat {
+	text-align: right;
+	border: 0px solid black;
+	margin: 0 !important;
+	padding-left: 15px;
+}
+
+.colResident {
+	width: 20%;
+	text-align: right;
+	border: 0px solid black;
+	margin: 0 !important;
+	padding-left: 15px;
+}
+
+.left3 {
+	width: 20%; 
+	text-align: left;
+	padding: 2px 2px 0px 0px;
+	border: 0px solid black;
+}
+
+.left3 label {
+	padding: 0;
+}
+
+.right3 {
+	width: 60%;
+	text-align: left;
+	padding: 2px 2px;
+}
+
+.agenda textarea {
+	margin: 25px 5px 25px 5px;
+	width: 700px;
+}
+
+.agenda .icon {
+	margin: 0px 0px 0px 0px;
+	padding: 0px 0px 0px 40px;
+	line-height: 14px;
+}
+
+.rooms {
+	width: 100%;
+	border: 0px solid black;
+	font-family: Georgia;
+	font-size: 13px;
+
+}
+
+.rooms .left {
+	width: 80%;
+	height: 20px;
+	text-align: left;
+	border: 0px solid black; 
+	padding: 10px 0px 10px 0px;
+	font-size: 15px;
+}
+
+.rooms .right {
+	text-align: right;
+	padding: 10px 0px 10px 0px;
+	border: 0px solid black;
+	font-weight: bold;
+}
+
 /* Primefaces Styles */
-.ui-growl {
+.agenda .ui-growl {
 	top: 40% !important;
 	left:40% !important;
+}
+
+.agenda .ui-icon {
+	background-image: url("/agenda-portlet/images/icon_churrasqueira1.png");
+}
+
+.agenda .ui-datagrid-data {
+	width: 240px;
+}
+
+.agenda .ui-scrollpanel {
+	padding: 0px 0px 0px 0px !important;
+	margin: 0px 0px 0px 0px !important;
+	
+}
+
+.agenda .ui-chkbox{display:inline !important;float: left;}
+
+.agenda .ui-chkbox-box, .agenda .ui-chkbox-icon {
+	float: left !important;
+	position: relative ! important;
+}
+
+.agenda .ui-chkbox-label {
+	float: left !important;
+	margin: 0px 0px 0px 5px !important;
+}
+
+.agenda .ui-inputmask {
+	display: none;
+}
+
+/* ---------- Bookings ---------- */
+
+.agenda .fc-event-skin {
+	background: none;
+}
+	
+.agenda .fc-event {
+	border: none;
+	width: 120px !important;
+}
+
+.agenda .fc-event-inner {
+	border: 0px solid black;
+	width: 80px !important;
+	height: 34px;
+	padding: 0px 0px 0px 42px;
+	font-weight: bold;
+	font-size: 13px;
+	overflow: visible;
+	color: grey;
+}
+
+.agenda .fc-border-separate .ui-widget-header {
+	font-size: 16px;
+}
+
+.agenda .fc-day-number {
+	font-family: Georgia;
+	font-weight: bold;
+	font-size: 18px;
+}
+
+.agenda .fc-event-time {
+	display: none;
 }

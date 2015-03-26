@@ -38,15 +38,16 @@
 								<h:panelGrid id="eventDetails-#{i.index}" columns="1" style="width: 100%">
 									<h:panelGrid columns="2" style="width: 100%; border: 0px solid black" columnClasses="left3,right3">
 										<h:outputLabel value="#{msg['room']}:"/>
-										<h:outputText value="#{calendarBean.booking.room.name}"/>
+										<h:outputText value="#{calendarBean.booking.resource.name}"/>
 										<h:outputLabel value="#{msg['date']}:"/>
-										<h:outputText value="#{calendarBean.booking.beginDate}"><f:convertDateTime pattern="EEEEE, dd/MM/yyyy" /></h:outputText>
+										<h:outputText value="#{calendarBean.booking.date}"><f:convertDateTime pattern="EEEEE, dd/MM/yyyy" /></h:outputText>
 										<h:outputLabel value="#{msg['time']}:"/>
 										<p:outputPanel>
-											<h:outputText value="#{calendarBean.booking.endDate}"><f:convertDateTime pattern=" 'às' HH:mm'h'" /></h:outputText>
+											<h:outputText value="#{calendarBean.booking.beginTime}"><f:convertDateTime pattern=" 'das' HH:mm'h'" /></h:outputText>
+											<h:outputText value="#{calendarBean.booking.endTime}"><f:convertDateTime pattern=" 'às' HH:mm'h'" /></h:outputText>
 										</p:outputPanel>
 										<h:outputLabel value="#{msg['flat']}:"/>
-										<h:outputText value="#{calendarBean.booking.domain.number} - Bloco #{calendarBean.booking.domain.block}"/>
+										<h:outputText value="#{calendarBean.booking.flat.number} - Bloco #{calendarBean.booking.flat.block}"/>
 										<h:outputLabel value="#{msg['resident']}:"/>
 										<h:outputText value="#{calendarBean.booking.person.fullName}"/>
 										<h:outputLabel value="#{msg['status']}:"/>
