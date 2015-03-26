@@ -118,7 +118,7 @@ public class AdminBean extends BaseBean {
 	public void onBookingCancel(Integer index) {
 		try {
 			BookingModel bm = bookings.get(index.intValue());
-			bm.updateStatus(bm, BookingStatus.CANCELLED);
+			//bm.updateStatus(bm, BookingStatus.CANCELLED);
 		} catch (Exception e) {
 			// TODO: handle exception
 		}
@@ -127,7 +127,7 @@ public class AdminBean extends BaseBean {
 	public void onBookingDischarge(Integer index) {
 		try {
 			BookingModel bm = bookings.get(index.intValue());
-			bm.updateStatus(bm, BookingStatus.PAID);
+			//bm.updateStatus(bm, BookingStatus.PAID);
 		} catch (Exception e) {
 			// TODO: handle exception
 		}

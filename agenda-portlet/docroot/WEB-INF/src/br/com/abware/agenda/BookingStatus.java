@@ -4,7 +4,8 @@ public enum BookingStatus {
 
 	OPENED("Alugado"),
 	PAID("Pago"),
-	CANCELLED("Cancelado");
+	CANCELLED("Cancelado"),
+	DELETED("Excluido");
 
 	private String label;
 	

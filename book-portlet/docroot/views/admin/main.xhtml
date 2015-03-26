@@ -30,7 +30,7 @@
 		<p>
 			<h:outputText id="occurrTitle" value="#{bookAdmin.occurrence.type.label} - #{bookAdmin.occurrence.code}" style="font-size: 15px; font-weight: bold;" rendered="#{not empty bookAdmin.occurrence.code}"/><br/>
 			<h:outputText id="occurrDate" value="#{bookAdmin.occurrence.date}" styleClass="record-time" rendered="true">
-				<f:convertDateTime pattern="'registrada em' dd 'de' MMMM 'de' yyyy 'às' HH:mm" />
+				<f:convertDateTime pattern="'registrada em' dd 'de' MMMM 'de' yyyy 'às' HH:mm" /><!-- timeZone="America/Sao_Paulo"-->
 			</h:outputText>
 		</p>
 		<h:panelGrid columns="2" styleClass="adm-book-grid" columnClasses="adm-book-grid-left-column,adm-book-grid-right-column">
@@ -47,7 +47,7 @@
 			<h:outputText value="salva em " rendered="#{not empty bookAdmin.occurrence.code and bookAdmin.occurrence.answer.draft and not empty bookAdmin.occurrence.answer.text}"/>
 			<h:outputText value="registrada em " rendered="#{not empty bookAdmin.occurrence.code and !bookAdmin.occurrence.answer.draft}"/>
 			<h:outputText id="answerDate" value="#{bookAdmin.occurrence.answer.date}" styleClass="record-time" rendered="true">
-				<f:convertDateTime pattern="dd 'de' MMMM 'de' yyyy 'às' HH:mm"/>
+				<f:convertDateTime pattern="dd 'de' MMMM 'de' yyyy 'às' HH:mm"/><!-- timeZone="America/Sao_Paulo"-->
 			</h:outputText>
 		</p>
 		<h:panelGrid columns="2" styleClass="adm-book-grid" columnClasses="adm-book-grid-left-column,adm-book-grid-right-column">
@@ -82,12 +82,12 @@
 			</p:column>
 			<p:column headerText="Criada em">
 				<h:outputText value="#{occurrence.date}" styleClass="record-time">
-					<f:convertDateTime pattern="dd/MM/yyyy 'às' HH:mm" />
+					<f:convertDateTime pattern="dd/MM/yyyy 'às' HH:mm"/><!-- timeZone="America/Sao_Paulo"-->
 				</h:outputText>
 			</p:column>
 			<p:column headerText="Respondida em">
 				<h:outputText value="#{occurrence.answer.date}" styleClass="record-time" rendered="#{!occurrence.answer.draft}">
-					<f:convertDateTime pattern="dd/MM/yyyy 'às' HH:mm" />
+					<f:convertDateTime pattern="dd/MM/yyyy 'às' HH:mm"/><!-- timeZone="America/Sao_Paulo"-->
 				</h:outputText>
 			</p:column>
 		</p:dataTable>

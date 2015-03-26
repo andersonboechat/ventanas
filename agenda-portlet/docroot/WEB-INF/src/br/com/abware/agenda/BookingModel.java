@@ -31,7 +31,7 @@ import br.com.abware.agenda.util.BeanUtils;
 
 public class BookingModel {
 
-	private static Logger logger = Logger.getLogger(BookingModel.class);
+	private static Logger LOGGER = Logger.getLogger(BookingModel.class);
 
 	public static final int BKG_MIN_HOUR = 9;
 	
@@ -80,7 +80,7 @@ public class BookingModel {
 		String owner = String.valueOf("BookingModel.doBooking");
 		Date today = new Date();
 
-		logger.info("Logged in user: " + userId);
+		LOGGER.info("Logged in user: " + userId);
 
 		if (date == null || date.before(today)) {
 			throw new BusinessException("register.past.date", DateFormatUtils.format(date, "dd/MM/yyyy"),
@@ -271,11 +271,7 @@ public class BookingModel {
 		return bookings;
 	}
 	
-	public void updateStatus(BookingModel booking, BookingStatus status) throws Exception {
-		if (status.equals(booking.getStatus())) {
-			throw new Exception("booking already " + status.getLabel());
-		}
-
+	public void cancel(BookingModel booking) throws Exception {
 		String owner = String.valueOf("BookingModel.updateStatus");
 
 		try {
@@ -287,11 +283,18 @@ public class BookingModel {
 				throw new Exception();
 			}
 
-			b.setStatus(status);
+			b.setStatus(BookingStatus.CANCELLED);
 			bm.save(b, UserHelper.getLoggedUserId());
-			booking.setStatus(status);
-		} catch (Exception e) {
-			// TODO: handle exception
+
+			LOGGER.info("Alguel cancelado: " + booking);
+
+			Date today = new Date();
+			if (!today.after(DateUtils.addDays(b.getDate(), -BKG_CANCEL_DEADLINE))) {
+				LOGGER.info("Cancelado dentro do prazo em " + DateFormatUtils.format(today, "dd/MM/yyyy"));
+				delete(booking, false);
+			}
+
+			booking.setStatus(b.getStatus());
 		} finally {
 			bm.closeManager(owner);
 		}
@@ -324,7 +327,12 @@ public class BookingModel {
 			bm.openManager(owner);
 			Booking b = bm.findById(new BookingPK(booking.getRoom().getId(), booking.getDate(), 
 												  booking.getStartTime(), booking.getEndTime()));
-			BeanUtils.copyProperties(b, booking);
+//			BeanUtils.copyProperties(b, booking);
+
+			b.setStatus(BookingStatus.DELETED);
+			bm.save(b, UserHelper.getLoggedUserId());
+			LOGGER.info("Alguel excluido: " + booking);
+
 			bm.delete(b, UserHelper.getLoggedUserId());
 		} finally {
 			bm.closeManager(owner);

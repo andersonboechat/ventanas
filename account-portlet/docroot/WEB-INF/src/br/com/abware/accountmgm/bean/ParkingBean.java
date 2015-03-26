@@ -85,6 +85,10 @@ public class ParkingBean extends BaseBean {
 		((List<Parking>) model.getWrappedData()).addAll(parkings);
 	}
 
+	public List<Flat> getAllFlats() throws Exception {
+		return flatService.getFlats();
+	}
+	
 	public ModelDataModel<Parking> getModel() {
 		return model;
 	}

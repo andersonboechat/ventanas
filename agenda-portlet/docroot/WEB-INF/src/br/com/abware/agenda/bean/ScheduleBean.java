@@ -139,7 +139,7 @@ public class ScheduleBean extends BaseBean {
 	public void onBookingCancel(int modelIndex) {
 		try { 
 			if (booking != null) {
-				booking.updateStatus(booking, BookingStatus.CANCELLED);
+				booking.cancel(booking);
 				setMessages(FacesMessage.SEVERITY_INFO, getClientId(":tabs:event-dialog-form-" + modelIndex + ":cancelBkgBtn"), "register.cancel.success");
 			}
 		} catch (Exception e) {
@@ -203,16 +203,6 @@ public class ScheduleBean extends BaseBean {
 		}
 	
 		LOGGER.trace("Method out");
-	}
-
-	@Deprecated
-	public void onCancelBooking(Integer index) {
-		try {
-			BookingModel bm = userBookings.get(index.intValue());
-			bm.updateStatus(bm, BookingStatus.CANCELLED);
-		} catch (Exception e) {
-			// TODO: handle exception
-		}
 	}
 
 	@Deprecated

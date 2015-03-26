@@ -20,7 +20,7 @@ public abstract class BaseBean {
 
 	protected static final Logger LOGGER = Logger.getLogger(BaseBean.class);
 
-	public static final List<RoomModel> rooms = new RoomModel().getRooms(false);
+	public static final List<RoomModel> rooms = new RoomModel().getRooms(true);
 
 	protected static ResourceBundle rb = ResourceBundle.getBundle("Language", new Locale("pt", "BR"));
 

@@ -47,6 +47,16 @@ public class SecurityManagerImpl {
 		}
 	}
 
+	public void updatePassword(Person person, String password, String newPassword) throws Exception {
+		int result = UserLocalServiceUtil.authenticateByEmailAddress(helper.getCompanyId(), person.getEmailAddress(), password, null, null, null);
+
+		if (result == -1) {
+			throw new Exception("user authetication failure.");
+		}
+
+		UserLocalServiceUtil.updatePassword(person.getUserId(), newPassword, newPassword, false);
+	}
+
 	public void addMembership(Person person, Membership membership) throws Exception {
 		if (membership.getDomain() instanceof Flat) {
 			if (membership.getType() == PersonType.OWNER) {

@@ -12,7 +12,7 @@ import br.com.abware.agenda.persistence.entity.BaseEntity;
 
 public abstract class BaseManager<Entity extends BaseEntity> {
 
-	protected EntityManagerFactory emf = Persistence.createEntityManagerFactory("agenda-portlet");
+	protected static EntityManagerFactory emf = Persistence.createEntityManagerFactory("agenda-portlet");
 	
 	protected EntityManager em;
 
