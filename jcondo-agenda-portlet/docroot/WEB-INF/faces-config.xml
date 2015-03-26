@@ -1,0 +1,17 @@
+<?xml version="1.0"?>
+
+<faces-config
+    version="2.0"
+    xmlns="http://java.sun.com/xml/ns/javaee"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-facesconfig_2_0.xsd"
+>
+	<converter>
+		<display-name>SelectItemsConverter</display-name>
+		<converter-id>selectItemsConverter</converter-id>
+		<converter-class>br.com.atilo.jcondo.commons.faces.SelectItemsConverter</converter-class>
+	</converter>
+	<lifecycle>
+		<phase-listener>com.liferay.faces.util.lifecycle.DebugPhaseListener</phase-listener>
+	</lifecycle>
+</faces-config>
