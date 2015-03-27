@@ -11,7 +11,7 @@ public class DocumentServiceImpl {
 	private DocumentManagerImpl documentManager = new DocumentManagerImpl();
 	
 	public List<Document> getDocuments(Domain domain) throws Exception {
-		return documentManager.findByDomain(domain);
+		return documentManager.findByFolderId(domain.getFolderId());
 	}
 
 	public Document register(Document document) throws Exception {

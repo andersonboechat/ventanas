@@ -5,6 +5,9 @@ import java.lang.reflect.InvocationTargetException;
 import org.apache.commons.beanutils.BeanUtilsBean;
 import org.apache.commons.beanutils.ConvertUtilsBean;
 
+import br.com.abware.jcondo.booking.model.Bookable;
+import br.com.abware.jcondo.booking.model.Room;
+import br.com.abware.jcondo.booking.model.RoomBooking;
 import br.com.abware.jcondo.core.PersonStatus;
 import br.com.abware.jcondo.core.model.Administration;
 import br.com.abware.jcondo.core.model.Domain;
@@ -14,6 +17,8 @@ import br.com.abware.jcondo.core.model.Membership;
 import br.com.abware.jcondo.core.model.Parking;
 import br.com.abware.jcondo.core.model.Person;
 import br.com.abware.jcondo.core.model.Vehicle;
+import br.com.atilo.jcondo.booking.persistence.entity.RoomBookingEntity;
+import br.com.atilo.jcondo.booking.persistence.entity.RoomEntity;
 import br.com.atilo.jcondo.core.persistence.entity.AdministrationEntity;
 import br.com.atilo.jcondo.core.persistence.entity.DomainEntity;
 import br.com.atilo.jcondo.core.persistence.entity.FlatEntity;
@@ -36,9 +41,14 @@ public class BeanUtils extends org.apache.commons.beanutils.BeanUtils {
 		 cub.register(bc, Flat.class);
 		 cub.register(bc, FlatEntity.class);
 		 cub.register(bc, Vehicle.class);
-		 cub.register(bc, VehicleEntity.class);		 
+		 cub.register(bc, VehicleEntity.class);
 		 cub.register(bc, Parking.class);
 		 cub.register(bc, ParkingEntity.class);
+		 cub.register(bc, Room.class);
+		 cub.register(bc, Bookable.class);
+		 cub.register(bc, RoomEntity.class);
+		 cub.register(bc, RoomBooking.class);
+		 cub.register(bc, RoomBookingEntity.class);
 		 cub.register(bc, Image.class);
 
 		 DomainConverter dc = new DomainConverter();

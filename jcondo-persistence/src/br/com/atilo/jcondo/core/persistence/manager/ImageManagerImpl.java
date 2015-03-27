@@ -9,6 +9,7 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
 
 import br.com.abware.jcondo.core.model.Document;
+import br.com.abware.jcondo.core.model.Image;
 
 import com.liferay.portal.kernel.util.MimeTypesUtil;
 import com.liferay.portal.service.ServiceContext;
@@ -21,60 +22,49 @@ import com.liferay.portlet.documentlibrary.service.DLFileEntryLocalServiceUtil;
 import com.liferay.portlet.documentlibrary.service.DLFileEntryTypeLocalServiceUtil;
 import com.liferay.portlet.documentlibrary.service.DLFolderLocalServiceUtil;
 
-public class DocumentManagerImpl extends LiferayManager<DLFileEntry, Document> {
+public class ImageManagerImpl extends LiferayManager<DLFileEntry, Image> {
 	
-	private FlatManagerImpl flatManager = new FlatManagerImpl();
-
 	private String getPath(long groupId, long folderId, String fileName) {
-		return new StringBuffer(helper.getPortalURL()).append("/documents/")
+		return new StringBuffer(helper.getPortalURL()).append("/images/")
 				.append(groupId).append("/").append(folderId).append("/").append(fileName).toString(); 
 	}
 
 	@Override
-	protected Class<Document> getModelClass() {
-		return Document.class;
+	protected Class<Image> getModelClass() {
+		return Image.class;
 	}
 
-	protected DLFileEntry getEntity(Document model) throws Exception {
-		return DLFileEntryLocalServiceUtil.getFileEntry(model.getId());
+	protected DLFileEntry getEntity(Image image) throws Exception {
+		return DLFileEntryLocalServiceUtil.getFileEntry(image.getId());
 	}
 	
 	@Override
-	protected Document getModel(DLFileEntry entity) throws Exception {
-		Document document = new Document(entity.getFileEntryId(), 
-							entity.getTitle(), 
-							getPath(entity.getGroupId(), entity.getFolderId(), entity.getTitle()));
-
-		document.setDomain(flatManager.findByFolder(entity.getFolderId()));
-
-		return document;
+	protected Image getModel(DLFileEntry entity) throws Exception {
+		Image image = new Image(entity.getFileEntryId(), 
+								getPath(entity.getGroupId(), entity.getFolderId(), entity.getTitle()), 
+								entity.getTitle(), entity.getDescription());
+		return image;
 	} 
 
-	public List<Document> findByFolderId(long folderId) throws Exception {
+	public List<Image> findByFolderId(long folderId) throws Exception {
 		try {
+			ArrayList<Image> images = new ArrayList<Image>();
 			DLFolder folder = DLFolderLocalServiceUtil.getFolder(folderId);
-			return getModels(DLFileEntryLocalServiceUtil.getFileEntries(folder.getGroupId(), folder.getFolderId(), -1, -1, null));
-		} catch (NoSuchFolderException e) {
-			return new ArrayList<Document>();
-		}
-	}
 
-	public List<Document> findByFolderIdAndType(long folderId, String type) throws Exception {
-		ArrayList<Document> docs = new ArrayList<Document>();
-		DLFolder folder = DLFolderLocalServiceUtil.getFolder(folderId);
-		DLFileEntryType fileType = DLFileEntryTypeLocalServiceUtil.getFileEntryType(folder.getFolderId(), type);
-
-		for (DLFileEntry fileEntry : DLFileEntryLocalServiceUtil.getFileEntries(folder.getGroupId(), folder.getFolderId(), -1, -1, null)) {
-			if (fileEntry.getFileEntryId() == fileType.getFileEntryTypeId()) {
-				docs.add(getModel(fileEntry));
+			for (DLFileEntry fileEntry : DLFileEntryLocalServiceUtil.getFileEntries(folder.getGroupId(), folder.getFolderId(), -1, -1, null)) {
+				if (fileEntry.getMimeType().matches("image/(jpeg|gif|png)")) {
+					images.add(getModel(fileEntry));
+				}
 			}
-		}
 
-		return docs;
+			return images;
+		} catch (NoSuchFolderException e) {
+			return new ArrayList<Image>();
+		}
 	}
 
 	@Override
-	public Document save(Document model) throws Exception {
+	public Image save(Image model) throws Exception {
 		if (StringUtils.isEmpty(model.getPath())) {
 			throw new Exception("caminho do arquivo nao definido");
 		}
@@ -82,23 +72,16 @@ public class DocumentManagerImpl extends LiferayManager<DLFileEntry, Document> {
 		File file = new File(new URL(model.getPath()).getPath());
 		DLFolder folder = DLFolderLocalServiceUtil.getFolder(model.getDomain().getFolderId());
 		DLFileEntry fileEntry = getEntity(model);
-		long fileEntryTypeId;
-
-		try {
-			fileEntryTypeId = DLFileEntryTypeLocalServiceUtil.getFileEntryType(folder.getGroupId(), "").getFileEntryTypeId();
-		} catch (NoSuchFileEntryTypeException e) {
-			fileEntryTypeId = 0;
-		}
 
 		if (fileEntry == null) {
 			fileEntry = DLFileEntryLocalServiceUtil.addFileEntry(helper.getUserId(), folder.getGroupId(), folder.getRepositoryId(), 
 																 folder.getFolderId(), model.getName(), MimeTypesUtil.getContentType(file), 
-																 folder.getName(), StringUtils.EMPTY, null, fileEntryTypeId, 
+																 folder.getName(), StringUtils.EMPTY, null, 0, 
 																 null, file, null, FileUtils.sizeOf(file), new ServiceContext());
 		} else {
 			fileEntry = DLFileEntryLocalServiceUtil.updateFileEntry(helper.getUserId(), fileEntry.getFileEntryId(), model.getName(), 
 																	MimeTypesUtil.getContentType(file),	folder.getName(), StringUtils.EMPTY, 
-																	StringUtils.EMPTY, true, fileEntryTypeId, null, file, null, 
+																	StringUtils.EMPTY, true, 0, null, file, null, 
 																	FileUtils.sizeOf(file), new ServiceContext());
 		}
 
@@ -106,7 +89,7 @@ public class DocumentManagerImpl extends LiferayManager<DLFileEntry, Document> {
 	}
 
 	@Override
-	public void delete(Document model) {
+	public void delete(Image model) {
 		// TODO Auto-generated method stub
 		
 	}

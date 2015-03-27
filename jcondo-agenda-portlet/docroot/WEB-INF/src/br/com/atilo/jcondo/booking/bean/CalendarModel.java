@@ -9,6 +9,7 @@ import org.primefaces.model.LazyScheduleModel;
 import br.com.abware.jcondo.booking.model.BookingStatus;
 import br.com.abware.jcondo.booking.model.Room;
 import br.com.abware.jcondo.booking.model.RoomBooking;
+import br.com.abware.jcondo.core.model.Flat;
 
 import br.com.atilo.jcondo.booking.service.RoomBookingServiceImpl;
 
@@ -38,7 +39,7 @@ public class CalendarModel extends LazyScheduleModel {
     			}
     		}
 		} catch (Exception e) {
-			// TODO: handle exception
+			e.printStackTrace();
 		}
 	}
 	
@@ -49,11 +50,11 @@ public class CalendarModel extends LazyScheduleModel {
 	public DefaultScheduleEvent createEvent(RoomBooking booking) throws Exception {
 		DefaultScheduleEvent event; 
 		StringBuffer sb = new StringBuffer();
-		sb.append(booking.getFlat().getBlock()).append("/")
-		  .append(StringUtils.leftPad(String.valueOf(booking.getFlat().getNumber()), 4, "0"))
+		sb.append(((Flat) booking.getDomain()).getBlock()).append("/")
+		  .append(StringUtils.leftPad(String.valueOf(((Flat) booking.getDomain()).getNumber()), 4, "0"))
 		  .append(" ").append(booking.getStatus().getLabel()); 
 
-		event = new DefaultScheduleEvent(sb.toString(), booking.getDate(), booking.getDate(), getBookingStyleClass(booking));
+		event = new DefaultScheduleEvent(sb.toString(), booking.getBeginDate(), booking.getBeginDate(), getBookingStyleClass(booking));
 		event.setData(booking);
 		return event;
 	}
@@ -62,9 +63,9 @@ public class CalendarModel extends LazyScheduleModel {
 		String style;
 
 		if (BookingStatus.CANCELLED.equals(booking.getStatus())) {
-			style = "cld.bkg.style.room.";
+			style = "cld.bkg.style.room." + booking.getResource().getId();
 		} else {
-			style = "bkg.style.room.";
+			style = "bkg.style.room." + booking.getResource().getId();
 		}
 
 		return style;

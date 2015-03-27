@@ -1,30 +1,23 @@
 package br.com.atilo.jcondo.booking.persistence.entity;
 
-import br.com.abware.jcondo.booking.model.BookingStatus;
-import br.com.atilo.jcondo.core.persistence.entity.BaseEntity;
-import br.com.atilo.jcondo.core.persistence.entity.PersonEntity;
-
 import java.util.Date;
 
-import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
+import javax.persistence.MappedSuperclass;
 import javax.persistence.OneToOne;
-import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 
+import br.com.abware.jcondo.booking.model.BookingStatus;
+import br.com.atilo.jcondo.core.persistence.entity.BaseEntity;
+import br.com.atilo.jcondo.core.persistence.entity.DomainEntity;
+import br.com.atilo.jcondo.core.persistence.entity.PersonEntity;
 
-/**
- * The persistent class for the rb_booking database table.
- * 
- */
-@Entity
-@Table(name="jco_booking")
+@MappedSuperclass
 public class BookingEntity extends BaseEntity {
 
 	private static final long serialVersionUID = 1L;
@@ -33,65 +26,51 @@ public class BookingEntity extends BaseEntity {
 	@GeneratedValue
 	private long id;
 
-	@Temporal(TemporalType.DATE)
-	private Date date;
-	
-	@Temporal(TemporalType.TIME)
-	private Date beginTime;
-	
-	@Temporal(TemporalType.TIME)
-	private Date endTime;
+	@Temporal(TemporalType.TIMESTAMP)
+	private Date beginDate;
+
+	@Temporal(TemporalType.TIMESTAMP)
+	private Date endDate;
 
 	@Enumerated(EnumType.ORDINAL)
 	private BookingStatus status;
-	
+
 	private double price;
-	
+
 	@OneToOne
 	@JoinColumn(name="personId", updatable=false)
 	private PersonEntity person;
 
-	@ManyToOne
-	@JoinColumn(name="resourceId", updatable=false)
-	private RoomEntity room;
-
-	public BookingEntity() {
-	}
+	@OneToOne
+	@JoinColumn(name="domainId")
+	private DomainEntity domain;	
 
 	public long getId() {
-		return this.id;
+		return id;
 	}
 
 	public void setId(long id) {
 		this.id = id;
 	}
 
-	public Date getDate() {
-		return date;
+	public Date getBeginDate() {
+		return beginDate;
 	}
 
-	public void setDate(Date date) {
-		this.date = date;
+	public void setBeginDate(Date beginDate) {
+		this.beginDate = beginDate;
 	}
 
-	public Date getBeginTime() {
-		return beginTime;
+	public Date getEndDate() {
+		return endDate;
 	}
 
-	public void setBeginTime(Date beginTime) {
-		this.beginTime = beginTime;
-	}
-
-	public Date getEndTime() {
-		return endTime;
-	}
-
-	public void setEndTime(Date endTime) {
-		this.endTime = endTime;
+	public void setEndDate(Date endDate) {
+		this.endDate = endDate;
 	}
 
 	public BookingStatus getStatus() {
-		return this.status;
+		return status;
 	}
 
 	public void setStatus(BookingStatus status) {
@@ -114,12 +93,12 @@ public class BookingEntity extends BaseEntity {
 		this.person = person;
 	}
 
-	public RoomEntity getRoom() {
-		return this.room;
+	public DomainEntity getDomain() {
+		return domain;
 	}
 
-	public void setRoom(RoomEntity room) {
-		this.room = room;
+	public void setDomain(DomainEntity domain) {
+		this.domain = domain;
 	}
 
 }

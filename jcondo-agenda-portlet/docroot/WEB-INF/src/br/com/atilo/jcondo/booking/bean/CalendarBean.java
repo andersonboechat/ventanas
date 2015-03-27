@@ -1,6 +1,5 @@
 package br.com.atilo.jcondo.booking.bean;
 
-import java.sql.Time;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -90,8 +89,8 @@ public class CalendarBean extends BaseBean {
 
 		try {
 			if (deal) {
-				booking.getBeginTime().setTime(DateUtils.setHours(booking.getBeginTime(), beginTime).getTime());
-				booking.getEndTime().setTime(DateUtils.setHours(booking.getEndTime(), endTime).getTime());
+				booking.getBeginDate().setTime(DateUtils.setHours(booking.getBeginDate(), beginTime).getTime());
+				booking.getEndDate().setTime(DateUtils.setHours(booking.getEndDate(), endTime).getTime());
 
 				booking = bookingService.book(booking);
 				model.addEvent(model.createEvent(booking));
@@ -99,7 +98,7 @@ public class CalendarBean extends BaseBean {
 				MessageUtils.addMessage(FacesMessage.SEVERITY_INFO, "register.success", null);
 
 				if (isCancelEnable()) {
-					Date deadline = DateUtils.addDays(booking.getDate(), -RoomBookingServiceImpl.BKG_CANCEL_DEADLINE);
+					Date deadline = DateUtils.addDays(booking.getBeginDate(), -RoomBookingServiceImpl.BKG_CANCEL_DEADLINE);
 					MessageUtils.addMessage(FacesMessage.SEVERITY_INFO, "register.cancel.notify", 
 											new String[] {DateFormatUtils.format(deadline, "dd/MM/yyyy")});
 				}
@@ -144,7 +143,6 @@ public class CalendarBean extends BaseBean {
 			LOGGER.error(e.getMessage(), e);
 			MessageUtils.addMessage(FacesMessage.SEVERITY_FATAL, "register.runtime.failure", null);
 		}
-		
 	}
 
 	public void onSelect(SelectEvent event) {
@@ -164,7 +162,7 @@ public class CalendarBean extends BaseBean {
 		}
 
 		booking = new RoomBooking(person, flats.size() > 1 ? null : flats.get(0), model.getRoom(), 
-								 (Date) bookingDate.clone(), Time.valueOf("00:00:00"), Time.valueOf("00:00:00"));
+								 (Date) bookingDate.clone(), (Date) bookingDate.clone());
 
 		if (!isTimeSelectionEnabled()) {
 			beginTime = RoomBookingServiceImpl.BKG_MIN_HOUR;
@@ -189,9 +187,10 @@ public class CalendarBean extends BaseBean {
 	}  
 
 	public boolean isCancelEnable() {
-		if (booking != null && booking.getDate() != null) {
-			Date today = new Date();
-			Date deadline = DateUtils.addDays(booking.getDate(), -RoomBookingServiceImpl.BKG_CANCEL_DEADLINE);
+		if (booking != null && booking.getBeginDate() != null) {
+			Date today = DateUtils.truncate(new Date(), Calendar.DAY_OF_MONTH);
+			Date bookingDate = DateUtils.truncate(booking.getBeginDate(), Calendar.DAY_OF_MONTH);
+			Date deadline = DateUtils.addDays(bookingDate, -RoomBookingServiceImpl.BKG_CANCEL_DEADLINE);
 			return deadline.after(today);
 		}
 

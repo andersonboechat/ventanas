@@ -10,10 +10,10 @@ import javax.persistence.Query;
 import br.com.abware.jcondo.booking.model.Room;
 import br.com.abware.jcondo.booking.model.RoomBooking;
 import br.com.abware.jcondo.core.model.Person;
-import br.com.atilo.jcondo.booking.persistence.entity.BookingEntity;
+import br.com.atilo.jcondo.booking.persistence.entity.RoomBookingEntity;
 import br.com.atilo.jcondo.core.persistence.manager.JCondoManager;
 
-public class BookingManagerImpl extends JCondoManager<BookingEntity, RoomBooking> {
+public class RoomBookingManagerImpl extends JCondoManager<RoomBookingEntity, RoomBooking> {
 
 	@Override
 	protected Class<RoomBooking> getModelClass() {
@@ -21,8 +21,8 @@ public class BookingManagerImpl extends JCondoManager<BookingEntity, RoomBooking
 	}
 
 	@Override
-	protected Class<BookingEntity> getEntityClass() {
-		return BookingEntity.class;
+	protected Class<RoomBookingEntity> getEntityClass() {
+		return RoomBookingEntity.class;
 	}
 
 	@SuppressWarnings("unchecked")
@@ -30,7 +30,7 @@ public class BookingManagerImpl extends JCondoManager<BookingEntity, RoomBooking
 		String key = generateKey();
 		try {
 			openManager(key);
-			String queryString = "FROM BookingEntity WHERE room.id = :roomId AND date BETWEEN :fromDate AND :toDate";
+			String queryString = "FROM RoomBookingEntity WHERE resource.id = :roomId AND (beginDate BETWEEN :fromDate AND :toDate) AND (endDate BETWEEN :fromDate AND :toDate)";
 			Query query = em.createQuery(queryString);
 			query.setParameter("roomId", room.getId());
 			query.setParameter("fromDate", fromDate);
@@ -48,7 +48,7 @@ public class BookingManagerImpl extends JCondoManager<BookingEntity, RoomBooking
 		String key = generateKey();
 		try {
 			openManager(key);
-			String queryString = "FROM BookingEntity WHERE person.id = :personId ORDER BY beginDate desc";
+			String queryString = "FROM RoomBookingEntity WHERE person.id = :personId ORDER BY beginDate DESC";
 			Query query = em.createQuery(queryString);
 			query.setParameter("personId", person.getId());
 			return getModels(query.getResultList());

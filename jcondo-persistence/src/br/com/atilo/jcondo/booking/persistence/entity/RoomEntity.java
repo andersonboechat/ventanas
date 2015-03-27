@@ -32,7 +32,7 @@ public class RoomEntity extends BaseEntity {
 
 	private String name;
 
-	private String detail;
+	private String description;
 
 	@Column(nullable=false, columnDefinition = "BIT", length = 1)
 	private boolean available;
@@ -40,8 +40,8 @@ public class RoomEntity extends BaseEntity {
 	private double price;
 	
 	//bi-directional many-to-one association to Booking
-	@OneToMany(mappedBy="room")
-	private List<BookingEntity> bookings;
+	@OneToMany(mappedBy="resource")
+	private List<RoomBookingEntity> bookings;
 
 	public RoomEntity() {
 	}
@@ -78,12 +78,12 @@ public class RoomEntity extends BaseEntity {
 		this.available = available;
 	}
 
-	public String getDetail() {
-		return this.detail;
+	public String getDescription() {
+		return this.description;
 	}
 
-	public void setDetail(String detail) {
-		this.detail = detail;
+	public void setDescription(String description) {
+		this.description = description;
 	}
 
 	public String getName() {
@@ -102,11 +102,11 @@ public class RoomEntity extends BaseEntity {
 		this.price = price;
 	}
 
-	public List<BookingEntity> getBookings() {
+	public List<RoomBookingEntity> getBookings() {
 		return this.bookings;
 	}
 
-	public void setBookings(List<BookingEntity> bookings) {
+	public void setBookings(List<RoomBookingEntity> bookings) {
 		this.bookings = bookings;
 	}
 

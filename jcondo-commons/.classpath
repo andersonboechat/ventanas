@@ -2,7 +2,6 @@
 <classpath>
 	<classpathentry kind="src" path="src"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.USER_LIBRARY/UTIL_LIBS"/>
-	<classpathentry kind="lib" path="C:/dev/tools/liferay-portal-6.1.2-ce-ga3/jboss-7.1.1/modules/br/com/jcondo/main/jcondo-api.jar"/>
 	<classpathentry kind="con" path="org.eclipse.jst.j2ee.internal.module.container"/>
 	<classpathentry kind="con" path="org.eclipse.jst.server.core.container/com.liferay.ide.eclipse.server.tomcat.runtimeClasspathProvider/Liferay v6.1 CE (Tomcat 7)">
 		<attributes>

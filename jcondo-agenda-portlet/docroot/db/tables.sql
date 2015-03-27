@@ -27,15 +27,14 @@ CREATE TABLE `jco_booking` (
   `domainId` bigint(20) NOT NULL,
   `personId` bigint(20) NOT NULL,
   `resourceId` bigint(20) NOT NULL,
-  `date` date NOT NULL,
-  `beginTime` time NOT NULL,
-  `endTime` time NOT NULL,
+  `beginDate` datetime NOT NULL,
+  `endDate` datetime NOT NULL,
   `status` int(1) NOT NULL,
   `price` double DEFAULT NULL,
   `updateDate` datetime NOT NULL,
   `updateUser` bigint(20) NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -50,7 +49,7 @@ CREATE TABLE `jco_resource` (
   `folderId` bigint(20) DEFAULT '0',
   `agreementId` bigint(20) DEFAULT '0',
   `name` varchar(45) NOT NULL,
-  `detail` varchar(1000) DEFAULT NULL,
+  `description` varchar(1000) DEFAULT NULL,
   `available` tinyint(1) NOT NULL DEFAULT '1',
   `price` double DEFAULT '0',
   `updateDate` datetime NOT NULL,
@@ -68,4 +67,4 @@ CREATE TABLE `jco_resource` (
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2015-03-25 17:07:04
+-- Dump completed on 2015-03-27 17:17:19

@@ -13,7 +13,7 @@
 					<p:column>
 						<h:outputText value="#{msg['room']}: #{calendarBean.booking.resource.name} " style="font-size: 14px;"/>
 						<p:panelGrid columns="5" style="font-size: 14px; margin-bottom: 10px;">
-							<h:outputText value="#{calendarBean.booking.date}" style="margin: 0px 3px 0px 0px;">
+							<h:outputText value="#{calendarBean.booking.beginDate}" style="margin: 0px 3px 0px 0px;">
 								<f:convertDateTime pattern="'#{msg['day']}:' dd/MM/yyyy" />
 							</h:outputText>
 							<h:outputText value="das" style="margin: 0px 3px 0px 0px"/>
@@ -37,7 +37,7 @@
 						</p:panelGrid>
 					</p:column>
 					<p:column>
-						<p:selectOneMenu value="#{calendarBean.booking.flat}" rendered="#{calendarBean.flats.size() > 1}" required="true" requiredMessage="#{msg['flat.not.selected']}" 
+						<p:selectOneMenu value="#{calendarBean.booking.domain}" rendered="#{calendarBean.flats.size() > 1}" required="true" requiredMessage="#{msg['flat.not.selected']}" 
 										 converter="selectItemsConverter" style="float: right; vertical-align: top">
 							<f:selectItem itemLabel="#{msg['flat']}" noSelectionOption="true"/>
 							<f:selectItems value="#{calendarBean.flats}" var="flat" itemLabel="Apartamento #{flat.number} - Bloco #{flat.block}" itemValue="#{flat}"/>
