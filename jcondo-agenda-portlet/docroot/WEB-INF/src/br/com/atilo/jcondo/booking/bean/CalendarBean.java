@@ -40,9 +40,7 @@ public class CalendarBean extends BaseBean {
 
 	private static final Logger LOGGER = Logger.getLogger(CalendarBean.class);
 
-	private static List<CalendarModel> models = initModels();
-
-	private static List<Room> rooms;
+	private static final List<CalendarModel> MODELS = initModels();
 
 	private CalendarModel model;
 
@@ -61,7 +59,7 @@ public class CalendarBean extends BaseBean {
 	@PostConstruct
 	public void init() {
 		try {
-			model = models.get(0);
+			model = MODELS.get(0);
 			person = personService.getPerson();
 			flats = flatService.getFlats(person);
 			booking = new RoomBooking();
@@ -72,16 +70,14 @@ public class CalendarBean extends BaseBean {
 	}
 
 	private static List<CalendarModel> initModels() {
-		try {
-			rooms = roomService.getRooms(true);
-			models = new ArrayList<CalendarModel>();
+		List<CalendarModel> models = new ArrayList<CalendarModel>();
 
-			for (Room room : rooms) {
+		try {
+			for (Room room : RoomBean.ROOMS) {
 				models.add(new CalendarModel(bookingService, room));
 			}
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			LOGGER.fatal("Calendar models load failure", e);
 		}
 
 		return models;
@@ -179,7 +175,7 @@ public class CalendarBean extends BaseBean {
 	public void onTabChange(TabChangeEvent event) {
 		TabView tv = (TabView) event.getSource();
 		int i = tv.getChildren().indexOf(event.getTab());
-		model = (CalendarModel) models.get(i);
+		model = (CalendarModel) MODELS.get(i);
 	}
 	
 	public void validateCheckbox(FacesContext context, UIComponent component, Object value) {  
@@ -205,11 +201,11 @@ public class CalendarBean extends BaseBean {
 	}
 
 	public ScheduleModel getModel(int index) {
-		return models.get(index);
+		return MODELS.get(index);
 	}	
 
 	public List<Room> getRooms() {
-		return rooms;
+		return RoomBean.ROOMS;
 	}
 
 	public Person getPerson() {
@@ -228,8 +224,8 @@ public class CalendarBean extends BaseBean {
 		this.flats = flats;
 	}
 
-	public static List<CalendarModel> getModels() {
-		return models;
+	public List<CalendarModel> getModels() {
+		return MODELS;
 	}
 
 	public CalendarModel getModel() {

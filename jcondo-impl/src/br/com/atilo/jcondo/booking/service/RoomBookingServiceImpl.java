@@ -14,6 +14,7 @@ import org.joda.time.Interval;
 import br.com.abware.jcondo.booking.model.BookingStatus;
 import br.com.abware.jcondo.booking.model.Room;
 import br.com.abware.jcondo.booking.model.RoomBooking;
+import br.com.abware.jcondo.core.model.Person;
 import br.com.abware.jcondo.exception.BusinessException;
 import br.com.atilo.jcondo.booking.persistence.manager.RoomBookingManagerImpl;
 
@@ -32,6 +33,11 @@ public class RoomBookingServiceImpl {
 	public static final int BKG_MAX_DAYS = 90;
 	
 	private RoomBookingManagerImpl bookingManager = new RoomBookingManagerImpl();
+
+
+	public List<RoomBooking> getBookings(Person person) throws Exception {
+		return bookingManager.findByPerson(person);
+	}
 
 	public List<RoomBooking> getBookings(Room room, Date beginDate, Date endDate) throws Exception {
 		return bookingManager.findByPeriod(room, beginDate, endDate);
