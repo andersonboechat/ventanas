@@ -44,17 +44,19 @@ public class BeanUtils extends org.apache.commons.beanutils.BeanUtils {
 		 cub.register(bc, VehicleEntity.class);
 		 cub.register(bc, Parking.class);
 		 cub.register(bc, ParkingEntity.class);
-		 cub.register(bc, Room.class);
-		 cub.register(bc, Bookable.class);
-		 cub.register(bc, RoomEntity.class);
+		 cub.register(bc, Image.class);
 		 cub.register(bc, RoomBooking.class);
 		 cub.register(bc, RoomBookingEntity.class);
-		 cub.register(bc, Image.class);
+		 cub.register(bc, Room.class);
+		 cub.register(bc, RoomEntity.class);
 
 		 DomainConverter dc = new DomainConverter();
 		 cub.register(dc, DomainEntity.class);
 		 cub.register(dc, Domain.class);
 
+		 BookableConverter bkc = new BookableConverter();
+		 cub.register(bkc, Bookable.class);
+		 
 		 cub.register(new PersonStatusConverter(), PersonStatus.class);
 	}
 	

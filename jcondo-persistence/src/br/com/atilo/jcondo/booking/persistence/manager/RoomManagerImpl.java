@@ -6,14 +6,10 @@ import java.util.List;
 import javax.persistence.NoResultException;
 import javax.persistence.Query;
 
-import org.apache.commons.collections.CollectionUtils;
-
 import br.com.abware.jcondo.booking.model.Room;
-import br.com.abware.jcondo.core.model.Archive;
-import br.com.abware.jcondo.core.model.Document;
+import br.com.abware.jcondo.core.model.ArchiveType;
 import br.com.atilo.jcondo.booking.persistence.entity.RoomEntity;
 import br.com.atilo.jcondo.core.persistence.manager.ArchiveManagerImpl;
-import br.com.atilo.jcondo.core.persistence.manager.DocumentManagerImpl;
 import br.com.atilo.jcondo.core.persistence.manager.JCondoManager;
 
 public class RoomManagerImpl extends JCondoManager<RoomEntity, Room> {
@@ -29,17 +25,19 @@ public class RoomManagerImpl extends JCondoManager<RoomEntity, Room> {
 	protected Class<RoomEntity> getEntityClass() {
 		return RoomEntity.class;
 	}
+
+	@Override
+	protected RoomEntity getEntity(Room room) throws Exception {
+		RoomEntity re = super.getEntity(room);
+		re.setAgreementId(room.getAgreement().getId());
+		return re;
+	}
 	
 	@Override
-	protected Room getModel(RoomEntity entity) throws Exception {
-		Room room = super.getModel(entity);
-		List<Archive> docs = archiveManager.findByFolderIdAndType(entity.getFolderId(), "agreement-term");
-		Document agreement = (Document) (!CollectionUtils.isEmpty(docs) ? docs.get(0) : null);
-		room.setAgreement(agreement);
-
-		docs = archiveManager.findByFolderIdAndType(entity.getFolderId(), "image");
-		room.setImages(images);
-		
+	protected Room getModel(RoomEntity re) throws Exception {
+		Room room = super.getModel(re);
+		room.setAgreement(archiveManager.findById(re.getAgreementId()));
+		room.setImages(archiveManager.findByFolderIdAndType(re.getFolderId(), ArchiveType.IMAGE));
 		return room;
 	}
 

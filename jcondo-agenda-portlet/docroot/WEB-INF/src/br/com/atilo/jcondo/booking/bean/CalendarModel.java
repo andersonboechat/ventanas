@@ -1,6 +1,7 @@
 package br.com.atilo.jcondo.booking.bean;
 
 import java.util.Date;
+import java.util.PropertyResourceBundle;
 
 import org.apache.commons.lang.StringUtils;
 import org.primefaces.model.DefaultScheduleEvent;
@@ -52,7 +53,7 @@ public class CalendarModel extends LazyScheduleModel {
 		StringBuffer sb = new StringBuffer();
 		sb.append(((Flat) booking.getDomain()).getBlock()).append("/")
 		  .append(StringUtils.leftPad(String.valueOf(((Flat) booking.getDomain()).getNumber()), 4, "0"))
-		  .append(" ").append(booking.getStatus().getLabel()); 
+		  .append(" ").append(PropertyResourceBundle.getBundle("Language").getString(booking.getStatus().getLabel())); 
 
 		event = new DefaultScheduleEvent(sb.toString(), booking.getBeginDate(), booking.getBeginDate(), getBookingStyleClass(booking));
 		event.setData(booking);
@@ -68,7 +69,7 @@ public class CalendarModel extends LazyScheduleModel {
 			style = "bkg.style.room." + booking.getResource().getId();
 		}
 
-		return style;
+		return PropertyResourceBundle.getBundle("application").getString(style);
 	}
 
 }

@@ -25,7 +25,7 @@
 		</attributes>
 	</classpathentry>
 	<classpathentry combineaccessrules="false" kind="src" path="/jcondo-impl"/>
-	<classpathentry kind="con" path="org.eclipse.jdt.USER_LIBRARY/UTIL_LIBS"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.USER_LIBRARY/LIFERAY_LIB"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.USER_LIBRARY/JCONDO_LIB"/>
 	<classpathentry kind="output" path="docroot/WEB-INF/classes"/>
 </classpath>

@@ -73,6 +73,7 @@ public abstract class JCondoManager<Entity extends BaseEntity, Model extends Bas
 
 			return models;
 		} catch (Exception e) {
+			e.printStackTrace();
 			throw new PersistenceException(e, "");
 		}
 	}

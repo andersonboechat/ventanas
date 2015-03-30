@@ -12,10 +12,10 @@
         <dependent-module archiveName="jcondo-commons.jar" deploy-path="/WEB-INF/lib" handle="module:/resource/jcondo-commons/jcondo-commons">
             <dependency-type>uses</dependency-type>
         </dependent-module>
-        <dependent-module archiveName="joda-time-2.6.jar" deploy-path="/WEB-INF/lib" handle="module:/classpath/lib/C:/dev/libs/joda-time-2.6.jar">
+        <dependent-module archiveName="myfaces-commons-utils20-1.0.2.1.jar" deploy-path="/WEB-INF/lib" handle="module:/classpath/lib/C:/dev/libs/jcondo/myfaces-commons-utils20-1.0.2.1.jar">
             <dependency-type>uses</dependency-type>
         </dependent-module>
-        <dependent-module archiveName="myfaces-commons-utils20-1.0.2.1.jar" deploy-path="/WEB-INF/lib" handle="module:/classpath/lib/C:/dev/libs/Utils Library/myfaces-commons-utils20-1.0.2.1.jar">
+        <dependent-module archiveName="joda-time-2.6.jar" deploy-path="/WEB-INF/lib" handle="module:/classpath/lib/C:/dev/libs/jcondo/joda-time-2.6.jar">
             <dependency-type>uses</dependency-type>
         </dependent-module>
         <property name="context-root" value="jcondo-agenda-portlet"/>

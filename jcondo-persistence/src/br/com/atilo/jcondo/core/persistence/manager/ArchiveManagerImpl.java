@@ -10,11 +10,10 @@ import org.apache.commons.lang.StringUtils;
 
 import br.com.abware.jcondo.core.model.Archive;
 import br.com.abware.jcondo.core.model.ArchiveType;
-import br.com.abware.jcondo.core.model.Document;
-import br.com.abware.jcondo.core.model.Image;
 
 import com.liferay.portal.kernel.util.MimeTypesUtil;
 import com.liferay.portal.service.ServiceContext;
+import com.liferay.portlet.documentlibrary.NoSuchFileEntryException;
 import com.liferay.portlet.documentlibrary.NoSuchFileEntryTypeException;
 import com.liferay.portlet.documentlibrary.NoSuchFolderException;
 import com.liferay.portlet.documentlibrary.model.DLFileEntry;
@@ -31,8 +30,18 @@ public class ArchiveManagerImpl extends LiferayManager<DLFileEntry, Archive> {
 				.append(groupId).append("/").append(folderId).append("/").append(fileName).toString(); 
 	}
 	
-	private ArchiveType getArchiveType(String type) {
-		
+	private ArchiveType getArchiveType(DLFileEntry entity) throws Exception {
+		if (entity.getMimeType().startsWith("image")) {
+			return ArchiveType.IMAGE;
+		} else {
+			DLFileEntryType type = DLFileEntryTypeLocalServiceUtil.getDLFileEntryType(entity.getFileEntryTypeId());
+			for (ArchiveType at : ArchiveType.values()) {
+				if (type.getName().equals(at.name())) {
+					return at;
+				}
+			}
+		}
+		return null;
 	}
 
 	@Override
@@ -45,16 +54,22 @@ public class ArchiveManagerImpl extends LiferayManager<DLFileEntry, Archive> {
 	}
 	
 	@Override
-	protected Archive getModel(DLFileEntry entity) throws Exception {
-		Archive archive = new Archive(entity.getFileEntryId(), 
-									  entity.getFolderId(), 
-									  entity.getf, 
-									  getPath(entity.getGroupId(), entity.getFolderId(), entity.getTitle()), 
-									  entity.getName(), entity.getDescription());
-
-		return archive;
+	protected Archive getModel(DLFileEntry file) throws Exception {
+		return new Archive(file.getFileEntryId(), 
+						   file.getFolderId(), 
+						   getArchiveType(file), 
+						   getPath(file.getGroupId(), file.getFolderId(), file.getTitle()), 
+						   file.getName(), file.getDescription());
 	} 
 
+	public Archive findById(long id) throws Exception {
+		try {
+			return getModel(DLFileEntryLocalServiceUtil.getDLFileEntry(id));	
+		} catch (NoSuchFileEntryException e) {
+			return null;
+		}
+	}
+	
 	public List<Archive> findByFolderId(long folderId) throws Exception {
 		try {
 			DLFolder folder = DLFolderLocalServiceUtil.getFolder(folderId);
@@ -66,21 +81,16 @@ public class ArchiveManagerImpl extends LiferayManager<DLFileEntry, Archive> {
 
 	public List<Archive> findByFolderIdAndType(long folderId, ArchiveType type) throws Exception {
 		ArrayList<Archive> archives = new ArrayList<Archive>();
-		DLFolder folder = DLFolderLocalServiceUtil.getFolder(folderId);
-		
-		if (type == ArchiveType.IMAGE) {
+		try {
+			DLFolder folder = DLFolderLocalServiceUtil.getFolder(folderId);
+
 			for (DLFileEntry fileEntry : DLFileEntryLocalServiceUtil.getFileEntries(folder.getGroupId(), folder.getFolderId(), -1, -1, null)) {
-				if (fileEntry.getMimeType().startsWith("image")) {
-					archives.add(getModel(fileEntry));
-				}
-			}			
-		} else {
-			DLFileEntryType fileType = DLFileEntryTypeLocalServiceUtil.getFileEntryType(folder.getGroupId(), type.name());
-			for (DLFileEntry fileEntry : DLFileEntryLocalServiceUtil.getFileEntries(folder.getGroupId(), folder.getFolderId(), -1, -1, null)) {
-				if (fileEntry.getFileEntryId() == fileType.getFileEntryTypeId()) {
+				if (getArchiveType(fileEntry) == type) {
 					archives.add(getModel(fileEntry));
 				}
 			}
+		} catch (NoSuchFolderException e) {
+			System.out.println("folder not found");
 		}
 
 		return archives;
@@ -98,7 +108,8 @@ public class ArchiveManagerImpl extends LiferayManager<DLFileEntry, Archive> {
 		long fileEntryTypeId;
 
 		try {
-			fileEntryTypeId = DLFileEntryTypeLocalServiceUtil.getFileEntryType(folder.getGroupId(), "").getFileEntryTypeId();
+			fileEntryTypeId = DLFileEntryTypeLocalServiceUtil.getFileEntryType(folder.getGroupId(), 
+																			   archive.getType().name()).getFileEntryTypeId();
 		} catch (NoSuchFileEntryTypeException e) {
 			fileEntryTypeId = 0;
 		}

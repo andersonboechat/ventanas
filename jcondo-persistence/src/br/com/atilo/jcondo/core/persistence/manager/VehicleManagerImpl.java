@@ -46,7 +46,7 @@ public class VehicleManagerImpl extends JCondoManager<VehicleEntity, Vehicle>{
 		Vehicle vehicle = super.getModel(entity);
 
 		String path = getPath(entity.getImageId());
-		vehicle.setImage(new Image(entity.getImageId(), path, null, null));
+		vehicle.setImage(new Image(entity.getImageId(), 0, path, null, null));
 
 		return vehicle;
 	}

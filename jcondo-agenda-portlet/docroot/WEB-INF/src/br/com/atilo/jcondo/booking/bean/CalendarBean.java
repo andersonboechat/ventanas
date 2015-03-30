@@ -25,6 +25,7 @@ import org.primefaces.event.TabChangeEvent;
 import org.primefaces.model.ScheduleEvent;
 import org.primefaces.model.ScheduleModel;
 
+import br.com.abware.jcondo.booking.model.BookingStatus;
 import br.com.abware.jcondo.booking.model.Room;
 import br.com.abware.jcondo.booking.model.RoomBooking;
 import br.com.abware.jcondo.core.model.Flat;
@@ -63,6 +64,8 @@ public class CalendarBean extends BaseBean {
 			model = models.get(0);
 			person = personService.getPerson();
 			flats = flatService.getFlats(person);
+			booking = new RoomBooking();
+			booking.setStatus(BookingStatus.BOOKED);
 		} catch (Exception e) {
 			LOGGER.error("", e);
 		}
