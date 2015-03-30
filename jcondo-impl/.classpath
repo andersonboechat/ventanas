@@ -15,7 +15,7 @@
 		</attributes>
 	</classpathentry>
 	<classpathentry kind="con" path="org.eclipse.jdt.USER_LIBRARY/UTIL_LIBS"/>
-	<classpathentry kind="lib" path="C:/dev/libs/log4j.jar"/>
-	<classpathentry kind="lib" path="C:/dev/libs/joda-time-2.6.jar"/>
+	<classpathentry kind="var" path="DEV_ROOT/lib/jcondo"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.USER_LIBRARY/LIFERAY_LIB"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
