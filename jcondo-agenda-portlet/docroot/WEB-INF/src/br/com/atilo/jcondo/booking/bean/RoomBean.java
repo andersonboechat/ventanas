@@ -57,6 +57,10 @@ public class RoomBean extends BaseBean {
 		
 	}
 
+	public List<Room> getRooms() {
+		return ROOMS;
+	}
+
 	public Room getRoom() {
 		return room;
 	}
@@ -64,5 +68,5 @@ public class RoomBean extends BaseBean {
 	public void setRoom(Room room) {
 		this.room = room;
 	}
-	
+
 }

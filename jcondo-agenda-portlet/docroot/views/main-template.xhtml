@@ -64,7 +64,7 @@
 			.docs-cmds img {padding: 0; margin: 0px 0px 0px 7px; vertical-align: middle;}
 			.ui-tabs {background: none; padding: 0 !important; border: 0px !important;}
 			.ui-tabs-nav {background: none !important; }
-			.ui-tabs-panel {margin: 0 !important; padding: 0 !important}
+			.ui-tabs-panel {margin: 0 !important; padding: 0 !important;}
 			.parkings {width: 50%; vertical-align: top}
 			.documents {width: 50%; vertical-align: top}
 			.birthday input {width: 80px;}
@@ -76,6 +76,15 @@
 			.pwd-panel td {margin: 0px !important;}
 			.pwd-panel input {width: 60px;}
 			
+			.calendar {border: 1px solid}
+			.calendar tr {border: 1px solid}
+			.calendar td {border: 1px solid}
+			
+			.leftClm {width:30%; vertical-align: top}
+			.rightClm {}
+			.ui-carousel-dropdown {
+			    display: none;
+			}
 		</style>
 	</h:head>
 	<h:body>
@@ -92,6 +101,11 @@
 			</f:facet>
 		</p:ajaxStatus>
 
-		<ui:insert name="app-view"/>
+		<p:panelGrid columns="2" columnClasses="leftClm,rightClm" styleClass="no-border no-background agenda">
+			<p:column><ui:include src="rooms-view.xhtml"/><ui:include src="history-view.xhtml"/></p:column>
+			<p:column><ui:insert name="app-view"/></p:column>
+		</p:panelGrid>
+
+		
 	</h:body>
 </f:view>

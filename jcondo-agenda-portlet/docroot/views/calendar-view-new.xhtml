@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+
+<f:view xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:c="http://java.sun.com/jsp/jstl/core"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:ui="http://java.sun.com/jsf/facelets">
+
+	<ui:composition template="main-template.xhtml">
+		<ui:define name="app-view">
+			<p:tabView id="tabs" var="room" value="#{calendarBean.rooms}" cache="false" styleClass="agenda" dynamic="true">
+				<p:ajax event="tabChange" listener="#{calendarBean.onTabChange}" global="false"/>
+				<p:tab title="${room.name}">
+					<h:form>
+						<p:schedule id="calendar" value="#{calendarBean.model}" editable="true"  
+							locale="pt" draggable="false" resizable="false" styleClass="calendar" aspectRatio="1.5" style="width: 100%" 
+							leftHeaderTemplate="" centerHeaderTemplate="title" rightHeaderTemplate="prev,next"> <!-- timeZone="America/Sao_Paulo"-->
+							<p:ajax event="dateSelect" listener="#{calendarBean.onDateSelect}" oncomplete="if (!args.exception) {PF('bookingDialog-#{i.index}').show();}"/>
+							<p:ajax event="eventSelect" listener="#{calendarBean.onSelect}" oncomplete="PF('eventDialog-#{i.index}').show();"/>
+						</p:schedule>
+					</h:form>
+				</p:tab>
+			</p:tabView>
+		</ui:define>
+	</ui:composition>
+</f:view>

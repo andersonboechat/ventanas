@@ -30,7 +30,7 @@ public class HistoryBean extends BaseBean {
 		try {
 			Person person = personService.getPerson();
 			bookings = bookingService.getBookings(person);
-			Collections.sort(bookings, new BeanSorter<RoomBooking>("beginDate", BeanSorter.DESCENDING_ORDER));
+			Collections.sort(bookings, new BeanSorter<RoomBooking>("beginDate", BeanSorter.ASCENDING_ORDER));
 		} catch (Exception e) {
 			LOGGER.fatal("Booking history load failure", e);
 			MessageUtils.addMessage(FacesMessage.SEVERITY_INFO, "history.load.failure", null);

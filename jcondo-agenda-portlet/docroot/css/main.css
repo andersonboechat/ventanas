@@ -1,3 +1,36 @@
+.portlet-booking .portlet-body section {
+	border: 0px solid !important;
+}
+
+.portlet-booking .portlet-content {
+	padding: 0;
+	margin: 0;
+	border: none;
+}
+
+.portlet-booking .portlet-topper {
+	background: none;
+	border: none;
+	box-shadow: none;
+}
+
+.portlet-booking .portlet-title-text {
+	font-size: 16px;
+}
+
+.portlet-booking .portlet-title .icon {
+	display: none;
+}
+
+.portlet-booking .portlet-minimize-icon, .portlet-booking .portlet-maximize-icon {
+	display: none;
+}
+
+.portlet-booking .portlet-title {
+	background: none;
+	border: none;
+}
+
 .agenda-admin-portlet .portlet-title-text {
 	display: none;
 }
@@ -172,7 +205,7 @@
 }
 
 .agenda .ui-datagrid-data {
-	width: 240px;
+	width: 140px;
 }
 
 .agenda .ui-scrollpanel {

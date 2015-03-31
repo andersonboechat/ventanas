@@ -7,27 +7,42 @@
 	xmlns:p="http://primefaces.org/ui"
 	xmlns:ui="http://java.sun.com/jsf/facelets">
 	<h:form id="bookings-form">
-		<p:scrollPanel id="mybookings" style="width: 100%; height: 300px; margin-right: 0px" rendered="true">
-			<p:outputPanel autoUpdate="true" rendered="true" style="border: 0px solid black;">
-				<h:panelGrid columns="2" style="border: 0px solid black; width: 100%; margin: 5px 5px 5px 10px;" styleClass="agenda" columnClasses="left,right">
-					<c:forEach var="aBooking" items="#{historyBean.bookings}" varStatus="counter">
-						<h:panelGrid columns="1" style="height: 50px;border: 0px solid black;width: 100%;" columnClasses="icon">
-							<h:outputText value="${aBooking.room.name}" style="line-height: 12px; font-size: 13px;font-weight:bold"/>
-							<h:panelGrid columns="2" style="padding: 0px 0px 0px 0px; border: 0px solid black;">
-								<p:commandLink value="#{msg.cancel}" actionListener="#{historyBean.onCancel}" 
-												update="mybookings,:tab:agenda-form:calendar" partialSubmit="true" process="@this" rendered="#{aBooking.status == 'BOOKED'}"
-												style="text-decoration: none; padding: 0px 10px 0px 0px; line-height: 12px;"/>
-							</h:panelGrid>
-						</h:panelGrid>
-						<h:panelGrid columns="1" style="height: 50px;margin-top:0px !important;border: 0px solid black;" styleClass="agenda">
-							<h:outputText value="${aBooking.date}" style="border: 0px solid black; line-height: 12px; float:right; padding-top: 3px;">
-								<f:convertDateTime pattern="dd/MM/yyyy"/>
-							</h:outputText>
-							<h:outputText value="${aBooking.status.label}" style="border: 0px solid black; float:right; padding-bottom: 10px;"/>
-						</h:panelGrid>
-					</c:forEach>
-				</h:panelGrid>
-			</p:outputPanel>
-		</p:scrollPanel>
+		<p:dataTable widgetVar="bookingTable" var="booking" value="#{historyBean.bookings}"	paginator="true" paginatorPosition="bottom" 
+			paginatorTemplate="{PreviousPageLink} {NextPageLink}" rows="5" rowKey="#{booking.id}" 
+			emptyMessage="Nenhum aluguel encontrado" styleClass="no-header no-border" style="margin-top: 15px">
+		    <p:ajax event="page" global="false"/>
+			<f:facet name="header">
+				<p:panelGrid columns="1" columnClasses="docs-header" styleClass="no-background no-border no-margin" style="width: 100%; height: 25px">
+					<h:outputText value="Meus Alugueis"/>
+				</p:panelGrid>
+			</f:facet>
+			<p:column style="width: 20px; vertical-align: top">
+				<p:panel styleClass="no-border #{historyBean.getBookingStyle(booking)}" style="width: 30px; height: 30px; "/>
+			</p:column>
+			<p:column style="vertical-align: top;">
+				<p:panelGrid columns="1" styleClass="no-margin">
+					<h:outputText value="#{booking.resource.name}" style="font-size: 14px; color: black; font-weight: bold;"/>
+					<h:outputText value="#{booking.beginDate}" style="font-size: 12px;">
+						<f:convertDateTime pattern="EEEE, dd 'de' MMMM 'de' yyyy"/>
+					</h:outputText>
+					<p:panelGrid columns="2" styleClass="no-background no-border" style="font-size: 12px; width: 130px;">
+						<h:outputText value="#{booking.beginDate}">
+							<f:convertDateTime pattern="'das' HH:mm'h'"/>
+						</h:outputText>
+						<h:outputText value="#{booking.endDate}">
+							<f:convertDateTime pattern="'às' HH:mm'h'"/>
+						</h:outputText>
+					</p:panelGrid>
+				</p:panelGrid>
+			</p:column>
+			<p:column style="width: 35px">
+				<p:commandLink title="Cancelar este aluguel" actionListener="#{historyBean.onCancel}" partialSubmit="true" 
+					process="@this" update="@widgetVar(bookingTable)" disabled="#{booking.status == 'CANCELLED'}">
+					<h:graphicImage value="../images/cancel2.png" />
+					<p:confirm header="Cancelamento de Aluguel" message="" icon="ui-icon-alert"/>
+					<f:setPropertyActionListener target="#{historyBean.booking}" value="#{booking}"/>
+				</p:commandLink>
+			</p:column>
+		</p:dataTable>
 	</h:form>
 </f:view>
