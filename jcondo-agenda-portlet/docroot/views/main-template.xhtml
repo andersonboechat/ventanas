@@ -88,8 +88,12 @@
 		</style>
 	</h:head>
 	<h:body>
-		<p:growl id="outputMsg"/>
+		<p:growl id="outputMsg" widgetVar="outputMsg"/>
 		<f:loadBundle basename="Language" var="msg"/>
+
+		<c:set var="calendarViewer" value="#{bookingBean.calendarBean}"/>
+		<c:set var="historyViewer" value="#{bookingBean.historyBean}"/>
+		<c:set var="roomViewer" value="#{bookingBean.roomBean}"/>
 
 		<p:ajaxStatus id="agenda-status" style="text-align: center; position: fixed; margin: 10% 30%;  border: 0px solid black; z-index: 99999999999999">
 			<f:facet name="start">
@@ -102,8 +106,8 @@
 		</p:ajaxStatus>
 
 		<p:panelGrid columns="2" columnClasses="leftClm,rightClm" styleClass="no-border no-background agenda">
-			<p:column><ui:include src="rooms-view.xhtml"/><ui:include src="history-view.xhtml"/></p:column>
-			<p:column><ui:insert name="app-view"/></p:column>
+			<p:column><ui:include src="rooms-view-new.xhtml"/><ui:include src="history-view-new.xhtml"/></p:column>
+			<p:column><ui:include src="calendar-view-new.xhtml"/></p:column>
 		</p:panelGrid>
 
 		

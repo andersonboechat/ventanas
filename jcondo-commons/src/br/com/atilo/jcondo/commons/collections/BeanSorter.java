@@ -2,7 +2,7 @@ package br.com.atilo.jcondo.commons.collections;
 
 import java.util.Comparator;
 
-import org.apache.commons.beanutils.BeanUtils;
+import org.apache.commons.beanutils.PropertyUtils;
 
 public class BeanSorter<Bean> implements Comparator<Bean> {
 
@@ -13,7 +13,7 @@ public class BeanSorter<Bean> implements Comparator<Bean> {
 	private String field;
 
     private Integer order;
-
+    
     public BeanSorter(String field, Integer order) {
         this.field = field;
         this.order = order;
@@ -22,14 +22,15 @@ public class BeanSorter<Bean> implements Comparator<Bean> {
     @SuppressWarnings({ "rawtypes", "unchecked" })
 	public int compare(Bean bean1, Bean bean2) {
         try {
-            Object value1 = BeanUtils.getProperty(bean1, field);
-            Object value2 = BeanUtils.getProperty(bean2, field);
+        	Object value1 = PropertyUtils.getProperty(bean1, field);
+            Object value2 = PropertyUtils.getProperty(bean2, field);
 
             int value = ((Comparable) value1).compareTo(value2);
 
             return ASCENDING_ORDER.equals(order) ? value : -1 * value;
         } catch(Exception e) {
-            throw new RuntimeException();
+            throw new RuntimeException(e);
         }
     }
+
 }

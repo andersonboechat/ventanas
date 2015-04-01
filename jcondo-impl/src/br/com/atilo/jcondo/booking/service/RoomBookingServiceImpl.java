@@ -143,14 +143,14 @@ public class RoomBookingServiceImpl {
 		Date today = new Date();
 		if (!today.after(DateUtils.addDays(b.getBeginDate(), -BKG_CANCEL_DEADLINE))) {
 			LOGGER.info("Booking cancelled within deadline on " + DateFormatUtils.format(today, "dd/MM/yyyy"));
-			delete(b);
+			b = delete(b);
 			return null;
 		}
 
 		return b;
 	}
 
-	public void delete(RoomBooking booking) throws Exception {
+	public RoomBooking delete(RoomBooking booking) throws Exception {
 		RoomBooking b = bookingManager.findById(booking.getId());
 
 		if (b == null || !BookingStatus.CANCELLED.equals(b.getStatus())) {
@@ -163,6 +163,8 @@ public class RoomBookingServiceImpl {
 
 		bookingManager.delete(b);
 		LOGGER.info("Booking deleted: " + booking);
+		
+		return b;
 	}
 
 }

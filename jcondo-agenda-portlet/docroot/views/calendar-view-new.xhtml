@@ -6,22 +6,23 @@
 	xmlns:h="http://java.sun.com/jsf/html"
 	xmlns:p="http://primefaces.org/ui"
 	xmlns:ui="http://java.sun.com/jsf/facelets">
-
-	<ui:composition template="main-template.xhtml">
-		<ui:define name="app-view">
-			<p:tabView id="tabs" var="room" value="#{calendarBean.rooms}" cache="false" styleClass="agenda" dynamic="true">
-				<p:ajax event="tabChange" listener="#{calendarBean.onTabChange}" global="false"/>
-				<p:tab title="${room.name}">
-					<h:form>
-						<p:schedule id="calendar" value="#{calendarBean.model}" editable="true"  
-							locale="pt" draggable="false" resizable="false" styleClass="calendar" aspectRatio="1.5" style="width: 100%" 
-							leftHeaderTemplate="" centerHeaderTemplate="title" rightHeaderTemplate="prev,next"> <!-- timeZone="America/Sao_Paulo"-->
-							<p:ajax event="dateSelect" listener="#{calendarBean.onDateSelect}" oncomplete="if (!args.exception) {PF('bookingDialog-#{i.index}').show();}"/>
-							<p:ajax event="eventSelect" listener="#{calendarBean.onSelect}" oncomplete="PF('eventDialog-#{i.index}').show();"/>
-						</p:schedule>
-					</h:form>
-				</p:tab>
-			</p:tabView>
-		</ui:define>
-	</ui:composition>
+	<p:tabView id="tabs" widgetVar="tabs">
+		<p:ajax event="tabChange" listener="#{calendarViewer.onTabChange}" global="false"/>
+		<c:forEach var="room" items="#{calendarViewer.rooms}" varStatus="i">
+			<p:tab id="tab_${i.index}" title="${room.name}">
+				<h:form id="agenda-form-#{i.index}">
+					<p:schedule id="calendar-#{i.index}" value="#{calendarViewer.getModel(i.index)}" editable="true" widgetVar="calendar-#{i.index}" 
+								locale="pt" draggable="false" resizable="false" styleClass="calendar" aspectRatio="1.5" style="width: 100%" 
+								 leftHeaderTemplate="" centerHeaderTemplate="title" rightHeaderTemplate="prev,next"> <!-- timeZone="America/Sao_Paulo"-->
+						<p:ajax event="dateSelect" listener="#{calendarViewer.onDateSelect}" update=":tabs:booking-dialog-form-#{i.index}:bookingDetails-#{i.index}, :outputMsg" oncomplete="if (!args.exception) {PF('bookingDialog-#{i.index}').show();}"/>
+						<p:ajax event="eventSelect" listener="#{calendarViewer.onSelect}" update=":tabs:booking-dialog-form-#{i.index}:bookingDetails-#{i.index}, :outputMsg" oncomplete="if (!args.exception) {PF('bookingDialog-#{i.index}').show();}"/>
+					</p:schedule>
+				</h:form>
+				<ui:include src="booking_dialog.xhtml">
+					<ui:param name="tabId" value="#{i.index}"/>
+					<ui:param name="roomId" value="#{room.id}"/>
+				</ui:include>
+			</p:tab>
+		</c:forEach>
+	</p:tabView>
 </f:view>

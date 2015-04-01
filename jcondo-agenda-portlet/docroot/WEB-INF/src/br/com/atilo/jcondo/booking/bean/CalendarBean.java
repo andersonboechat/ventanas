@@ -14,6 +14,7 @@ import javax.faces.component.UIInput;
 import javax.faces.context.FacesContext;
 import javax.faces.validator.ValidatorException;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.time.DateFormatUtils;
 import org.apache.commons.lang.time.DateUtils;
 import org.apache.log4j.Logger;
@@ -33,6 +34,9 @@ import br.com.abware.jcondo.core.model.Person;
 import br.com.abware.jcondo.exception.BusinessException;
 import br.com.atilo.jcondo.booking.service.RoomBookingServiceImpl;
 import br.com.atilo.jcondo.booking.service.RoomServiceImpl;
+import br.com.atilo.jcondo.booking.util.BookingEvent;
+import br.com.atilo.jcondo.booking.util.EventType;
+import br.com.atilo.jcondo.booking.util.collections.BookingDatePredicate;
 
 @ManagedBean
 @ViewScoped
@@ -103,6 +107,8 @@ public class CalendarBean extends BaseBean {
 				}
 
 				deal = false;
+				setChanged();
+				notifyObservers(new BookingEvent(booking, EventType.BOOK));
 			} else {
 				MessageUtils.addMessage(FacesMessage.SEVERITY_WARN, "agreement.deal.unchecked", null);
 			}
@@ -121,7 +127,14 @@ public class CalendarBean extends BaseBean {
 	public void onCancel() {
 		try { 
 			if (booking != null) {
-				bookingService.cancel(booking);
+				booking = bookingService.cancel(booking);
+				setChanged();
+				if (booking.getStatus() == BookingStatus.CANCELLED) {
+					notifyObservers(new BookingEvent(booking, EventType.BOOK_CANCEL));
+				}
+				if (booking.getStatus() == BookingStatus.DELETED) {
+					notifyObservers(new BookingEvent(booking, EventType.BOOK_DELETE));
+				}
 				MessageUtils.addMessage(FacesMessage.SEVERITY_INFO, "register.cancel.success", null);
 			}
 		} catch (Exception e) {
@@ -133,6 +146,8 @@ public class CalendarBean extends BaseBean {
 	public void onDelete() {
 		try {
 			bookingService.delete(booking);
+			setChanged();
+			notifyObservers(new BookingEvent(booking, EventType.BOOK_DELETE));
 			MessageUtils.addMessage(FacesMessage.SEVERITY_INFO, "register.delete.success", null);
 		} catch (BusinessException e) {
 			LOGGER.warn(e.getMessage(), e);
@@ -146,12 +161,18 @@ public class CalendarBean extends BaseBean {
 
 	public void onSelect(SelectEvent event) {
 		ScheduleEvent e = (ScheduleEvent) event.getObject();
-		booking = (RoomBooking) e.getData();
+		RoomBooking booking = (RoomBooking) e.getData();
+		if (booking.getResource().getId() == RoomServiceImpl.CINEMA || booking.getStatus() == BookingStatus.CANCELLED) {
+			createBooking(e.getStartDate());
+		} else {
+			MessageUtils.addMessage(FacesMessage.SEVERITY_WARN, "booking.already.exists", null);
+			RequestContext.getCurrentInstance().addCallbackParam("exception", true);
+		}
 	}
 
-	public void onDateSelect(SelectEvent e) {
+	public void onDateSelect(SelectEvent event) {
 		Date today = DateUtils.truncate(new Date(), Calendar.DAY_OF_MONTH);
-		Date bookingDate = (Date) e.getObject();
+		Date bookingDate = (Date) event.getObject();
 
 		if (bookingDate.before(today)) {
 			MessageUtils.addMessage(FacesMessage.SEVERITY_WARN, "register.past.date", new String[] {
@@ -160,8 +181,20 @@ public class CalendarBean extends BaseBean {
 			RequestContext.getCurrentInstance().addCallbackParam("exception", true);
 		}
 
-		booking = new RoomBooking(person, flats.size() > 1 ? null : flats.get(0), model.getRoom(), 
-								 (Date) bookingDate.clone(), (Date) bookingDate.clone());
+		ScheduleEvent se = (ScheduleEvent) CollectionUtils.find(model.getEvents(), new BookingDatePredicate(bookingDate));
+		RoomBooking booking = se != null ? (RoomBooking) se.getData() : null; 
+
+		if (model.getRoom().getId() == RoomServiceImpl.CINEMA || booking == null || booking.getStatus() == BookingStatus.CANCELLED) {
+			createBooking(bookingDate);
+		} else {
+			MessageUtils.addMessage(FacesMessage.SEVERITY_WARN, "booking.already.exists", null);
+			RequestContext.getCurrentInstance().addCallbackParam("exception", true);
+		}
+	}
+
+	public void createBooking(Date bookingDate) {
+		booking = new RoomBooking(person, flats.size() > 1 ? null : flats.get(0), 
+								  model.getRoom(), (Date) bookingDate.clone(), (Date) bookingDate.clone());
 
 		if (!isTimeSelectionEnabled()) {
 			beginTime = RoomBookingServiceImpl.BKG_MIN_HOUR;
@@ -171,7 +204,7 @@ public class CalendarBean extends BaseBean {
 			endTime = 0;
 		}
 	}
-
+	
 	public void onTabChange(TabChangeEvent event) {
 		TabView tv = (TabView) event.getSource();
 		int i = tv.getChildren().indexOf(event.getTab());

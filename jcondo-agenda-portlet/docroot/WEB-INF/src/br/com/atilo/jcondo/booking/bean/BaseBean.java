@@ -1,5 +1,6 @@
 package br.com.atilo.jcondo.booking.bean;
 
+import java.util.Observable;
 import java.util.PropertyResourceBundle;
 
 import br.com.abware.jcondo.booking.model.BookingStatus;
@@ -11,7 +12,7 @@ import br.com.atilo.jcondo.core.service.FlatServiceImpl;
 import br.com.atilo.jcondo.core.service.PersonServiceImpl;
 
 
-public abstract class BaseBean {
+public abstract class BaseBean extends Observable {
 
 	protected static PersonServiceImpl personService = new PersonServiceImpl();
 	
