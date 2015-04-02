@@ -7,17 +7,19 @@
 	xmlns:p="http://primefaces.org/ui"
 	xmlns:ui="http://java.sun.com/jsf/facelets">
 	<h:form id="rooms-form">
-		<p:carousel widgetVar="rooms" var="room" value="#{roomViewer.rooms}" headerText="Espaços" numVisible="1"  style="margin-top: 5px">
-			<p:panelGrid columns="1" styleClass="no-background no-border" style="width: 370px">
+		<p:carousel widgetVar="rooms" var="room" value="#{roomViewer.rooms}" headerText="Espaços" numVisible="1">
+			<p:panelGrid columns="1" styleClass="no-background no-border" style="width: 370px; text-align: justify">
 				<p:column>
 					<p:panel styleClass="no-border #{historyBean.getRoomStyle(room)}" style="width: 30px; height: 30px; float: left"/>
 					<h:outputText value="#{room.name}" style="font-size: 14px; color: black; font-weight: bold;"/><br/>
-					<h:outputText value="Valor: "/>
-					<h:outputText value="#{room.price}"><f:convertNumber type="currency" /></h:outputText><br/>
-					<h:outputText value="#{room.description}" escape="false"/>
+					<h:outputLink value="#{room.agreement.path}" target="_blank" rendered="#{not empty room.agreement.path}">Termo de Responsabilidade</h:outputLink>
 				</p:column>
+				<p:column>
+					<h:outputText value="Valor: "/><h:outputText value="#{room.price}"><f:convertNumber type="currency" /></h:outputText>
+				</p:column>
+				<h:outputText value="#{room.description}" escape="false"/>
 				<p:dataGrid widgetVar="pictures" var="picture" value="#{room.images}" columns="4" 
-					styleClass="no-background no-border" style="margin: 10px">
+					styleClass="no-background no-border" style="margin: 10px" rendered="false">
 					<p:column><p:graphicImage value="#{picture.path}" width="80" height="60"/></p:column>
 				</p:dataGrid>
 			</p:panelGrid>

@@ -9,10 +9,10 @@
 	<h:form id="bookings-form">
 		<p:dataTable widgetVar="bookingTable" var="booking" value="#{historyViewer.bookings}"	paginator="true" paginatorPosition="bottom" 
 			paginatorTemplate="{PreviousPageLink} {NextPageLink}" rows="5" rowKey="#{booking.id}" 
-			emptyMessage="Nenhum aluguel encontrado" styleClass="no-header no-border" style="margin-top: 15px; height: 100%">
+			emptyMessage="Nenhum aluguel encontrado" styleClass="no-header no-border no-background" style="margin-top: 15px; height: 100%">
 		    <p:ajax event="page" global="false"/>
 			<f:facet name="header">
-				<p:panelGrid columns="1" columnClasses="docs-header" styleClass="no-background no-border no-margin" style="width: 100%; height: 25px">
+				<p:panelGrid columns="1" columnClasses="docs-header" styleClass="no-border no-margin no-background" style="width: 100%; height: 25px">
 					<h:outputText value="Meus Alugueis"/>
 				</p:panelGrid>
 			</f:facet>
@@ -20,7 +20,7 @@
 				<p:panel styleClass="no-border #{historyViewer.getBookingStyle(booking)}" style="width: 30px; height: 30px; "/>
 			</p:column>
 			<p:column style="vertical-align: top;">
-				<p:panelGrid columns="1" styleClass="no-margin">
+				<p:panelGrid columns="1" styleClass="no-margin no-border no-background">
 					<h:outputText value="#{booking.resource.name}" style="font-size: 14px; color: black; font-weight: bold;"/>
 					<h:outputText value="#{booking.beginDate}" style="font-size: 12px;">
 						<f:convertDateTime pattern="EEEE, dd 'de' MMMM 'de' yyyy"/>
