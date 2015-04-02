@@ -8,13 +8,18 @@
 	xmlns:ui="http://java.sun.com/jsf/facelets">
 	<h:form id="rooms-form">
 		<p:carousel widgetVar="rooms" var="room" value="#{roomViewer.rooms}" headerText="Espaços" numVisible="1">
-			<p:panelGrid columns="1" styleClass="no-background no-border" style="width: 370px; text-align: justify">
+			<p:panelGrid columns="1" styleClass="no-background no-border" style="width: 370px; text-align: justify;">
 				<p:column>
-					<p:panel styleClass="no-border #{historyBean.getRoomStyle(room)}" style="width: 30px; height: 30px; float: left"/>
-					<h:outputText value="#{room.name}" style="font-size: 14px; color: black; font-weight: bold;"/><br/>
-					<h:outputLink value="#{room.agreement.path}" target="_blank" rendered="#{not empty room.agreement.path}">Termo de Responsabilidade</h:outputLink>
+					<p:panelGrid columns="3" columnClasses="room-icon,room-name,room-picture" styleClass="no-background no-border no-margin" style="width: 100%;">
+						<p:panel styleClass="no-border #{historyBean.getRoomStyle(room)}" style="width: 30px; height: 30px; float: left"/>
+						<p:column>
+							<h:outputText value="#{room.name}" style="font-size: 14px; color: black; font-weight: bold;"/><br/>
+							<h:outputLink value="#{room.agreement.path}" target="_blank" rendered="#{not empty room.agreement.path}">Termo de Responsabilidade</h:outputLink>
+						</p:column>
+						<p:commandLink id="picLink" title="Fotos do espaço"><h:graphicImage value="../images/pictures.png" width="34" height="34" /></p:commandLink>
+					</p:panelGrid>
 				</p:column>
-				<p:column>
+				<p:column rendered="false">
 					<h:outputText value="Valor: "/><h:outputText value="#{room.price}"><f:convertNumber type="currency" /></h:outputText>
 				</p:column>
 				<h:outputText value="#{room.description}" escape="false"/>
@@ -23,6 +28,12 @@
 					<p:column><p:graphicImage value="#{picture.path}" width="80" height="60"/></p:column>
 				</p:dataGrid>
 			</p:panelGrid>
+			<p:overlayPanel for="picLink" appendToBody="true" dismissable="true" showCloseIcon="true" at="left top" 
+				styleClass="room-pictures" >
+					<p:galleria var="image" value="#{room.images}" panelWidth="640" panelHeight="480" showCaption="false" autoPlay="false" style="margin: 0px;">
+					    <p:graphicImage value="${image.path}" title="${image.name}"/>
+					</p:galleria>
+			</p:overlayPanel>
 		</p:carousel>
 	</h:form>
 </f:view>
