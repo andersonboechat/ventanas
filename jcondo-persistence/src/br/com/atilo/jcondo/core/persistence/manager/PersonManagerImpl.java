@@ -225,4 +225,10 @@ public class PersonManagerImpl extends JCondoManager<PersonEntity, Person> {
 		UserLocalServiceUtil.addGroupUsers(domain.getRelatedId(), new long[] {person.getUserId()});
 	}
 
+	public boolean authenticate(Person person, String password) throws Exception {
+		return UserLocalServiceUtil.authenticateByUserId(helper.getCompanyId(), 
+														 person.getUserId(), 
+														 password, null, null, null) == 1 ? true : false;
+	}
+
 }

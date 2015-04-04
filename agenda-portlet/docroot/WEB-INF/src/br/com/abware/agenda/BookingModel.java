@@ -78,7 +78,7 @@ public class BookingModel {
 	
 	public synchronized void doBooking() throws Exception {
 		String owner = String.valueOf("BookingModel.doBooking");
-		Date today = new Date();
+		Date today = DateUtils.truncate(new Date(), Calendar.DAY_OF_MONTH);
 
 		LOGGER.info("Logged in user: " + userId);
 

@@ -26,6 +26,8 @@ import org.primefaces.event.TabChangeEvent;
 import org.primefaces.model.ScheduleEvent;
 import org.primefaces.model.ScheduleModel;
 
+import com.sun.faces.util.MessageFactory;
+
 import br.com.abware.jcondo.booking.model.BookingStatus;
 import br.com.abware.jcondo.booking.model.Room;
 import br.com.abware.jcondo.booking.model.RoomBooking;
@@ -217,6 +219,17 @@ public class CalendarBean extends BaseBean {
 			throw new ValidatorException(message);  
 		}  
 	}  
+
+	public void validatePassword(FacesContext context, UIComponent component, Object value) {  
+		if (value instanceof String) {
+			String pwd = (String) value;
+			if (!personService.authenticate(person, pwd)) {
+				String clientId = component.getClientId(context);
+				FacesMessage message = MessageFactory.getMessage(UIInput.REQUIRED_MESSAGE_ID, clientId);
+				throw new ValidatorException(message);  
+			}
+		}
+	}
 
 	public boolean isCancelEnable() {
 		if (booking != null && booking.getBeginDate() != null) {

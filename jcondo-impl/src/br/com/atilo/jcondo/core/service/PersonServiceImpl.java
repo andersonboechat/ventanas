@@ -251,4 +251,12 @@ public class PersonServiceImpl  {
 		personManager.delete(person);
 	}
 
+	public boolean authenticate(Person person, String password) {
+		try {
+			return personManager.authenticate(person, password);
+		} catch (Exception e) {
+			return false;
+		}
+	}
+
 }
