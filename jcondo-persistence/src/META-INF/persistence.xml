@@ -17,7 +17,9 @@
 		<class>br.com.atilo.jcondo.core.persistence.entity.KinshipEntity</class>
 		<class>br.com.atilo.jcondo.booking.persistence.entity.BookingEntity</class>		
 		<class>br.com.atilo.jcondo.booking.persistence.entity.RoomBookingEntity</class>
-		<class>br.com.atilo.jcondo.booking.persistence.entity.RoomEntity</class>		
+		<class>br.com.atilo.jcondo.booking.persistence.entity.RoomEntity</class>
+		<class>br.com.atilo.jcondo.occurrence.persistence.entity.OccurrenceEntity</class>
+		<class>br.com.atilo.jcondo.occurrence.persistence.entity.AnswerEntity</class>		
 		<properties>
 			<property name="hibernate.dialect" value="org.hibernate.dialect.MySQLDialect"/>  
 			<property name="hibernate.query.substitutions" value="true 1,false 0"/>

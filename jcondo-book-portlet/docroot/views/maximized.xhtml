@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+
+<f:view xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:c="http://java.sun.com/jsp/jstl/core"
+	xmlns:fn="http://java.sun.com/jsp/jstl/functions"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:ui="http://java.sun.com/jsf/facelets">
+	<h:head>
+	</h:head>
+	<h:body>
+		#{bookBean.onLoad()}
+
+		<f:loadBundle basename="Language_pt_BR" var="msg"/>
+		
+		<h:form id="form">
+			<p:ajaxStatus id="status" style="width: 250px;text-align: center; position:absolute; left:40%; top: 45%; border: 0px solid black; z-index: 99999999999999">
+				<f:facet name="start">
+					<div id="loaderImage" style="margin-left: 60px;border: 0px solid red;"/>
+					<h:outputScript library="js" name="loading.js"/>
+					<p:spacer style="width: 100%; height: 12px;"/>
+					<h:messages id="statusStartMsg" for="status" infoStyle="background: none; width: 250px; text-align: center; font-family: Georgia; font-size: 16px; font-weight: bold; text-shadow: 0 3px 3px #f7f7f7; border: none; margin: 0; padding: 0;" style="margin: 0;"/>
+				</f:facet>
+				<f:facet name="complete">
+					<p:messages for="registerBtn" id="statusCompleteMsg" showDetail="true" showSummary="true"/>
+				</f:facet>
+			</p:ajaxStatus>
+
+			<p:growl id="globalMsgs" severity="warn,error,fatal"/>
+
+			<h:panelGrid columns="2" styleClass="book-view-header" columnClasses="left,right">
+				<h:panelGrid columns="2" columnClasses="left,left">
+					<p:commandButton id="complainBtn" value="#{msg['new.complaint']}" actionListener="#{bookBean.onNewComplain}" update="book,complainBtn,suggetionBtn,cancelBtn,registerBtn,statusStartMsg" disabled="#{!empty bookBean.occurrences and (bookBean.occurrences.get(0).id == 0)}" global="false" onclick="thebook.getPaginator().setPage(0)"/>
+					<p:commandButton id="suggetionBtn" value="#{msg['new.suggestion']}" actionListener="#{bookBean.onNewSuggestion}" update="book,complainBtn,suggetionBtn,cancelBtn,registerBtn,statusStartMsg" disabled="#{!empty bookBean.occurrences and (bookBean.occurrences.get(0).id == 0)}" global="false" onclick="thebook.getPaginator().setPage(0)"/>
+				</h:panelGrid>
+				<h:panelGrid columns="2" columnClasses="right,right">
+					<p:commandButton id="cancelBtn" value="#{msg.cancel}" actionListener="#{bookBean.onCancel}" update="book,complainBtn,suggetionBtn,cancelBtn,registerBtn,statusStartMsg" disabled="#{empty bookBean.occurrences or (bookBean.occurrences.get(0).id != 0)}" global="false" partialSubmit="true" process="@this"/>
+					<p:commandButton id="registerBtn" value="#{msg.register}" actionListener="#{bookBean.onSave}" update="globalMsgs,book,complainBtn,suggetionBtn,cancelBtn,registerBtn,statusCompleteMsg,statusStartMsg" disabled="#{empty bookBean.occurrences or (bookBean.occurrences.get(0).id != 0)}" global="true"/>
+				</h:panelGrid>
+			</h:panelGrid>
+
+			<p:dataTable widgetVar="thebook" id="book" var="occurrence" value="#{bookBean.occurrences}" rows="1" paginator="true" paginatorPosition="top" emptyMessage="#{msg['empty.book']}" styleClass="complaint-book">
+				<p:ajax event="page" listener="#{bookBean.onPaging}" update=":form:statusStartMsg" disabled="${bookBean.occurrences.get(0).id == 0}"/>
+				<p:column style="border: 0px solid red; padding-top: 20px; background: none; width: 50%; margin: 0;" layout="block" styleClass="complaint-book">
+					<h:outputLabel for="occurrenceText" styleClass="book-page-header book-page-header-left" value="#{occurrence.type.label} #{occurrence.code}"/>
+					<p:spacer style="width: 100%; height: 15px; border: 0px solid black; padding-right: 0px;"/>
+					<div style="height: 25px">
+					<h:outputText value="#{occurrence.date}" styleClass="record-time" rendered="true">
+						<f:convertDateTime pattern="'registrada em' dd 'de' MMMM 'de' yyyy 'às' HH:mm" />
+					</h:outputText>
+					</div>
+					<p:outputPanel layout="block" styleClass="textarea" rendered="${bookBean.occurrences.get(0).id != 0}">#{occurrence.text}</p:outputPanel>
+					<p:inputTextarea id="occurrenceText" requiredMessage="O texto da ${fn:toLowerCase(occurrence.type.label)} não foi informado" 
+									counter="remaining-chars" counterTemplate="#{msg['text.counter']} {0}" 
+									maxlength="1000"
+									styleClass="textarea" 
+									value="#{bookBean.text}" rendered="${bookBean.occurrences.get(0).id == 0}" style="display:inline; float: none;"/>
+					<h:panelGrid columns="2" styleClass="book-page-footer book-page-footer-left" columnClasses="left,right">
+						<h:outputLabel id="remaining-chars"/>
+						<h:outputText value="#{bookBean.getOccurrenceFooter(occurrence.id)}"/>
+					</h:panelGrid>
+				</p:column>
+				<p:column style="border: 0px solid green; padding-top: 20px; background: none;" layout="block" styleClass="complaint-book">
+					<h:outputLabel for="answerText" styleClass="book-page-header book-page-header-right" value="Resposta"/>
+					<p:spacer style="width: 100%; height: 15px; border: 0px solid black; margin: 0;"/>
+					<h:outputText value="#{occurrence.answer.date}" styleClass="record-time" rendered="#{!occurrence.answer.draft}">
+						<f:convertDateTime pattern="'registrada em' dd 'de' MMMM 'de' yyyy 'às' HH:mm" />
+					</h:outputText>						
+					<p:outputPanel id="answerText" layout="block" styleClass="textarea-right">
+						<h:outputText value="#{occurrence.answer.text}" rendered="#{!occurrence.answer.draft}"/>
+					</p:outputPanel>
+					<h:panelGrid columns="1" styleClass="book-page-footer book-page-footer-right" columnClasses="right" rendered="#{!occurrence.answer.draft}">
+						<h:outputText value="#{bookBean.getAnswerFooter(occurrence.answer.id)}"/>
+					</h:panelGrid>
+				</p:column>
+			</p:dataTable>
+		</h:form>
+	</h:body>
+</f:view>
