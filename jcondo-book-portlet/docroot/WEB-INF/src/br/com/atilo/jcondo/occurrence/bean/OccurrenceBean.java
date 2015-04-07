@@ -41,7 +41,7 @@ public class OccurrenceBean extends BaseBean {
 		try {
 			person = personService.getPerson();
 			model = new OccurrenceDataModel(occurrenceService.getOccurrences(person));
-			occurrence = CollectionUtils.isEmpty((List<Occurrence>) model.getWrappedData()) ? null : ((List<Occurrence>) model.getWrappedData()).get(0);
+			occurrence = CollectionUtils.isEmpty((List<Occurrence>) model.getWrappedData()) ? new Occurrence(null, person) : ((List<Occurrence>) model.getWrappedData()).get(0);
 			types = Arrays.asList(OccurrenceType.values());
 		} catch (Exception e) {
 			LOGGER.fatal("failure on occurrence loading", e);

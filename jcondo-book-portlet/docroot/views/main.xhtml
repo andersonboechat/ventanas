@@ -32,7 +32,7 @@
 		border: 1px solid #d7d7d7 !important; 
 		border-spacing: none !important;
 		border-radius: 5px;
-		width: 100%;
+		width: 500px;
 		height: 180px !important;
 		overflow-y: auto;
 		padding: 10px 10px 5px 10px !important; 
@@ -40,9 +40,11 @@
 		font-size: 15px !important;
 		font-family: Georgia !important; 
 		font-style: italic !important;
-		margin-right: 10px;
+		margin-right: 0px !important;
 		margin-top: 0px !important;
 		text-align: justify;
+		position: relative !important;
+		left: 0px;
 	}
 	
 	.no-header thead {display: none}
@@ -66,6 +68,7 @@
 	</p:ajaxStatus>
 
 	<h:form id="book-form">
+		<p:commandButton actionListener="#{occurrenceBean.onCreate}" value="Nova Ocorrência" oncomplete="PF('occurrenceDialog').show();"/>
 		<p:panelGrid columns="2" columnClasses="leftClm,rightClm" styleClass="occurrence no-background no-border" style="width: 100%">
 			<p:column>
 				<p:dataTable widgetVar="occurrenceTable" id="occurrenceTable" var="occurrence" value="#{occurrenceBean.model}" rows="10" 
@@ -92,63 +95,52 @@
 			<p:column>
 				<p:panelGrid columns="1" style="width: 100%">
 					<p:column>
-						<h:outputText value="Ocorrência:" style="font-size: 15px; font-weight: bold;"/>
-						<p:selectOneMenu value="#{occurrenceBean.occurrence.type}" rendered="#{occurrenceBean.occurrence != null and empty occurrenceBean.occurrence.code}">
-							<f:selectItem itemLabel="Selecione" noSelectionOption="true"/>
-							<f:selectItems var="type" value="#{occurrenceBean.types}" itemLabel="#{msg[type.label]}" itemValue="#{type}"/>
-						</p:selectOneMenu>
-						<h:outputText value="#{msg[occurrenceBean.occurrence.type.label]}" rendered="#{occurrenceBean.occurrence.type != null}"/>
-						<h:outputText value="- #{occurrenceBean.occurrence.code}" rendered="#{not empty occurrenceBean.occurrence.code}"/>
-						<h:outputText id="occurrDate" value="#{occurrenceBean.occurrence.date}" rendered="#{not empty occurrenceBean.occurrence.code}" 
-									   styleClass="record-time">
+						<h:outputText value="#{msg[occurrenceBean.occurrence.type.label]} - #{occurrenceBean.occurrence.code}" rendered="#{occurrenceBean.occurrence != null}"/>
+						<h:outputText id="occurrDate" value="#{occurrenceBean.occurrence.date}" rendered="#{occurrenceBean.occurrence != null}">
 							<f:convertDateTime pattern="'registrada em' dd 'de' MMMM 'de' yyyy 'às' HH:mm" /><!-- timeZone="America/Sao_Paulo"-->
 						</h:outputText>
 					</p:column>
 					<p:column>
-						<p:panelGrid columns="2" columnClasses="portrait" styleClass="no-margin" style="width: 100%; margin:  0px !important;">
-							<p:column>
-								<p:graphicImage id="portrait" value="#{occurrenceBean.person.picture.path}" width="101" height="150" style="border: 1px solid grey; display:block; margin: 0px auto;"/>
-								<h:outputText value="#{occurrenceBean.person.fullName}"/>
-								<h:outputText value="#{occurrenceBean.displayPersonFlat(occurrenceBean.person)}"/>
-							</p:column>
-							<p:column>
-								<p:inputTextarea id="occurrenceText" required="true" requiredMessage="#{msg['empty.answer']}"
-								 counter="remaining-chars" counterTemplate="#{msg['text.counter']} {0}" maxlength="1000"
-								 rendered="#{empty occurrenceBean.occurrence.code}" value="#{occurrenceBean.occurrence.text}"
-								 styleClass="textarea" style="display:inline; float: none;" />
-								<h:outputLabel id="remaining-chars" style="float:right; margin: 0px 0px;" rendered="#{empty occurrenceBean.occurrence.code}"/>
-								<p:outputPanel layout="block" styleClass="textarea" 
-											   rendered="#{not empty occurrenceBean.occurrence.code}">#{occurrenceBean.occurrence.text}</p:outputPanel>
-							</p:column>
-						</p:panelGrid>
+						<p:outputPanel layout="block" styleClass="textarea">#{occurrenceBean.occurrence.text}</p:outputPanel>
 					</p:column>
-					<p:column rendered="#{occurrenceBean.occurrence.answer != null and occurrenceBean.occurrence.answer.date != null}">
+					<p:column rendered="#{occurrenceBean.occurrence != null and occurrenceBean.occurrence.answer != null and occurrenceBean.occurrence.answer.date != null}">
 						<h:outputText value="Resposta:" style="font-size: 15px; font-weight: bold;"/>
 						<h:outputText value="registrada em "/>
 						<h:outputText id="answerDate" value="#{occurrenceBean.occurrence.answer.date}" styleClass="record-time">
 							<f:convertDateTime pattern="dd 'de' MMMM 'de' yyyy 'às' HH:mm"/><!-- timeZone="America/Sao_Paulo"-->
 						</h:outputText>
 					</p:column>
-					<p:column>
-						<p:panelGrid columns="2" columnClasses="portrait" style="width: 100%">
-							<p:column id="column1">
-								<p:graphicImage id="portrait2" value="#{occurrenceBean.occurrence.answer.person.picture.path}" width="101" height="150" 
-												rendered="#{occurrenceBean.occurrence.answer != null and occurrenceBean.occurrence.answer.date != null}" 
-												style="border: 1px solid grey; display:block; margin: 0px auto;"/>
-								<h:outputText value="#{occurrenceBean.occurrence.answer.person.fullName}" rendered="#{occurrenceBean.occurrence.answer != null and occurrenceBean.occurrence.answer.date != null}"/>
-								<h:outputText value="#{occurrenceBean.displayPersonFlat(occurrenceBean.occurrence.answer.person)}" rendered="#{occurrenceBean.occurrence.answer != null and occurrenceBean.occurrence.answer.date != null}"/>
-							</p:column>
-							<p:column>
-								<p:outputPanel id="answerText" layout="block" styleClass="textarea" 
-											   rendered="#{occurrenceBean.occurrence.answer != null and occurrenceBean.occurrence.answer.date != null}">#{occurrenceBean.occurrence.text}</p:outputPanel>
-							</p:column>
-						</p:panelGrid>
+					<p:column rendered="#{occurrenceBean.occurrence != null and occurrenceBean.occurrence.answer != null and occurrenceBean.occurrence.answer.date != null}">
+						<p:outputPanel id="answerText" layout="block" styleClass="textarea">#{occurrenceBean.occurrence.answer.text}</p:outputPanel>
 					</p:column>
 				</p:panelGrid>
-				<p:commandButton id="saveBtn" value="#{msg['save']}" actionListener="#{occurrenceBean.onSave}" update="@all"
-								 disabled="#{not empty occurrenceBean.occurrence.code}" style="margin: 0px 0px; float: right;"/>
+				<p:tabView value="" >
+					<p:tab></p:tab>
+				</p:tabView>
 			</p:column>
 		</p:panelGrid>
 	</h:form>
+
+	<p:dialog widgetVar="occurrenceDialog" header="Registro de ocorrência" modal="true" draggable="false" resizable="false" visible="false" styleClass="occurrence">
+		<h:form>
+			<p:panelGrid columns="1" styleClass="no-border" style="width: 100%; text-align: right;">
+			<p:column>
+				<p:outputLabel for="type" value="Tipo da ocorrência: " style=" vertical-align: middle; margin-right: 10px;"/>
+				<p:selectOneMenu id="type" value="#{occurrenceBean.occurrence.type}" required="true" requiredMessage="" style="vertical-align: middle;">
+					<f:selectItem itemLabel="Selecione" noSelectionOption="true"/>
+					<f:selectItems var="type" value="#{occurrenceBean.types}" itemLabel="#{msg[type.label]}" itemValue="#{type}"/>
+				</p:selectOneMenu>
+			</p:column>
+			<p:inputTextarea id="occurrenceText" required="true" requiredMessage="#{msg['empty.answer']}"
+							 counter="remaining-chars" counterTemplate="#{msg['text.counter']} {0}" maxlength="1000" 
+							 value="#{occurrenceBean.occurrence.text}" styleClass="textarea" style="float: right; " />
+			<h:outputLabel id="remaining-chars" style="float: right; margin: 0px 0px;"/>
+			</p:panelGrid>
+			<p:commandButton type="button" value="Cancelar" onclick="PF('occurrenceDialog').hide();" style="float: right; margin: 10px 10px 10px 0px;"/>
+			<p:commandButton actionListener="#{occurrenceBean.onSave}" value="Registrar" update="@widgetVar(occurrenceTable)" 
+							 oncomplete="if (!args.validationFailed &amp;&amp; !args.exception) {PF('occurrenceDialog').hide();}"
+							 style="float: right; margin: 10px 10px 10px 0px;"/>
+		</h:form>
+	</p:dialog>
 </h:body>
 </f:view>
