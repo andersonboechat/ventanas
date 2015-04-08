@@ -10,6 +10,14 @@
 		<header-portlet-css>/css/main.css</header-portlet-css>
 		<css-class-wrapper>jcondo-book-portlet</css-class-wrapper>
 	</portlet>
+	<portlet>
+		<portlet-name>jcondo-book-admin</portlet-name>
+		<icon>/icon.png</icon>
+		<control-panel-entry-category>content</control-panel-entry-category>
+		<instanceable>false</instanceable>
+		<header-portlet-css>/css/main.css</header-portlet-css>
+		<css-class-wrapper>jcondo-book-admin-portlet</css-class-wrapper>
+	</portlet>
 	<role-mapper>
 		<role-name>administrator</role-name>
 		<role-link>Administrator</role-link>

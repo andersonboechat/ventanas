@@ -9,9 +9,12 @@ import javax.persistence.Query;
 import br.com.abware.jcondo.core.model.Person;
 import br.com.abware.jcondo.crm.model.Occurrence;
 import br.com.atilo.jcondo.core.persistence.manager.JCondoManager;
+import br.com.atilo.jcondo.core.persistence.manager.PersonManagerImpl;
 import br.com.atilo.jcondo.occurrence.persistence.entity.OccurrenceEntity;
 
 public class OccurrenceManagerImpl extends JCondoManager<OccurrenceEntity, Occurrence> {
+
+	protected PersonManagerImpl personManager = new PersonManagerImpl();
 
 	@Override
 	protected Class<Occurrence> getModelClass() {
@@ -21,6 +24,13 @@ public class OccurrenceManagerImpl extends JCondoManager<OccurrenceEntity, Occur
 	@Override
 	protected Class<OccurrenceEntity> getEntityClass() {
 		return OccurrenceEntity.class;
+	}
+
+	@Override
+	protected Occurrence getModel(OccurrenceEntity entity) throws Exception {
+		Occurrence occurrence = super.getModel(entity);
+		occurrence.setPerson(personManager.findById(entity.getPerson().getId()));
+		return occurrence;
 	}
 
 	@SuppressWarnings("unchecked")

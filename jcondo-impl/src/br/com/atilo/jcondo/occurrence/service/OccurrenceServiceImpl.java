@@ -6,14 +6,17 @@ import java.util.List;
 import br.com.abware.jcondo.core.model.Person;
 import br.com.abware.jcondo.crm.model.Answer;
 import br.com.abware.jcondo.crm.model.Occurrence;
+import br.com.atilo.jcondo.occurrence.persistence.manager.AnswerManagerImpl;
 import br.com.atilo.jcondo.occurrence.persistence.manager.OccurrenceManagerImpl;
 
 public class OccurrenceServiceImpl {
 
 	private OccurrenceManagerImpl occurrenceManager = new OccurrenceManagerImpl();
+	
+	private AnswerManagerImpl answerManager = new AnswerManagerImpl();
 
 	private String generateCode(Occurrence occurrence) {
-		return null;
+		return String.valueOf(occurrence.getId() + occurrence.getDate().getTime());
 	}
 	
 	protected Occurrence answer(Occurrence occurrence, boolean draft) throws Exception {
@@ -35,11 +38,15 @@ public class OccurrenceServiceImpl {
 			}
 		} else {
 			answer = new Answer();
+			o.setAnswer(answer);
 		}
 
 		answer.setDate(draft ? null : new Date());
 		answer.setText(occurrence.getAnswer().getText());
 		answer.setPerson(occurrence.getAnswer().getPerson());
+
+		answer = answerManager.save(answer);
+		o.setAnswer(answer);
 
 		return occurrenceManager.save(o);
 	}
@@ -53,6 +60,9 @@ public class OccurrenceServiceImpl {
 	}
 
 	public List<Occurrence> getOccurrences(Person person) throws Exception {
+		if (person == null) {
+			return occurrenceManager.findAll();
+		}
 		return occurrenceManager.findOccurrences(person);
 	}
 	

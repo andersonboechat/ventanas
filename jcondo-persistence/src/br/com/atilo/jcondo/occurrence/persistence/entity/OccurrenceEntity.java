@@ -1,5 +1,6 @@
 package br.com.atilo.jcondo.occurrence.persistence.entity;
 
+import br.com.abware.jcondo.crm.model.OccurrenceType;
 import br.com.atilo.jcondo.core.persistence.entity.BaseEntity;
 import br.com.atilo.jcondo.core.persistence.entity.PersonEntity;
 
@@ -7,6 +8,8 @@ import java.util.Date;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
@@ -34,7 +37,8 @@ public class OccurrenceEntity extends BaseEntity {
 
 	private String text;
 
-	private int type;
+	@Enumerated(EnumType.ORDINAL)
+	private OccurrenceType type;
 
 	@Temporal(TemporalType.TIMESTAMP)
 	private Date date;
@@ -74,11 +78,11 @@ public class OccurrenceEntity extends BaseEntity {
 		this.text = text;
 	}
 
-	public int getType() {
+	public OccurrenceType getType() {
 		return type;
 	}
 
-	public void setType(int type) {
+	public void setType(OccurrenceType type) {
 		this.type = type;
 	}
 

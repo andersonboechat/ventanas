@@ -2,6 +2,7 @@ package br.com.atilo.jcondo.occurrence.bean;
 
 import java.util.Observable;
 import java.util.PropertyResourceBundle;
+import java.util.ResourceBundle;
 
 import br.com.abware.jcondo.booking.model.BookingStatus;
 import br.com.abware.jcondo.booking.model.Room;
@@ -12,6 +13,8 @@ import br.com.atilo.jcondo.occurrence.service.OccurrenceServiceImpl;
 
 
 public abstract class BaseBean extends Observable {
+	
+	protected static final ResourceBundle rb = ResourceBundle.getBundle("Language");
 
 	protected static PersonServiceImpl personService = new PersonServiceImpl();
 	

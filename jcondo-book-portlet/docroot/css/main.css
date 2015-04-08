@@ -1,0 +1,38 @@
+.portlet-occurrence .portlet-body section {
+	border: 0px solid !important;
+}
+
+.portlet-occurrence .portlet-content {
+	padding: 0;
+	margin: 0;
+	border: none;
+}
+
+.portlet-occurrence .portlet-topper {
+	background: none;
+	border: none;
+	box-shadow: none;
+}
+
+.portlet-occurrence .portlet-title-text {
+	font-size: 16px;
+}
+
+.portlet-occurrence .portlet-title .icon {
+	display: none;
+}
+
+.portlet-occurrence .portlet-minimize-icon, .portlet-occurrence .portlet-maximize-icon {
+	display: none;
+}
+
+.portlet-occurrence .portlet-title {
+	background: none;
+	border: none;
+}
+
+/* Primefaces Styles */
+.ui-growl {
+	top: 40% !important;
+	left:40% !important;
+}

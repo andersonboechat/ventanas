@@ -1,0 +1,160 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+
+<f:view xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:c="http://java.sun.com/jsp/jstl/core"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:fn="http://java.sun.com/jsp/jstl/functions"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:ui="http://java.sun.com/jsf/facelets">
+<h:head>
+	<style>
+	.occurrence .leftClm {width: 35%; vertical-align: top}
+	.occurrence .rightClm {vertical-align: top;}
+	
+	.occurrence .portraitClm {width: 200px; text-align: center; vertical-align: top}
+	.occurrence .portraitClm img {border: 1px solid grey; display: block; margin: 0px auto;}
+	.occurrence .textClm {padding-top: 0px; vertical-align: top}
+
+	.no-border {border: none !important;}
+	.no-border tr {border: none !important;}
+	.no-border .ui-datatable td {border: none !important;}
+	.no-border .ui-datagrid-content {border: none !important;}
+	.no-border .ui-panelgrid-cell  {border: none !important;}
+	.no-margin {margin:  0px !important; padding: 0px !important;}
+	.no-margin td {margin:  0px !important; padding: 0px !important;}
+	.no-margin tr {margin:  0px !important; padding: 0px !important;}
+	.no-background {background-color: transparent;}
+	.no-background .ui-datatable td  {background-color: transparent !important;}
+	.no-background .ui-panelgrid-cell {background-color: transparent !important;}
+	.ui-panelgrid.no-background tr {background-color: transparent !important;}
+	
+	.occurrence .textarea {
+		-moz-box-shadow: none !important;
+		-webkit-box-shadow: none !important;
+		box-shadow: none !important;
+		border: 1px solid #d7d7d7 !important; 
+		border-spacing: none !important;
+		border-radius: 5px;
+		width: 100%;
+		height: 220px !important;
+		overflow-y: auto;
+		padding: 10px 10px 5px 10px !important; 
+		background: #ffffff !important; 
+		font-size: 15px !important;
+		font-family: Georgia !important; 
+		font-style: italic !important;
+		margin-right: 20px !important;
+		margin-top: 0px !important;
+		text-align: justify;
+		position: relative !important;
+		left: 0px;
+		display: block;
+	}
+	
+	.no-header thead {display: none;}
+	
+	.ui-row-toggler2 {width: 15px; }
+	
+	.ui-datatable-tablewrapper tbody {border-top: 0px !important; border-bottom: 0px !important;}
+	
+	.occurrence .portrait {vertical-align: top; width: 160px; text-align: center}
+	
+	.occurrence .answered {font-weight: bold;}
+	
+	.occurrence .not-answered {}
+	</style>
+</h:head>
+<h:body>
+	<p:growl id="outputMsg" widgetVar="outputMsg"/>
+	<f:loadBundle basename="Language" var="msg"/>
+	
+	<h:form id="answer-form">
+		<p:panelGrid columns="2" columnClasses="leftClm,rightClm" styleClass="occurrence no-background no-border" style="width: 100%;">
+			<p:column>
+				<p:dataTable widgetVar="occurrenceTable" id="occurrenceTable" var="occurrence" value="#{answerBean.model}" rows="10" 
+							 paginator="true" paginatorPosition="bottom" emptyMessage="#{msg['empty.list']}" sortBy="#{occurrence.date}" 
+							 sortOrder="descending" rowKey="#{occurrence.id}" styleClass="no-header" selectionMode="single" first="0">
+					<p:ajax event="rowSelect" listener="#{answerBean.onRowSelect}" update=":answer-form:details" />
+					<f:facet name="header">
+						<p:panelGrid columns="1" columnClasses="docs-header" styleClass="no-border no-margin no-background" style="width: 100%; text-align: left; height: 25px">
+							<h:outputText value="Ocorrências"/>
+						</p:panelGrid>
+					</f:facet>
+					<p:column rendered="#{occurrence.answer != null and occurrence.answer.date != null}" styleClass="answered">
+						<h:outputText value="#{occurrence.date}" style="float: right; display: block;">
+							<f:convertDateTime pattern="dd/MM/yyyy 'às' HH:mm" /><!-- timeZone="America/Sao_Paulo"-->
+						</h:outputText>
+						<h:outputText value="#{msg[occurrence.type.label]} - #{occurrence.code}" style="display: block;"/>
+						<h:outputText value="#{occurrence.person.fullName}" style="display: block;"/>
+						<h:outputText value="#{answerBean.displayFlat(occurrence.person)}" style="display: block;"/>
+					</p:column>
+					<p:column rendered="#{occurrence.answer == null or occurrence.answer.date == null}" styleClass="not-answered">
+						<h:outputText value="#{occurrence.date}" style="float: right; display: block;">
+							<f:convertDateTime pattern="dd/MM/yyyy 'às' HH:mm" /><!-- timeZone="America/Sao_Paulo"-->
+						</h:outputText>
+						<h:outputText value="#{msg[occurrence.type.label]} - #{occurrence.code}" style="display: block;"/>
+						<h:outputText value="#{occurrence.person.fullName}" style="display: block;"/>
+						<h:outputText value="#{answerBean.displayFlat(occurrence.person)}" style="display: block;"/>
+					</p:column>
+				</p:dataTable>
+			</p:column>
+			<p:column>
+				<p:panelGrid id="details" columns="1" style="width: 100%;">
+					<p:column>
+						<h:outputText value="#{msg[answerBean.occurrence.type.label]} - #{answerBean.occurrence.code}" style="font-size: 15px; font-weight: bold; display: block;"/>
+						<h:outputText value="#{answerBean.occurrence.date}">
+							<f:convertDateTime pattern="'registrada em' dd 'de' MMMM 'de' yyyy 'às' HH:mm" /><!-- timeZone="America/Sao_Paulo"-->
+						</h:outputText>
+					</p:column>
+					<p:column>
+						<h:panelGrid columns="2" columnClasses="portraitClm,textClm" style="width: 100%;">
+							<p:column>
+								<p:graphicImage id="portrait" value="#{answerBean.occurrence.person.picture.path}" width="95" height="140"/>
+								<h:outputText value="#{answerBean.occurrence.person.fullName}" style="display: block;"/>
+								<h:outputText value="#{answerBean.displayFlat(answerBean.occurrence.person)}"/>
+							</p:column>
+							<p:column>
+								<p:outputPanel id="occurrenceText" layout="block" styleClass="textarea">#{answerBean.occurrence.text}</p:outputPanel>
+							</p:column>
+						</h:panelGrid>
+					</p:column>
+					<p:column>
+						<h:outputText value="Resposta:" style="font-size: 15px; font-weight: bold; display: block;"/>
+						<h:outputText value="registrada em " rendered="#{answerBean.answer.date != null}"/>
+						<h:outputText value="#{answerBean.occurrence.answer.date}">
+							<f:convertDateTime pattern="dd 'de' MMMM 'de' yyyy 'às' HH:mm"/><!-- timeZone="America/Sao_Paulo"-->
+						</h:outputText>
+					</p:column>
+					<p:column>
+						<h:panelGrid columns="2" columnClasses="portraitClm,textClm" style="width: 100%;">
+							<p:column>
+								<p:graphicImage id="portrait2" value="#{answerBean.person.picture.path}" width="95" height="140"/>
+								<h:outputText value="#{answerBean.person.fullName}" style="display: block;"/>
+								<h:outputText value="#{answerBean.displayFlat(answerBean.person)}"/>
+							</p:column>
+							<p:column>
+								<p:inputTextarea id="answerText" required="true" requiredMessage="#{msg['empty.answer']}"
+												 counter="remaining-chars" counterTemplate="#{msg['text.counter']} {0}" maxlength="1000"
+												 styleClass="textarea" value="#{answerBean.answer.text}"  
+												 readonly="#{answerBean.answer.date != null}"/>
+								<h:outputLabel id="remaining-chars" style="float:right; width: 100%" rendered="#{answerBean.answer.date == null}"/>
+							</p:column>
+						</h:panelGrid>
+					</p:column>
+					<p:column>
+						<p:commandButton id="draftBtn" value="#{msg['save.draft']}" actionListener="#{answerBean.onSave}" update="@all" 
+										 disabled="#{answerBean.answer.date != null}" style="margin: 0px -20px 0px 15px; float: right"/>
+						<p:commandButton id="registerBtn" type="button" value="#{msg['save.answer']}" 
+										 disabled="#{answerBean.answer.date != null}" onclick="PF('cd').show();" style="float: right"/>
+					</p:column>
+				</p:panelGrid>
+			</p:column>
+		</p:panelGrid>
+		<p:confirmDialog message="#{msg['register.confirm']}" severity="alert" widgetVar="cd">
+			<p:commandButton value="#{msg['yes']}" actionListener="#{answerBean.onAnswer}" update="@all" oncomplete="PF('cd').hide();" global="true"/>
+			<p:commandButton type="button" value="#{msg['no']}" onclick="PF('cd').hide();"/>
+		</p:confirmDialog>
+	</h:form>
+</h:body>
+</f:view>

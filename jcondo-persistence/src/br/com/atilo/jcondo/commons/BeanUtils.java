@@ -17,6 +17,8 @@ import br.com.abware.jcondo.core.model.Membership;
 import br.com.abware.jcondo.core.model.Parking;
 import br.com.abware.jcondo.core.model.Person;
 import br.com.abware.jcondo.core.model.Vehicle;
+import br.com.abware.jcondo.crm.model.Answer;
+import br.com.abware.jcondo.crm.model.Occurrence;
 import br.com.atilo.jcondo.booking.persistence.entity.RoomBookingEntity;
 import br.com.atilo.jcondo.booking.persistence.entity.RoomEntity;
 import br.com.atilo.jcondo.core.persistence.entity.AdministrationEntity;
@@ -26,6 +28,8 @@ import br.com.atilo.jcondo.core.persistence.entity.MembershipEntity;
 import br.com.atilo.jcondo.core.persistence.entity.ParkingEntity;
 import br.com.atilo.jcondo.core.persistence.entity.PersonEntity;
 import br.com.atilo.jcondo.core.persistence.entity.VehicleEntity;
+import br.com.atilo.jcondo.occurrence.persistence.entity.AnswerEntity;
+import br.com.atilo.jcondo.occurrence.persistence.entity.OccurrenceEntity;
 
 public class BeanUtils extends org.apache.commons.beanutils.BeanUtils {
 
@@ -49,6 +53,10 @@ public class BeanUtils extends org.apache.commons.beanutils.BeanUtils {
 		 cub.register(bc, RoomBookingEntity.class);
 		 cub.register(bc, Room.class);
 		 cub.register(bc, RoomEntity.class);
+		 cub.register(bc, Occurrence.class);
+		 cub.register(bc, OccurrenceEntity.class);
+		 cub.register(bc, Answer.class);
+		 cub.register(bc, AnswerEntity.class);
 
 		 DomainConverter dc = new DomainConverter();
 		 cub.register(dc, DomainEntity.class);

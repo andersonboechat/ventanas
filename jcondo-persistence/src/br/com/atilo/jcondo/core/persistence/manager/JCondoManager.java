@@ -60,6 +60,9 @@ public abstract class JCondoManager<Entity extends BaseEntity, Model extends Bas
 		Model model = getModelClass().newInstance();
 		BeanUtils.copyProperties(model, entity);
 
+		entity.setUpdateDate(new Date());
+		entity.setUpdateUser(helper.getUserId());		
+		
 		return model;
 	}
 

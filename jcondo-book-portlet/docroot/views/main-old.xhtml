@@ -1,0 +1,146 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+
+<f:view xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:c="http://java.sun.com/jsp/jstl/core"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:fn="http://java.sun.com/jsp/jstl/functions"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:ui="http://java.sun.com/jsf/facelets">
+<h:head>
+	<style>
+	.occurrence .leftClm {width: 35%; vertical-align: top}
+	.occurrence .rightClm {vertical-align: top;}
+
+	.no-border {border: none !important;}
+	.no-border tr {border: none !important;}
+	.no-border .ui-datatable td {border: none !important;}
+	.no-border .ui-datagrid-content {border: none !important;}
+	.no-border .ui-panelgrid-cell  {border: none !important;}
+	.no-margin {margin:  0px !important; padding: 0px !important;}
+	.no-margin td {margin:  0px !important; padding: 0px !important;}
+	.no-margin tr {margin:  0px !important; padding: 0px !important;}
+	.no-background {background-color: transparent;}
+	.no-background .ui-datatable td  {background-color: transparent !important;}
+	.no-background .ui-panelgrid-cell {background-color: transparent !important;}
+	.ui-panelgrid.no-background tr {background-color: transparent !important;}
+	
+	.occurrence .textarea {
+		-moz-box-shadow: none !important;
+		-webkit-box-shadow: none !important;
+		box-shadow: none !important;
+		border: 1px solid #d7d7d7 !important; 
+		border-spacing: none !important;
+		border-radius: 5px;
+		width: 500px;
+		height: 180px !important;
+		overflow-y: auto;
+		padding: 10px 10px 5px 10px !important; 
+		background: #ffffff !important; 
+		font-size: 15px !important;
+		font-family: Georgia !important; 
+		font-style: italic !important;
+		margin-right: 0px !important;
+		margin-top: 0px !important;
+		text-align: justify;
+		position: relative !important;
+		left: 0px;
+	}
+	
+	.no-header thead {display: none}
+	
+	.occurrence .portrait {vertical-align: top; width: 160px; text-align: center}
+	
+	</style>
+</h:head>
+<h:body>
+	<p:growl id="outputMsg" widgetVar="outputMsg"/>
+	<f:loadBundle basename="Language" var="msg"/>
+
+	<p:ajaxStatus id="status" style="text-align: center; position: fixed; width: 250px; margin-left: 40%; border: 0px solid black; z-index: 99999999999999">
+		<f:facet name="start">
+			<h:messages id="statusStartMsg" for="status" infoStyle="background: none; width: 250px; text-align: center; font-family: Georgia; font-size: 16px; font-weight: bold; text-shadow: 0 3px 3px #f7f7f7; border: none; margin: 0; padding: 0;" style="margin: 0;"/>
+		</f:facet>
+		<f:facet name="complete">
+			<p:messages for="registerBtn" showDetail="true" showSummary="true"/>
+			<p:messages for="draftBtn" showDetail="true" showSummary="true"/>
+		</f:facet>
+	</p:ajaxStatus>
+
+	<h:form id="book-form">
+		<p:commandButton actionListener="#{occurrenceBean.onCreate}" value="Nova Ocorrência" oncomplete="PF('occurrenceDialog').show();"/>
+		<p:panelGrid columns="2" columnClasses="leftClm,rightClm" styleClass="occurrence no-background no-border" style="width: 100%">
+			<p:column>
+				<p:dataTable widgetVar="occurrenceTable" id="occurrenceTable" var="occurrence" value="#{occurrenceBean.model}" rows="10" 
+					paginator="true" paginatorPosition="bottom" emptyMessage="#{msg['empty.list']}" sortBy="#{occurrence.date}" 
+					sortOrder="descending" selectionMode="single" selection="#{occurrenceBean.occurrence}" rowKey="#{occurrence.id}" 
+					first="0" styleClass="no-header" style="height: 200px">
+					<f:facet name="header">
+						<p:panelGrid columns="1" columnClasses="docs-header" styleClass="no-border no-margin no-background" style="width: 100%; text-align: left; height: 25px">
+							<h:outputText value="Minhas Ocorrências"/>
+						</p:panelGrid>
+					</f:facet>
+					<p:ajax event="rowSelect" listener="#{occurrenceBean.onOccurrenceSelect}" update="@all" />
+					<p:column>
+						<p:panelGrid columns="1">
+							<h:outputText value="#{occurrence.type.label}"/>
+							<h:outputText value="Número: #{occurrence.code}"/>
+							<h:outputText value="#{occurrence.date}">
+								<f:convertDateTime pattern="'Registrada em: ' dd/MM/yyyy 'às' HH:mm"/><!-- timeZone="America/Sao_Paulo"-->
+							</h:outputText>
+						</p:panelGrid>
+					</p:column>
+				</p:dataTable>
+			</p:column>
+			<p:column>
+				<p:panelGrid columns="1" style="width: 100%">
+					<p:column>
+						<h:outputText value="#{msg[occurrenceBean.occurrence.type.label]} - #{occurrenceBean.occurrence.code}" rendered="#{occurrenceBean.occurrence != null}"/>
+						<h:outputText id="occurrDate" value="#{occurrenceBean.occurrence.date}" rendered="#{occurrenceBean.occurrence != null}">
+							<f:convertDateTime pattern="'registrada em' dd 'de' MMMM 'de' yyyy 'às' HH:mm" /><!-- timeZone="America/Sao_Paulo"-->
+						</h:outputText>
+					</p:column>
+					<p:column>
+						<p:outputPanel layout="block" styleClass="textarea">#{occurrenceBean.occurrence.text}</p:outputPanel>
+					</p:column>
+					<p:column rendered="#{occurrenceBean.occurrence != null and occurrenceBean.occurrence.answer != null and occurrenceBean.occurrence.answer.date != null}">
+						<h:outputText value="Resposta:" style="font-size: 15px; font-weight: bold;"/>
+						<h:outputText value="registrada em "/>
+						<h:outputText id="answerDate" value="#{occurrenceBean.occurrence.answer.date}" styleClass="record-time">
+							<f:convertDateTime pattern="dd 'de' MMMM 'de' yyyy 'às' HH:mm"/><!-- timeZone="America/Sao_Paulo"-->
+						</h:outputText>
+					</p:column>
+					<p:column rendered="#{occurrenceBean.occurrence != null and occurrenceBean.occurrence.answer != null and occurrenceBean.occurrence.answer.date != null}">
+						<p:outputPanel id="answerText" layout="block" styleClass="textarea">#{occurrenceBean.occurrence.answer.text}</p:outputPanel>
+					</p:column>
+				</p:panelGrid>
+				<p:tabView value="" >
+					<p:tab></p:tab>
+				</p:tabView>
+			</p:column>
+		</p:panelGrid>
+	</h:form>
+
+	<p:dialog widgetVar="occurrenceDialog" header="Registro de ocorrência" modal="true" draggable="false" resizable="false" visible="false" styleClass="occurrence">
+		<h:form>
+			<p:panelGrid columns="1" styleClass="no-border" style="width: 100%; text-align: right;">
+			<p:column>
+				<p:outputLabel for="type" value="Tipo da ocorrência: " style=" vertical-align: middle; margin-right: 10px;"/>
+				<p:selectOneMenu id="type" value="#{occurrenceBean.occurrence.type}" required="true" requiredMessage="" style="vertical-align: middle;">
+					<f:selectItem itemLabel="Selecione" noSelectionOption="true"/>
+					<f:selectItems var="type" value="#{occurrenceBean.types}" itemLabel="#{msg[type.label]}" itemValue="#{type}"/>
+				</p:selectOneMenu>
+			</p:column>
+			<p:inputTextarea id="occurrenceText" required="true" requiredMessage="#{msg['empty.answer']}"
+							 counter="remaining-chars" counterTemplate="#{msg['text.counter']} {0}" maxlength="1000" 
+							 value="#{occurrenceBean.occurrence.text}" styleClass="textarea" style="float: right; " />
+			<h:outputLabel id="remaining-chars" style="float: right; margin: 0px 0px;"/>
+			</p:panelGrid>
+			<p:commandButton type="button" value="Cancelar" onclick="PF('occurrenceDialog').hide();" style="float: right; margin: 10px 10px 10px 0px;"/>
+			<p:commandButton actionListener="#{occurrenceBean.onSave}" value="Registrar" update="@widgetVar(occurrenceTable)" 
+							 oncomplete="if (!args.validationFailed &amp;&amp; !args.exception) {PF('occurrenceDialog').hide();}"
+							 style="float: right; margin: 10px 10px 10px 0px;"/>
+		</h:form>
+	</p:dialog>
+</h:body>
+</f:view>
