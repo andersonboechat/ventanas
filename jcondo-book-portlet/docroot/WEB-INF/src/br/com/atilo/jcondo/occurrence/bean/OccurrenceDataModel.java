@@ -36,5 +36,15 @@ public class OccurrenceDataModel extends ListDataModel<Occurrence> implements Se
 	public void add(Occurrence occurrence) {
 		((List<Occurrence>) getWrappedData()).add(0, occurrence);
 	}
+	
+	@SuppressWarnings("unchecked")
+	public void update(Occurrence occurrence) {
+    	int index = ((List<Occurrence>) getWrappedData()).indexOf(occurrence);
+    	if (index >= 0) {
+    		((List<Occurrence>) getWrappedData()).set(index, occurrence);
+    	} else {
+    		((List<Occurrence>) getWrappedData()).add(0, occurrence);    		
+    	}
+	}
 
 }

@@ -28,8 +28,17 @@ public class OccurrenceManagerImpl extends JCondoManager<OccurrenceEntity, Occur
 
 	@Override
 	protected Occurrence getModel(OccurrenceEntity entity) throws Exception {
+		if (entity == null) {
+			return null;
+		}
+
 		Occurrence occurrence = super.getModel(entity);
 		occurrence.setPerson(personManager.findById(entity.getPerson().getId()));
+
+		if (occurrence.getAnswer() != null) {
+			occurrence.getAnswer().setPerson(personManager.findById(entity.getAnswer().getPerson().getId()));	
+		}
+
 		return occurrence;
 	}
 
@@ -38,7 +47,7 @@ public class OccurrenceManagerImpl extends JCondoManager<OccurrenceEntity, Occur
 		String key = generateKey();
 		try {
 			openManager(key);
-			String queryString = "FROM OccurrenceEntity WHERE person.id = :personId";
+			String queryString = "FROM OccurrenceEntity WHERE person.id = :personId ORDER BY date DESC";
 			Query query = em.createQuery(queryString);
 			query.setParameter("personId", person.getId());
 			return getModels(query.getResultList());
@@ -53,7 +62,7 @@ public class OccurrenceManagerImpl extends JCondoManager<OccurrenceEntity, Occur
 		String key = generateKey();
 		try {
 			openManager(key);
-			String queryString = "FROM OccurrenceEntity WHERE code = :code";
+			String queryString = "FROM OccurrenceEntity WHERE code = :code ORDER BY date DESC";
 			Query query = em.createQuery(queryString);
 			query.setParameter("code", code);
 			return getModel((OccurrenceEntity) query.getSingleResult());

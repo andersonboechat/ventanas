@@ -76,20 +76,17 @@
 			.pwd-panel td {margin: 0px !important;}
 			.pwd-panel input {width: 60px;}
 			
+			.status .ui-dialog-titlebar {display: none}
 		</style>
 	</h:head>
 	<h:body>
 		<p:growl id="outputMsg"/>
 		<f:loadBundle basename="Language_pt_BR" var="msg"/>
 
-		<p:ajaxStatus>
-			<f:facet name="start"><p:messages id="statusStartMsg" /> Aguarde por favor...</f:facet>
-		</p:ajaxStatus>
-
-		<p:dialog widgetVar="dialogAguarde" id="dialogAguarde">
-			<h:form id="nada">
-				<p:messages id="statusCompleteMsg" />
-			</h:form>
+		<p:ajaxStatus id="status" onstart="PF('status').show();" oncomplete="PF('status').hide();"/>
+	
+		<p:dialog widgetVar="status" fitViewport="true" closable="false" modal="true" draggable="false" resizable="false" visible="false" styleClass="status">
+			<p:graphicImage value="../images/loader.gif" style="margin: 5px; vertical-align: middle;"/><h:outputText value="Processando, aguarde." style="font-size: 13px; font-weight: bold; margin: 15px"/>
 		</p:dialog>
 
 		<ui:insert name="app-view"/>

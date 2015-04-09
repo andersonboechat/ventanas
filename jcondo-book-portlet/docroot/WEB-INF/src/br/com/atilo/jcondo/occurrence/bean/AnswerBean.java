@@ -61,6 +61,8 @@ public class AnswerBean extends BaseBean {
 
 		try {
 			occurrence = occurrenceService.answer(occurrence);
+			model.update(occurrence);
+			answer = occurrence.getAnswer();
 			MessageUtils.addMessage(FacesMessage.SEVERITY_INFO, "register.success", 
 									new String[] {label.toLowerCase()});
 		} catch (Exception e) {
@@ -75,6 +77,8 @@ public class AnswerBean extends BaseBean {
 
 		try {
 			occurrence = occurrenceService.saveAsDraft(occurrence);
+			model.update(occurrence);
+			answer = occurrence.getAnswer();
 			MessageUtils.addMessage(FacesMessage.SEVERITY_INFO, "save.success", 
 									new String[] {label.toLowerCase()});
 		} catch (Exception e) {

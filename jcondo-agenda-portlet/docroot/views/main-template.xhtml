@@ -115,6 +115,8 @@
 			.room-icon {width: 30px;}
 			.room-name {vertical-align: top}
 			.room-picture {width: 15px;}
+			
+			.status .ui-dialog-titlebar {display: none}
 		</style>
 	</h:head>
 	<h:body>
@@ -125,15 +127,11 @@
 		<c:set var="historyViewer" value="#{bookingBean.historyBean}"/>
 		<c:set var="roomViewer" value="#{bookingBean.roomBean}"/>
 
-		<p:ajaxStatus id="agenda-status" style="text-align: center; position: fixed; margin: 10% 30%;  border: 0px solid black; z-index: 99999999999999">
-			<f:facet name="start">
-				<div id="loaderImage" style="margin-left: 60px;border: 0px solid red;"/>
-				<h:outputText value="Aguarde..." style="background: none; width: 250px; text-align: center; font-family: Georgia; font-size: 16px; font-weight: bold; text-shadow: 0 3px 3px #f7f7f7; border: 0px solid black; margin-left: 60px; padding: 0; box-shadow: none;" />
-			</f:facet>
-			<f:facet name="complete">
-				<p:messages id="statusCompleteMsg" showDetail="true" showSummary="true"/>
-			</f:facet>
-		</p:ajaxStatus>
+		<p:ajaxStatus id="status" onstart="PF('status').show();" oncomplete="PF('status').hide();"/>
+	
+		<p:dialog widgetVar="status" fitViewport="true" closable="false" modal="true" draggable="false" resizable="false" visible="false" styleClass="status">
+			<p:graphicImage value="../images/loader.gif" style="margin: 5px; vertical-align: middle;"/><h:outputText value="Processando, aguarde." style="font-size: 13px; font-weight: bold; margin: 15px"/>
+		</p:dialog>
 
 		<p:panelGrid columns="2" columnClasses="leftClm,rightClm" styleClass="no-border agenda no-background">
 			<p:column><ui:include src="rooms-view-new.xhtml"/><ui:include src="history-view-new.xhtml"/></p:column>

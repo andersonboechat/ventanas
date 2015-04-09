@@ -143,16 +143,19 @@
 						</h:panelGrid>
 					</p:column>
 					<p:column>
-						<p:commandButton id="draftBtn" value="#{msg['save.draft']}" actionListener="#{answerBean.onSave}" update="@all" 
+						<p:commandButton widgetVar="draftBtn" value="#{msg['save.draft']}" actionListener="#{answerBean.onSave}" 
+										 update="@widgetVar(outputMsg),@widgetVar(occurrenceTable)" 
 										 disabled="#{answerBean.answer.date != null}" style="margin: 0px -20px 0px 15px; float: right"/>
-						<p:commandButton id="registerBtn" type="button" value="#{msg['save.answer']}" 
+						<p:commandButton widgetVar="registerBtn" type="button" value="#{msg['save.answer']}"
 										 disabled="#{answerBean.answer.date != null}" onclick="PF('cd').show();" style="float: right"/>
 					</p:column>
 				</p:panelGrid>
 			</p:column>
 		</p:panelGrid>
 		<p:confirmDialog message="#{msg['register.confirm']}" severity="alert" widgetVar="cd">
-			<p:commandButton value="#{msg['yes']}" actionListener="#{answerBean.onAnswer}" update="@all" oncomplete="PF('cd').hide();" global="true"/>
+			<p:commandButton value="#{msg['yes']}" actionListener="#{answerBean.onAnswer}" 
+							 update="@widgetVar(outputMsg),@widgetVar(occurrenceTable),@widgetVar(draftBtn),@widgetVar(registerBtn)" 
+							 oncomplete="PF('cd').hide();" global="true"/>
 			<p:commandButton type="button" value="#{msg['no']}" onclick="PF('cd').hide();"/>
 		</p:confirmDialog>
 	</h:form>

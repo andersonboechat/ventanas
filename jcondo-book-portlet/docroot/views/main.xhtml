@@ -60,34 +60,33 @@
 	.occurrence .answered {font-weight: bold;}
 	
 	.occurrence .not-answered {}
+	
+	.status .ui-dialog-titlebar {display: none}
+
 	</style>
 </h:head>
 <h:body>
 	<p:growl id="outputMsg" widgetVar="outputMsg"/>
 	<f:loadBundle basename="Language" var="msg"/>
 
-	<p:ajaxStatus id="status" style="text-align: center; position: fixed; width: 250px; margin-left: 40%; border: 0px solid black; z-index: 99999999999999">
-		<f:facet name="start">
-			<h:messages id="statusStartMsg" for="status" infoStyle="background: none; width: 250px; text-align: center; font-family: Georgia; font-size: 16px; font-weight: bold; text-shadow: 0 3px 3px #f7f7f7; border: none; margin: 0; padding: 0;" style="margin: 0;"/>
-		</f:facet>
-		<f:facet name="complete">
-			<p:messages for="registerBtn" showDetail="true" showSummary="true"/>
-			<p:messages for="draftBtn" showDetail="true" showSummary="true"/>
-		</f:facet>
-	</p:ajaxStatus>
+	<p:ajaxStatus id="status" onstart="PF('status').show();" oncomplete="PF('status').hide();"/>
+
+	<p:dialog widgetVar="status" fitViewport="true" closable="false" modal="true" draggable="false" resizable="false" visible="false" styleClass="status">
+		<p:graphicImage value="../images/loader.gif" style="margin: 5px; vertical-align: middle;"/><h:outputText value="Processando, aguarde." style="font-size: 13px; font-weight: bold; margin: 15px"/>
+	</p:dialog>
 
 	<h:form id="book-form">
 		<p:panelGrid columns="2" columnClasses="leftClm,rightClm" styleClass="occurrence no-background no-border" style="width: 100%">
 			<p:column>
 				<p:panelGrid id="new-occurrence" columns="1" styleClass="no-border" style="width: 100%; text-align: right;">
 					<p:column>
-						<p:outputLabel for="type" value="Tipo da ocorrência: " style=" vertical-align: middle; margin-right: 10px;"/>
-						<p:selectOneMenu id="type" value="#{occurrenceBean.occurrence.type}" required="true" requiredMessage="" style="vertical-align: middle;">
+						<p:outputLabel for="type" value="#{msg['occurrence.type']}: " style=" vertical-align: middle; margin-right: 10px;"/>
+						<p:selectOneMenu id="type" value="#{occurrenceBean.occurrence.type}" required="true" requiredMessage="#{msg['empty.occurrence.type']}" style="vertical-align: middle;">
 							<f:selectItem itemLabel="Selecione" noSelectionOption="true"/>
 							<f:selectItems var="type" value="#{occurrenceBean.types}" itemLabel="#{msg[type.label]}" itemValue="#{type}"/>
 						</p:selectOneMenu>
 					</p:column>
-					<p:inputTextarea id="occurrenceText" required="true" requiredMessage="#{msg['empty.answer']}"
+					<p:inputTextarea id="occurrenceText" required="true" requiredMessage="#{msg['empty.occurrence.text']}"
 									 counter="remaining-chars" counterTemplate="#{msg['text.counter']} {0}" maxlength="1000" 
 									 value="#{occurrenceBean.occurrence.text}" styleClass="textarea" style="float: right; " />
 					<h:outputLabel id="remaining-chars" style="float: right; margin: 0px 0px;"/>
@@ -98,10 +97,13 @@
 			<p:column>
 				<p:dataTable widgetVar="occurrenceTable" id="occurrenceTable" var="occurrence" value="#{occurrenceBean.model}" rows="5" 
 							 paginator="true" paginatorPosition="bottom" emptyMessage="#{msg['empty.list']}" sortBy="#{occurrence.date}" 
-							 sortOrder="descending" rowKey="#{occurrence.id}" rowExpandMode="single" styleClass="no-header">
+							 sortOrder="descending" rowKey="#{occurrence.id}" rowExpandMode="single" styleClass="no-header" rowIndexVar="index"
+							 expandedRow="#{index == 0}">
+					<p:ajax event="rowToggle" global="false"/>
+					<p:ajax event="page" global="false"/>
 					<f:facet name="header">
 						<p:panelGrid columns="1" columnClasses="docs-header" styleClass="no-border no-margin no-background" style="width: 100%; text-align: left; height: 25px">
-							<h:outputText value="Minhas Ocorrências"/>
+							<h:outputText value="#{msg['my.occurrences']}"/>
 						</p:panelGrid>
 					</f:facet>
 					<p:column width="1%"><p:rowToggler/></p:column>
@@ -110,25 +112,26 @@
 						<h:outputText value="#{msg[occurrence.type.label]} - #{occurrence.code}" styleClass="not-answered" rendered="#{not (occurrence.answer != null and occurrence.answer.date != null)}"/>
 					</p:column>
 					<p:column width="50%">
-						<h:outputText value="#{occurrence.date}" style="float: right" styleClass="answered" rendered="#{occurrence.answer != null and occurrence.answer.date != null}">
+						<h:outputText value="#{occurrence.date}" style="float: right; padding-right: 10px;" styleClass="answered" rendered="#{occurrence.answer != null and occurrence.answer.date != null}">
 							<f:convertDateTime pattern="'registrada em' dd 'de' MMMM 'de' yyyy 'às' HH:mm" /><!-- timeZone="America/Sao_Paulo"-->
 						</h:outputText>
-						<h:outputText value="#{occurrence.date}" style="float: right" styleClass="not-answered" rendered="#{not (occurrence.answer != null and occurrence.answer.date != null)}">
+						<h:outputText value="#{occurrence.date}" style="float: right; padding-right: 10px;" styleClass="not-answered" rendered="#{not (occurrence.answer != null and occurrence.answer.date != null)}">
 							<f:convertDateTime pattern="'registrada em' dd 'de' MMMM 'de' yyyy 'às' HH:mm" /><!-- timeZone="America/Sao_Paulo"-->
 						</h:outputText>
 					</p:column>
 					<p:rowExpansion>
-						<p:panelGrid columns="1" style="width: 100%; text-align: justify">
-							<h:outputText value="#{occurrence.text}"/>
+						<p:panel styleClass="no-border no-margin" style="text-align: justify">
+						<h:outputText value="#{occurrence.text}"/></p:panel>
+						<p:panelGrid columns="1" style="width: 100%; text-align: justify" rendered="#{occurrence.answer != null and occurrence.answer.date != null}">
+							<p:spacer height="1px" width="50%" style="background-color: grey; margin: 5px auto; display: block"/>
 							<p:column rendered="#{occurrence.answer != null and occurrence.answer.date != null}">
-								<h:outputText value="Resposta:" style="font-size: 15px; font-weight: bold;"/>
-								<h:outputText value="#{occurrence.answer.text}"/>
-								<h:outputText value="registrada em "/>
-								<h:outputText id="answerDate" value="#{occurrence.answer.date}" styleClass="record-time">
-									<f:convertDateTime pattern="dd 'de' MMMM 'de' yyyy 'às' HH:mm"/><!-- timeZone="America/Sao_Paulo"-->
+								<h:outputText id="answerDate" value="#{occurrence.answer.date}" style="float: right; display: block;">
+									<f:convertDateTime pattern="'registrada em ' dd 'de' MMMM 'de' yyyy 'às' HH:mm"/><!-- timeZone="America/Sao_Paulo"-->
 								</h:outputText>
-								<h:outputText value="#{occurrence.answer.person.fullName}"/>
+								<h:outputText value="Resposta:" style="font-size: 12px; font-weight: bold; display: block;"/>
 							</p:column>
+							<h:outputText value="#{occurrence.answer.text}"/>
+							<h:outputText value="#{occurrence.answer.person.fullName}" style="float: right"/>
 						</p:panelGrid>
 					</p:rowExpansion>
 				</p:dataTable>

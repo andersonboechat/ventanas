@@ -21,10 +21,6 @@
 	<classpathentry combineaccessrules="false" kind="src" path="/jcondo-impl"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.USER_LIBRARY/JCONDO_LIB"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.USER_LIBRARY/LIFERAY_LIB"/>
-	<classpathentry kind="con" path="org.eclipse.jdt.USER_LIBRARY/EclipseLink 2.4.2 - Juno">
-		<attributes>
-			<attribute name="org.eclipse.jst.component.dependency" value="/WEB-INF/lib"/>
-		</attributes>
-	</classpathentry>
+	<classpathentry kind="con" path="org.eclipse.jdt.USER_LIBRARY/EclipseLink 2.4.2 - Juno"/>
 	<classpathentry kind="output" path="docroot/WEB-INF/classes"/>
 </classpath>

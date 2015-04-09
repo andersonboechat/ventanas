@@ -18,7 +18,7 @@
 				</p:commandButton>
 				<p:commandButton value="Excluir" actionListener="#{supplierViewer.onPeopleDelete}" 
 								partialSubmit="true" process="@this,supplierTable" update="supplierTable" style="font-size: 12px">
-					<p:confirm header="#{msg['main.delete.confirm']}" message="#{msg['supplier.delete.message']}" icon="ui-icon-alert"/>
+					<p:confirm header="#{msg['supplier.delete.confirm']}" message="#{msg['supplier.delete.message']}" icon="ui-icon-alert"/>
 				</p:commandButton>
 			</p:column>
 			<p:column>
@@ -61,16 +61,16 @@
 			<p:panelGrid id="model-details" columns="1" styleClass="no-border" style="margin: 10px 0px 20px 0px;" cellpadding="10">
 		    	<h:outputText value="Apartamento #{supplierViewer.domain.number} - Bloco #{supplierViewer.domain.block}" rendered="#{!empty(supplierViewer.domain)}"/>
 		    	<p:outputLabel for="domain" value="Apartamento: " rendered="#{empty(supplierViewer.domain)}"/>
-		    	<p:selectOneMenu id="domain" value="#{supplierViewer.domain}" converter="selectItemsConverter" rendered="#{empty(supplierViewer.domain)}">
+		    	<p:selectOneMenu id="domain" value="#{supplierViewer.domain}" converter="selectItemsConverter" rendered="#{empty(supplierViewer.domain)}" required="true" requiredMessage="#{msg['supplier.empty.flat']}">
 		    		<f:selectItem itemLabel="Selecione" noSelectionOption="true"/>
 					<f:selectItems var="flat" value="#{flatBean.flats}" itemLabel="Apartamento #{flat.number} - Bloco #{flat.block}" itemValue="#{flat}"/>
 		    	</p:selectOneMenu>
 				<p:outputLabel for="name" value="Nome: "/>
-				<p:inputText id="name" value="#{supplierViewer.supplier.name}" size="40" required="true"/>
+				<p:inputText id="name" value="#{supplierViewer.supplier.name}" size="40" required="true" requiredMessage="#{msg['supplier.empty.name']}"/>
 				<p:outputLabel for="description" value="Descrição: "/>
 				<p:inputTextarea id="description" value="#{supplierViewer.supplier.description}" cols="40" rows="5"/>
 			</p:panelGrid>
-			<p:commandButton value="Cancelar" onclick="PF('supplierDialog').hide();" style="float: right; width: 80px; margin: 0px 0px 10px 5px;">
+			<p:commandButton value="Cancelar" onclick="PF('supplierDialog').hide();" global="false" style="float: right; width: 80px; margin: 0px 0px 10px 5px;">
 				<f:setPropertyActionListener target="#{supplierViewer.domain}" value=""/>
 			</p:commandButton>
 			<p:commandButton value="Salvar" actionListener="#{supplierViewer.onSupplierSave}" update=":tabs:supplier-form:supplierTable, :outputMsg" oncomplete="if (!args.validationFailed) { if(!args.exception) {PF('supplierDialog').hide();} else { if(args.alert) {PF('alertDialog').show();}}}" style="float: right; width: 80px; margin: 0px 0px 10px 5px;"/>

@@ -5,12 +5,12 @@
   </head>
   <body text="#000000" bgcolor="#FFFFFF">
 	<p>Prezado Condômino,</p>
-	<p>A sua $occurrence.type.label.toLowerCase() de número $occurrence.code, foi respondida:</p>
+	<p>A sua $occurrenceLabel de número $occurrence.code, foi respondida:</p>
 	<p style="font-style: italic; text-align: justify">$occurrence.text<br><br>Em $occurrenceDate</p>
 	<p style="font-style: normal;">Resposta:</p>
 	<p style="font-style: normal; text-align: justify">$occurrence.answer.text<br><br>Em $answerDate</p>
 	<p>
-		Você também pode vizualizar esta $occurrence.type.label.toLowerCase() no portal do Ventanas sempre que desejar.
+		Você também pode vizualizar esta $occurrenceLabel no portal do Ventanas sempre que desejar.
 	</p>
 	<div class="moz-signature"><br>
       <div class="moz-signature">

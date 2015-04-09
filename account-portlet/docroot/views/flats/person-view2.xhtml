@@ -19,7 +19,7 @@
 				<p:commandLink title="Excluir usuários selecionados" actionListener="#{personViewer.onPeopleDelete}" 
 								partialSubmit="true" process="@this,personTable" update="personTable" style="font-size: 12px; margin: 0; padding:0">
 					<h:graphicImage value="../images/user_erase.png" width="30" height="30" style="margin: 0; vertical-align: middle"/>
-					<p:confirm header="#{msg['main.delete.confirm']}" message="#{msg['person.delete.message']}" icon="ui-icon-alert"/>
+					<p:confirm header="#{msg['person.delete.confirm']}" message="#{msg['person.delete.message']}" icon="ui-icon-alert"/>
 				</p:commandLink>
 			</p:column>
 			<p:column>

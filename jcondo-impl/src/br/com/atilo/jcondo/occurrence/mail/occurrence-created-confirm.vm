@@ -4,13 +4,8 @@
     <title>[Portal Ventanas]</title>
   </head>
   <body text="#000000" bgcolor="#FFFFFF">
-	<p>Prezado Síndico,</p>
-	<p>A ocorrência a seguir foi gerada e requer sua atenção:</p>
-	<p style="font-style: italic; text-align: justify">$occurrence</p>
-	<p style="font-style: italic;">$resident</p>
-	<p>
-	<a href="http://www.ventanasresidencial.com.br/group/control_panel/manage?p_p_id=bookadmin_WAR_bookportlet&p_p_lifecycle=0&p_p_state=maximized&p_p_mode=view&doAsGroupId=10179">Clique aqui para responder a ocorrência</a>
-	</p>
+	<p>Prezado Condômino,</p>
+	<p>A sua $occurrenceLabel de número $occurrence.code, foi registrada com sucesso. O prazo para resposta é de até 7 dias corridos. Você será notificado por e-mail quando sua resposta for registrada.</p>
 	<div class="moz-signature"><br>
       <div class="moz-signature">
         <table cellpadding="0" cellspacing="0" width="700px" border="0">

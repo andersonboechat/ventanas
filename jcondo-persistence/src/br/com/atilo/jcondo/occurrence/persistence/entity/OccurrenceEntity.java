@@ -6,7 +6,6 @@ import br.com.atilo.jcondo.core.persistence.entity.PersonEntity;
 
 import java.util.Date;
 
-import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
@@ -44,11 +43,11 @@ public class OccurrenceEntity extends BaseEntity {
 	private Date date;
 
 	@OneToOne
-	@JoinColumn(name="personId")
+	@JoinColumn(name="personId", updatable=false)
 	private PersonEntity person;
 
-	@OneToOne(cascade=CascadeType.ALL)
-	@JoinColumn(name="answerId")
+	@OneToOne
+	@JoinColumn(name="answerId", updatable=false)
 	private AnswerEntity answer;
 
 	public OccurrenceEntity() {
