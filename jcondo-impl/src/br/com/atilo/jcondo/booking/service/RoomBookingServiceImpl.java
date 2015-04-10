@@ -14,9 +14,11 @@ import org.joda.time.Interval;
 import br.com.abware.jcondo.booking.model.BookingStatus;
 import br.com.abware.jcondo.booking.model.Room;
 import br.com.abware.jcondo.booking.model.RoomBooking;
+import br.com.abware.jcondo.core.Permission;
 import br.com.abware.jcondo.core.model.Person;
 import br.com.abware.jcondo.exception.BusinessException;
 import br.com.atilo.jcondo.booking.persistence.manager.RoomBookingManagerImpl;
+import br.com.atilo.jcondo.core.persistence.manager.SecurityManagerImpl;
 
 public class RoomBookingServiceImpl {
 
@@ -34,6 +36,99 @@ public class RoomBookingServiceImpl {
 	
 	private RoomBookingManagerImpl bookingManager = new RoomBookingManagerImpl();
 
+	private SecurityManagerImpl securityManager = new SecurityManagerImpl();
+	
+	private void checkAvailability(RoomBooking booking) throws Exception {
+		List<RoomBooking> bookings = bookingManager.findByPeriod(booking.getResource(), booking.getBeginDate(), booking.getEndDate());
+
+		if (RoomServiceImpl.CINEMA == booking.getResource().getId()) {
+			List<RoomBooking> overlapCancelledBkgs = new ArrayList<RoomBooking>();
+			Interval interval = new Interval(booking.getBeginDate().getTime(), booking.getEndDate().getTime());
+
+			for (RoomBooking b : bookings) {
+				Interval i = new Interval(b.getBeginDate().getTime(), b.getEndDate().getTime());
+
+				if (interval.overlaps(i)) {
+					if (!BookingStatus.CANCELLED.equals(b.getStatus())) {
+						throw new BusinessException(null, "register.already.done.failure", booking.getResource().getName(), 
+													DateFormatUtils.format(booking.getBeginDate(), "dd/MM/yyyy"),
+													DateFormatUtils.format(booking.getBeginDate(), "HH:mm'h'"), 
+													DateFormatUtils.format(booking.getEndDate(), "HH:mm'h'"));
+					} else {
+						overlapCancelledBkgs.add(booking);
+					}
+				}
+			}
+
+			for(RoomBooking b: overlapCancelledBkgs) {
+				delete(b, false);
+			}
+		} else {
+			RoomBooking b = CollectionUtils.isEmpty(bookings) ? null : bookings.get(0);
+
+			if (b != null && !BookingStatus.CANCELLED.equals(b.getStatus())) {
+				throw new BusinessException(null, "register.already.done.failure", booking.getResource().getName(), 
+											DateFormatUtils.format(booking.getBeginDate(), "dd/MM/yyyy"),
+											DateFormatUtils.format(booking.getBeginDate(), "HH:mm'h'"), 
+											DateFormatUtils.format(booking.getEndDate(), "HH:mm'h'"));
+			}
+		}
+	}
+
+	private RoomBooking delete(RoomBooking booking, boolean checkPermission) throws Exception {
+		if (checkPermission && !securityManager.hasPermission(booking, Permission.DELETE)) {
+			throw new BusinessException(null, "booking.delete.denied");
+		}
+
+		RoomBooking b = bookingManager.findById(booking.getId());
+
+		if (b == null || !BookingStatus.CANCELLED.equals(b.getStatus())) {
+			throw new BusinessException(null, "register.booking.not.cancelled");			
+		}
+
+		b.setStatus(BookingStatus.DELETED);
+		bookingManager.save(b);
+		LOGGER.info("Booking set as deleted: " + booking);
+
+		bookingManager.delete(b);
+		LOGGER.info("Booking deleted: " + booking);
+		
+		return b;
+	}
+	
+	public RoomBooking delete(RoomBooking booking) throws Exception {
+		return delete(booking, true);
+	}
+
+	public RoomBooking cancel(RoomBooking booking) throws Exception {
+		if (!securityManager.hasPermission(booking, Permission.UPDATE)) {
+			throw new BusinessException(null, "booking.cancel.denied");
+		}
+
+		RoomBooking b = bookingManager.findById(booking.getId());
+
+		if (b == null) {
+			throw new BusinessException(null, "register.booking.not.found");			
+		}
+
+		if (BookingStatus.CANCELLED.equals(b.getStatus())) {
+			return booking;
+		}
+
+		b.setStatus(BookingStatus.CANCELLED);
+		b = bookingManager.save(b);
+
+		LOGGER.info("Booking cancelled: " + booking);
+
+		Date today = new Date();
+		if (!today.after(DateUtils.addDays(b.getBeginDate(), -BKG_CANCEL_DEADLINE))) {
+			LOGGER.info("Booking cancelled within deadline on " + DateFormatUtils.format(today, "dd/MM/yyyy"));
+			b = delete(b, false);
+			return null;
+		}
+
+		return b;
+	}
 
 	public List<RoomBooking> getBookings(Person person) throws Exception {
 		return bookingManager.findByPerson(person);
@@ -44,6 +139,10 @@ public class RoomBookingServiceImpl {
 	}
 
 	public RoomBooking book(RoomBooking booking) throws Exception {
+		if (!securityManager.hasPermission(booking, Permission.ADD)) {
+			throw new BusinessException(null, "booking.create.denied");
+		}
+
 		Date today = DateUtils.truncate(new Date(), Calendar.DAY_OF_MONTH);
 
 		if (booking.getBeginDate().before(today)) {
@@ -86,85 +185,4 @@ public class RoomBookingServiceImpl {
 		booking.setStatus(BookingStatus.BOOKED);
 		return bookingManager.save(booking);
 	}
-	
-	private void checkAvailability(RoomBooking booking) throws Exception {
-		List<RoomBooking> bookings = bookingManager.findByPeriod(booking.getResource(), booking.getBeginDate(), booking.getEndDate());
-
-		if (RoomServiceImpl.CINEMA == booking.getResource().getId()) {
-			List<RoomBooking> overlapCancelledBkgs = new ArrayList<RoomBooking>();
-			Interval interval = new Interval(booking.getBeginDate().getTime(), booking.getEndDate().getTime());
-
-			for (RoomBooking b : bookings) {
-				Interval i = new Interval(b.getBeginDate().getTime(), b.getEndDate().getTime());
-
-				if (interval.overlaps(i)) {
-					if (!BookingStatus.CANCELLED.equals(b.getStatus())) {
-						throw new BusinessException(null, "register.already.done.failure", booking.getResource().getName(), 
-													DateFormatUtils.format(booking.getBeginDate(), "dd/MM/yyyy"),
-													DateFormatUtils.format(booking.getBeginDate(), "HH:mm'h'"), 
-													DateFormatUtils.format(booking.getEndDate(), "HH:mm'h'"));
-					} else {
-						overlapCancelledBkgs.add(booking);
-					}
-				}
-			}
-
-			for(RoomBooking b: overlapCancelledBkgs) {
-				delete(b);
-			}
-		} else {
-			RoomBooking b = CollectionUtils.isEmpty(bookings) ? null : bookings.get(0);
-
-			if (b != null && !BookingStatus.CANCELLED.equals(b.getStatus())) {
-				throw new BusinessException(null, "register.already.done.failure", booking.getResource().getName(), 
-											DateFormatUtils.format(booking.getBeginDate(), "dd/MM/yyyy"),
-											DateFormatUtils.format(booking.getBeginDate(), "HH:mm'h'"), 
-											DateFormatUtils.format(booking.getEndDate(), "HH:mm'h'"));
-			}
-		}
-	}
-
-	public RoomBooking cancel(RoomBooking booking) throws Exception {
-		RoomBooking b = bookingManager.findById(booking.getId());
-
-		if (b == null) {
-			throw new BusinessException(null, "register.booking.not.found");			
-		}
-
-		if (BookingStatus.CANCELLED.equals(b.getStatus())) {
-			return booking;
-		}
-
-		b.setStatus(BookingStatus.CANCELLED);
-		b = bookingManager.save(b);
-
-		LOGGER.info("Booking cancelled: " + booking);
-
-		Date today = new Date();
-		if (!today.after(DateUtils.addDays(b.getBeginDate(), -BKG_CANCEL_DEADLINE))) {
-			LOGGER.info("Booking cancelled within deadline on " + DateFormatUtils.format(today, "dd/MM/yyyy"));
-			b = delete(b);
-			return null;
-		}
-
-		return b;
-	}
-
-	public RoomBooking delete(RoomBooking booking) throws Exception {
-		RoomBooking b = bookingManager.findById(booking.getId());
-
-		if (b == null || !BookingStatus.CANCELLED.equals(b.getStatus())) {
-			throw new BusinessException(null, "register.booking.not.cancelled");			
-		}
-
-		b.setStatus(BookingStatus.DELETED);
-		bookingManager.save(b);
-		LOGGER.info("Booking set as deleted: " + booking);
-
-		bookingManager.delete(b);
-		LOGGER.info("Booking deleted: " + booking);
-		
-		return b;
-	}
-
 }

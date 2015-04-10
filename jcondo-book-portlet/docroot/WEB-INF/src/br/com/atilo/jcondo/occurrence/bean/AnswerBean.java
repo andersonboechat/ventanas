@@ -9,6 +9,7 @@ import javax.faces.application.FacesMessage;
 import javax.faces.bean.ManagedBean;
 import javax.faces.bean.ViewScoped;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.log4j.Logger;
 import org.apache.myfaces.commons.util.MessageUtils;
 import org.primefaces.event.SelectEvent;
@@ -39,8 +40,9 @@ public class AnswerBean extends BaseBean {
 	public void init() {
 		try {
 			person = personService.getPerson();
-			model = new OccurrenceDataModel(occurrenceService.getOccurrences(null));
-			occurrence = model.getRowData();
+			List<Occurrence> occurrences = occurrenceService.getAllOccurrences(person);
+			model = new OccurrenceDataModel(occurrences);
+			occurrence = CollectionUtils.isEmpty(occurrences) ? new Occurrence(OccurrenceType.COMPLAINT, person) : model.getRowData();
 			answer = occurrence.getAnswer();
 			types = Arrays.asList(OccurrenceType.values());
 		} catch (Exception e) {

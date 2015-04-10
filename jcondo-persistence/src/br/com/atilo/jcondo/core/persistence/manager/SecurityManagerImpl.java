@@ -9,6 +9,7 @@ import com.liferay.portal.security.permission.ActionKeys;
 import com.liferay.portal.security.permission.PermissionChecker;
 import com.liferay.portal.service.GroupLocalServiceUtil;
 import com.liferay.portal.service.OrganizationLocalServiceUtil;
+import com.liferay.portal.service.ResourceLocalServiceUtil;
 import com.liferay.portal.service.RoleLocalServiceUtil;
 import com.liferay.portal.service.UserGroupRoleLocalServiceUtil;
 import com.liferay.portal.service.UserLocalServiceUtil;
@@ -45,6 +46,11 @@ public class SecurityManagerImpl {
 		} catch (Exception e) {
 			
 		}
+	}
+	
+	public void addPermission(Person person, BaseModel resource, Permission permission) throws Exception {
+		ResourceLocalServiceUtil.addResources(helper.getCompanyId(), 0, person.getUserId(), 
+											  resource.getClass().getName(), resource.getId(), false, false, false);
 	}
 
 	public void updatePassword(Person person, String password, String newPassword) throws Exception {
@@ -255,13 +261,17 @@ public class SecurityManagerImpl {
 			} else if (model instanceof Membership) {
 				return checkPersonTypePermission(permissionChecker, ((Membership) model).getType(), ((Membership) model).getDomain(), permission);
 			} else {
-				throw new SystemException("model.not.supported");
+				return checkPermission(permissionChecker, model, permission);
 			}
 		} catch (Exception e) {
 			throw new ApplicationException(e, "fail.check.permission");
 		}
 	}
 
+	private boolean checkPermission(PermissionChecker permissionChecker, BaseModel model, Permission permission) throws Exception {
+		return permissionChecker.hasPermission(helper.getUser().getGroupId(), model.getClass().getName(), model.getId(), permission.name());
+	}
+	
 	private boolean checkPersonTypePermission(PermissionChecker permissionChecker, PersonType type, Domain domain, Permission permission) throws Exception {
         Organization organization = OrganizationLocalServiceUtil.getOrganization(domain.getRelatedId());
         long id;

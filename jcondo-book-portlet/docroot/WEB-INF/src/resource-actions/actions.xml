@@ -1,0 +1,41 @@
+<?xml version="1.0"?>
+<!DOCTYPE resource-action-mapping PUBLIC "-//Liferay//DTD Resource Action Mapping 6.1.0//EN" "http://www.liferay.com/dtd/liferay-resource-action-mapping_6_1_0.dtd">
+<resource-action-mapping>
+	<model-resource>
+		<model-name>br.com.abware.jcondo.crm.model.Occurrence</model-name>
+		<portlet-ref>
+			<portlet-name>jcondo-book</portlet-name>
+		</portlet-ref>
+		<permissions>
+			<supports>
+				<action-key>ADD</action-key>
+				<action-key>VIEW</action-key>
+			</supports>
+			<site-member-defaults/>
+			<guest-defaults/>
+			<guest-unsupported/>
+			<owner-defaults>
+				<action-key>VIEW</action-key>
+			</owner-defaults>
+		</permissions>
+	</model-resource>
+	<model-resource>
+		<model-name>br.com.abware.jcondo.crm.model.Answer</model-name>
+		<portlet-ref>
+			<portlet-name>jcondo-book</portlet-name>
+		</portlet-ref>
+		<permissions>
+			<supports>
+				<action-key>ADD</action-key>
+				<action-key>UPDATE</action-key>
+				<action-key>VIEW</action-key>
+			</supports>
+			<site-member-defaults/>
+			<guest-defaults/>
+			<guest-unsupported/>
+			<owner-defaults>
+				<action-key>VIEW</action-key>
+			</owner-defaults>
+		</permissions>
+	</model-resource>
+</resource-action-mapping>

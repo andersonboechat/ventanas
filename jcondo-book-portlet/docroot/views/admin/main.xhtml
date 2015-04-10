@@ -122,16 +122,16 @@
 					<p:column>
 						<h:outputText value="Resposta:" style="font-size: 15px; font-weight: bold; display: block;"/>
 						<h:outputText value="registrada em " rendered="#{answerBean.answer.date != null}"/>
-						<h:outputText value="#{answerBean.occurrence.answer.date}">
+						<h:outputText value="#{answerBean.answer.date}">
 							<f:convertDateTime pattern="dd 'de' MMMM 'de' yyyy 'às' HH:mm"/><!-- timeZone="America/Sao_Paulo"-->
 						</h:outputText>
 					</p:column>
 					<p:column>
 						<h:panelGrid columns="2" columnClasses="portraitClm,textClm" style="width: 100%;">
 							<p:column>
-								<p:graphicImage id="portrait2" value="#{answerBean.person.picture.path}" width="95" height="140"/>
-								<h:outputText value="#{answerBean.person.fullName}" style="display: block;"/>
-								<h:outputText value="#{answerBean.displayFlat(answerBean.person)}"/>
+								<p:graphicImage id="portrait2" value="#{answerBean.answer.person.picture.path}" width="95" height="140"/>
+								<h:outputText value="#{answerBean.answer.person.fullName}" style="display: block;"/>
+								<h:outputText value="#{answerBean.displayFlat(answerBean.answer.person)}"/>
 							</p:column>
 							<p:column>
 								<p:inputTextarea id="answerText" required="true" requiredMessage="#{msg['empty.answer']}"

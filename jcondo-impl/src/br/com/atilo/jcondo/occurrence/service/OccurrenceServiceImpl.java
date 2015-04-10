@@ -1,6 +1,7 @@
 package br.com.atilo.jcondo.occurrence.service;
 
 import java.text.MessageFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.ResourceBundle;
@@ -13,10 +14,12 @@ import com.liferay.portal.kernel.velocity.VelocityContext;
 import com.liferay.portal.kernel.velocity.VelocityEngineUtil;
 import com.liferay.util.ContentUtil;
 
+import br.com.abware.jcondo.core.Permission;
 import br.com.abware.jcondo.core.model.Flat;
 import br.com.abware.jcondo.core.model.Person;
 import br.com.abware.jcondo.crm.model.Answer;
 import br.com.abware.jcondo.crm.model.Occurrence;
+import br.com.atilo.jcondo.core.persistence.manager.SecurityManagerImpl;
 import br.com.atilo.jcondo.core.service.FlatServiceImpl;
 import br.com.atilo.jcondo.occurrence.persistence.manager.AnswerManagerImpl;
 import br.com.atilo.jcondo.occurrence.persistence.manager.OccurrenceManagerImpl;
@@ -32,89 +35,12 @@ public class OccurrenceServiceImpl {
 	
 	private AnswerManagerImpl answerManager = new AnswerManagerImpl();
 	
+	private SecurityManagerImpl securityManager = new SecurityManagerImpl();
+	
 	private FlatServiceImpl flatService = new FlatServiceImpl();
 
 	private String generateCode(Occurrence occurrence) {
 		return String.valueOf(occurrence.getId() + occurrence.getDate().getTime());
-	}
-	
-	protected Occurrence answer(Occurrence occurrence, boolean draft) throws Exception {
-		if (occurrence.getAnswer() == null) {
-			throw new Exception("occurrence answer not specified");
-		}
-
-		Occurrence o = occurrenceManager.findById(occurrence.getId());
-
-		if (o == null) {
-			throw new Exception("occurrence not exist");
-		}
-
-		boolean create = false;
-		Answer answer = o.getAnswer();
-
-		if (answer != null) {
-			if (answer.getDate() != null) {	
-				throw new Exception("occurrence already answered: " + occurrence);
-			}
-		} else {
-			answer = new Answer();
-			create = true;
-		}
-
-		answer.setDate(draft ? null : new Date());
-		answer.setText(occurrence.getAnswer().getText());
-		answer.setPerson(occurrence.getAnswer().getPerson());
-
-		answer = answerManager.save(answer);
-		o.setAnswer(answer);
-
-		return create ? occurrenceManager.save(o) : o;
-	}
-
-	public Occurrence answer(Occurrence occurrence) throws Exception {
-		Occurrence o = answer(occurrence, false);
-
-		try {
-			notifyOccurrenceAnswered(o);
-		} catch (Exception e) {
-			LOGGER.error("failure on sending the occurrence answered notification", e);
-		}
-
-		return o;
-	}
-
-	public Occurrence saveAsDraft(Occurrence occurrence) throws Exception {
-		return answer(occurrence, true);
-	}
-
-	public List<Occurrence> getOccurrences(Person person) throws Exception {
-		if (person == null) {
-			return occurrenceManager.findAll();
-		}
-		return occurrenceManager.findOccurrences(person);
-	}
-	
-	public Occurrence register(Occurrence occurrence) throws Exception {
-		if (occurrenceManager.findById(occurrence.getId()) != null || 
-				occurrenceManager.findOccurrence(occurrence.getCode()) != null) {
-			throw new Exception("occurrence already exists");
-		}
-
-		occurrence.setId(0);
-		occurrence.setDate(new Date());
-		occurrence.setCode(generateCode(occurrence));
-		occurrence.setAnswer(null);
-
-		Occurrence o = occurrenceManager.save(occurrence);
-
-		try {
-			notifyOccurrenceCreate(o);
-			notifyOccurrenceConfirm(o);
-		} catch (Exception e) {
-			LOGGER.error("failure on sending the occurrence answered notification", e);
-		}
-
-		return o;
 	}
 
 	private void notifyOccurrenceConfirm(Occurrence occurrence) throws Exception {
@@ -141,7 +67,6 @@ public class OccurrenceServiceImpl {
 
 		LOGGER.info("Sucesso no envio da confirmacao de registro da ocorrencia " + occurrence.getId());
 	}
-	
 	
 	private void notifyOccurrenceCreate(Occurrence occurrence) throws Exception {
 		LOGGER.info("Enviando notificacao da ocorrencia " + occurrence.getId());
@@ -194,6 +119,105 @@ public class OccurrenceServiceImpl {
 												  rb.getString(occurrence.getType().getLabel()).toLowerCase());
 
 		MailService.send(mailTo, mailSubject, mailBody);
+	}
+
+	protected Occurrence answer(Occurrence occurrence, boolean draft) throws Exception {
+		if (!securityManager.hasPermission(occurrence.getAnswer(), Permission.ADD)) {
+			throw new Exception("occurrence answering denied");
+		}
+
+		if (occurrence.getAnswer() == null) {
+			throw new Exception("occurrence answer not specified");
+		}
+
+		Occurrence o = occurrenceManager.findById(occurrence.getId());
+
+		if (o == null) {
+			throw new Exception("occurrence not exist");
+		}
+
+		boolean create = false;
+		Answer answer = o.getAnswer();
+
+		if (answer != null) {
+			if (answer.getDate() != null) {	
+				throw new Exception("occurrence already answered: " + occurrence);
+			}
+		} else {
+			answer = new Answer();
+			create = true;
+		}
+
+		answer.setDate(draft ? null : new Date());
+		answer.setText(occurrence.getAnswer().getText());
+		answer.setPerson(occurrence.getAnswer().getPerson());
+
+		answer = answerManager.save(answer);
+		o.setAnswer(answer);
+
+		return create ? occurrenceManager.save(o) : o;
+	}
+
+	public Occurrence answer(Occurrence occurrence) throws Exception {
+		Occurrence o = answer(occurrence, false);
+
+		securityManager.addPermission(o.getPerson(), o.getAnswer(), Permission.VIEW);
+
+		try {
+			notifyOccurrenceAnswered(o);
+		} catch (Exception e) {
+			LOGGER.error("failure on sending the occurrence answered notification", e);
+		}
+
+		return o;
+	}
+
+	public Occurrence saveAsDraft(Occurrence occurrence) throws Exception {
+		return answer(occurrence, true);
+	}
+
+	public List<Occurrence> getOccurrences(Person person) throws Exception {
+		return occurrenceManager.findOccurrences(person);
+	}
+
+	public List<Occurrence> getAllOccurrences(Person person) throws Exception {
+		List<Occurrence> occurrences = new ArrayList<Occurrence>();
+
+		for (Occurrence occurrence : occurrenceManager.findAll()) {
+			if (securityManager.hasPermission(occurrence, Permission.VIEW)) {
+				occurrences.add(occurrence);
+			}
+		}
+
+		return occurrences;
+	}
+	
+	public Occurrence register(Occurrence occurrence) throws Exception {
+		if (!securityManager.hasPermission(occurrence, Permission.ADD)) {
+			throw new Exception("occurrence creation denied");
+		}
+
+		if (occurrenceManager.findById(occurrence.getId()) != null || 
+				occurrenceManager.findOccurrence(occurrence.getCode()) != null) {
+			throw new Exception("occurrence already exists");
+		}
+
+		occurrence.setId(0);
+		occurrence.setDate(new Date());
+		occurrence.setCode(generateCode(occurrence));
+		occurrence.setAnswer(null);
+
+		Occurrence o = occurrenceManager.save(occurrence);
+		securityManager.addPermission(o.getPerson(), o, Permission.VIEW);
+
+		try {
+			notifyOccurrenceCreate(o);
+			notifyOccurrenceConfirm(o);
+		} catch (Exception e) {
+			LOGGER.error("failure on sending the occurrence answered notification", e);
+		}
+
+		return o;
 	}
 
 }
