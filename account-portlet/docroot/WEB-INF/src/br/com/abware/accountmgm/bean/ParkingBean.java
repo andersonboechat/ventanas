@@ -13,9 +13,9 @@ import org.apache.commons.collections.CollectionUtils;
 import org.apache.log4j.Logger;
 
 import br.com.abware.accountmgm.bean.model.ModelDataModel;
-import br.com.abware.accountmgm.model.Parking;
 import br.com.abware.jcondo.core.model.Domain;
 import br.com.abware.jcondo.core.model.Flat;
+import br.com.abware.jcondo.core.model.Parking;
 
 @ManagedBean
 @ViewScoped

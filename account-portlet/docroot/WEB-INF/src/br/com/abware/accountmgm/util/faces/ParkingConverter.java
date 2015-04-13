@@ -8,8 +8,8 @@ import org.apache.commons.collections.CollectionUtils;
 import org.primefaces.component.picklist.PickList;
 import org.primefaces.model.DualListModel;
 
-import br.com.abware.accountmgm.model.Parking;
 import br.com.abware.accountmgm.util.IdPredicate;
+import br.com.abware.jcondo.core.model.Parking;
 
 public class ParkingConverter implements Converter {
 

@@ -50,7 +50,7 @@ public class RoomBookingServiceImpl {
 
 				if (interval.overlaps(i)) {
 					if (!BookingStatus.CANCELLED.equals(b.getStatus())) {
-						throw new BusinessException(null, "register.already.done.failure", booking.getResource().getName(), 
+						throw new BusinessException("bkg.room.already.booked", booking.getResource().getName(), 
 													DateFormatUtils.format(booking.getBeginDate(), "dd/MM/yyyy"),
 													DateFormatUtils.format(booking.getBeginDate(), "HH:mm'h'"), 
 													DateFormatUtils.format(booking.getEndDate(), "HH:mm'h'"));
@@ -67,7 +67,7 @@ public class RoomBookingServiceImpl {
 			RoomBooking b = CollectionUtils.isEmpty(bookings) ? null : bookings.get(0);
 
 			if (b != null && !BookingStatus.CANCELLED.equals(b.getStatus())) {
-				throw new BusinessException(null, "register.already.done.failure", booking.getResource().getName(), 
+				throw new BusinessException("bkg.room.already.booked", booking.getResource().getName(), 
 											DateFormatUtils.format(booking.getBeginDate(), "dd/MM/yyyy"),
 											DateFormatUtils.format(booking.getBeginDate(), "HH:mm'h'"), 
 											DateFormatUtils.format(booking.getEndDate(), "HH:mm'h'"));
@@ -77,13 +77,13 @@ public class RoomBookingServiceImpl {
 
 	private RoomBooking delete(RoomBooking booking, boolean checkPermission) throws Exception {
 		if (checkPermission && !securityManager.hasPermission(booking, Permission.DELETE)) {
-			throw new BusinessException(null, "booking.delete.denied");
+			throw new BusinessException("bkg.delete.denied");
 		}
 
 		RoomBooking b = bookingManager.findById(booking.getId());
 
 		if (b == null || !BookingStatus.CANCELLED.equals(b.getStatus())) {
-			throw new BusinessException(null, "register.booking.not.cancelled");			
+			throw new BusinessException("bkg.not.cancelled");			
 		}
 
 		b.setStatus(BookingStatus.DELETED);
@@ -102,13 +102,13 @@ public class RoomBookingServiceImpl {
 
 	public RoomBooking cancel(RoomBooking booking) throws Exception {
 		if (!securityManager.hasPermission(booking, Permission.UPDATE)) {
-			throw new BusinessException(null, "booking.cancel.denied");
+			throw new BusinessException("bkg.cancel.denied");
 		}
 
 		RoomBooking b = bookingManager.findById(booking.getId());
 
 		if (b == null) {
-			throw new BusinessException(null, "register.booking.not.found");			
+			throw new BusinessException("bkg.not.found");			
 		}
 
 		if (BookingStatus.CANCELLED.equals(b.getStatus())) {
@@ -140,18 +140,18 @@ public class RoomBookingServiceImpl {
 
 	public RoomBooking book(RoomBooking booking) throws Exception {
 		if (!securityManager.hasPermission(booking, Permission.ADD)) {
-			throw new BusinessException(null, "booking.create.denied");
+			throw new BusinessException("bkg.create.denied");
 		}
 
 		Date today = DateUtils.truncate(new Date(), Calendar.DAY_OF_MONTH);
 
 		if (booking.getBeginDate().before(today)) {
-			throw new BusinessException(null, "register.past.date", DateFormatUtils.format(booking.getBeginDate(), "dd/MM/yyyy"),
+			throw new BusinessException("bkg.past.date", DateFormatUtils.format(booking.getBeginDate(), "dd/MM/yyyy"),
 										DateFormatUtils.format(today, "dd/MM/yyyy"));
 		}
 		
 		if (booking.getBeginDate().after(DateUtils.addDays(today, BKG_MAX_DAYS))) {
-			throw new BusinessException(null, "register.over.date", DateFormatUtils.format(booking.getBeginDate(), "dd/MM/yyyy"), BKG_MAX_DAYS, 
+			throw new BusinessException("bkg.over.date", DateFormatUtils.format(booking.getBeginDate(), "dd/MM/yyyy"), BKG_MAX_DAYS, 
 										DateFormatUtils.format(DateUtils.addDays(booking.getBeginDate(), -BKG_MAX_DAYS), "dd/MM/yyyy"));
 		}
 
@@ -159,23 +159,23 @@ public class RoomBookingServiceImpl {
 		Date maxDate = DateUtils.setHours(booking.getEndDate(), BKG_MAX_HOUR);
 
 		if (booking.getBeginDate().equals(booking.getEndDate()) || booking.getBeginDate().after(booking.getEndDate())) {
-			throw new BusinessException(null, "register.time.invalid.range", DateFormatUtils.format(booking.getBeginDate(), "HH:mm'h'"), 
+			throw new BusinessException("bkg.time.invalid.range", DateFormatUtils.format(booking.getBeginDate(), "HH:mm'h'"), 
 										DateFormatUtils.format(booking.getEndDate(), "HH:mm'h'"));
 		}
 
 		if (booking.getBeginDate().before(minDate)) {
-			throw new BusinessException(null, "register.time.bound.low", DateFormatUtils.format(booking.getBeginDate(), "HH:mm'h'"), 
+			throw new BusinessException("bkg.time.bound.low", DateFormatUtils.format(booking.getBeginDate(), "HH:mm'h'"), 
 										DateFormatUtils.format(minDate, "HH:mm'h'"));
 		}
 
 		if (booking.getEndDate().after(maxDate)) {
-			throw new BusinessException(null, "register.time.bound.high", DateFormatUtils.format(booking.getBeginDate(), "HH:mm'h'"), 
+			throw new BusinessException("bkg.time.bound.high", DateFormatUtils.format(booking.getBeginDate(), "HH:mm'h'"), 
 										DateFormatUtils.format(maxDate, "HH:mm'h'"));
 		}
 
 		if (RoomServiceImpl.CINEMA == booking.getResource().getId()) {
 			if (booking.getEndDate().after(DateUtils.addHours(booking.getBeginDate(), BKG_RANGE_HOUR))) {
-				throw new BusinessException(null, "register.time.exceeded.range", booking.getResource().getName(), 
+				throw new BusinessException("bkg.time.exceeded.range", booking.getResource().getName(), 
 											BKG_RANGE_HOUR + " horas");
 			}
 		}

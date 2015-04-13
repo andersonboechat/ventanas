@@ -7,10 +7,10 @@ import java.util.List;
 import javax.faces.bean.ManagedBean;
 import javax.faces.bean.ViewScoped;
 
+import org.apache.commons.beanutils.BeanUtils;
 import org.apache.log4j.Logger;
 
 import br.com.abware.accountmgm.bean.model.ModelDataModel;
-import br.com.abware.accountmgm.util.BeanUtils;
 import br.com.abware.jcondo.core.model.Document;
 import br.com.abware.jcondo.core.model.Domain;
 
@@ -51,7 +51,6 @@ public class DocumentBean extends BaseBean {
 
 	public void onCreate() {
 		document = new Document();
-		document.setDomain(new Domain());
 	}
 
 	public void onSave() throws Exception {

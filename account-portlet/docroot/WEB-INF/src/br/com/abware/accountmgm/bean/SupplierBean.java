@@ -8,10 +8,10 @@ import java.util.Map;
 import javax.faces.bean.ManagedBean;
 import javax.faces.bean.ViewScoped;
 
+import org.apache.commons.beanutils.BeanUtils;
 import org.apache.log4j.Logger;
 
 import br.com.abware.accountmgm.bean.model.ModelDataModel;
-import br.com.abware.accountmgm.util.BeanUtils;
 import br.com.abware.jcondo.core.SupplierStatus;
 import br.com.abware.jcondo.core.model.Domain;
 import br.com.abware.jcondo.core.model.Supplier;

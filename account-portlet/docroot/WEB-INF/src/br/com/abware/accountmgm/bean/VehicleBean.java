@@ -15,21 +15,22 @@ import javax.faces.context.FacesContext;
 import javax.faces.event.AjaxBehaviorEvent;
 import javax.faces.event.ValueChangeEvent;
 
+import org.apache.commons.beanutils.BeanUtils;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.log4j.Logger;
 import org.primefaces.context.RequestContext;
 import org.primefaces.event.FileUploadEvent;
 
 import br.com.abware.accountmgm.bean.model.ModelDataModel;
-import br.com.abware.accountmgm.exception.ModelExistException;
-import br.com.abware.accountmgm.model.Vehicle;
-import br.com.abware.accountmgm.model.VehicleType;
-import br.com.abware.accountmgm.util.BeanUtils;
+
 import br.com.abware.jcondo.core.model.Condominium;
 import br.com.abware.jcondo.core.model.Domain;
 import br.com.abware.jcondo.core.model.Flat;
 import br.com.abware.jcondo.core.model.Image;
 import br.com.abware.jcondo.core.model.Supplier;
+import br.com.abware.jcondo.core.model.Vehicle;
+import br.com.abware.jcondo.core.model.VehicleType;
+import br.com.abware.jcondo.exception.ModelExistException;
 
 @ViewScoped
 @ManagedBean
@@ -101,9 +102,9 @@ public class VehicleBean extends BaseBean {
 		try {
 			vehicle.setLicense(vehicle.getLicense().replaceAll("[^A-Za-z0-9]", ""));
 
-			if (visitor && vehicle.getDomain() != null && vehicle.getDomain().getId() > 0) {
-				vehicle.setDomain(null);
-			}
+//			if (visitor && vehicle.getDomain() != null && vehicle.getDomain().getId() > 0) {
+//				vehicle.setDomain(null);
+//			}
 
 			if (vehicle.getId() == 0) {
 				Vehicle v = vehicleService.register(vehicle);

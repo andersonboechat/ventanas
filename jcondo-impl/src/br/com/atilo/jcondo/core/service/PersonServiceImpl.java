@@ -135,11 +135,11 @@ public class PersonServiceImpl  {
 		}
 
 		if (StringUtils.isEmpty(person.getIdentity())) {
-			throw new ApplicationException(null, "identidade não fornecida");
+			throw new ApplicationException("identidade não fornecida");
 		}
 
 		if (getPerson(person.getIdentity()) != null) {
-			throw new ApplicationException(null, "existe usuario cadastrado com a identidade " + person.getIdentity());
+			throw new ApplicationException("existe usuario cadastrado com a identidade " + person.getIdentity());
 		}
 
 		validateDomains(person);
@@ -171,12 +171,12 @@ public class PersonServiceImpl  {
 		}
 
 		if (StringUtils.isEmpty(person.getIdentity())) {
-			throw new ApplicationException(null, "identidade não fornecida");
+			throw new ApplicationException("identidade não fornecida");
 		}
 
 		Person p = personManager.findById(person.getId());
 		if (p == null) {
-			throw new ApplicationException(null, "usuario nao cadastrado");
+			throw new ApplicationException("usuario nao cadastrado");
 		}
 
 		validateDomains(person);

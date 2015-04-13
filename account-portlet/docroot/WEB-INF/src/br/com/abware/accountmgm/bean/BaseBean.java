@@ -4,15 +4,15 @@ import java.util.Locale;
 import java.util.Observable;
 import java.util.ResourceBundle;
 
-import br.com.abware.accountmgm.persistence.manager.SecurityManagerImpl;
-import br.com.abware.accountmgm.service.core.AdministrationServiceImpl;
-import br.com.abware.accountmgm.service.core.DocumentServiceImpl;
-import br.com.abware.accountmgm.service.core.FlatServiceImpl;
-import br.com.abware.accountmgm.service.core.ParkingServiceImpl;
-import br.com.abware.accountmgm.service.core.PersonServiceImpl;
-import br.com.abware.accountmgm.service.core.SupplierServiceImpl;
-import br.com.abware.accountmgm.service.core.VehicleServiceImpl;
 import br.com.abware.jcondo.core.model.Condominium;
+
+import br.com.atilo.jcondo.core.service.AdministrationServiceImpl;
+import br.com.atilo.jcondo.core.service.DocumentServiceImpl;
+import br.com.atilo.jcondo.core.service.FlatServiceImpl;
+import br.com.atilo.jcondo.core.service.ParkingServiceImpl;
+import br.com.atilo.jcondo.core.service.PersonServiceImpl;
+import br.com.atilo.jcondo.core.service.SupplierServiceImpl;
+import br.com.atilo.jcondo.core.service.VehicleServiceImpl;
 
 public abstract class BaseBean extends Observable {
 
@@ -27,8 +27,6 @@ public abstract class BaseBean extends Observable {
 	protected static final SupplierServiceImpl supplierService = new SupplierServiceImpl();
 	
 	protected static final ParkingServiceImpl parkingService = new ParkingServiceImpl();
-	
-	protected static final SecurityManagerImpl securityManager = new SecurityManagerImpl();
 	
 	protected static final DocumentServiceImpl documentService = new DocumentServiceImpl();
 

@@ -15,7 +15,6 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.apache.myfaces.commons.util.MessageUtils;
 
-import br.com.abware.accountmgm.service.core.PersonDetailServiceImpl;
 import br.com.abware.accountmgm.util.KinTypePredicate;
 import br.com.abware.accountmgm.util.RelativeTransformer;
 import br.com.abware.jcondo.core.Gender;
@@ -27,6 +26,8 @@ import br.com.abware.jcondo.core.model.Membership;
 import br.com.abware.jcondo.core.model.Person;
 import br.com.abware.jcondo.core.model.Phone;
 import br.com.abware.jcondo.core.model.PhoneType;
+
+import br.com.atilo.jcondo.core.service.PersonDetailServiceImpl;
 
 @ManagedBean
 @ViewScoped

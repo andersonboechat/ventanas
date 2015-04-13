@@ -100,11 +100,11 @@ public class CalendarBean extends BaseBean {
 				booking = bookingService.book(booking);
 				model.addEvent(model.createEvent(booking));
 
-				MessageUtils.addMessage(FacesMessage.SEVERITY_INFO, "register.success", null);
+				MessageUtils.addMessage(FacesMessage.SEVERITY_INFO, "bkg.success", null);
 
 				if (isCancelEnable()) {
 					Date deadline = DateUtils.addDays(booking.getBeginDate(), -RoomBookingServiceImpl.BKG_CANCEL_DEADLINE);
-					MessageUtils.addMessage(FacesMessage.SEVERITY_INFO, "register.cancel.notify", 
+					MessageUtils.addMessage(FacesMessage.SEVERITY_INFO, "bkg.cancel.notify", 
 											new String[] {DateFormatUtils.format(deadline, "dd/MM/yyyy")});
 				}
 
@@ -120,7 +120,7 @@ public class CalendarBean extends BaseBean {
 			RequestContext.getCurrentInstance().addCallbackParam("exception", true);
 		} catch (Exception e) {
 			LOGGER.fatal(e.getMessage(), e);
-			MessageUtils.addMessage(FacesMessage.SEVERITY_FATAL, "register.runtime.failure", null);
+			MessageUtils.addMessage(FacesMessage.SEVERITY_FATAL, "bkg.failure", null);
 		}
 
 		LOGGER.trace("Method out");
@@ -137,11 +137,11 @@ public class CalendarBean extends BaseBean {
 				if (booking.getStatus() == BookingStatus.DELETED) {
 					notifyObservers(new BookingEvent(booking, EventType.BOOK_DELETE));
 				}
-				MessageUtils.addMessage(FacesMessage.SEVERITY_INFO, "register.cancel.success", null);
+				MessageUtils.addMessage(FacesMessage.SEVERITY_INFO, "bkg.cancel.success", null);
 			}
 		} catch (Exception e) {
 			LOGGER.error(e.getMessage(), e);
-			MessageUtils.addMessage(FacesMessage.SEVERITY_FATAL, "register.cancel.failure", null);
+			MessageUtils.addMessage(FacesMessage.SEVERITY_FATAL, "bkg.cancel.failure", null);
 		}
 	}
 
@@ -150,14 +150,14 @@ public class CalendarBean extends BaseBean {
 			bookingService.delete(booking);
 			setChanged();
 			notifyObservers(new BookingEvent(booking, EventType.BOOK_DELETE));
-			MessageUtils.addMessage(FacesMessage.SEVERITY_INFO, "register.delete.success", null);
+			MessageUtils.addMessage(FacesMessage.SEVERITY_INFO, "bkg.delete.success", null);
 		} catch (BusinessException e) {
 			LOGGER.warn(e.getMessage(), e);
 			MessageUtils.addMessage(FacesMessage.SEVERITY_WARN, e.getMessage(), e.getArgs());
 			RequestContext.getCurrentInstance().addCallbackParam("exception", true);
 		} catch (Exception e) {
 			LOGGER.error(e.getMessage(), e);
-			MessageUtils.addMessage(FacesMessage.SEVERITY_FATAL, "register.runtime.failure", null);
+			MessageUtils.addMessage(FacesMessage.SEVERITY_FATAL, "bkg.failure", null);
 		}
 	}
 
@@ -167,7 +167,7 @@ public class CalendarBean extends BaseBean {
 		if (booking.getResource().getId() == RoomServiceImpl.CINEMA || booking.getStatus() == BookingStatus.CANCELLED) {
 			createBooking(e.getStartDate());
 		} else {
-			MessageUtils.addMessage(FacesMessage.SEVERITY_WARN, "booking.already.exists", null);
+			MessageUtils.addMessage(FacesMessage.SEVERITY_WARN, "bkg.room.already.booked", null);
 			RequestContext.getCurrentInstance().addCallbackParam("exception", true);
 		}
 	}
@@ -177,7 +177,7 @@ public class CalendarBean extends BaseBean {
 		Date bookingDate = (Date) event.getObject();
 
 		if (bookingDate.before(today)) {
-			MessageUtils.addMessage(FacesMessage.SEVERITY_WARN, "register.past.date", new String[] {
+			MessageUtils.addMessage(FacesMessage.SEVERITY_WARN, "bkg.past.date", new String[] {
 									DateFormatUtils.format(bookingDate, "dd/MM/yyyy"), 
 									DateFormatUtils.format(today, "dd/MM/yyyy")});
 			RequestContext.getCurrentInstance().addCallbackParam("exception", true);
@@ -189,7 +189,7 @@ public class CalendarBean extends BaseBean {
 		if (model.getRoom().getId() == RoomServiceImpl.CINEMA || booking == null || booking.getStatus() == BookingStatus.CANCELLED) {
 			createBooking(bookingDate);
 		} else {
-			MessageUtils.addMessage(FacesMessage.SEVERITY_WARN, "booking.already.exists", null);
+			MessageUtils.addMessage(FacesMessage.SEVERITY_WARN, "bkg.room.already.booked", null);
 			RequestContext.getCurrentInstance().addCallbackParam("exception", true);
 		}
 	}

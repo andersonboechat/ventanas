@@ -3,6 +3,9 @@
 	<name>account-portlet</name>
 	<comment></comment>
 	<projects>
+		<project>jcondo-impl</project>
+		<project>jcondo-persistence</project>
+		<project>jcondo-commons</project>
 	</projects>
 	<buildSpec>
 		<buildCommand>

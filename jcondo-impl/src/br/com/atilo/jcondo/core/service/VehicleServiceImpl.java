@@ -6,20 +6,20 @@ import java.util.List;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 
+import br.com.abware.jcondo.exception.ModelExistException;
+import br.com.abware.jcondo.core.model.Parking;
+import br.com.abware.jcondo.core.model.Vehicle;
+import br.com.abware.jcondo.core.model.VehicleType;
+import br.com.atilo.jcondo.core.persistence.manager.SecurityManagerImpl;
+import br.com.atilo.jcondo.core.persistence.manager.VehicleManagerImpl;
 import br.com.abware.jcondo.core.Permission;
 import br.com.abware.jcondo.core.model.Administration;
 import br.com.abware.jcondo.core.model.Domain;
 import br.com.abware.jcondo.core.model.Flat;
 import br.com.abware.jcondo.core.model.Image;
-import br.com.abware.jcondo.core.model.Parking;
 import br.com.abware.jcondo.core.model.Person;
-import br.com.abware.jcondo.core.model.Vehicle;
-import br.com.abware.jcondo.core.model.VehicleType;
 import br.com.abware.jcondo.core.service.BaseService;
-import br.com.abware.jcondo.exception.ModelExistException;
-
-import br.com.atilo.jcondo.core.persistence.manager.SecurityManagerImpl;
-import br.com.atilo.jcondo.core.persistence.manager.VehicleManagerImpl;
+import br.com.abware.jcondo.exception.BusinessException;
 
 public class VehicleServiceImpl implements BaseService<Vehicle> {
 
@@ -47,27 +47,26 @@ public class VehicleServiceImpl implements BaseService<Vehicle> {
 		Vehicle vehicle = vehicleManager.findById(vehicleId);
 
 		if (vehicle == null) {
-			throw new Exception("veiculo nao cadastrado");
+			throw new BusinessException("vhc.not.found", vehicle);
 		}
 
 //		if (!securityManager.hasPermission(vehicle, Permission.VIEW)) {
-//			throw new Exception("sem permissao para visualizar o veiculo " + vehicle);
+//			throw new BusinessException("vhc.view.denied", vehicle);
 //		}
 
 		return vehicle;
 	}
 
-	public Vehicle getVehicle(String license) {
+	public Vehicle getVehicle(String license)  {
 		Vehicle vehicle = null;
 		try {
 			vehicle = vehicleManager.findByLicense(license);
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 
 //		if (!securityManager.hasPermission(vehicle, Permission.VIEW)) {
-//			throw new Exception("sem permissao para visualizar o veiculo " + vehicle);
+//			throw new BusinessException("vhc.view.denied", vehicle);
 //		}
 
 		return vehicle;
@@ -84,25 +83,28 @@ public class VehicleServiceImpl implements BaseService<Vehicle> {
 			CollectionUtils.addAll(vehicles, vehicleManager.findVehicles(flat).iterator());
 		}
 
-		// TODO verificar permissao de visualizar veiculos de visitantes
+		return vehicles;
+	}
+
+	public List<Vehicle> getAllVehicles() throws Exception {
 //		if (!securityManager.hasPermission(new Vehicle(), Permission.VIEW)) {
-			CollectionUtils.addAll(vehicles, vehicleManager.findVehicles(new Flat()).iterator());
+//			throw new BusinessException("vhc.view.denied");
 //		}
 
-		return vehicles;
+		return vehicleManager.findAll();
 	}
 
 	public Vehicle register(Vehicle vehicle) throws Exception {
 //		if (!securityManager.hasPermission(vehicle, Permission.ADD)) {
-//			throw new Exception("sem permissao para cadastrar veiculos");
+//			throw new BusinessException("vhc.create.denied");		
 //		}
 
 		if (StringUtils.isEmpty(vehicle.getLicense())) {
-			throw new Exception("placa nao especificada");
+			throw new BusinessException("vhc.license.undefinied");
 		}
 
 		if(vehicle.getType() != VehicleType.BIKE && !vehicle.getLicense().matches("[A-Za-z]{3,3}[0-9]{4,4}")) {
-			throw new Exception("placa invalida");
+			throw new BusinessException("vhc.license.invalid");
 		}
 
 		Vehicle v = vehicleManager.findByLicense(vehicle.getLicense());
@@ -110,26 +112,30 @@ public class VehicleServiceImpl implements BaseService<Vehicle> {
 		if (v != null) {
 			throw new ModelExistException(null, "vehicle.exists");
 		}
+		
+		if (vehicle.getDomain() == null) {
+			throw new BusinessException("vhc.domain.undefinied");
+		} else {
+			if (!(vehicle.getDomain() instanceof Flat)) {
+				throw new BusinessException("vhc.domain.not.flat");
+			}
+			if (flatService.getFlat(vehicle.getDomain().getId()) == null) {
+				throw new BusinessException("vhc.domain.unknown", vehicle.getDomain().getId());
+			}
+		}
 
 		// Verifica se tem vaga para o apartamento especificado
 		// Visitantes podem acessar o condominio apenas para deixar/buscar passageiros
-		if(vehicle.getType() != VehicleType.BIKE) {
-			if (vehicle.getDomain() != null) {
-				if (vehicle.getDomain().getId() <= 0 || 
-						(vehicle.getDomain() instanceof Flat && flatService.getFlat(vehicle.getDomain().getId()) == null)) {
-					throw new Exception("dominio nao encontrado");
-				} else {
-					List<Parking> parkings = parkingService.getFreeParkings(vehicle.getDomain());
+		if(vehicle.getType() == VehicleType.CAR) {
+			List<Parking> parkings = parkingService.getFreeParkings(vehicle.getDomain());
 
-					if (CollectionUtils.isEmpty(parkings)) {
-						throw new Exception("nao ha vagas disponíveis");
-					}
-
-					Parking parking = parkings.get(0);
-					parking.setVehicle(v);
-					parkingService.update(parking);
-				}
+			if (CollectionUtils.isEmpty(parkings)) {
+				throw new BusinessException("vhc.parking.unavailable");
 			}
+
+			Parking parking = parkings.get(0);
+			parking.setVehicle(v);
+			parkingService.update(parking);
 		}
 
 		return vehicleManager.save(vehicle);
@@ -137,7 +143,7 @@ public class VehicleServiceImpl implements BaseService<Vehicle> {
 
 	public void assignTo(Vehicle vehicle, Domain domain) throws Exception {
 //		if (!securityManager.hasPermission(vehicle, Permission.UPDATE)) {
-//			throw new Exception("sem permissao para cadastrar veiculos");
+//			throw new BusinessException("vhc.update.denied");		
 //		}
 
 		Vehicle v = getVehicle(vehicle.getId());
@@ -153,7 +159,7 @@ public class VehicleServiceImpl implements BaseService<Vehicle> {
 				List<Parking> parkings = parkingService.getFreeParkings(domain);
 				
 				if (CollectionUtils.isEmpty(parkings)) {
-					throw new Exception("nao ha vagas disponíveis");
+					throw new BusinessException("vhc.parking.unavailable");
 				}
 
 				Parking parking = parkings.get(0);
@@ -180,7 +186,7 @@ public class VehicleServiceImpl implements BaseService<Vehicle> {
 
 	public void updateImage(Vehicle vehicle, Image image) throws Exception {
 //		if (!securityManager.hasPermission(vehicle, Permission.UPDATE)) {
-//			throw new Exception("sem permissao para cadastrar veiculos");
+//			throw new BusinessException("vhc.update.denied");
 //		}
 
 		Vehicle v = getVehicle(vehicle.getId());

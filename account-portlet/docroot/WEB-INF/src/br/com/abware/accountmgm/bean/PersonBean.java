@@ -14,11 +14,11 @@ import javax.faces.bean.ManagedBean;
 import javax.faces.bean.ViewScoped;
 import javax.faces.event.AjaxBehaviorEvent;
 
+import org.apache.commons.beanutils.BeanUtils;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.log4j.Logger;
 
 import br.com.abware.accountmgm.bean.model.ModelDataModel;
-import br.com.abware.accountmgm.util.BeanUtils;
 import br.com.abware.accountmgm.util.DomainPredicate;
 import br.com.abware.accountmgm.util.DomainTransformer;
 import br.com.abware.accountmgm.util.IdPredicate;
