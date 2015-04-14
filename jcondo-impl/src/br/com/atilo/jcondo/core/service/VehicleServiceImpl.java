@@ -94,6 +94,13 @@ public class VehicleServiceImpl implements BaseService<Vehicle> {
 		return vehicleManager.findAll();
 	}
 
+	/**
+	 * Veículos com domínio nulo, são considerados visitantes.
+	 * 
+	 * @param vehicle
+	 * @return
+	 * @throws Exception
+	 */
 	public Vehicle register(Vehicle vehicle) throws Exception {
 //		if (!securityManager.hasPermission(vehicle, Permission.ADD)) {
 //			throw new BusinessException("vhc.create.denied");		
@@ -112,30 +119,29 @@ public class VehicleServiceImpl implements BaseService<Vehicle> {
 		if (v != null) {
 			throw new ModelExistException(null, "vehicle.exists");
 		}
-		
-		if (vehicle.getDomain() == null) {
-			throw new BusinessException("vhc.domain.undefinied");
-		} else {
+
+		if (vehicle.getDomain() != null) {
 			if (!(vehicle.getDomain() instanceof Flat)) {
 				throw new BusinessException("vhc.domain.not.flat");
 			}
 			if (flatService.getFlat(vehicle.getDomain().getId()) == null) {
 				throw new BusinessException("vhc.domain.unknown", vehicle.getDomain().getId());
 			}
-		}
 
-		// Verifica se tem vaga para o apartamento especificado
-		// Visitantes podem acessar o condominio apenas para deixar/buscar passageiros
-		if(vehicle.getType() == VehicleType.CAR) {
-			List<Parking> parkings = parkingService.getFreeParkings(vehicle.getDomain());
+			// Verifica se tem vaga para o apartamento especificado
+			// Visitantes podem acessar o condominio apenas para deixar/buscar passageiros
+			// Motos e Bicicletas são veículos extras
+			if(vehicle.getType() == VehicleType.CAR) {
+				List<Parking> parkings = parkingService.getFreeParkings(vehicle.getDomain());
 
-			if (CollectionUtils.isEmpty(parkings)) {
-				throw new BusinessException("vhc.parking.unavailable");
+				if (CollectionUtils.isEmpty(parkings)) {
+					throw new BusinessException("vhc.parking.unavailable");
+				}
+
+				Parking parking = parkings.get(0);
+				parking.setVehicle(v);
+				parkingService.update(parking);
 			}
-
-			Parking parking = parkings.get(0);
-			parking.setVehicle(v);
-			parkingService.update(parking);
 		}
 
 		return vehicleManager.save(vehicle);

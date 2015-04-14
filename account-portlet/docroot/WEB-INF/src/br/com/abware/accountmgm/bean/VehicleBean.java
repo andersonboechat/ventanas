@@ -102,10 +102,6 @@ public class VehicleBean extends BaseBean {
 		try {
 			vehicle.setLicense(vehicle.getLicense().replaceAll("[^A-Za-z0-9]", ""));
 
-//			if (visitor && vehicle.getDomain() != null && vehicle.getDomain().getId() > 0) {
-//				vehicle.setDomain(null);
-//			}
-
 			if (vehicle.getId() == 0) {
 				Vehicle v = vehicleService.register(vehicle);
 				model.addModel(v);
