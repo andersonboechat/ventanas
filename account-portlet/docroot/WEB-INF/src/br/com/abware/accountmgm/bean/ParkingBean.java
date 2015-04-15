@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Observable;
+import java.util.Observer;
 import java.util.Set;
 
 import javax.faces.bean.ManagedBean;
@@ -13,13 +15,16 @@ import org.apache.commons.collections.CollectionUtils;
 import org.apache.log4j.Logger;
 
 import br.com.abware.accountmgm.bean.model.ModelDataModel;
+import br.com.abware.accountmgm.util.VehicleParkingPredicate;
 import br.com.abware.jcondo.core.model.Domain;
 import br.com.abware.jcondo.core.model.Flat;
 import br.com.abware.jcondo.core.model.Parking;
+import br.com.abware.jcondo.core.model.Vehicle;
+import br.com.abware.jcondo.core.model.VehicleType;
 
 @ManagedBean
 @ViewScoped
-public class ParkingBean extends BaseBean {
+public class ParkingBean extends BaseBean implements Observer {
 
 	private static Logger LOGGER = Logger.getLogger(ParkingBean.class);
 
@@ -28,6 +33,8 @@ public class ParkingBean extends BaseBean {
 	private HashMap<String, Object> filters;
 	
 	private Parking parking;
+	
+	private List<Parking> parkings;
 	
 	private List<Flat> flats;
 
@@ -43,7 +50,8 @@ public class ParkingBean extends BaseBean {
 					parkings.addAll(parkingService.getParkings(flat));
 				}
 				
-				model = new ModelDataModel<Parking>(new ArrayList<Parking>(parkings));
+				this.parkings = new ArrayList<Parking>(parkings);
+				model = new ModelDataModel<Parking>(this.parkings);
 			}
 
 			filters = new HashMap<String, Object>();
@@ -83,6 +91,32 @@ public class ParkingBean extends BaseBean {
 		filters.put("ownerDomain", domain != null ? domain : null);
 		model.filter(filters);
 		((List<Parking>) model.getWrappedData()).addAll(parkings);
+	}
+
+	@Override
+	public void update(Observable observable, Object object) {
+		try {
+			Vehicle vehicle = (Vehicle) object;
+			Parking parking;
+
+			parking = (Parking) CollectionUtils.find(this.parkings, new VehicleParkingPredicate(vehicle));
+
+			if (parking != null) {
+				if (vehicle.getType() != VehicleType.CAR || vehicle.getDomain() == null) {
+					parking.setVehicle(null);
+				}
+			} else {
+				parking = (Parking) CollectionUtils.find(parkingService.getParkings(vehicle.getDomain()), 
+						 															new VehicleParkingPredicate(vehicle));
+				if (parking != null) {
+					model.update(parking);
+				}
+				
+			}
+
+		} catch (Exception e) {
+			LOGGER.warn("Failure on flat parkings update", e);
+		}
 	}
 
 	public List<Flat> getAllFlats() throws Exception {

@@ -52,6 +52,7 @@ public class FlatBean extends BaseBean {
 
 			personBean.init(domains);
 			supplierBean.addObserver(personBean);
+			vehicleBean.addObserver(parkingBean);
 			if (flats.size() == 1) {
 				flat = flats.get(0);
 			}

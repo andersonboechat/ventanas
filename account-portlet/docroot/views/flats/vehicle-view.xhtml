@@ -97,7 +97,7 @@
 						<p:column>
 							<p:selectOneMenu id="vehicleType" value="#{vehicleViewer.vehicle.type}" required="true" requiredMessage="Selecione o tipo do veículo">
 								<f:selectItem itemLabel="Selecione" noSelectionOption="true"/>
-								<f:selectItems var="type" value="#{vehicleViewer.types.get(flatBean.vehicleBean.vehicle.domain)}" itemLabel="#{msg[type.label]}"/>
+								<f:selectItems var="type" value="#{vehicleViewer.types.get(flatBean.vehicleBean.vehicle.domain)}" itemValue="#{type}" itemLabel="#{msg[type.label]}"/>
 								<p:ajax event="change" update="license" global="false"/>
 							</p:selectOneMenu>
 						</p:column>
@@ -111,7 +111,7 @@
 					</p:row>
 		        </p:panelGrid>
 				<h:panelGrid columns="2" style="border: 0px solid black; float: right; margin: 10px 0px 5px">
-					<p:commandButton value="Salvar" actionListener="#{vehicleViewer.onVehicleSave}" update=":tabs:vehicle-form:vehicleTable,:outputMsg" oncomplete="if (!args.validationFailed) { if(!args.exception) {PF('vehicleDialog').hide();} else { if(args.alert) {PF('alertDialog').show();}}}" style="float: right; width: 80px; margin: 0px 0px 0px 5px;"/>
+					<p:commandButton value="Salvar" actionListener="#{vehicleViewer.onVehicleSave}" update="@widgetVar(parkingTable),@widgetVar(vehicleTable),:outputMsg" oncomplete="if (!args.validationFailed) { if(!args.exception) {PF('vehicleDialog').hide();} else { if(args.alert) {PF('alertDialog').show();}}}" style="float: right; width: 80px; margin: 0px 0px 0px 5px;"/>
 					<p:commandButton value="Cancelar" type="button" onclick="PF('vehicleDialog').hide();" style="float: right; width: 80px; margin: 0px 0px 0px 5px;" global="false"/>
 				</h:panelGrid>
 			</p:panelGrid>
@@ -120,7 +120,7 @@
 	
 	<p:dialog id="vehiclePictureDialog" widgetVar="vehiclePictureDialog" modal="true" header="Upload de Imagem">
 		<h:form id="vehicle-picture-form" enctype="multipart/form-data">
-			<p:fileUpload id="image" label="Selecionar Foto" fileUploadListener="#{vehiclePictureUploader.onImageUpload}" mode="simple" auto="true" allowTypes="/(\.|\/)(gif|jpe?g|png)$/" update="vehicle-picture-form" rendered="#{empty vehiclePictureUploader.image.path}"/>
+			<p:fileUpload id="image" label="Selecionar Foto" fileUploadListener="#{vehiclePictureUploader.onImageUpload}" mode="advanced" auto="true" allowTypes="/(\.|\/)(gif|jpe?g|png)$/" update="vehicle-picture-form" rendered="#{empty vehiclePictureUploader.image.path}"/>
 			<p:panel rendered="#{!(empty vehiclePictureUploader.image.path)}" style="border: 0px !important;">
 				<p:panel styleClass="cropper2">
 					<p:imageCropper value="#{vehiclePictureUploader.croppedImage}" image="#{vehiclePictureUploader.image.path}" initialCoords="0,0,#{vehiclePictureUploader.width},#{vehiclePictureUploader.height}" minSize="#{vehiclePictureUploader.width},#{vehiclePictureUploader.height}" maxSize="#{vehiclePictureUploader.width},#{vehiclePictureUploader.height}"/>

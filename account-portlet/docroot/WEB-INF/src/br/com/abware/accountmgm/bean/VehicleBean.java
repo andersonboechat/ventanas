@@ -18,6 +18,7 @@ import javax.faces.event.ValueChangeEvent;
 import org.apache.commons.beanutils.BeanUtils;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.log4j.Logger;
+import org.apache.myfaces.commons.util.MessageUtils;
 import org.primefaces.context.RequestContext;
 import org.primefaces.event.FileUploadEvent;
 
@@ -30,6 +31,7 @@ import br.com.abware.jcondo.core.model.Image;
 import br.com.abware.jcondo.core.model.Supplier;
 import br.com.abware.jcondo.core.model.Vehicle;
 import br.com.abware.jcondo.core.model.VehicleType;
+import br.com.abware.jcondo.exception.BusinessException;
 import br.com.abware.jcondo.exception.ModelExistException;
 
 @ViewScoped
@@ -100,20 +102,21 @@ public class VehicleBean extends BaseBean {
 
 	public void onVehicleSave() {
 		try {
+			Vehicle v;
 			vehicle.setLicense(vehicle.getLicense().replaceAll("[^A-Za-z0-9]", ""));
 
 			if (vehicle.getId() == 0) {
-				Vehicle v = vehicleService.register(vehicle);
-				model.addModel(v);
+				v = vehicleService.register(vehicle);
 			} else {
-				vehicleService.assignTo(vehicle, vehicle.getDomain());
-				vehicleService.updateImage(vehicle, vehicle.getImage());
-				model.update(vehicle);
+				v = vehicleService.update(vehicle);
 			}
 
-			FacesContext context = FacesContext.getCurrentInstance();
-			String component = context.getViewRoot().findComponent("outputMsg").getClientId();
-			context.addMessage(component, new FacesMessage(FacesMessage.SEVERITY_INFO, "veiculo registrado com sucesso", ""));
+			model.update(v);
+
+			this.setChanged();
+			this.notifyObservers(v);
+
+			MessageUtils.addMessage(FacesMessage.SEVERITY_INFO, "vehicle.create.success", null);
 		} catch (ModelExistException e) {
 			Vehicle v = vehicleService.getVehicle(vehicle.getLicense());
 
@@ -144,10 +147,11 @@ public class VehicleBean extends BaseBean {
 			}
 
 			RequestContext.getCurrentInstance().addCallbackParam("exception", true);
+		} catch (BusinessException e) {
+			MessageUtils.addMessage(FacesMessage.SEVERITY_WARN, e.getMessage(), null);
+			RequestContext.getCurrentInstance().addCallbackParam("exception", true);
 		} catch (Exception e) {
-			FacesContext context = FacesContext.getCurrentInstance();
-			String component = context.getViewRoot().findComponent("outputMsg").getClientId();
-			context.addMessage(component, new FacesMessage(FacesMessage.SEVERITY_INFO, e.getMessage(), ""));
+			MessageUtils.addMessage(FacesMessage.SEVERITY_ERROR, e.getMessage(), null);
 			RequestContext.getCurrentInstance().addCallbackParam("exception", true);
 		}
 	}
@@ -169,9 +173,7 @@ public class VehicleBean extends BaseBean {
 	public void onVehicleDelete() throws Exception {
 		vehicleService.assignTo(model.getRowData(), null);
 		model.removeModel(model.getRowData());
-		FacesContext context = FacesContext.getCurrentInstance();
-		String component = context.getViewRoot().findComponent("outputMsg").getClientId();
-		context.addMessage(component, new FacesMessage(FacesMessage.SEVERITY_INFO, "exclusao realizada com sucesso", ""));
+		MessageUtils.addMessage(FacesMessage.SEVERITY_INFO, "vehicle.delete.success", null);
 	}
 	
 	public void onVehicleEdit() {
@@ -181,6 +183,7 @@ public class VehicleBean extends BaseBean {
 			imageUploadBean.setImage(vehicle.getImage());
 		} catch (Exception e) {
 			LOGGER.error("Falha ao editar veiculo", e);
+			MessageUtils.addMessage(FacesMessage.SEVERITY_ERROR, "vehicle.edit.failure", null);
 		}
 	}
 
