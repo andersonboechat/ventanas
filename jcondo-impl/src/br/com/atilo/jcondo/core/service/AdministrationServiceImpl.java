@@ -11,9 +11,9 @@ import br.com.atilo.jcondo.core.persistence.manager.SecurityManagerImpl;
 
 public class AdministrationServiceImpl {
 
-	private static AdministrationManagerImpl adminManager = new AdministrationManagerImpl();
+	private AdministrationManagerImpl adminManager = new AdministrationManagerImpl();
 
-	private static SecurityManagerImpl securityManager = new SecurityManagerImpl();
+	private SecurityManagerImpl securityManager = new SecurityManagerImpl();
 
 	public Administration getAdministration(long adminId) throws Exception {
 		return adminManager.findById(adminId);

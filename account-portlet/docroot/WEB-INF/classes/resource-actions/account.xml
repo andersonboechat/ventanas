@@ -2,7 +2,7 @@
 <!DOCTYPE resource-action-mapping PUBLIC "-//Liferay//DTD Resource Action Mapping 6.1.0//EN" "http://www.liferay.com/dtd/liferay-resource-action-mapping_6_1_0.dtd">
 <resource-action-mapping>
 	<model-resource>
-		<model-name>br.com.abware.accountmgm.model.Vehicle</model-name>
+		<model-name>br.com.abware.jcondo.core.model.Vehicle</model-name>
 		<portlet-ref>
 			<portlet-name>vehicle-management</portlet-name>
 		</portlet-ref>
@@ -10,14 +10,16 @@
 			<supports>
 				<action-key>ADD</action-key>
 				<action-key>DELETE</action-key>
+				<action-key>UPDATE</action-key>
 				<action-key>VIEW</action-key>
 				<action-key>ASSIGN</action-key>
 			</supports>
-			<site-member-defaults>
-				<action-key>VIEW</action-key>
-			</site-member-defaults>
+			<site-member-defaults/>
 			<guest-defaults/>
 			<guest-unsupported/>
+			<owner-defaults>
+				<action-key>VIEW</action-key>
+			</owner-defaults>
 		</permissions>
 	</model-resource>
 	<model-resource>
@@ -34,11 +36,12 @@
 				<action-key>ASSIGN_MEMBER</action-key>
 				<action-key>REMOVE_MEMBER</action-key>
 			</supports>
-			<site-member-defaults>
-				<action-key>VIEW</action-key>
-			</site-member-defaults>
+			<site-member-defaults/>
 			<guest-defaults/>
 			<guest-unsupported/>
+			<owner-defaults>
+				<action-key>VIEW</action-key>
+			</owner-defaults>
 		</permissions>
 	</model-resource>
 	<model-resource>

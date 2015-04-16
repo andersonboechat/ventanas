@@ -16,9 +16,9 @@ import br.com.atilo.jcondo.core.persistence.manager.SecurityManagerImpl;
 
 public class FlatServiceImpl {
 
-	private static FlatManagerImpl flatManager = new FlatManagerImpl();
+	private FlatManagerImpl flatManager = new FlatManagerImpl();
 
-	private static SecurityManagerImpl securityManager = new SecurityManagerImpl();
+	private SecurityManagerImpl securityManager = new SecurityManagerImpl();
 	
 	@SuppressWarnings("unchecked")
 	public Flat getHome(Person person) throws Exception {

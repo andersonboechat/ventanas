@@ -28,13 +28,13 @@ public class PersonServiceImpl  {
 
 	private static final Condominium CONDOMINIUM = new Condominium();
 
-	private static PersonManagerImpl personManager = new PersonManagerImpl();
+	private PersonManagerImpl personManager = new PersonManagerImpl();
 
-	private static SecurityManagerImpl securityManager = new SecurityManagerImpl();
+	private SecurityManagerImpl securityManager = new SecurityManagerImpl();
 	
-	private static AdministrationServiceImpl adminService = new AdministrationServiceImpl();
+	private AdministrationServiceImpl adminService = new AdministrationServiceImpl();
 
-	private static FlatServiceImpl flatService = new FlatServiceImpl();
+	private FlatServiceImpl flatService = new FlatServiceImpl();
 
 	public PersonServiceImpl() {
 		CONDOMINIUM.setRelatedId(10179);

@@ -13,7 +13,6 @@ import br.com.abware.jcondo.core.model.VehicleType;
 import br.com.atilo.jcondo.core.persistence.manager.SecurityManagerImpl;
 import br.com.atilo.jcondo.core.persistence.manager.VehicleManagerImpl;
 import br.com.abware.jcondo.core.Permission;
-import br.com.abware.jcondo.core.model.Administration;
 import br.com.abware.jcondo.core.model.Domain;
 import br.com.abware.jcondo.core.model.Flat;
 import br.com.abware.jcondo.core.model.Image;
@@ -31,7 +30,7 @@ public class VehicleServiceImpl implements BaseService<Vehicle> {
 
 	private SecurityManagerImpl securityManager = new SecurityManagerImpl();
 
-	public List<VehicleType> getTypes(Domain domain) {
+	public List<VehicleType> getTypes(Domain domain) throws Exception {
 		List<VehicleType> types = new ArrayList<VehicleType>();
 
 		for (VehicleType type : VehicleType.values()) {
@@ -50,9 +49,9 @@ public class VehicleServiceImpl implements BaseService<Vehicle> {
 			throw new BusinessException("vhc.not.found", vehicle);
 		}
 
-//		if (!securityManager.hasPermission(vehicle, Permission.VIEW)) {
-//			throw new BusinessException("vhc.view.denied", vehicle);
-//		}
+		if (!securityManager.hasPermission(vehicle, Permission.VIEW)) {
+			throw new BusinessException("vhc.view.denied", vehicle);
+		}
 
 		return vehicle;
 	}
@@ -87,9 +86,9 @@ public class VehicleServiceImpl implements BaseService<Vehicle> {
 	}
 
 	public List<Vehicle> getAllVehicles() throws Exception {
-//		if (!securityManager.hasPermission(new Vehicle(), Permission.VIEW)) {
-//			throw new BusinessException("vhc.view.denied");
-//		}
+		if (!securityManager.hasPermission(new Vehicle(), Permission.VIEW)) {
+			throw new BusinessException("vhc.view.denied");
+		}
 
 		return vehicleManager.findAll();
 	}
@@ -102,9 +101,9 @@ public class VehicleServiceImpl implements BaseService<Vehicle> {
 	 * @throws Exception
 	 */
 	public Vehicle register(Vehicle vehicle) throws Exception {
-//		if (!securityManager.hasPermission(vehicle, Permission.ADD)) {
-//			throw new BusinessException("vhc.create.denied");		
-//		}
+		if (!securityManager.hasPermission(vehicle, Permission.ADD)) {
+			throw new BusinessException("vhc.create.denied");		
+		}
 
 		if (StringUtils.isEmpty(vehicle.getLicense())) {
 			throw new BusinessException("vhc.license.undefinied");
@@ -152,9 +151,9 @@ public class VehicleServiceImpl implements BaseService<Vehicle> {
 	}
 
 	public Vehicle update(Vehicle vehicle) throws Exception {
-//		if (!securityManager.hasPermission(vehicle, Permission.UPDATE)) {
-//			throw new BusinessException("vhc.update.denied");
-//		}
+		if (!securityManager.hasPermission(vehicle, Permission.UPDATE)) {
+			throw new BusinessException("vhc.update.denied");
+		}
 
 		if(vehicle.getType() != VehicleType.BIKE && !vehicle.getLicense().matches("[A-Za-z]{3,3}[0-9]{4,4}")) {
 			throw new BusinessException("vhc.license.invalid");

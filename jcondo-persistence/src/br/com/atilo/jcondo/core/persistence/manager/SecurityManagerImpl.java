@@ -28,6 +28,7 @@ import br.com.abware.jcondo.core.model.Membership;
 import br.com.abware.jcondo.core.model.Person;
 import br.com.abware.jcondo.core.model.RoleName;
 import br.com.abware.jcondo.core.model.Supplier;
+import br.com.abware.jcondo.core.model.Vehicle;
 import br.com.abware.jcondo.exception.ApplicationException;
 import br.com.abware.jcondo.exception.SystemException;
 
@@ -260,6 +261,8 @@ public class SecurityManagerImpl {
 				return checkDomainPermission(permissionChecker, (Domain) model, permission);
 			} else if (model instanceof Membership) {
 				return checkPersonTypePermission(permissionChecker, ((Membership) model).getType(), ((Membership) model).getDomain(), permission);
+			} else if (model instanceof Vehicle) {
+				return checkVehiclePermission(permissionChecker, model, ((Vehicle) model).getDomain(), permission);
 			} else {
 				return checkPermission(permissionChecker, model, permission);
 			}
@@ -267,6 +270,32 @@ public class SecurityManagerImpl {
 			throw new ApplicationException(e, "fail.check.permission");
 		}
 	}
+
+	private boolean checkVehiclePermission(PermissionChecker permissionChecker, BaseModel model, Domain domain, Permission permission) throws Exception {
+        Organization organization = OrganizationLocalServiceUtil.getOrganization(domain.getRelatedId());
+        long id;
+
+		try {
+			id = GroupLocalServiceUtil.getOrganizationGroup(helper.getCompanyId(), domain.getRelatedId()).getGroupId();	
+
+			if(permissionChecker.hasPermission(id, model.getClass().getName(), model.getId(), permission.name())) {
+	        	return true;
+	        }
+		} catch (Exception e) {
+			id = 0;
+		}
+
+        Organization parent;
+
+        for(; !organization.isRoot(); organization = parent) {
+            parent = organization.getParentOrganization();
+            if(permissionChecker.hasPermission(parent.getGroup().getGroupId(), model.getClass().getName(), model.getId(), permission.name())) {
+            	return true;
+            }
+        }
+
+		return false;
+	}	
 
 	private boolean checkPermission(PermissionChecker permissionChecker, BaseModel model, Permission permission) throws Exception {
 		return permissionChecker.hasPermission(helper.getUser().getGroupId(), model.getClass().getName(), model.getId(), permission.name());

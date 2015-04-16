@@ -17,11 +17,11 @@ import br.com.atilo.jcondo.core.persistence.manager.SupplierManagerImpl;
 
 public class SupplierServiceImpl {
 
-	private static AdministrationManagerImpl adminManager = new AdministrationManagerImpl();
+	private AdministrationManagerImpl adminManager = new AdministrationManagerImpl();
 	
-	private static SupplierManagerImpl supplierManager = new SupplierManagerImpl();
+	private SupplierManagerImpl supplierManager = new SupplierManagerImpl();
 
-	private static SecurityManagerImpl securityManager = new SecurityManagerImpl();
+	private SecurityManagerImpl securityManager = new SecurityManagerImpl();
 
 	public List<Supplier> getSuppliers(Domain domain) throws Exception {
 		List<Supplier> suppliers = new ArrayList<Supplier>();
