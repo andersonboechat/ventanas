@@ -252,17 +252,17 @@ public class SecurityManagerImpl {
 
 	public boolean hasPermission(BaseModel model, Permission permission) throws ApplicationException {
 		try {
-			//PermissionChecker permissionChecker = PermissionCheckerFactoryUtil.create(helper.getUser());
 			PermissionChecker permissionChecker = helper.getThemeDisplay().getPermissionChecker();
 
 			if (model instanceof Person) {
 				return checkUserPermission(permissionChecker, ((Person) model).getUserId(), permission);
 			} else if (model instanceof Flat || model instanceof Supplier || model instanceof Administration) {
-				return checkDomainPermission(permissionChecker, (Domain) model, permission);
+				// return checkDomainPermission(permissionChecker, (Domain) model, permission); 
+				return checkPermission(permissionChecker, (Domain) model, (Domain) model, permission);
 			} else if (model instanceof Membership) {
-				return checkPersonTypePermission(permissionChecker, ((Membership) model).getType(), ((Membership) model).getDomain(), permission);
+				return checkPermission(permissionChecker, ((Membership) model).getType(), ((Membership) model).getDomain(), permission);
 			} else if (model instanceof Vehicle) {
-				return checkVehiclePermission(permissionChecker, model, ((Vehicle) model).getDomain(), permission);
+				return checkPermission(permissionChecker, model, ((Vehicle) model).getDomain(), permission);
 			} else {
 				return checkPermission(permissionChecker, model, permission);
 			}
@@ -271,25 +271,15 @@ public class SecurityManagerImpl {
 		}
 	}
 
-	private boolean checkVehiclePermission(PermissionChecker permissionChecker, BaseModel model, Domain domain, Permission permission) throws Exception {
-        Organization organization = OrganizationLocalServiceUtil.getOrganization(domain.getRelatedId());
-        long id;
-
-		try {
-			id = GroupLocalServiceUtil.getOrganizationGroup(helper.getCompanyId(), domain.getRelatedId()).getGroupId();	
-
-			if(permissionChecker.hasPermission(id, model.getClass().getName(), model.getId(), permission.name())) {
-	        	return true;
-	        }
-		} catch (Exception e) {
-			id = 0;
+	private boolean checkPermission(PermissionChecker permissionChecker, BaseModel model, Domain domain, Permission permission) throws Exception {
+		if (domain == null) {
+			return permissionChecker.hasPermission(helper.getScopeGroupId(), model.getClass().getName(), model.getId(), permission.name());
 		}
 
-        Organization parent;
+		Organization organization = OrganizationLocalServiceUtil.getOrganization(domain.getRelatedId());
 
-        for(; !organization.isRoot(); organization = parent) {
-            parent = organization.getParentOrganization();
-            if(permissionChecker.hasPermission(parent.getGroup().getGroupId(), model.getClass().getName(), model.getId(), permission.name())) {
+        for(; !organization.isRoot(); organization = organization.getParentOrganization()) {
+            if(permissionChecker.hasPermission(organization.getGroup().getGroupId(), model.getClass().getName(), model.getId(), permission.name())) {
             	return true;
             }
         }
@@ -298,35 +288,9 @@ public class SecurityManagerImpl {
 	}	
 
 	private boolean checkPermission(PermissionChecker permissionChecker, BaseModel model, Permission permission) throws Exception {
-		return permissionChecker.hasPermission(helper.getUser().getGroupId(), model.getClass().getName(), model.getId(), permission.name());
+		return checkPermission(permissionChecker, model, null, permission);
 	}
 	
-	private boolean checkPersonTypePermission(PermissionChecker permissionChecker, PersonType type, Domain domain, Permission permission) throws Exception {
-        Organization organization = OrganizationLocalServiceUtil.getOrganization(domain.getRelatedId());
-        long id;
-
-		try {
-			id = GroupLocalServiceUtil.getOrganizationGroup(helper.getCompanyId(), domain.getRelatedId()).getGroupId();	
-
-			if(permissionChecker.hasPermission(id, PersonType.class.getName(), type.ordinal(), permission.name())) {
-	        	return true;
-	        }
-		} catch (Exception e) {
-			id = 0;
-		}
-
-        Organization parent;
-
-        for(; !organization.isRoot(); organization = parent) {
-            parent = organization.getParentOrganization();
-            if(permissionChecker.hasPermission(parent.getGroup().getGroupId(), PersonType.class.getName(), type.ordinal(), permission.name())) {
-            	return true;
-            }
-        }
-
-		return false;
-	}
-
 	private boolean checkDomainPermission(PermissionChecker permissionChecker, Domain domain, Permission permission) throws Exception {
 		String actionkey;
 
