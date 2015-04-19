@@ -31,19 +31,6 @@
 								<f:setPropertyActionListener target="#{profileBean.person.picture.path}" value=""/>
 							</p:commandLink>
 						</p:panelGrid>
-						<p:panel widgetVar="pwd-panel" header="Alteração de Senha" styleClass="pwd-panel" style="float: right; padding: 0px !important">
-							<p:panelGrid columns="2">
-								<p:outputLabel for="pwd" value="Senha atual"/>
-								<p:password id="pwd" value="#{profileBean.password}" maxlength="8" required="true" requiredMessage="Informe a senha atual"/>
-								<p:outputLabel for="newPwd" value="Nova senha"/>
-								<p:password id="newPwd" value="#{profileBean.newPassword}" maxlength="8" match="confirmPwd" required="true" 
-											requiredMessage="Informe a nova senha" validatorMessage="A confirmação da nova senha não confere"/>
-								<p:outputLabel for="confirmPwd" value="Confirmar senha" style=" white-space: nowrap;"/>
-								<p:password id="confirmPwd" value="#{profileBean.newPassword}" maxlength="8" required="true" 
-											requiredMessage="Confirme a nova senha" validatorMessage="A confirmação da nova senha não confere"/>
-							</p:panelGrid>
-							<p:commandButton value="Alterar senha" actionListener="#{profileBean.onPasswordChange}" global="false" style="float: right; margin: 10px"/>
-						</p:panel>
 					</p:column>
 					<p:column styleClass="my-account-col2">
 						<p:panelGrid columns="4" styleClass="userPanel" style="width: 100%; margin: 0; padding: 0;">
@@ -185,7 +172,21 @@
 				</p:row>
 			</p:panelGrid>
 		</h:form>
-	
+		<h:form>
+		<p:panel widgetVar="pwd-panel" header="Alteração de Senha" styleClass="pwd-panel" style="float: right; padding: 0px !important">
+			<p:panelGrid columns="2">
+				<p:outputLabel for="pwd" value="Senha atual"/>
+				<p:password id="pwd" value="#{profileBean.password}" maxlength="8" required="true" requiredMessage="Informe a senha atual"/>
+				<p:outputLabel for="newPwd" value="Nova senha"/>
+				<p:password id="newPwd" value="#{profileBean.newPassword}" maxlength="8" match="confirmPwd" required="true" 
+							requiredMessage="Informe a nova senha" validatorMessage="A confirmação da nova senha não confere"/>
+				<p:outputLabel for="confirmPwd" value="Confirmar senha" style=" white-space: nowrap;"/>
+				<p:password id="confirmPwd" value="#{profileBean.newPassword}" maxlength="8" required="true" 
+							requiredMessage="Confirme a nova senha" validatorMessage="A confirmação da nova senha não confere"/>
+			</p:panelGrid>
+			<p:commandButton value="Alterar senha" actionListener="#{profileBean.onPasswordChange}" global="false" style="float: right; margin: 10px"/>
+		</p:panel>
+	</h:form>
 		<p:dialog id="profilePictureDialog" widgetVar="profilePictureDialog" modal="true" header="Retrato">
 			<h:form id="profile-picture-form" enctype="multipart/form-data">
 				<p:fileUpload id="image" label="Selecionar Foto" fileUploadListener="#{profilePictureUploader.onImageUpload}" auto="true" update="profile-picture-form" rendered="#{empty profilePictureUploader.image.path}"/>

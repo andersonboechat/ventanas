@@ -12,7 +12,6 @@
 				<action-key>DELETE</action-key>
 				<action-key>UPDATE</action-key>
 				<action-key>VIEW</action-key>
-				<action-key>ASSIGN</action-key>
 			</supports>
 			<site-member-defaults/>
 			<guest-defaults/>
