@@ -21,6 +21,8 @@ import br.com.abware.jcondo.core.service.BaseService;
 import br.com.abware.jcondo.exception.BusinessException;
 
 public class VehicleServiceImpl implements BaseService<Vehicle> {
+	
+	public static final String LICENSE_PATTERN = "[A-Za-z]{3,3}[0-9]{4,4}";
 
 	private VehicleManagerImpl vehicleManager = new VehicleManagerImpl();
 
@@ -102,14 +104,22 @@ public class VehicleServiceImpl implements BaseService<Vehicle> {
 	 */
 	public Vehicle register(Vehicle vehicle) throws Exception {
 		if (!securityManager.hasPermission(vehicle, Permission.ADD)) {
-			throw new BusinessException("vhc.create.denied");		
+			throw new BusinessException("vhc.create.denied");
+		}
+
+		if (vehicle.getDomain() != null && !securityManager.hasPermission(vehicle.getDomain(), Permission.ASSIGN_VEHICLE)) {
+			if (vehicle.getDomain() instanceof Flat) {
+				throw new BusinessException("vhc.domain.assign.denied", ((Flat) vehicle.getDomain()).getNumber(), ((Flat) vehicle.getDomain()).getBlock());
+			} else {
+				throw new BusinessException("vhc.domain.assign.denied", vehicle.getDomain());				
+			}
 		}
 
 		if (StringUtils.isEmpty(vehicle.getLicense())) {
 			throw new BusinessException("vhc.license.undefinied");
 		}
 
-		if(vehicle.getType() != VehicleType.BIKE && !vehicle.getLicense().matches("[A-Za-z]{3,3}[0-9]{4,4}")) {
+		if(vehicle.getType() != VehicleType.BIKE && !vehicle.getLicense().matches(LICENSE_PATTERN)) {
 			throw new BusinessException("vhc.license.invalid");
 		}
 
@@ -155,7 +165,7 @@ public class VehicleServiceImpl implements BaseService<Vehicle> {
 			throw new BusinessException("vhc.update.denied");
 		}
 
-		if(vehicle.getType() != VehicleType.BIKE && !vehicle.getLicense().matches("[A-Za-z]{3,3}[0-9]{4,4}")) {
+		if(vehicle.getType() != VehicleType.BIKE && !vehicle.getLicense().matches(LICENSE_PATTERN)) {
 			throw new BusinessException("vhc.license.invalid");
 		}
 

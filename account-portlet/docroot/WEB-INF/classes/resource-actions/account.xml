@@ -34,6 +34,8 @@
 				<action-key>VIEW</action-key>
 				<action-key>ASSIGN_MEMBER</action-key>
 				<action-key>REMOVE_MEMBER</action-key>
+				<action-key>ASSIGN_VEHICLE</action-key>
+				<action-key>REMOVE_VEHICLE</action-key>
 			</supports>
 			<site-member-defaults/>
 			<guest-defaults/>
