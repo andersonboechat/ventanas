@@ -5,16 +5,19 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.faces.application.FacesMessage;
 import javax.faces.bean.ManagedBean;
 import javax.faces.bean.ViewScoped;
 
 import org.apache.commons.beanutils.BeanUtils;
 import org.apache.log4j.Logger;
+import org.apache.myfaces.commons.util.MessageUtils;
 
 import br.com.abware.accountmgm.bean.model.ModelDataModel;
 import br.com.abware.jcondo.core.SupplierStatus;
 import br.com.abware.jcondo.core.model.Domain;
 import br.com.abware.jcondo.core.model.Supplier;
+import br.com.abware.jcondo.exception.BusinessException;
 
 
 @ManagedBean
@@ -55,7 +58,8 @@ public class SupplierBean extends BaseBean {
 			filters = new HashMap<String, Object>();
 			supplier = new Supplier();
 		} catch (Exception e) {
-			LOGGER.error("", e);
+			LOGGER.fatal("Failure on supplier initialization", e);
+			MessageUtils.addMessage(FacesMessage.SEVERITY_FATAL, "general.failure", null);
 		}
 	}
 
@@ -79,19 +83,38 @@ public class SupplierBean extends BaseBean {
 
 			this.setChanged();
 			this.notifyObservers(sup);
+		} catch (BusinessException e) {
+			LOGGER.warn("Business failure on supplier saving: " + e.getMessage());
+			MessageUtils.addMessage(FacesMessage.SEVERITY_WARN, e.getMessage(), e.getArgs());
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}		
+			LOGGER.error("Unexpected failure on supplier saving", e);
+			MessageUtils.addMessage(FacesMessage.SEVERITY_ERROR, "general.failure", null);
+		}
 	}
 
 	public void onSupplierDelete() throws Exception {
-		supplierService.delete(supplier);
+		try {
+			supplierService.delete(supplier);
+		} catch (BusinessException e) {
+			LOGGER.warn("Business failure on supplier delete: " + e.getMessage());
+			MessageUtils.addMessage(FacesMessage.SEVERITY_WARN, e.getMessage(), e.getArgs());
+		} catch (Exception e) {
+			LOGGER.error("Unexpected failure on supplier saving", e);
+			MessageUtils.addMessage(FacesMessage.SEVERITY_ERROR, "general.failure", null);
+		}
 	}
 	
 	public void onSuppliersDelete() throws Exception {
-		for (Supplier supplier : selectedSuppliers) {
-			supplierService.delete(supplier);
+		try {
+			for (Supplier supplier : selectedSuppliers) {
+				supplierService.delete(supplier);
+			}
+		} catch (BusinessException e) {
+			LOGGER.warn("Business failure on suppliers delete: " + e.getMessage());
+			MessageUtils.addMessage(FacesMessage.SEVERITY_WARN, e.getMessage(), e.getArgs());
+		} catch (Exception e) {
+			LOGGER.error("Unexpected failure on supplier saving", e);
+			MessageUtils.addMessage(FacesMessage.SEVERITY_ERROR, "general.failure", null);
 		}
 	}
 
@@ -100,7 +123,8 @@ public class SupplierBean extends BaseBean {
 			BeanUtils.copyProperties(supplier, model.getRowData());
 			//domain = (Domain) BeanUtils.cloneBean(supplier.getParent());
 		} catch (Exception e) {
-			e.printStackTrace();
+			LOGGER.error("Unexpected failure on supplier editing", e);
+			MessageUtils.addMessage(FacesMessage.SEVERITY_ERROR, "general.failure", null);
 		}
 	}
 

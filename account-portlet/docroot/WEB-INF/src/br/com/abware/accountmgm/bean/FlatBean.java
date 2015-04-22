@@ -4,11 +4,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javax.annotation.PostConstruct;
+import javax.faces.application.FacesMessage;
 import javax.faces.bean.ManagedBean;
 import javax.faces.bean.ManagedProperty;
 import javax.faces.bean.ViewScoped;
 
 import org.apache.log4j.Logger;
+import org.apache.myfaces.commons.util.MessageUtils;
 
 import br.com.abware.jcondo.core.model.Domain;
 import br.com.abware.jcondo.core.model.Flat;
@@ -57,7 +59,8 @@ public class FlatBean extends BaseBean {
 				flat = flats.get(0);
 			}
 		} catch (Exception e) {
-			LOGGER.error("", e);
+			LOGGER.fatal("Failure on flat initialization", e);
+			MessageUtils.addMessage(FacesMessage.SEVERITY_FATAL, "general.failure", null);
 		}
 	}
 

@@ -41,13 +41,16 @@
 				</p:panelGrid>
 			</p:column>
 			<p:column style="width: 35px">
-				<p:commandLink update=":tabs:supplier-details-form:model-details" actionListener="#{supplierViewer.onSupplierEdit}" oncomplete="PF('supplierDialog').show();" partialSubmit="true" process="@this">
+				<p:commandLink update=":tabs:supplier-details-form:model-details" actionListener="#{supplierViewer.onSupplierEdit}" 
+							   oncomplete="PF('supplierDialog').show();" partialSubmit="true" process="@this" disabled="">
 					<h:graphicImage value="../images/edit.png" />
 					<f:setPropertyActionListener target="#{supplierViewer.domain}" value="#{supplier.parent}"/>
 				</p:commandLink>
 			</p:column>
 			<p:column style="width: 35px">
-				<p:commandLink actionListener="#{supplierViewer.onSupplierDelete}" oncomplete="if (!args.validationFailed &amp;&amp; !args.exception) {PF('supplierTable').update();}" partialSubmit="true" process="@this">
+				<p:commandLink update="@widgetVar(supplierTable)" actionListener="#{supplierViewer.onSupplierDelete}" 
+							   oncomplete="if (!args.validationFailed &amp;&amp; !args.exception) {PF('supplierTable').update();}" 
+							   partialSubmit="true" process="@this" disabled="">
 					<h:graphicImage value="../images/delete.png" />
 					<p:confirm header="#{msg['supplier.delete.confirm']}" message="#{msg['supplier.delete.message']}" icon="ui-icon-alert"/>
 					<f:setPropertyActionListener target="#{supplierViewer.supplier}" value="#{model.supplier}"/>

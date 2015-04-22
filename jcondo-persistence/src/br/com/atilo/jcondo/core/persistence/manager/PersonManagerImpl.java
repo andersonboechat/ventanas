@@ -112,7 +112,7 @@ public class PersonManagerImpl extends JCondoManager<PersonEntity, Person> {
 											 		StringUtils.EMPTY, StringUtils.EMPTY, true, StringUtils.EMPTY, 
 											 		person.getEmailAddress(), 0, StringUtils.EMPTY, helper.getUser().getLocale(), 
 											 		person.getFirstName(), StringUtils.EMPTY, person.getLastName(), 0, 0, 
-											 		isMale, calendar.get(Calendar.DAY_OF_MONTH), calendar.get(Calendar.MONTH), 
+											 		isMale, calendar.get(Calendar.MONTH), calendar.get(Calendar.DAY_OF_MONTH), 
 											 		calendar.get(Calendar.YEAR), StringUtils.EMPTY, null, null, null, null, 
 											 		false, new ServiceContext());
 				person.setUserId(user.getUserId());
@@ -145,7 +145,7 @@ public class PersonManagerImpl extends JCondoManager<PersonEntity, Person> {
 
 			return super.save(person);
 		} catch (Exception e) {
-			throw new PersistenceException("");
+			throw new PersistenceException(e, "");
 		}
 	}
 

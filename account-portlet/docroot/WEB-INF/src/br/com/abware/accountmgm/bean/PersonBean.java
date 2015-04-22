@@ -10,6 +10,7 @@ import java.util.Observable;
 import java.util.Observer;
 import java.util.Set;
 
+import javax.faces.application.FacesMessage;
 import javax.faces.bean.ManagedBean;
 import javax.faces.bean.ViewScoped;
 import javax.faces.event.AjaxBehaviorEvent;
@@ -17,6 +18,7 @@ import javax.faces.event.AjaxBehaviorEvent;
 import org.apache.commons.beanutils.BeanUtils;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.log4j.Logger;
+import org.apache.myfaces.commons.util.MessageUtils;
 
 import br.com.abware.accountmgm.bean.model.ModelDataModel;
 import br.com.abware.accountmgm.util.DomainPredicate;
@@ -31,6 +33,7 @@ import br.com.abware.jcondo.core.model.Image;
 import br.com.abware.jcondo.core.model.Membership;
 import br.com.abware.jcondo.core.model.Person;
 import br.com.abware.jcondo.core.model.Supplier;
+import br.com.abware.jcondo.exception.BusinessException;
 
 @ManagedBean
 @ViewScoped
@@ -85,7 +88,8 @@ public class PersonBean extends BaseBean implements Observer {
 			cameraBean = new CameraBean(198, 300);
 			genders = Arrays.asList(Gender.values());
 		} catch (Exception e) {
-			LOGGER.error("", e);
+			LOGGER.fatal("Failure on person initialization", e);
+			MessageUtils.addMessage(FacesMessage.SEVERITY_FATAL, "general.failure", null);
 		}
 	}
 
@@ -121,11 +125,13 @@ public class PersonBean extends BaseBean implements Observer {
 				p = personService.update(person);
 				model.setModel(p);
 			}
-			
+		} catch (BusinessException e) {
+			LOGGER.warn("Business failure on person saving: " + e.getMessage());
+			MessageUtils.addMessage(FacesMessage.SEVERITY_WARN, e.getMessage(), e.getArgs());
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+			LOGGER.error("Unexpected failure on person saving", e);
+			MessageUtils.addMessage(FacesMessage.SEVERITY_ERROR, "general.failure", null);
+		}	
 	}
 
 	public void onPersonCreate() throws Exception {
@@ -135,15 +141,31 @@ public class PersonBean extends BaseBean implements Observer {
 	}
 
 	public void onPersonDelete() throws Exception {
-		removeMemberships(person);
-		person = personService.update(person);
+		try {
+			removeMemberships(person);
+			person = personService.update(person);
+		} catch (BusinessException e) {
+			LOGGER.warn("Business failure on person delete: " + e.getMessage());
+			MessageUtils.addMessage(FacesMessage.SEVERITY_WARN, e.getMessage(), e.getArgs());
+		} catch (Exception e) {
+			LOGGER.error("Unexpected failure on person delete", e);
+			MessageUtils.addMessage(FacesMessage.SEVERITY_ERROR, "general.failure", null);
+		}	
 	}
 
 	public void onPeopleDelete() throws Exception {
-		for (Person person : selectedPeople) {
-			removeMemberships(person);
-			person = personService.update(person);
-		}
+		try {
+			for (Person person : selectedPeople) {
+				removeMemberships(person);
+				person = personService.update(person);
+			}
+		} catch (BusinessException e) {
+			LOGGER.warn("Business failure on people delete: " + e.getMessage());
+			MessageUtils.addMessage(FacesMessage.SEVERITY_WARN, e.getMessage(), e.getArgs());
+		} catch (Exception e) {
+			LOGGER.error("Unexpected failure on people delete", e);
+			MessageUtils.addMessage(FacesMessage.SEVERITY_ERROR, "general.failure", null);
+		}	
 	}
 
 	private void removeMemberships(Person person) {
@@ -158,14 +180,15 @@ public class PersonBean extends BaseBean implements Observer {
 			BeanUtils.copyProperties(person, model.getRowData());
 			imageUploadBean.setImage(person.getPicture());
 		} catch (Exception e) {
-			e.printStackTrace();
-		}
+			LOGGER.error("Unexpected failure on person editing", e);
+			MessageUtils.addMessage(FacesMessage.SEVERITY_ERROR, "general.failure", null);
+		}	
 	}
 	
 	public void onDomainAdd() {
 		List<Domain> domains = new ArrayList<Domain>(types.keySet());
 		Domain domain = (Domain) CollectionUtils.find(domains, new IdPredicate(selectedDomainId));
-		
+
 		if (domain != null) {
 			if (person.getMemberships() == null) {
 				person.setMemberships(new ArrayList<Membership>());
@@ -361,7 +384,7 @@ public class PersonBean extends BaseBean implements Observer {
 		try {
 			types.put((Domain) arg, personService.getTypes((Domain) arg));
 		} catch (Exception e) {
-			LOGGER.warn("fail to update domain person types");
+			LOGGER.error("fail to update domain person types");
 		}
 	}
 
