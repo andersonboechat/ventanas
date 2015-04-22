@@ -40,10 +40,9 @@ public class SupplierServiceImpl {
 	}
 	
 	public Supplier register(Supplier supplier) throws Exception {
-//		if (!securityManager.hasPermission(supplier, Permission.ADD)) {
-//			throw new BusinessException("supplier.create.denied");
-//			throw new Exception("sem permissao para cadastrar fornecedor");
-//		}
+		if (!securityManager.hasPermission(supplier, Permission.ADD)) {
+			throw new BusinessException("supplier.create.denied");
+		}
 
 //		if (getAdministration(admin.getName()) != null) {
 //			throw new BusinessException("supplier.already.exists");
@@ -53,16 +52,18 @@ public class SupplierServiceImpl {
 	}
 
 	public Supplier update(Supplier supplier) throws Exception {
-//		if (!securityManager.hasPermission(supplier, Permission.UPDATE)) {
-//		throw new BusinessException("supplier.update.denied");
-//	}
+		if (!securityManager.hasPermission(supplier, Permission.UPDATE)) {
+			throw new BusinessException("supplier.update.denied");
+		}
+
 		return supplierManager.save(supplier);
 	}
 
 	public void delete(Supplier supplier) throws Exception {
-//		if (!securityManager.hasPermission(supplier, Permission.DELETE)) {
-//		throw new BusinessException("supplier.delete.denied");
-//	}
+		if (!securityManager.hasPermission(supplier, Permission.DELETE)) {
+			throw new BusinessException("supplier.delete.denied");
+		}
+
 		supplierManager.delete(supplier);
 	}
 

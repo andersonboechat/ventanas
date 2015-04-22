@@ -8,6 +8,7 @@ import org.apache.commons.collections.CollectionUtils;
 import br.com.abware.jcondo.core.Permission;
 import br.com.abware.jcondo.core.model.Flat;
 import br.com.abware.jcondo.core.model.Person;
+import br.com.abware.jcondo.exception.BusinessException;
 import br.com.abware.jcondo.exception.PersistenceException;
 
 import br.com.atilo.jcondo.commons.collections.FlatTransformer;
@@ -68,6 +69,10 @@ public class FlatServiceImpl {
 	}
 
 	public Flat register(Flat flat) throws Exception {
+		if (!securityManager.hasPermission(flat, Permission.ADD)) {
+			throw new BusinessException("flt.create.denied");
+		}
+
 		Flat f = flatManager.findByNumberAndBlock(flat.getNumber(), flat.getBlock());
 
 		if (f != null) {
@@ -78,6 +83,10 @@ public class FlatServiceImpl {
 	}
 	
 	public Flat update(Flat flat) throws Exception {
+		if (!securityManager.hasPermission(flat, Permission.UPDATE)) {
+			throw new BusinessException("flt.update.denied");
+		}
+
 //		Flat f = flatManager.findByNumberAndBlock(flat.getNumber(), flat.getBlock());
 //
 //		if (f == null) {
@@ -85,6 +94,7 @@ public class FlatServiceImpl {
 //		}
 //
 //		return flatManager.save(flat);
+
 		return flat;
 	}
 

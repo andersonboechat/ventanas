@@ -16,6 +16,7 @@ import br.com.abware.jcondo.core.model.Image;
 import br.com.abware.jcondo.core.model.Membership;
 import br.com.abware.jcondo.core.model.Parking;
 import br.com.abware.jcondo.core.model.Person;
+import br.com.abware.jcondo.core.model.Supplier;
 import br.com.abware.jcondo.core.model.Vehicle;
 import br.com.abware.jcondo.crm.model.Answer;
 import br.com.abware.jcondo.crm.model.Occurrence;
@@ -27,6 +28,7 @@ import br.com.atilo.jcondo.core.persistence.entity.FlatEntity;
 import br.com.atilo.jcondo.core.persistence.entity.MembershipEntity;
 import br.com.atilo.jcondo.core.persistence.entity.ParkingEntity;
 import br.com.atilo.jcondo.core.persistence.entity.PersonEntity;
+import br.com.atilo.jcondo.core.persistence.entity.SupplierEntity;
 import br.com.atilo.jcondo.core.persistence.entity.VehicleEntity;
 import br.com.atilo.jcondo.occurrence.persistence.entity.AnswerEntity;
 import br.com.atilo.jcondo.occurrence.persistence.entity.OccurrenceEntity;
@@ -57,6 +59,8 @@ public class BeanUtils extends org.apache.commons.beanutils.BeanUtils {
 		 cub.register(bc, OccurrenceEntity.class);
 		 cub.register(bc, Answer.class);
 		 cub.register(bc, AnswerEntity.class);
+		 cub.register(bc, Supplier.class);
+		 cub.register(bc, SupplierEntity.class);
 
 		 DomainConverter dc = new DomainConverter();
 		 cub.register(dc, DomainEntity.class);

@@ -272,17 +272,23 @@ public class SecurityManagerImpl {
 	}
 
 	private boolean checkPermission(PermissionChecker permissionChecker, BaseModel model, Domain domain, Permission permission) throws Exception {
-		if (domain == null) {
-			return permissionChecker.hasPermission(helper.getScopeGroupId(), model.getClass().getName(), model.getId(), permission.name());
+		try {
+			if (domain == null) {
+				return permissionChecker.hasPermission(helper.getScopeGroupId(), model.getClass().getName(), model.getId(), permission.name());
+			}
+
+			Domain d = domain.getRelatedId() == 0 ? domain.getParent() : domain;
+			Organization organization = OrganizationLocalServiceUtil.getOrganization(d.getRelatedId());
+
+	        for(; !organization.isRoot(); organization = organization.getParentOrganization()) {
+	            if(permissionChecker.hasPermission(organization.getGroup().getGroupId(), model.getClass().getName(), model.getId(), permission.name())) {
+	            	return true;
+	            }
+	        }
+
+		} catch (Exception e) {
+			e.printStackTrace();
 		}
-
-		Organization organization = OrganizationLocalServiceUtil.getOrganization(domain.getRelatedId());
-
-        for(; !organization.isRoot(); organization = organization.getParentOrganization()) {
-            if(permissionChecker.hasPermission(organization.getGroup().getGroupId(), model.getClass().getName(), model.getId(), permission.name())) {
-            	return true;
-            }
-        }
 
 		return false;
 	}	
