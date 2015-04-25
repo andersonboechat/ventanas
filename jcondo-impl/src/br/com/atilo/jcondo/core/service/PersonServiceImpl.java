@@ -18,6 +18,7 @@ import br.com.abware.jcondo.core.model.Membership;
 import br.com.abware.jcondo.core.model.Person;
 import br.com.abware.jcondo.core.model.Supplier;
 import br.com.abware.jcondo.exception.ApplicationException;
+import br.com.abware.jcondo.exception.BusinessException;
 import br.com.abware.jcondo.exception.PersistenceException;
 
 import br.com.atilo.jcondo.commons.collections.MembershipPredicate;
@@ -51,7 +52,7 @@ public class PersonServiceImpl  {
 		} else if (domain instanceof Administration) {
 			ts = PersonType.ADMIN_TYPES;
 		} else {
-			throw new Exception("Unknown domain");
+			throw new ApplicationException("psn.domain.unknown", domain);
 		}
 
 		for (PersonType type : ts) {
@@ -75,8 +76,7 @@ public class PersonServiceImpl  {
 				people.addAll(personManager.findPeople(administration));
 			}
 		} catch (PersistenceException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			throw new ApplicationException(e, "psn.get.person.people.fail");
 		}
 
 		return new ArrayList<Person>(people);
@@ -90,8 +90,7 @@ public class PersonServiceImpl  {
 				people = personManager.findPeople(domain);
 			}
 		} catch (PersistenceException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			throw new ApplicationException(e, "psn.get.domain.people.fail");
 		}
 
 		return people;
@@ -130,28 +129,32 @@ public class PersonServiceImpl  {
 	 * 				   , associa os proprietários aos papeis: Proprietário
 	 */
 	public Person register(Person person) throws Exception {
-		if (!securityManager.hasPermission(person, Permission.ADD)) {
-			throw new Exception("sem permissao para cadastrar usuario");
+		try {
+			if (!securityManager.hasPermission(person, Permission.ADD)) {
+				throw new BusinessException("psn.create.denied");
+			}
+	
+			if (StringUtils.isEmpty(person.getIdentity())) {
+				throw new BusinessException("psn.identity.empty");
+			}
+	
+			if (getPerson(person.getIdentity()) != null) {
+				throw new BusinessException("psn.identity.exists", person.getIdentity());
+			}
+
+			validateDomains(person);
+			validateMemberships(person);
+	
+			Person p = personManager.save(person);
+	
+			for (Membership membership : person.getMemberships()) {
+				securityManager.addMembership(p, membership);
+			}
+	
+			return p;
+		} catch (PersistenceException e) {
+			throw new ApplicationException(e, "psn.register.fail");
 		}
-
-		if (StringUtils.isEmpty(person.getIdentity())) {
-			throw new ApplicationException("identidade não fornecida");
-		}
-
-		if (getPerson(person.getIdentity()) != null) {
-			throw new ApplicationException("existe usuario cadastrado com a identidade " + person.getIdentity());
-		}
-
-		validateDomains(person);
-		validateMemberships(person);
-
-		Person p = personManager.save(person);
-
-		for (Membership membership : person.getMemberships()) {
-			securityManager.addMembership(p, membership);
-		}
-
-		return p;
 	}
 
 	public void updatePassword(Person person, String password, String newPassword) throws Exception {
@@ -166,39 +169,43 @@ public class PersonServiceImpl  {
 	
 	@SuppressWarnings("unchecked")
 	public Person update(Person person) throws Exception {
-		if (!securityManager.hasPermission(person, Permission.UPDATE)) {
-			throw new Exception("sem permissao para alterar usuario");
+		try {
+			if (!securityManager.hasPermission(person, Permission.UPDATE)) {
+				throw new BusinessException("psn.update.denied");
+			}
+	
+			if (StringUtils.isEmpty(person.getIdentity())) {
+				throw new BusinessException("psn.identity.empty");
+			}
+	
+			Person p = personManager.findById(person.getId());
+			if (p == null) {
+				throw new BusinessException("psn.not.found");
+			}
+
+			validateDomains(person);
+			validateMemberships(person);
+	
+			if (p.getMemberships() == null) {
+				p.setMemberships(new ArrayList<Membership>());
+			}
+	
+			List<Membership> memberships = (List<Membership>) CollectionUtils.subtract(p.getMemberships(), person.getMemberships());
+	
+			for (Membership membership : memberships) {
+				securityManager.removeMembership(person, membership);
+			}
+	
+			memberships = (List<Membership>) CollectionUtils.subtract(person.getMemberships(), p.getMemberships());
+	
+			for (Membership membership : memberships) {
+				securityManager.addMembership(person, membership);
+			}
+	
+			return personManager.save(person);
+		} catch (PersistenceException e) {
+			throw new ApplicationException(e, "psn.update.fail");
 		}
-
-		if (StringUtils.isEmpty(person.getIdentity())) {
-			throw new ApplicationException("identidade não fornecida");
-		}
-
-		Person p = personManager.findById(person.getId());
-		if (p == null) {
-			throw new ApplicationException("usuario nao cadastrado");
-		}
-
-		validateDomains(person);
-		validateMemberships(person);
-
-		if (p.getMemberships() == null) {
-			p.setMemberships(new ArrayList<Membership>());
-		}
-
-		List<Membership> memberships = (List<Membership>) CollectionUtils.subtract(p.getMemberships(), person.getMemberships());
-
-		for (Membership membership : memberships) {
-			securityManager.removeMembership(person, membership);
-		}
-
-		memberships = (List<Membership>) CollectionUtils.subtract(person.getMemberships(), p.getMemberships());
-
-		for (Membership membership : memberships) {
-			securityManager.addMembership(person, membership);
-		}
-
-		return personManager.save(person);
 	}	
 
 	private void validateDomains(Person person) throws Exception {
@@ -210,7 +217,7 @@ public class PersonServiceImpl  {
 		List<Membership> oldMemberships;
 		List<Membership> memberships = person.getMemberships();
 
-		Person p = getPerson(person.getIdentity());
+		Person p = personManager.findById(person.getId());
 
 		if (p != null) {
 			oldMemberships = p.getMemberships();
@@ -225,7 +232,7 @@ public class PersonServiceImpl  {
 			/* usuário deixou de ter esse papel nesse dominio */
 			if (!CollectionUtils.exists(person.getMemberships(), new MembershipPredicate(domain, type))) {
 				if (!securityManager.hasPermission(membership, Permission.REMOVE_MEMBER)) {
-					throw new Exception("");
+					throw new BusinessException("psn.membership.remove.member.denied");
 				}
 			}
 		}
@@ -237,24 +244,29 @@ public class PersonServiceImpl  {
 			/* usuário nao tem esse papel nesse dominio */
 			if (!CollectionUtils.exists(oldMemberships, new MembershipPredicate(domain, type))) {
 				if (!securityManager.hasPermission(membership, Permission.ASSIGN_MEMBER)) {
-					throw new Exception("");
+					throw new BusinessException("psn.membership.assign.member.denied");
 				}
 			}
 		}
 	}
 	
 	public void delete(Person person) throws Exception {
-		if (!securityManager.hasPermission(person, Permission.DELETE)) {
-			throw new Exception("sem permissao para excluir este usuario");
+		try {
+			if (!securityManager.hasPermission(person, Permission.DELETE)) {
+				throw new BusinessException("psn.delete.denied");
+			}
+	
+			personManager.delete(person);
+		} catch (PersistenceException e) {
+			throw new ApplicationException(e, "psn.delete.fail");
 		}
-
-		personManager.delete(person);
 	}
 
 	public boolean authenticate(Person person, String password) {
 		try {
 			return personManager.authenticate(person, password);
 		} catch (Exception e) {
+			// TODO log it!
 			return false;
 		}
 	}

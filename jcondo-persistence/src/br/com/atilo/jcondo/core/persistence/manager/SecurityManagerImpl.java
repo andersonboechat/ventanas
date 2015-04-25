@@ -13,7 +13,6 @@ import com.liferay.portal.service.ResourceLocalServiceUtil;
 import com.liferay.portal.service.RoleLocalServiceUtil;
 import com.liferay.portal.service.UserGroupRoleLocalServiceUtil;
 import com.liferay.portal.service.UserLocalServiceUtil;
-import com.liferay.portal.service.permission.OrganizationPermissionUtil;
 import com.liferay.portal.service.permission.PortalPermissionUtil;
 import com.liferay.portal.service.permission.UserPermissionUtil;
 
@@ -55,13 +54,17 @@ public class SecurityManagerImpl {
 	}
 
 	public void updatePassword(Person person, String password, String newPassword) throws Exception {
-		int result = UserLocalServiceUtil.authenticateByEmailAddress(helper.getCompanyId(), person.getEmailAddress(), password, null, null, null);
+		try {
+			int result = UserLocalServiceUtil.authenticateByEmailAddress(helper.getCompanyId(), person.getEmailAddress(), password, null, null, null);
 
-		if (result == -1) {
-			throw new Exception("user authetication failure.");
+			if (result == -1) {
+				throw new ApplicationException("sct.auth.failed");
+			}
+
+			UserLocalServiceUtil.updatePassword(person.getUserId(), newPassword, newPassword, false);
+		} catch (Exception e) {
+			throw new ApplicationException(e, "sct.pwd.update.failed");
 		}
-
-		UserLocalServiceUtil.updatePassword(person.getUserId(), newPassword, newPassword, false);
 	}
 
 	public void addMembership(Person person, Membership membership) throws Exception {
@@ -207,7 +210,7 @@ public class SecurityManagerImpl {
 				UserGroupRoleLocalServiceUtil.addUserGroupRoles(person.getUserId(), id, new long[] {roleId});	
 			}
 		} catch (Exception e) {
-			throw new ApplicationException(e, "");
+			throw new ApplicationException(e, "sct.add.role.failed");
 		}
 	}
 
@@ -225,7 +228,7 @@ public class SecurityManagerImpl {
 				UserGroupRoleLocalServiceUtil.deleteUserGroupRoles(person.getUserId(), id, new long[] {roleId});	
 			}
 		} catch (Exception e) {
-			throw new ApplicationException(e, "");
+			throw new ApplicationException(e, "sct.remove.role.failed");
 		}
 	}
 
@@ -250,42 +253,39 @@ public class SecurityManagerImpl {
 		UserLocalServiceUtil.addGroupUsers(helper.getScopeGroupId(), new long[] {person.getUserId()});
 	}
 
-	public boolean hasPermission(BaseModel model, Permission permission) throws ApplicationException {
-		try {
-			PermissionChecker permissionChecker = helper.getThemeDisplay().getPermissionChecker();
+	public boolean hasPermission(BaseModel model, Permission permission) {
+		PermissionChecker permissionChecker = helper.getThemeDisplay().getPermissionChecker();
 
-			if (model instanceof Person) {
-				return checkUserPermission(permissionChecker, ((Person) model).getUserId(), permission);
-			} else if (model instanceof Flat || model instanceof Supplier || model instanceof Administration) {
-				// return checkDomainPermission(permissionChecker, (Domain) model, permission); 
-				return checkPermission(permissionChecker, (Domain) model, (Domain) model, permission);
-			} else if (model instanceof Membership) {
-				return checkPermission(permissionChecker, ((Membership) model).getType(), ((Membership) model).getDomain(), permission);
-			} else if (model instanceof Vehicle) {
-				return checkPermission(permissionChecker, model, ((Vehicle) model).getDomain(), permission);
-			} else {
-				return checkPermission(permissionChecker, model, permission);
-			}
-		} catch (Exception e) {
-			throw new ApplicationException(e, "fail.check.permission");
+		if (model instanceof Person) {
+			return checkUserPermission(permissionChecker, ((Person) model).getUserId(), permission);
+		} else if (model instanceof Flat || model instanceof Supplier || model instanceof Administration) {
+			return checkPermission(permissionChecker, (Domain) model, (Domain) model, permission);
+		} else if (model instanceof Membership) {
+			return checkPermission(permissionChecker, ((Membership) model).getType(), ((Membership) model).getDomain(), permission);
+		} else if (model instanceof Vehicle) {
+			return checkPermission(permissionChecker, model, ((Vehicle) model).getDomain(), permission);
+		} else {
+			return checkPermission(permissionChecker, model, permission);
 		}
+
 	}
 
-	private boolean checkPermission(PermissionChecker permissionChecker, BaseModel model, Domain domain, Permission permission) throws Exception {
+	private boolean checkPermission(PermissionChecker permissionChecker, BaseModel model, Domain domain, Permission permission) {
 		try {
 			if (domain == null) {
-				return permissionChecker.hasPermission(helper.getScopeGroupId(), model.getClass().getName(), model.getId(), permission.name());
+				return permissionChecker.hasPermission(helper.getHostGroupId(), model.getClass().getName(), model.getId(), permission.name());
 			}
 
 			Domain d = domain.getRelatedId() == 0 ? domain.getParent() : domain;
 			Organization organization = OrganizationLocalServiceUtil.getOrganization(d.getRelatedId());
 
-	        for(; !organization.isRoot(); organization = organization.getParentOrganization()) {
+			while (organization != null) {
 	            if(permissionChecker.hasPermission(organization.getGroup().getGroupId(), model.getClass().getName(), model.getId(), permission.name())) {
 	            	return true;
 	            }
-	        }
-
+				organization = organization.getParentOrganization();
+			} 
+			
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -293,34 +293,28 @@ public class SecurityManagerImpl {
 		return false;
 	}	
 
-	private boolean checkPermission(PermissionChecker permissionChecker, BaseModel model, Permission permission) throws Exception {
+	private boolean checkPermission(PermissionChecker permissionChecker, BaseModel model, Permission permission) {
 		return checkPermission(permissionChecker, model, null, permission);
 	}
 	
-	private boolean checkDomainPermission(PermissionChecker permissionChecker, Domain domain, Permission permission) throws Exception {
-		String actionkey;
+	private boolean checkUserPermission(PermissionChecker permissionChecker, long userId, Permission permission) {
+		try {
+			String actionkey;
 
-		if (permission == Permission.VIEW) {
-			actionkey = ActionKeys.VIEW;
-		} else {
-			throw new SystemException("permission.not.supported");
+			if (permission == Permission.UPDATE) {
+				actionkey = ActionKeys.UPDATE;
+			} else if (permission == Permission.ADD) { 
+				return PortalPermissionUtil.contains(permissionChecker, ActionKeys.ADD_USER);
+			} else {
+				throw new SystemException("permission.not.supported");
+			}
+
+			return UserPermissionUtil.contains(permissionChecker, userId, actionkey);
+		} catch (Exception e) {
+			e.printStackTrace();
 		}
-
-		return OrganizationPermissionUtil.contains(permissionChecker, domain.getRelatedId(), actionkey);
-	}
-
-	private boolean checkUserPermission(PermissionChecker permissionChecker, long userId, Permission permission) throws Exception {
-		String actionkey;
-
-		if (permission == Permission.UPDATE) {
-			actionkey = ActionKeys.UPDATE;
-		} else if (permission == Permission.ADD) { 
-			return PortalPermissionUtil.contains(permissionChecker, ActionKeys.ADD_USER);
-		} else {
-			throw new SystemException("permission.not.supported");
-		}
-
-		return UserPermissionUtil.contains(permissionChecker, userId, actionkey);
+		
+		return false;
 	}
 
 }

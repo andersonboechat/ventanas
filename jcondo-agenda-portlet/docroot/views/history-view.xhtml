@@ -9,7 +9,7 @@
 	<h:form id="bookings-form">
 		<p:dataTable widgetVar="bookingTable" var="booking" value="#{historyBean.bookings}"	paginator="true" paginatorPosition="bottom" 
 			paginatorTemplate="{PreviousPageLink} {NextPageLink}" rows="5" rowKey="#{booking.id}" 
-			emptyMessage="Nenhum aluguel encontrado" styleClass="no-header no-border" style="margin-top: 15px">
+			emptyMessage="Não há reservas" styleClass="no-header no-border" style="margin-top: 15px">
 		    <p:ajax event="page" global="false"/>
 			<f:facet name="header">
 				<p:panelGrid columns="1" columnClasses="docs-header" styleClass="no-background no-border no-margin" style="width: 100%; height: 25px">

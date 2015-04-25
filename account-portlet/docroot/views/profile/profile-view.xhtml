@@ -52,7 +52,7 @@
 						</p:row>
 						<p:row>
 							<p:column styleClass="labelClm"><p:outputLabel for="male" value="Sexo:"/></p:column>
-							<p:column styleClass="fieldClm">
+							<p:column>
 								<p:selectOneMenu id="male" value="#{profileBean.person.gender}" required="false" style="vertical-align: middle">
 									<f:selectItems var="gender" value="#{profileBean.genders}" itemLabel="#{msg[gender.label]}"/>
 								</p:selectOneMenu>
@@ -66,11 +66,11 @@
 						</p:panelGrid>
 						<p:dataTable id="phoneTable" widgetVar="phoneTable" var="phone" value="#{profileBean.phones}" styleClass="no-header" rows="4"
 							paginator="true" paginatorAlwaysVisible="false" paginatorPosition="bottom" paginatorTemplate="{PreviousPageLink} {CurrentPageReport} {NextPageLink}"
-							emptyMessage="Nenhum telefone informado" style="margin: 10px 9px">
+							emptyMessage="Nenhum telefone informado" style="margin: 10px 18px 10px 10px;">
 							<f:facet name="header">
 								<p:panelGrid columns="4" columnClasses="docs-header,docs-header,docs-header,docs-cmds" styleClass="no-background no-border no-margin" style="width: 100%;">
 									<h:outputText value="Telefones"/>
-									<p:inputMask id="phoneNumber" mask="(99) 99999999?9" value="#{profileBean.phoneNumber}" style=" width: 105px; height: 12px; padding-left: 3px" placeholder="Número"/>
+									<p:inputMask id="phoneNumber" mask="(99) 99999999?9" value="#{profileBean.phoneNumber}" style="width: 100px; height: 8px; padding: 0px 0px 0px 3px" placeholder="Número"/>
 									<p:selectOneMenu id="phoneType" value="#{profileBean.phoneType}" style="font-size: 10px; margin-left: 10px; vertical-align: middle; float: right; width: 100px;">
 										<f:selectItem itemLabel="Tipo" noSelectionOption="true"/>
 										<f:selectItems var="type" value="#{profileBean.phoneTypes}" itemLabel="#{msg[type.label]}"/>
@@ -88,12 +88,16 @@
 								</p:commandLink>										
 							</p:column>
 						</p:dataTable>
+					</p:column>
+				</p:row>
+				<p:row>
+					<p:column colspan="2">
 						<p:fieldset id="parents" legend="Parentes" style="margin: 0px 9px" styleClass="no-background" rendered="#{profileBean.people != null}">
 							<p:panelGrid style="width: 100%; margin: 0px">
 								<p:row>
 									<p:column styleClass="labelClm"><p:outputLabel for="father" value="Pai: "/></p:column>
 									<p:column styleClass="fieldClm">
-										<p:selectOneMenu id="father" value="#{profileBean.father}" converter="selectItemsConverter" style="width: 130px">
+										<p:selectOneMenu id="father" value="#{profileBean.father}" converter="selectItemsConverter">
 											<f:selectItem itemLabel="Selecione" noSelectionOption="true"/>
 											<f:selectItems var="relative" value="#{profileBean.getFathers()}" itemLabel="#{relative.fullName}" itemValue="#{relative}"/>
 											<p:ajax event="change" update=":profile-form:mother,:profile-form:childTable,:profile-form:grandChildTable" global="false"/>
@@ -101,7 +105,7 @@
 									</p:column>
 									<p:column styleClass="labelClm"><p:outputLabel for="mother" value="Mãe: "/></p:column>
 									<p:column styleClass="fieldClm">
-										<p:selectOneMenu id="mother" value="#{profileBean.mother}" converter="selectItemsConverter" style="width: 130px">
+										<p:selectOneMenu id="mother" value="#{profileBean.mother}" converter="selectItemsConverter">
 											<f:selectItem itemLabel="Selecione" noSelectionOption="true"/>
 											<f:selectItems var="relative" value="#{profileBean.getMothers()}" itemLabel="#{relative.fullName}" itemValue="#{relative}"/>
 											<p:ajax event="change" update=":profile-form:father,:profile-form:childTable,:profile-form:grandChildTable" global="false"/>
@@ -166,8 +170,7 @@
 				</p:row>
 				<p:row>
 					<p:column colspan="2">
-						<p:commandButton value="Cancelar" update="profile-form" global="false" style="float: right; width: 80px; margin: 10px 0px 10px 5px;"/>
-						<p:commandButton value="Salvar" actionListener="#{profileBean.onSave}" update=":outputMsg" style="float: right; width: 80px; margin: 10px 0px 10px 5px;"/>
+						<p:commandButton value="Salvar" actionListener="#{profileBean.onSave}" update=":outputMsg" style="float: right; width: 85px; margin: 10px 10px 0px 5px;"/>
 					</p:column>
 				</p:row>
 			</p:panelGrid>

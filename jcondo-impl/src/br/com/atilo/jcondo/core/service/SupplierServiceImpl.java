@@ -9,7 +9,9 @@ import br.com.abware.jcondo.core.SupplierStatus;
 import br.com.abware.jcondo.core.model.Administration;
 import br.com.abware.jcondo.core.model.Domain;
 import br.com.abware.jcondo.core.model.Supplier;
+import br.com.abware.jcondo.exception.ApplicationException;
 import br.com.abware.jcondo.exception.BusinessException;
+import br.com.abware.jcondo.exception.PersistenceException;
 
 import br.com.atilo.jcondo.core.persistence.manager.AdministrationManagerImpl;
 import br.com.atilo.jcondo.core.persistence.manager.SecurityManagerImpl;
@@ -24,15 +26,19 @@ public class SupplierServiceImpl {
 	private SecurityManagerImpl securityManager = new SecurityManagerImpl();
 
 	public List<Supplier> getSuppliers(Domain domain) throws Exception {
-		List<Supplier> suppliers = new ArrayList<Supplier>();
+		try {
+			List<Supplier> suppliers = new ArrayList<Supplier>();
 
-		for (Supplier supplier : supplierManager.findByDomain(domain)) {
-//			if (securityManager.hasPermission(supplier, Permission.VIEW)) {
-				suppliers.add(supplier);
-//			}
+			for (Supplier supplier : supplierManager.findByDomain(domain)) {
+//				if (securityManager.hasPermission(supplier, Permission.VIEW)) {
+					suppliers.add(supplier);
+//				}
+			}
+
+			return suppliers;
+		} catch (PersistenceException e) {
+			throw new ApplicationException(e, "slr.get.suppliers.fail");
 		}
-
-		return suppliers;
 	}
 
 	public List<SupplierStatus> getStatuses(Domain domain) {
@@ -41,30 +47,42 @@ public class SupplierServiceImpl {
 	
 	public Supplier register(Supplier supplier) throws Exception {
 		if (!securityManager.hasPermission(supplier, Permission.ADD)) {
-			throw new BusinessException("supplier.create.denied");
+			throw new BusinessException("slr.create.denied");
 		}
 
 //		if (getAdministration(admin.getName()) != null) {
 //			throw new BusinessException("supplier.already.exists");
 //		}
 
-		return supplierManager.save(supplier);
+		try {
+			return supplierManager.save(supplier);
+		} catch (PersistenceException e) {
+			throw new ApplicationException(e, "slr.register.fail");
+		}
 	}
 
 	public Supplier update(Supplier supplier) throws Exception {
 		if (!securityManager.hasPermission(supplier, Permission.UPDATE)) {
-			throw new BusinessException("supplier.update.denied");
+			throw new BusinessException("slr.update.denied");
 		}
 
-		return supplierManager.save(supplier);
+		try {
+			return supplierManager.save(supplier);
+		} catch (PersistenceException e) {
+			throw new ApplicationException(e, "slr.update.fail");
+		}
 	}
 
 	public void delete(Supplier supplier) throws Exception {
 		if (!securityManager.hasPermission(supplier, Permission.DELETE)) {
-			throw new BusinessException("supplier.delete.denied");
+			throw new BusinessException("slr.delete.denied");
 		}
 
-		supplierManager.delete(supplier);
+		try {
+			supplierManager.delete(supplier);
+		} catch (PersistenceException e) {
+			throw new ApplicationException(e, "slr.delete.fail");
+		}
 	}
 
 }

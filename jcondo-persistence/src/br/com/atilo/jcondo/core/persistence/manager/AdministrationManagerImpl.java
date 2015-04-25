@@ -16,15 +16,12 @@ import com.liferay.portal.service.ResourceLocalServiceUtil;
 
 import br.com.abware.jcondo.core.model.Administration;
 import br.com.abware.jcondo.core.model.Person;
+import br.com.abware.jcondo.exception.PersistenceException;
 import br.com.atilo.jcondo.core.persistence.entity.AdministrationEntity;
 
 public class AdministrationManagerImpl extends JCondoManager<AdministrationEntity, Administration> {
 
 	public static final Administration ADMINISTRATION = new Administration();
-
-	static {
-	}
-	
 	
 	@Override
 	protected Class<Administration> getModelClass() {
@@ -37,19 +34,23 @@ public class AdministrationManagerImpl extends JCondoManager<AdministrationEntit
 	}
 
 	public Administration save(Administration admin) throws Exception {
-		Administration adm = super.save(admin);
+		try {
+			Administration adm = super.save(admin);
 
-		if (admin.getRelatedId() == 0) {
-			Group group = GroupLocalServiceUtil.addGroup(helper.getUserId(), Group.class.getName(), 0, admin.getName(), 
-														 StringUtils.EMPTY, GroupConstants.TYPE_SITE_PRIVATE, 
-														 "/" + admin.getName(), true, true, null);
-			ResourceLocalServiceUtil.addResources(helper.getCompanyId(), group.getGroupId(), helper.getUserId(), 
-												  Administration.class.getName(), adm.getId(), false, true, false);
-			adm.setRelatedId(group.getGroupId());
-			adm = super.save(adm);
+			if (admin.getRelatedId() == 0) {
+				Group group = GroupLocalServiceUtil.addGroup(helper.getUserId(), Group.class.getName(), 0, admin.getName(), 
+															 StringUtils.EMPTY, GroupConstants.TYPE_SITE_PRIVATE, 
+															 "/" + admin.getName(), true, true, null);
+				ResourceLocalServiceUtil.addResources(helper.getCompanyId(), group.getGroupId(), helper.getUserId(), 
+													  Administration.class.getName(), adm.getId(), false, true, false);
+				adm.setRelatedId(group.getGroupId());
+				adm = super.save(adm);
+			}
+
+			return adm;
+		} catch (Exception e) {
+			throw new PersistenceException(e, "psn.mgr.save.fail");
 		}
-
-		return adm;
 	}
 
 	public void delete(Administration flat) throws Exception {
@@ -70,6 +71,8 @@ public class AdministrationManagerImpl extends JCondoManager<AdministrationEntit
 			return getModel((AdministrationEntity) query.getSingleResult());
 		} catch (NoResultException e) {
 			return null;
+		} catch (Exception e) {
+			throw new PersistenceException(e, "adm.mgr.find.name.fail");
 		} finally {
 			closeManager(key);
 		}
@@ -86,6 +89,8 @@ public class AdministrationManagerImpl extends JCondoManager<AdministrationEntit
 			return getModels(query.getResultList());
 		} catch (NoResultException e) {
 			return new ArrayList<Administration>();
+		} catch (Exception e) {
+			throw new PersistenceException(e, "adm.mgr.find.person.fail");
 		} finally {
 			closeManager(key);
 		}

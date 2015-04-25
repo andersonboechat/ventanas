@@ -33,9 +33,13 @@ public abstract class JCondoManager<Entity extends BaseEntity, Model extends Bas
 	protected abstract Class<Entity> getEntityClass();
 
 	protected Entity getEntity(Model model) throws Exception {
-		Entity entity = getEntityClass().newInstance();
-		BeanUtils.copyProperties(entity, model);
-		return entity;
+		try {
+			Entity entity = getEntityClass().newInstance();
+			BeanUtils.copyProperties(entity, model);
+			return entity;
+		} catch (Exception e) {
+			throw new PersistenceException(e, "mgr.get.entity.fail");
+		}
 	}
 
 	protected List<Entity> getEntities(List<Model> models) throws PersistenceException {
@@ -48,22 +52,26 @@ public abstract class JCondoManager<Entity extends BaseEntity, Model extends Bas
 
 			return entities;
 		} catch (Exception e) {
-			throw new PersistenceException(e, "");
+			throw new PersistenceException(e, "mgr.get.entities.fail");
 		}
 	}
 
 	protected Model getModel(Entity entity) throws Exception {
-		if (entity == null) {
-			return null;
+		try {
+			if (entity == null) {
+				return null;
+			}
+
+			Model model = getModelClass().newInstance();
+			BeanUtils.copyProperties(model, entity);
+
+			entity.setUpdateDate(new Date());
+			entity.setUpdateUser(helper.getUserId());		
+			
+			return model;
+		} catch (Exception e) {
+			throw new PersistenceException(e, "mgr.get.model.fail");
 		}
-
-		Model model = getModelClass().newInstance();
-		BeanUtils.copyProperties(model, entity);
-
-		entity.setUpdateDate(new Date());
-		entity.setUpdateUser(helper.getUserId());		
-		
-		return model;
 	}
 
 	protected List<Model> getModels(List<Entity> entities) throws PersistenceException {
@@ -76,8 +84,7 @@ public abstract class JCondoManager<Entity extends BaseEntity, Model extends Bas
 
 			return models;
 		} catch (Exception e) {
-			e.printStackTrace();
-			throw new PersistenceException(e, "");
+			throw new PersistenceException(e, "mgr.get.models.fail");
 		}
 	}
 
@@ -117,6 +124,8 @@ public abstract class JCondoManager<Entity extends BaseEntity, Model extends Bas
 			em.refresh(entity);
 
 			return getModel(entity);
+		} catch (Exception e) {
+			throw new PersistenceException(e, "mgr.save.fail");
 		} finally {
 			closeManager(key);
 		}
@@ -133,6 +142,8 @@ public abstract class JCondoManager<Entity extends BaseEntity, Model extends Bas
 				em.remove(entity);
 				em.getTransaction().commit();
 			}
+		} catch (Exception e) {
+			throw new PersistenceException(e, "mgr.delete.fail");
 		} finally {
 			closeManager(key);
 		}
@@ -142,11 +153,13 @@ public abstract class JCondoManager<Entity extends BaseEntity, Model extends Bas
 		return getModel(findEntityById(id));
 	}
 
-	protected Entity findEntityById(Object id) {
+	protected Entity findEntityById(Object id) throws Exception {
 		String key = generateKey();
 		try {
 			openManager(key);
 			return em.find(getEntityClass(), id);
+		} catch (Exception e) {
+			throw new PersistenceException(e, "mgr.find.entity.fail");
 		} finally {
 			closeManager(key);
 		}
@@ -160,6 +173,8 @@ public abstract class JCondoManager<Entity extends BaseEntity, Model extends Bas
 			String query = "FROM " + getEntityClass().getSimpleName();
 			Query q = em.createQuery(query);
 			return getModels(q.getResultList());
+		} catch (Exception e) {
+			throw new PersistenceException(e, "mgr.find.all.fail");
 		} finally {
 			closeManager(key);
 		}

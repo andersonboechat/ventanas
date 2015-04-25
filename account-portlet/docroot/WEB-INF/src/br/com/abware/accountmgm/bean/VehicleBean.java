@@ -96,19 +96,23 @@ public class VehicleBean extends BaseBean {
 			filters = new HashMap<String, Object>();
 			imageUploadBean = new ImageUploadBean(420, 315);
 		} catch (Exception e) {
-			LOGGER.error("", e);
+			LOGGER.fatal("Failure on vehicle initialization", e);
+			MessageUtils.addMessage(FacesMessage.SEVERITY_FATAL, "general.failure", null);
 		}
 	}
 
 	public void onVehicleSave() {
 		try {
+			String msg;
 			Vehicle v;
 			vehicle.setLicense(vehicle.getLicense().replaceAll("[^A-Za-z0-9]", ""));
 
 			if (vehicle.getId() == 0) {
 				v = vehicleService.register(vehicle);
+				msg = "vehicle.create.success";
 			} else {
 				v = vehicleService.update(vehicle);
+				msg = "vehicle.edit.success";
 			}
 
 			model.update(v);
@@ -116,7 +120,7 @@ public class VehicleBean extends BaseBean {
 			this.setChanged();
 			this.notifyObservers(v);
 
-			MessageUtils.addMessage(FacesMessage.SEVERITY_INFO, "vehicle.create.success", null);
+			MessageUtils.addMessage(FacesMessage.SEVERITY_INFO, msg, null);
 		} catch (ModelExistException e) {
 			Vehicle v = vehicleService.getVehicle(vehicle.getLicense());
 
@@ -148,10 +152,10 @@ public class VehicleBean extends BaseBean {
 
 			RequestContext.getCurrentInstance().addCallbackParam("exception", true);
 		} catch (BusinessException e) {
-			MessageUtils.addMessage(FacesMessage.SEVERITY_WARN, e.getMessage(), null);
+			MessageUtils.addMessage(FacesMessage.SEVERITY_WARN, e.getMessage(), e.getArgs());
 			RequestContext.getCurrentInstance().addCallbackParam("exception", true);
 		} catch (Exception e) {
-			MessageUtils.addMessage(FacesMessage.SEVERITY_ERROR, e.getMessage(), null);
+			MessageUtils.addMessage(FacesMessage.SEVERITY_ERROR, "general.failure", null);
 			RequestContext.getCurrentInstance().addCallbackParam("exception", true);
 		}
 	}
@@ -165,15 +169,34 @@ public class VehicleBean extends BaseBean {
 	}
 
 	public void onVehiclesDelete() throws Exception {
-		for (Vehicle vehicle : selectedVehicles) {
-			vehicleService.assignTo(vehicle, null);
+		try {
+			for (Vehicle vehicle : selectedVehicles) {
+				vehicleService.assignTo(vehicle, null);
+				model.removeModel(vehicle);
+			}
+		} catch (BusinessException e) {
+			MessageUtils.addMessage(FacesMessage.SEVERITY_WARN, e.getMessage(), e.getArgs());
+			RequestContext.getCurrentInstance().addCallbackParam("exception", true);
+		} catch (Exception e) {
+			LOGGER.error("Failure on vehicle delete", e);
+			MessageUtils.addMessage(FacesMessage.SEVERITY_ERROR, "vehicles.delete.failure", null);
+			RequestContext.getCurrentInstance().addCallbackParam("exception", true);
 		}
 	}
 
 	public void onVehicleDelete() throws Exception {
-		vehicleService.assignTo(model.getRowData(), null);
-		model.removeModel(model.getRowData());
-		MessageUtils.addMessage(FacesMessage.SEVERITY_INFO, "vehicle.delete.success", null);
+		try {
+			vehicleService.assignTo(model.getRowData(), null);
+			model.removeModel(model.getRowData());
+			MessageUtils.addMessage(FacesMessage.SEVERITY_INFO, "vehicle.delete.success", null);
+		} catch (BusinessException e) {
+			MessageUtils.addMessage(FacesMessage.SEVERITY_WARN, e.getMessage(), e.getArgs());
+			RequestContext.getCurrentInstance().addCallbackParam("exception", true);
+		} catch (Exception e) {
+			LOGGER.error("Failure on vehicle delete", e);
+			MessageUtils.addMessage(FacesMessage.SEVERITY_ERROR, "vehicle.delete.failure", null);
+			RequestContext.getCurrentInstance().addCallbackParam("exception", true);
+		}
 	}
 	
 	public void onVehicleEdit() {
@@ -182,8 +205,9 @@ public class VehicleBean extends BaseBean {
 			visitor = vehicle.getDomain() == null ? true : false;
 			imageUploadBean.setImage(vehicle.getImage());
 		} catch (Exception e) {
-			LOGGER.error("Falha ao editar veiculo", e);
+			LOGGER.error("Failure on vehicle editing", e);
 			MessageUtils.addMessage(FacesMessage.SEVERITY_ERROR, "vehicle.edit.failure", null);
+			RequestContext.getCurrentInstance().addCallbackParam("exception", true);
 		}
 	}
 

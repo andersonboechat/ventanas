@@ -56,7 +56,7 @@
 		<icon>/icon.png</icon>
 		<instanceable>false</instanceable>
 		<ajaxable>false</ajaxable>
-		<footer-portlet-javascript>/js/locale.js</footer-portlet-javascript>
+		<header-portlet-javascript>/js/locale.js</header-portlet-javascript>
 	</portlet>
 	<role-mapper>
 		<role-name>administrator</role-name>

@@ -71,7 +71,7 @@ public class CalendarBean extends BaseBean {
 			booking = new RoomBooking();
 			booking.setStatus(BookingStatus.BOOKED);
 		} catch (Exception e) {
-			LOGGER.error("", e);
+			LOGGER.error("Failure on calendar initialization", e);
 		}
 	}
 
@@ -115,12 +115,12 @@ public class CalendarBean extends BaseBean {
 				MessageUtils.addMessage(FacesMessage.SEVERITY_WARN, "agreement.deal.unchecked", null);
 			}
 		} catch (BusinessException e) {
-			LOGGER.warn(e.getMessage(), e);
 			MessageUtils.addMessage(FacesMessage.SEVERITY_WARN, e.getMessage(), e.getArgs());
 			RequestContext.getCurrentInstance().addCallbackParam("exception", true);
 		} catch (Exception e) {
-			LOGGER.fatal(e.getMessage(), e);
+			LOGGER.fatal("Failure on book", e);
 			MessageUtils.addMessage(FacesMessage.SEVERITY_FATAL, "bkg.failure", null);
+			RequestContext.getCurrentInstance().addCallbackParam("exception", true);
 		}
 
 		LOGGER.trace("Method out");
@@ -139,9 +139,13 @@ public class CalendarBean extends BaseBean {
 				}
 				MessageUtils.addMessage(FacesMessage.SEVERITY_INFO, "bkg.cancel.success", null);
 			}
+		} catch (BusinessException e) {
+			MessageUtils.addMessage(FacesMessage.SEVERITY_WARN, e.getMessage(), e.getArgs());
+			RequestContext.getCurrentInstance().addCallbackParam("exception", true);
 		} catch (Exception e) {
-			LOGGER.error(e.getMessage(), e);
+			LOGGER.error("Failure on booking cancel", e);
 			MessageUtils.addMessage(FacesMessage.SEVERITY_FATAL, "bkg.cancel.failure", null);
+			RequestContext.getCurrentInstance().addCallbackParam("exception", true);
 		}
 	}
 
@@ -152,12 +156,12 @@ public class CalendarBean extends BaseBean {
 			notifyObservers(new BookingEvent(booking, EventType.BOOK_DELETE));
 			MessageUtils.addMessage(FacesMessage.SEVERITY_INFO, "bkg.delete.success", null);
 		} catch (BusinessException e) {
-			LOGGER.warn(e.getMessage(), e);
 			MessageUtils.addMessage(FacesMessage.SEVERITY_WARN, e.getMessage(), e.getArgs());
 			RequestContext.getCurrentInstance().addCallbackParam("exception", true);
 		} catch (Exception e) {
-			LOGGER.error(e.getMessage(), e);
+			LOGGER.error("Failure on booking delete", e);
 			MessageUtils.addMessage(FacesMessage.SEVERITY_FATAL, "bkg.failure", null);
+			RequestContext.getCurrentInstance().addCallbackParam("exception", true);
 		}
 	}
 
@@ -167,7 +171,11 @@ public class CalendarBean extends BaseBean {
 		if (booking.getResource().getId() == RoomServiceImpl.CINEMA || booking.getStatus() == BookingStatus.CANCELLED) {
 			createBooking(e.getStartDate());
 		} else {
-			MessageUtils.addMessage(FacesMessage.SEVERITY_WARN, "bkg.room.already.booked", null);
+			MessageUtils.addMessage(FacesMessage.SEVERITY_WARN, "bkg.room.already.booked", 
+									new String[] {booking.getResource().getName(), 
+									DateFormatUtils.format(booking.getBeginDate(), "dd/MM/yyyy"), 
+									DateFormatUtils.format(booking.getBeginDate(), "HH:mm"),
+									DateFormatUtils.format(booking.getEndDate(), "HH:mm")});
 			RequestContext.getCurrentInstance().addCallbackParam("exception", true);
 		}
 	}
@@ -176,20 +184,25 @@ public class CalendarBean extends BaseBean {
 		Date today = DateUtils.truncate(new Date(), Calendar.DAY_OF_MONTH);
 		Date bookingDate = (Date) event.getObject();
 
-		if (bookingDate.before(today)) {
-			MessageUtils.addMessage(FacesMessage.SEVERITY_WARN, "bkg.past.date", new String[] {
-									DateFormatUtils.format(bookingDate, "dd/MM/yyyy"), 
-									DateFormatUtils.format(today, "dd/MM/yyyy")});
-			RequestContext.getCurrentInstance().addCallbackParam("exception", true);
-		}
-
 		ScheduleEvent se = (ScheduleEvent) CollectionUtils.find(model.getEvents(), new BookingDatePredicate(bookingDate));
 		RoomBooking booking = se != null ? (RoomBooking) se.getData() : null; 
 
 		if (model.getRoom().getId() == RoomServiceImpl.CINEMA || booking == null || booking.getStatus() == BookingStatus.CANCELLED) {
+			if (bookingDate.before(today)) {
+				MessageUtils.addMessage(FacesMessage.SEVERITY_WARN, "bkg.past.date", new String[] {
+										DateFormatUtils.format(bookingDate, "dd/MM/yyyy"), 
+										DateFormatUtils.format(today, "dd/MM/yyyy")});
+				RequestContext.getCurrentInstance().addCallbackParam("exception", true);
+				return;
+			}
+
 			createBooking(bookingDate);
 		} else {
-			MessageUtils.addMessage(FacesMessage.SEVERITY_WARN, "bkg.room.already.booked", null);
+			MessageUtils.addMessage(FacesMessage.SEVERITY_WARN, "bkg.room.already.booked", 
+									new String[] {booking.getResource().getName(), 
+									DateFormatUtils.format(booking.getBeginDate(), "dd/MM/yyyy"), 
+									DateFormatUtils.format(booking.getBeginDate(), "HH:mm"),
+									DateFormatUtils.format(booking.getEndDate(), "HH:mm")});
 			RequestContext.getCurrentInstance().addCallbackParam("exception", true);
 		}
 	}

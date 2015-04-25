@@ -8,6 +8,7 @@
 		<instanceable>false</instanceable>
 		<ajaxable>false</ajaxable>
 		<header-portlet-css>/css/main.css</header-portlet-css>
+		<footer-portlet-javascript>/js/locale.js</footer-portlet-javascript>
 		<css-class-wrapper>jcondo-agenda-portlet</css-class-wrapper>
 	</portlet>
 	<role-mapper>

@@ -48,18 +48,18 @@
 				</p:panelGrid>
 
 				<p:panel header="#{msg['agreement.term']}" styleClass="no-margin">
-					<p:media id="agreement" width="900px" height="350px" style="margin: 0px 0px 0px;" value="/..#{calendarBean.booking.resource.agreement}" player="pdf">  
+					<p:media id="agreement" width="900px" height="350px" style="margin: 0px 0px 0px;" value="#{calendarBean.booking.resource.agreement.path}?targetExtension=pdf" player="pdf">  
 						<h:outputText value="#{msg['media.not.supported']}" escape="false"/>
 					</p:media>
 				</p:panel>
 
-				<p:selectBooleanCheckbox id="deal" value="#{calendarBean.deal}" itemLabel="#{msg['agreement.user.deal']}" 
+				<p:selectBooleanCheckbox id="deal" value="#{calendarBean.deal}" itemLabel="#{msg['agreement.deal']}" 
 										 validator="#{calendarBean.validateCheckbox}" validatorMessage="#{msg['agreement.deal.unchecked']}"
 										 style="margin: 10px 0px 0px"/>
 
 				<p:panelGrid columns="2" style="float: right; height: 30px; overflow: hidden; margin: 20px 0px 10px 0px;">
 					<p:commandButton id="bookingConfirmBtn" value="#{msg.book}" rendered="#{not(calendarBean.isCancelEnable())}" oncomplete="PF('passwordDialog-#{tabId}').show();" style="margin: 0px 5px; width: 85px">
-						<p:confirm header="#{msg['confirm.dialog.header']}" message="#{msg['register.deadline']}" icon="ui-icon-alert"/>
+						<p:confirm header="#{msg['confirm.dialog.header']}" message="#{msg['bkg.deadline']}" icon="ui-icon-alert"/>
 					</p:commandButton>
 					<p:commandButton id="bookingBtn" value="#{msg.book}" rendered="#{calendarBean.isCancelEnable()}" oncomplete="PF('passwordDialog-#{tabId}').show();" style="margin: 0px 5px; width: 85px"/>
 					<p:commandButton id="cancelBookingBtn" value="#{msg.cancel}" type="button" onclick="PF('bookingDialog-#{tabId}').hide();" global="false" style="margin: 0px 0px 0px 5px; width: 85px"/>

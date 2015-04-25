@@ -6,6 +6,7 @@ import br.com.abware.jcondo.core.model.Domain;
 import br.com.abware.jcondo.core.model.Flat;
 import br.com.abware.jcondo.core.model.Parking;
 import br.com.abware.jcondo.core.service.BaseService;
+import br.com.abware.jcondo.exception.BusinessException;
 
 import br.com.atilo.jcondo.core.persistence.manager.ParkingManagerImpl;
 import br.com.atilo.jcondo.core.persistence.manager.VehicleManagerImpl;
@@ -80,8 +81,7 @@ public class ParkingServiceImpl implements BaseService<Parking> {
 
 		return parkings;
 	}
-	
-	
+
 	public List<Parking> getNotOwnedParkings() throws Exception {
 		return parkingManager.findNotOwnedParkings();
 	}
@@ -92,24 +92,24 @@ public class ParkingServiceImpl implements BaseService<Parking> {
 
 	public Parking update(Parking parking) throws Exception {
 		if (parking.getId() <= 0) {
-			throw new Exception("vaga inexistente");
+			throw new BusinessException("pkg.not.exists", parking);
 		}
 
 		Parking p = parkingManager.findById(parking.getId());
 
 		if (p == null) {
-			throw new Exception("vaga nao encontrada");
+			throw new BusinessException("pkg.not.found", parking);
 		}
 
 		if (parking.getOwnerDomain() != null) {
 			if (p.getOwnerDomain() != null && !p.getOwnerDomain().equals(parking.getOwnerDomain())) {
-				throw new Exception("vaga ja associada a outro apartamento");
+				throw new BusinessException("pkg.already.owned");
 			}
 		}
 
 		if (parking.getRenterDomain() != null) {
 			if (p.getRenterDomain() != null && !p.getRenterDomain().equals(parking.getRenterDomain())) {
-				throw new Exception("vaga ja alugada para outro apartamento");
+				throw new BusinessException("pkg.already.rented");
 			}
 		}
 

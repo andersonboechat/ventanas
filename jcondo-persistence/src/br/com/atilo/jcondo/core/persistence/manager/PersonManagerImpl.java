@@ -49,19 +49,23 @@ public class PersonManagerImpl extends JCondoManager<PersonEntity, Person> {
 
 	@Override
 	protected PersonEntity getEntity(Person model) throws Exception {
-		PersonEntity person = super.getEntity(model);
+		try {
+			PersonEntity person = super.getEntity(model);
 
-		List<MembershipEntity> memberships = new ArrayList<MembershipEntity>();
-		for (Membership membership : model.getMemberships()) {
-			MembershipEntity m = new MembershipEntity(model.getId());
-			BeanUtils.copyProperties(m, membership);
-			m.setUpdateDate(new Date());
-			m.setUpdateUser(helper.getUserId());
-			memberships.add(m);
+			List<MembershipEntity> memberships = new ArrayList<MembershipEntity>();
+			for (Membership membership : model.getMemberships()) {
+				MembershipEntity m = new MembershipEntity(model.getId());
+				BeanUtils.copyProperties(m, membership);
+				m.setUpdateDate(new Date());
+				m.setUpdateUser(helper.getUserId());
+				memberships.add(m);
+			}
+			person.setMemberships(memberships);
+
+			return person;
+		} catch (Exception e) {
+			throw new PersistenceException(e, "psn.mgr.get.entity.fail");
 		}
-		person.setMemberships(memberships);
-
-		return person;
 	}
 	
 	@Override
@@ -90,7 +94,7 @@ public class PersonManagerImpl extends JCondoManager<PersonEntity, Person> {
 
 			return person;
 		} catch (Exception e) {
-			throw new PersistenceException(e, "");
+			throw new PersistenceException(e, "psn.mgr.get.model.failed");
 		}
 	}
 
@@ -145,7 +149,7 @@ public class PersonManagerImpl extends JCondoManager<PersonEntity, Person> {
 
 			return super.save(person);
 		} catch (Exception e) {
-			throw new PersistenceException(e, "");
+			throw new PersistenceException(e, "psn.mgr.save.fail");
 		}
 	}
 
@@ -153,18 +157,16 @@ public class PersonManagerImpl extends JCondoManager<PersonEntity, Person> {
 		try {
 			UserLocalServiceUtil.updateStatus(person.getUserId(), WorkflowConstants.STATUS_INACTIVE);
 			person.setStatus(PersonStatus.INACTIVE);
-		} catch (NoSuchUserException e) {
-			throw new PersistenceException("usuario nao cadastrado");
 		} catch (Exception e) {
-			throw new PersistenceException("");
+			throw new PersistenceException(e, "psn.mgr.delete.fail");
 		}
 	}
 	
 	public void lock(Person person) throws Exception {
 		try {
 			UserLocalServiceUtil.updateLockoutById(person.getUserId(), true);
-		} catch (NoSuchUserException e) {
-			throw new PersistenceException("usuario nao cadastrado");
+		} catch (Exception e) {
+			throw new PersistenceException(e, "psn.mgr.lock.fail");
 		}
 	}
 
@@ -180,6 +182,8 @@ public class PersonManagerImpl extends JCondoManager<PersonEntity, Person> {
 			return getModels(query.getResultList());
 		} catch (NoResultException e) {
 			return new ArrayList<Person>();
+		} catch (Exception e) {
+			throw new PersistenceException(e, "psn.mgr.find.people.fail");
 		} finally {
 			closeManager(key);
 		}
@@ -194,6 +198,8 @@ public class PersonManagerImpl extends JCondoManager<PersonEntity, Person> {
 			Query query = em.createQuery(queryString);
 			query.setParameter("userId", helper.getUser().getUserId());
 			return getModel((PersonEntity) query.getSingleResult());
+		} catch (Exception e) {
+			throw new PersistenceException(e, "psn.mgr.find.person.fail");
 		} finally {
 			closeManager(key);
 		}
@@ -212,23 +218,37 @@ public class PersonManagerImpl extends JCondoManager<PersonEntity, Person> {
 			return getModels(query.getResultList());
 		} catch (NoResultException e) {
 			return new ArrayList<Person>();
+		} catch (Exception e) {
+			throw new PersistenceException(e, "psn.mgr.find.people.by.type.fail");
 		} finally {
 			closeManager(key);
 		}
 	}
 
 	public void removeDomain(Person person, Domain domain) throws Exception {
-		UserLocalServiceUtil.unsetGroupUsers(domain.getRelatedId(), new long[] {person.getUserId()}, null);
+		try {
+			UserLocalServiceUtil.unsetGroupUsers(domain.getRelatedId(), new long[] {person.getUserId()}, null);
+		} catch (Exception e) {
+			throw new PersistenceException(e, "psn.mgr.remove.domain.fail");
+		}
 	}
 
 	public void addDomain(Person person, Domain domain) throws Exception {
-		UserLocalServiceUtil.addGroupUsers(domain.getRelatedId(), new long[] {person.getUserId()});
+		try {
+			UserLocalServiceUtil.addGroupUsers(domain.getRelatedId(), new long[] {person.getUserId()});
+		} catch (Exception e) {
+			throw new PersistenceException(e, "psn.mgr.add.domain.fail");
+		}
 	}
 
 	public boolean authenticate(Person person, String password) throws Exception {
-		return UserLocalServiceUtil.authenticateByUserId(helper.getCompanyId(), 
-														 person.getUserId(), 
-														 password, null, null, null) == 1 ? true : false;
+		try {
+			return UserLocalServiceUtil.authenticateByUserId(helper.getCompanyId(), 
+															 person.getUserId(), 
+															 password, null, null, null) == 1 ? true : false;
+		} catch (Exception e) {
+			throw new PersistenceException(e, "psn.mgr.authenticate.fail");
+		}
 	}
 
 }

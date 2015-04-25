@@ -9,7 +9,7 @@
 	<h:form id="bookings-form">
 		<p:dataTable widgetVar="bookingTable" var="booking" value="#{historyViewer.bookings}"	paginator="true" paginatorPosition="bottom" 
 			paginatorTemplate="{PreviousPageLink} {NextPageLink}" rows="5" rowKey="#{booking.id}" 
-			emptyMessage="Nenhum aluguel encontrado" styleClass="no-header no-border no-background" style="margin-top: 15px; width: 378px; height: 100%">
+			emptyMessage="Não há reservas" styleClass="no-header no-border no-background" style="margin-top: 15px; width: 378px; height: 100%">
 		    <p:ajax event="page" global="false"/>
 			<f:facet name="header">
 				<p:panelGrid columns="1" columnClasses="docs-header" styleClass="no-border no-margin no-background" style="width: 100%; height: 25px">
@@ -39,7 +39,7 @@
 				<p:commandLink title="#{msg['this.book.cancel']}" actionListener="#{historyViewer.onCancel(booking)}" partialSubmit="true" 
 					process="@this" update="@widgetVar(bookingTable),@widgetVar(tabs),@widgetVar(outputMsg)" disabled="#{not historyViewer.isCancelEnabled(booking)}" rendered="#{historyViewer.hasDeadlineExceeded(booking)}">
 					<h:graphicImage value="../images/cancel2.png" />
-					<p:confirm header="#{msg['booking.cancel.header']}" message="#{msg['register.cancel.deadline']}" icon="ui-icon-alert"/>
+					<p:confirm header="#{msg['booking.cancel.header']}" message="#{msg['bkg.cancel.deadline']}" icon="ui-icon-alert"/>
 				</p:commandLink>
 				<p:commandLink title="#{msg['this.book.cancel']}" actionListener="#{historyViewer.onCancel(booking)}" partialSubmit="true" 
 					process="@this" update="@widgetVar(bookingTable),@widgetVar(tabs),@widgetVar(outputMsg)" disabled="#{not historyViewer.isCancelEnabled(booking)}" rendered="#{not historyViewer.hasDeadlineExceeded(booking)}">

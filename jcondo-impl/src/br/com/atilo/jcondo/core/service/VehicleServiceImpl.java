@@ -116,17 +116,17 @@ public class VehicleServiceImpl implements BaseService<Vehicle> {
 		}
 
 		if (StringUtils.isEmpty(vehicle.getLicense())) {
-			throw new BusinessException("vhc.license.undefinied");
+			throw new BusinessException("vhc.license.empty");
 		}
 
 		if(vehicle.getType() != VehicleType.BIKE && !vehicle.getLicense().matches(LICENSE_PATTERN)) {
-			throw new BusinessException("vhc.license.invalid");
+			throw new BusinessException("vhc.license.invalid", vehicle.getLicense());
 		}
 
 		Vehicle v = vehicleManager.findByLicense(vehicle.getLicense());
 
 		if (v != null) {
-			throw new ModelExistException(null, "vhc.exists");
+			throw new ModelExistException(null, "vhc.exists", vehicle.getLicense());
 		}
 
 		if (vehicle.getDomain() != null) {
@@ -225,9 +225,9 @@ public class VehicleServiceImpl implements BaseService<Vehicle> {
 	}
 
 	public void assignTo(Vehicle vehicle, Domain domain) throws Exception {
-//		if (!securityManager.hasPermission(vehicle, Permission.UPDATE)) {
-//			throw new BusinessException("vhc.update.denied");
-//		}
+		if (!securityManager.hasPermission(domain, Permission.ASSIGN_VEHICLE)) {
+			throw new BusinessException("vhc.domain.assign.denied", domain);
+		}
 
 		Vehicle v = getVehicle(vehicle.getId());
 
@@ -276,9 +276,9 @@ public class VehicleServiceImpl implements BaseService<Vehicle> {
 	}
 
 	public void updateImage(Vehicle vehicle, Image image) throws Exception {
-//		if (!securityManager.hasPermission(vehicle, Permission.UPDATE)) {
-//			throw new BusinessException("vhc.update.denied");
-//		}
+		if (!securityManager.hasPermission(vehicle, Permission.UPDATE)) {
+			throw new BusinessException("vhc.update.denied");
+		}
 
 		Vehicle v = getVehicle(vehicle.getId());
 		v.setImage(image);

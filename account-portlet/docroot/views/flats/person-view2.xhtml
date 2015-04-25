@@ -61,66 +61,89 @@
 		</p:dataTable>
 	</h:form>
 
-	<p:dialog header="#{msg['dlg.user.signon']}" widgetVar="personDialog" draggable="true" resizable="false" modal="true" closable="false" visible="false">
+	<p:dialog header="#{msg['dlg.user.signon']}" widgetVar="personDialog" draggable="true" resizable="false" modal="true" closable="false" visible="true">
 		<h:form id="person-details-form">
-			<p:panelGrid id="model-details" columns="2" columnClasses="my-account-col1,my-account-col2" styleClass="no-border" style="margin: 10px 0px 20px 0px;" cellpadding="10">
-				<p:column>
-					<p:panel widgetVar="portrait" styleClass="person-image" style="text-align: center; border: 1px solid black; ">
-						<p:graphicImage value="http://localhost/image/user_male_portrait?img_id=0" width="198" height="300" rendered="#{empty imageUploader.image.path}" style="border: 1px solid black;"/>
-						<p:graphicImage id="portrait" value="#{imageUploader.image.path}" width="198" height="300" rendered="#{not empty imageUploader.image.path}" style="border: 1px solid black;"/>
-					</p:panel>
-					<p:panelGrid columns="2" columnClasses="picture" styleClass="pic-cmds" style="text-align: center; float: right; margin-right: 0px">
-						<p:commandLink title="Enviar uma foto" update="@widgetVar(personPictureDialog)" oncomplete="PF('personPictureDialog').show();" partialSubmit="true" process="@this" global="false" styleClass="column" disabled="#{!personViewer.canEditInfo()}">
-							<h:graphicImage value="../images/send-pic.png"/>
-							<f:setPropertyActionListener target="#{imageUploader.image.path}" value=""/>
-						</p:commandLink>
-						<p:commandLink title="Tirar uma foto" update="@widgetVar(personPictureDialog)" oncomplete="PF('photoCameraDialog').show();" partialSubmit="true" process="@this" global="false" styleClass="column" disabled="#{!personViewer.canEditInfo()}">
-							<h:graphicImage value="../images/take-pic.png" width="38" height="31"/>
-							<f:setPropertyActionListener target="#{imageUploader.image.path}" value=""/>
-						</p:commandLink>
-					</p:panelGrid>
-				</p:column>
-				<p:column>
-					<p:panelGrid columns="1" columnClasses="fieldClm">
-						<p:panelGrid columns="2" columnClasses="labelClm,fieldClm" style="width: 100%; margin: 0px">
-							<p:outputLabel for="email" value="Email: "/>
-							<p:inputText id="email" value="#{personViewer.person.emailAddress}" size="40" readonly="#{!personViewer.canEditInfo()}"/>
-							<p:outputLabel for="firstName" value="Nome: "/>
-							<p:inputText id="firstName" value="#{personViewer.person.firstName}" size="40" readonly="#{!personViewer.canEditInfo()}"/>
-							<p:outputLabel for="lastName" value="Sobrenome: "/>
-							<p:inputText id="lastName" value="#{personViewer.person.lastName}" size="40" readonly="#{!personViewer.canEditInfo()}"/>
-							<p:outputLabel for="identity" value="CPF: "/>
-							<p:inputMask id="identity" value="#{personViewer.person.identity}" mask="999.999.999-99" size="40" readonly="#{!personViewer.canEditInfo()}"/>
-							<p:outputLabel for="male" value="Sexo:"/>
-							<p:selectOneMenu id="male" value="#{personViewer.person.gender}" required="false" disabled="#{!personViewer.canEditInfo()}">
-								<f:selectItems var="gender" value="#{personViewer.genders}" itemLabel="#{msg[gender.label]}"/>
-							</p:selectOneMenu>
+			<p:panelGrid id="model-details" styleClass="no-background no-border" style="margin: 10px 0px 20px 0px;" cellpadding="10">
+				<p:row>
+					<p:column styleClass="my-account-col1">
+						<p:panelGrid columns="1" columnClasses="person-image" style="text-align: center">
+							<p:graphicImage id="portrait" value="#{profileBean.person.picture.path}" width="198" height="300" style="border: 1px solid black;"/>
+				        </p:panelGrid>
+						<p:panelGrid columns="2" columnClasses="picture" styleClass="pic-cmds" style="text-align: center; float: right">
+							<p:commandLink title="Enviar um foto"  oncomplete="PF('profilePictureDialog').show();" partialSubmit="true" process="@this" global="false" styleClass="column">
+								<h:graphicImage value="../images/send-pic.png"/>
+								<f:setPropertyActionListener target="#{profileBean.person.picture.path}" value=""/>
+							</p:commandLink>
+							<p:commandLink title="Tirar uma foto" oncomplete="PF('profileCameraDialog').show();" partialSubmit="true" global="false" process="@this" styleClass="column">
+								<h:graphicImage value="../images/take-pic.png" width="38" height="31"/>
+								<f:setPropertyActionListener target="#{profileBean.person.picture.path}" value=""/>
+							</p:commandLink>
 						</p:panelGrid>
-						<p:panelGrid columns="2" style="text-align: center; margin: 0px; float: right" styleClass="no-border" rendered="#{personViewer.getUnassignedDomains().size() > 0}">
-							<p:selectOneMenu id="newDomain" value="#{personViewer.selectedDomainId}" filter="true" filterMatchMode="contains">
-								<f:selectItems var="domain" value="#{personViewer.getUnassignedDomains()}" itemLabel="#{personViewer.displayDomain(domain)}" itemValue="#{domain.id}"/>
-							</p:selectOneMenu>
-							<p:commandButton value="Incluir" actionListener="#{personViewer.onDomainAdd}" update="memberships, newDomain" partialSubmit="true" process="@namingcontainer" global="false"/>
-						</p:panelGrid>
-						<p:dataTable id="memberships" var="membership" rows="2" paginator="true" paginatorAlwaysVisible="false" paginatorPosition="bottom" 
-									 value="#{personViewer.person.memberships}" styleClass="no-header no-border no-background" style="width: 340px; margin-right: 10px;" 
-									 emptyMessage="">
-							<p:ajax event="page" global="false"/>
+					</p:column>
+					<p:column styleClass="my-account-col2">
+						<p:panelGrid columns="4" styleClass="userPanel" style="width: 100%; margin: 0; padding: 0;">
+						<p:row>
+							<p:column styleClass="labelClm"><p:outputLabel for="email" value="Email: "/></p:column>
+							<p:column colspan="3" styleClass="fieldClm"><p:inputText id="email" value="#{profileBean.person.emailAddress}"/></p:column>
+						</p:row>
+						<p:row>
+							<p:column styleClass="labelClm"><p:outputLabel for="firstName" value="Nome: "/></p:column>
+							<p:column colspan="3" styleClass="fieldClm"><p:inputText id="firstName" value="#{profileBean.person.firstName}"/></p:column>
+						</p:row>									
+						<p:row>
+							<p:column styleClass="labelClm"><p:outputLabel for="lastName" value="Sobrenome: "/></p:column>
+							<p:column colspan="3" styleClass="fieldClm"><p:inputText id="lastName" value="#{profileBean.person.lastName}"/></p:column>
+						</p:row>
+						<p:row>
+							<p:column styleClass="labelClm"><p:outputLabel for="identity" value="CPF: "/></p:column>
+							<p:column colspan="3" styleClass="fieldClm"><p:inputMask id="identity" value="#{profileBean.person.identity}" mask="999.999.999-99"/></p:column>
+						</p:row>
+						<p:row>
+							<p:column styleClass="labelClm"><p:outputLabel for="male" value="Sexo:"/></p:column>
 							<p:column>
-								<p:panelGrid columns="1" columnClasses="fieldClm" styleClass="no-background" style="margin: 0px; float: right" >
-									<h:outputText value="#{personViewer.displayDomain(membership.domain)}" />
-									<h:outputText value="#{msg[membership.type.label]}" rendered="#{!personViewer.canChangeType(membership)}"/>
-									<p:selectOneMenu value="#{membership.type}" style="vertical-align: middle;" rendered="#{personViewer.canChangeType(membership)}">
-										<f:selectItems var="type" value="#{personViewer.types.get(membership.domain)}" itemLabel="#{msg[type.label]}"/>
+								<p:selectOneMenu id="male" value="#{profileBean.person.gender}" required="false" style="vertical-align: middle">
+									<f:selectItems var="gender" value="#{profileBean.genders}" itemLabel="#{msg[gender.label]}"/>
+								</p:selectOneMenu>
+							</p:column>
+							<p:column styleClass="labelClm"><p:outputLabel for="birthday" value="Nascimento:"/></p:column>
+							<p:column styleClass="fieldClm">
+								<p:calendar id="birthday" mode="popup" pattern="dd/MM/yyyy" value="#{profileBean.person.birthday}"
+											navigator="true" yearRange="c-100:c+0" lang="pt" styleClass="birthday" readonly="true"/>
+							</p:column>
+						</p:row>
+						<p:row>
+							<p:column colspan="4">
+								<p:panelGrid columns="2" columnClasses="no-margin" style="text-align: right; margin: 0; padding: 0; float: right;" styleClass="no-border" rendered="#{personViewer.getUnassignedDomains().size() > 0}">
+									<p:selectOneMenu id="newDomain" value="#{personViewer.selectedDomainId}" filter="true" filterMatchMode="contains" style="vertical-align: top">
+										<f:selectItems var="domain" value="#{personViewer.getUnassignedDomains()}" itemLabel="#{personViewer.displayDomain(domain)}" itemValue="#{domain.id}"/>
 									</p:selectOneMenu>
+									<p:commandButton value="Incluir" actionListener="#{personViewer.onDomainAdd}" update="memberships, newDomain" partialSubmit="true" process="@namingcontainer" global="false"/>
 								</p:panelGrid>
 							</p:column>
-						</p:dataTable>
-					</p:panelGrid>
-				</p:column>
+						</p:row>
+						<p:row>
+							<p:column colspan="4">
+								<p:dataTable id="memberships" var="membership" rows="2" paginator="true" paginatorAlwaysVisible="false" paginatorPosition="bottom" 
+											 value="#{personViewer.person.memberships}" styleClass="no-header no-border no-background" 
+											 style="width: 300px; margin-right: 10px; float: right;" 
+											 emptyMessage="">
+									<p:ajax event="page" global="false"/>
+									<p:column style="text-align: right">
+											<h:outputText value="#{personViewer.displayDomain(membership.domain)}" />
+											<h:outputText value="#{msg[membership.type.label]}" rendered="#{!personViewer.canChangeType(membership)}"/>
+											<p:selectOneMenu value="#{membership.type}" style="vertical-align: middle;" rendered="#{personViewer.canChangeType(membership)}">
+												<f:selectItems var="type" value="#{personViewer.types.get(membership.domain)}" itemLabel="#{msg[type.label]}"/>
+											</p:selectOneMenu>
+									</p:column>
+								</p:dataTable>
+							</p:column>
+						</p:row>
+						</p:panelGrid>
+					</p:column>
+				</p:row>
 			</p:panelGrid>
-			<p:commandButton value="Cancelar" global="false" oncomplete="if (!args.validationFailed) { if(!args.exception) {PF('personDialog').hide();} else { if(args.alert) {PF('alertDialog').show();}}}" style="float: right; width: 80px; margin: 0px 0px 10px 5px;"/>
-			<p:commandButton value="Salvar" actionListener="#{personViewer.onPersonSave}" update="@widgetVar(personTable), :outputMsg" oncomplete="if (!args.validationFailed) { if(!args.exception) {PF('personDialog').hide();} else { if(args.alert) {PF('alertDialog').show();}}}" style="float: right; width: 80px; margin: 0px 0px 10px 5px;"/>
+			<p:commandButton value="Cancelar" global="false" oncomplete="if (!args.validationFailed) { if(!args.exception) {PF('personDialog').hide();} else { if(args.alert) {PF('alertDialog').show();}}}" style="float: right; width: 85px; margin: 0px 10px 10px 5px;"/>
+			<p:commandButton value="Salvar" actionListener="#{personViewer.onPersonSave}" update="@widgetVar(personTable), :outputMsg" oncomplete="if (!args.validationFailed) { if(!args.exception) {PF('personDialog').hide();} else { if(args.alert) {PF('alertDialog').show();}}}" style="float: right; width: 85px; margin: 0px 10px 10px 5px;"/>
 		</h:form>
 	</p:dialog>
 

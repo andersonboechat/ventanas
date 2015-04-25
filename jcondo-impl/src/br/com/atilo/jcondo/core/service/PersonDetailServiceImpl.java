@@ -9,6 +9,7 @@ import br.com.abware.jcondo.core.PersonDetail;
 import br.com.abware.jcondo.core.model.Kinship;
 import br.com.abware.jcondo.core.model.Person;
 import br.com.abware.jcondo.core.model.Phone;
+import br.com.abware.jcondo.exception.BusinessException;
 
 import br.com.atilo.jcondo.core.persistence.manager.KinshipManagerImpl;
 import br.com.atilo.jcondo.core.persistence.manager.PhoneManagerImpl;
@@ -39,7 +40,7 @@ public class PersonDetailServiceImpl {
 
 		for (Phone phone : (List<Phone>) CollectionUtils.subtract(detail.getPhones(), oldPhones)) {
 			if (!NumberUtils.isDigits(phone.getExtension()) || !NumberUtils.isDigits(phone.getNumber())) {
-				throw new Exception("numero de telefone invalido");
+				throw new BusinessException("pdt.phone.invalid");
 			}
 			phoneManager.save(phone);
 		}

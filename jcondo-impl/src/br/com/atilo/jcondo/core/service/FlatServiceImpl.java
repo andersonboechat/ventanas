@@ -44,7 +44,6 @@ public class FlatServiceImpl {
 				}
 			}
 		} catch (PersistenceException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 
@@ -61,7 +60,6 @@ public class FlatServiceImpl {
 				}
 			}
 		} catch (PersistenceException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		

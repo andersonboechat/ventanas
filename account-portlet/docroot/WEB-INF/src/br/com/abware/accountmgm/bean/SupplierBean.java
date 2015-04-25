@@ -83,11 +83,12 @@ public class SupplierBean extends BaseBean {
 
 			this.setChanged();
 			this.notifyObservers(sup);
+
+			MessageUtils.addMessage(FacesMessage.SEVERITY_INFO, "supplier.create.success", null);
 		} catch (BusinessException e) {
-			LOGGER.warn("Business failure on supplier saving: " + e.getMessage());
 			MessageUtils.addMessage(FacesMessage.SEVERITY_WARN, e.getMessage(), e.getArgs());
 		} catch (Exception e) {
-			LOGGER.error("Unexpected failure on supplier saving", e);
+			LOGGER.error("Failure on supplier saving", e);
 			MessageUtils.addMessage(FacesMessage.SEVERITY_ERROR, "general.failure", null);
 		}
 	}
@@ -96,10 +97,9 @@ public class SupplierBean extends BaseBean {
 		try {
 			supplierService.delete(supplier);
 		} catch (BusinessException e) {
-			LOGGER.warn("Business failure on supplier delete: " + e.getMessage());
 			MessageUtils.addMessage(FacesMessage.SEVERITY_WARN, e.getMessage(), e.getArgs());
 		} catch (Exception e) {
-			LOGGER.error("Unexpected failure on supplier saving", e);
+			LOGGER.error("Failure on supplier saving", e);
 			MessageUtils.addMessage(FacesMessage.SEVERITY_ERROR, "general.failure", null);
 		}
 	}
@@ -110,10 +110,9 @@ public class SupplierBean extends BaseBean {
 				supplierService.delete(supplier);
 			}
 		} catch (BusinessException e) {
-			LOGGER.warn("Business failure on suppliers delete: " + e.getMessage());
 			MessageUtils.addMessage(FacesMessage.SEVERITY_WARN, e.getMessage(), e.getArgs());
 		} catch (Exception e) {
-			LOGGER.error("Unexpected failure on supplier saving", e);
+			LOGGER.error("Failure on supplier saving", e);
 			MessageUtils.addMessage(FacesMessage.SEVERITY_ERROR, "general.failure", null);
 		}
 	}
