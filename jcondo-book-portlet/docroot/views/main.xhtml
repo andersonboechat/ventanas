@@ -61,7 +61,7 @@
 	
 	.occurrence .not-answered {}
 	
-	.status .ui-dialog-titlebar {display: none}
+	.status .ui-dialog-titlebar {display: none; }
 
 	</style>
 </h:head>
@@ -106,7 +106,7 @@
 							<h:outputText value="#{msg['my.occurrences']}"/>
 						</p:panelGrid>
 					</f:facet>
-					<p:column style="width: 12px;"><p:rowToggler/></p:column>
+					<p:column style="width:12px"><p:rowToggler/></p:column>
 					<p:column width="45%">
 						<h:outputText value="#{msg[occurrence.type.label]} - #{occurrence.code}" styleClass="answered" rendered="#{occurrence.answer != null and occurrence.answer.date != null}"/>
 						<h:outputText value="#{msg[occurrence.type.label]} - #{occurrence.code}" styleClass="not-answered" rendered="#{not (occurrence.answer != null and occurrence.answer.date != null)}"/>
