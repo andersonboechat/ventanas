@@ -12,6 +12,7 @@ import javax.faces.bean.ViewScoped;
 import org.apache.commons.beanutils.BeanUtils;
 import org.apache.log4j.Logger;
 import org.apache.myfaces.commons.util.MessageUtils;
+import org.primefaces.context.RequestContext;
 
 import br.com.abware.accountmgm.bean.model.ModelDataModel;
 import br.com.abware.jcondo.core.SupplierStatus;
@@ -60,6 +61,7 @@ public class SupplierBean extends BaseBean {
 		} catch (Exception e) {
 			LOGGER.fatal("Failure on supplier initialization", e);
 			MessageUtils.addMessage(FacesMessage.SEVERITY_FATAL, "general.failure", null);
+			RequestContext.getCurrentInstance().addCallbackParam("exception", true);
 		}
 	}
 
@@ -87,9 +89,11 @@ public class SupplierBean extends BaseBean {
 			MessageUtils.addMessage(FacesMessage.SEVERITY_INFO, "supplier.create.success", null);
 		} catch (BusinessException e) {
 			MessageUtils.addMessage(FacesMessage.SEVERITY_WARN, e.getMessage(), e.getArgs());
+			RequestContext.getCurrentInstance().addCallbackParam("exception", true);
 		} catch (Exception e) {
 			LOGGER.error("Failure on supplier saving", e);
 			MessageUtils.addMessage(FacesMessage.SEVERITY_ERROR, "general.failure", null);
+			RequestContext.getCurrentInstance().addCallbackParam("exception", true);
 		}
 	}
 
@@ -98,9 +102,11 @@ public class SupplierBean extends BaseBean {
 			supplierService.delete(supplier);
 		} catch (BusinessException e) {
 			MessageUtils.addMessage(FacesMessage.SEVERITY_WARN, e.getMessage(), e.getArgs());
+			RequestContext.getCurrentInstance().addCallbackParam("exception", true);
 		} catch (Exception e) {
 			LOGGER.error("Failure on supplier saving", e);
 			MessageUtils.addMessage(FacesMessage.SEVERITY_ERROR, "general.failure", null);
+			RequestContext.getCurrentInstance().addCallbackParam("exception", true);
 		}
 	}
 	
@@ -111,9 +117,11 @@ public class SupplierBean extends BaseBean {
 			}
 		} catch (BusinessException e) {
 			MessageUtils.addMessage(FacesMessage.SEVERITY_WARN, e.getMessage(), e.getArgs());
+			RequestContext.getCurrentInstance().addCallbackParam("exception", true);
 		} catch (Exception e) {
 			LOGGER.error("Failure on supplier saving", e);
 			MessageUtils.addMessage(FacesMessage.SEVERITY_ERROR, "general.failure", null);
+			RequestContext.getCurrentInstance().addCallbackParam("exception", true);
 		}
 	}
 
@@ -124,6 +132,7 @@ public class SupplierBean extends BaseBean {
 		} catch (Exception e) {
 			LOGGER.error("Unexpected failure on supplier editing", e);
 			MessageUtils.addMessage(FacesMessage.SEVERITY_ERROR, "general.failure", null);
+			RequestContext.getCurrentInstance().addCallbackParam("exception", true);
 		}
 	}
 

@@ -216,13 +216,14 @@ public class PersonServiceImpl  {
 	private void validateMemberships(Person person) throws Exception {
 		List<Membership> oldMemberships;
 		List<Membership> memberships = person.getMemberships();
-
+		
 		Person p = personManager.findById(person.getId());
 
 		if (p != null) {
 			oldMemberships = p.getMemberships();
 		} else {
 			oldMemberships = new ArrayList<Membership>();
+			memberships = new ArrayList<Membership>();
 		}
 
 		for (Membership membership : oldMemberships) {

@@ -54,7 +54,7 @@ public class PersonManagerImpl extends JCondoManager<PersonEntity, Person> {
 
 			List<MembershipEntity> memberships = new ArrayList<MembershipEntity>();
 			for (Membership membership : model.getMemberships()) {
-				MembershipEntity m = new MembershipEntity(model.getId());
+				MembershipEntity m = new MembershipEntity(person);
 				BeanUtils.copyProperties(m, membership);
 				m.setUpdateDate(new Date());
 				m.setUpdateUser(helper.getUserId());
@@ -71,6 +71,10 @@ public class PersonManagerImpl extends JCondoManager<PersonEntity, Person> {
 	@Override
 	protected Person getModel(PersonEntity entity) throws PersistenceException {
 		try {
+			if (entity == null) {
+				return null;
+			}
+
 			Person person = super.getModel(entity);
 
 			List<Membership> memberships = new ArrayList<Membership>();

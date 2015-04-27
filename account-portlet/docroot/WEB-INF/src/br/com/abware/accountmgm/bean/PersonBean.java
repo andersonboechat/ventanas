@@ -19,6 +19,7 @@ import org.apache.commons.beanutils.BeanUtils;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.log4j.Logger;
 import org.apache.myfaces.commons.util.MessageUtils;
+import org.primefaces.context.RequestContext;
 
 import br.com.abware.accountmgm.bean.model.ModelDataModel;
 import br.com.abware.accountmgm.util.DomainPredicate;
@@ -59,7 +60,7 @@ public class PersonBean extends BaseBean implements Observer {
 
 	private Long number;
 
-	private List<Flat> flats;
+	private List<Domain> domains;
 
 	private Person person;
 
@@ -71,8 +72,10 @@ public class PersonBean extends BaseBean implements Observer {
 
 	private List<Gender> genders;
 	
+	@SuppressWarnings("unchecked")
 	public void init(List<? extends Domain> domains) {
 		try {
+			this.domains = (List<Domain>) domains;
 			Set<Person> people = new HashSet<Person>();
 			types = new HashMap<Domain, List<PersonType>>();
 
@@ -90,6 +93,7 @@ public class PersonBean extends BaseBean implements Observer {
 		} catch (Exception e) {
 			LOGGER.fatal("Failure on person initialization", e);
 			MessageUtils.addMessage(FacesMessage.SEVERITY_FATAL, "general.failure", null);
+			RequestContext.getCurrentInstance().addCallbackParam("exception", true);
 		}
 	}
 
@@ -121,16 +125,20 @@ public class PersonBean extends BaseBean implements Observer {
 			if (person.getId() == 0) {
 				p = personService.register(person);
 				model.addModel(p);
+				MessageUtils.addMessage(FacesMessage.SEVERITY_INFO, "flats.user.add.success", null);
 			} else {
 				p = personService.update(person);
 				model.setModel(p);
+				MessageUtils.addMessage(FacesMessage.SEVERITY_INFO, "flats.user.update.success", null);
 			}
 		} catch (BusinessException e) {
 			LOGGER.warn("Business failure on person saving: " + e.getMessage());
 			MessageUtils.addMessage(FacesMessage.SEVERITY_WARN, e.getMessage(), e.getArgs());
+			RequestContext.getCurrentInstance().addCallbackParam("exception", true);
 		} catch (Exception e) {
 			LOGGER.error("Unexpected failure on person saving", e);
 			MessageUtils.addMessage(FacesMessage.SEVERITY_ERROR, "general.failure", null);
+			RequestContext.getCurrentInstance().addCallbackParam("exception", true);
 		}	
 	}
 
@@ -142,14 +150,19 @@ public class PersonBean extends BaseBean implements Observer {
 
 	public void onPersonDelete() throws Exception {
 		try {
+			person = model.getRowData();
 			removeMemberships(person);
-			person = personService.update(person);
+			personService.update(person);
+			model.removeModel(person);
+			MessageUtils.addMessage(FacesMessage.SEVERITY_INFO, "flats.user.remove.success", null);
 		} catch (BusinessException e) {
 			LOGGER.warn("Business failure on person delete: " + e.getMessage());
 			MessageUtils.addMessage(FacesMessage.SEVERITY_WARN, e.getMessage(), e.getArgs());
+			RequestContext.getCurrentInstance().addCallbackParam("exception", true);
 		} catch (Exception e) {
 			LOGGER.error("Unexpected failure on person delete", e);
 			MessageUtils.addMessage(FacesMessage.SEVERITY_ERROR, "general.failure", null);
+			RequestContext.getCurrentInstance().addCallbackParam("exception", true);
 		}	
 	}
 
@@ -162,16 +175,18 @@ public class PersonBean extends BaseBean implements Observer {
 		} catch (BusinessException e) {
 			LOGGER.warn("Business failure on people delete: " + e.getMessage());
 			MessageUtils.addMessage(FacesMessage.SEVERITY_WARN, e.getMessage(), e.getArgs());
+			RequestContext.getCurrentInstance().addCallbackParam("exception", true);
 		} catch (Exception e) {
 			LOGGER.error("Unexpected failure on people delete", e);
 			MessageUtils.addMessage(FacesMessage.SEVERITY_ERROR, "general.failure", null);
+			RequestContext.getCurrentInstance().addCallbackParam("exception", true);
 		}	
 	}
 
 	private void removeMemberships(Person person) {
-		for (Flat flat : flats) {
+		for (Domain domain : domains) {
 			person.getMemberships().removeAll(CollectionUtils.select(person.getMemberships(), 
-																	 new DomainPredicate(flat)));
+																	 new DomainPredicate(domain)));
 		}
 	}
 
@@ -182,6 +197,7 @@ public class PersonBean extends BaseBean implements Observer {
 		} catch (Exception e) {
 			LOGGER.error("Unexpected failure on person editing", e);
 			MessageUtils.addMessage(FacesMessage.SEVERITY_ERROR, "general.failure", null);
+			RequestContext.getCurrentInstance().addCallbackParam("exception", true);
 		}	
 	}
 	
@@ -315,12 +331,12 @@ public class PersonBean extends BaseBean implements Observer {
 		this.number = number;
 	}
 
-	public List<Flat> getFlats() {
-		return flats;
+	public List<Domain> getDomains() {
+		return domains;
 	}
 
-	public void setFlats(List<Flat> flats) {
-		this.flats = flats;
+	public void setDomains(List<Domain> domains) {
+		this.domains = domains;
 	}
 
 	public Person getPerson() {

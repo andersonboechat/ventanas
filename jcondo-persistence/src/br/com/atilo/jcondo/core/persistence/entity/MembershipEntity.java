@@ -26,13 +26,15 @@ public class MembershipEntity extends BaseEntity {
 	@Enumerated(EnumType.ORDINAL)
 	private PersonType type;
 
-	private long personId;
+	@ManyToOne
+	@JoinColumn(name="personId")
+	private PersonEntity person;
 	
 	public MembershipEntity() {
 	}	
 
-	public MembershipEntity(long personId) {
-		this.personId = personId;
+	public MembershipEntity(PersonEntity person) {
+		this.person = person;
 	}	
 
 	public void setId(long id) {
@@ -59,11 +61,12 @@ public class MembershipEntity extends BaseEntity {
 		this.type = type;
 	}
 
-	public long getPersonId() {
-		return personId;
+	public PersonEntity getPerson() {
+		return person;
 	}
 
-	public void setPersonId(long personId) {
-		this.personId = personId;
+	public void setPerson(PersonEntity person) {
+		this.person = person;
 	}
+
 }

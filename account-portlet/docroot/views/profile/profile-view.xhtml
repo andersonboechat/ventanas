@@ -22,11 +22,11 @@
 							<p:graphicImage id="portrait" value="#{profileBean.person.picture.path}" width="198" height="300" style="border: 1px solid black;"/>
 				        </p:panelGrid>
 						<p:panelGrid columns="2" columnClasses="picture" styleClass="pic-cmds" style="text-align: center; float: right">
-							<p:commandLink title="Enviar um foto" update=":profile-picture-form" oncomplete="PF('profilePictureDialog').show();" partialSubmit="true" process="@this" global="false" styleClass="column">
+							<p:commandLink title="#{msg['send.picture']}" update=":profile-picture-form" oncomplete="PF('profilePictureDialog').show();" partialSubmit="true" process="@this" global="false" styleClass="column">
 								<h:graphicImage value="../images/send-pic.png"/>
 								<f:setPropertyActionListener target="#{profileBean.person.picture.path}" value=""/>
 							</p:commandLink>
-							<p:commandLink title="Tirar uma foto" update=":profile-picture-form" oncomplete="PF('profileCameraDialog').show();" partialSubmit="true" global="false" process="@this" styleClass="column">
+							<p:commandLink title="#{msg['take.picture']}" update=":profile-picture-form" oncomplete="PF('profileCameraDialog').show();" partialSubmit="true" global="false" process="@this" styleClass="column" rendered="false">
 								<h:graphicImage value="../images/take-pic.png" width="38" height="31"/>
 								<f:setPropertyActionListener target="#{profileBean.person.picture.path}" value=""/>
 							</p:commandLink>
@@ -36,19 +36,31 @@
 						<p:panelGrid columns="4" styleClass="userPanel" style="width: 100%; margin: 0; padding: 0;">
 						<p:row>
 							<p:column styleClass="labelClm"><p:outputLabel for="email" value="Email: "/></p:column>
-							<p:column colspan="3" styleClass="fieldClm"><p:inputText id="email" value="#{profileBean.person.emailAddress}"/></p:column>
+							<p:column colspan="3" styleClass="fieldClm">
+								<p:inputText id="email" value="#{profileBean.person.emailAddress}" 
+											 required="true" requiredMessage="#{msg['person.email.empty']}"/>
+							</p:column>
 						</p:row>
 						<p:row>
 							<p:column styleClass="labelClm"><p:outputLabel for="firstName" value="Nome: "/></p:column>
-							<p:column colspan="3" styleClass="fieldClm"><p:inputText id="firstName" value="#{profileBean.person.firstName}"/></p:column>
+							<p:column colspan="3" styleClass="fieldClm">
+								<p:inputText id="firstName" value="#{profileBean.person.firstName}" 
+											 required="true" requiredMessage="#{msg['person.firstname.empty']}"/>
+							</p:column>
 						</p:row>									
 						<p:row>
 							<p:column styleClass="labelClm"><p:outputLabel for="lastName" value="Sobrenome: "/></p:column>
-							<p:column colspan="3" styleClass="fieldClm"><p:inputText id="lastName" value="#{profileBean.person.lastName}"/></p:column>
+							<p:column colspan="3" styleClass="fieldClm">
+								<p:inputText id="lastName" value="#{profileBean.person.lastName}"
+											 required="true" requiredMessage="#{msg['person.lastname.empty']}"/>
+							</p:column>
 						</p:row>
 						<p:row>
 							<p:column styleClass="labelClm"><p:outputLabel for="identity" value="CPF: "/></p:column>
-							<p:column colspan="3" styleClass="fieldClm"><p:inputMask id="identity" value="#{profileBean.person.identity}" mask="999.999.999-99"/></p:column>
+							<p:column colspan="3" styleClass="fieldClm">
+								<p:inputMask id="identity" value="#{profileBean.person.identity}" mask="999.999.999-99"
+											 required="true" requiredMessage="#{msg['person.email.empty']}"/>
+							</p:column>
 						</p:row>
 						<p:row>
 							<p:column styleClass="labelClm"><p:outputLabel for="male" value="Sexo:"/></p:column>
@@ -57,10 +69,10 @@
 									<f:selectItems var="gender" value="#{profileBean.genders}" itemLabel="#{msg[gender.label]}"/>
 								</p:selectOneMenu>
 							</p:column>
-							<p:column styleClass="labelClm"><p:outputLabel for="birthday" value="Nascimento:"/></p:column>
+							<p:column style="padding-right: 0px;"><p:outputLabel for="birthday" value="Nascimento:"/></p:column>
 							<p:column styleClass="fieldClm">
 								<p:calendar id="birthday" mode="popup" pattern="dd/MM/yyyy" value="#{profileBean.person.birthday}"
-											navigator="true" yearRange="c-100:c+0" lang="pt" styleClass="birthday" readonly="true"/>
+											navigator="true" yearRange="c-100:c+0" styleClass="birthday" mask="true" locale="pt"/>
 							</p:column>
 						</p:row>
 						</p:panelGrid>
@@ -207,7 +219,7 @@
 			</h:form>
 		</p:dialog>
 	
-		<p:dialog id="profileCameraDialog" widgetVar="profileCameraDialog" modal="true" header="Retrato" visible="false">
+		<p:dialog id="profileCameraDialog" widgetVar="profileCameraDialog" resizable="false" draggable="false" modal="true" header="Retrato" visible="false">
 			<h:form id="profile-camera-form">
 				<p:photoCam id="pc" widgetVar="pc" listener="#{profileBean.cameraBean.onCapture}" rendered="#{empty profileBean.cameraBean.image.path}"/>
 				<p:imageCropper id="capturedImage" value="#{profileBean.cameraBean.croppedImage}" image="#{profileBean.cameraBean.image.path}" initialCoords="0,0,198,300" minSize="198,300" maxSize="198,300" rendered="#{not empty profileBean.cameraBean.image.path}"/>
@@ -218,7 +230,7 @@
 			</h:form>
 		</p:dialog>
 	
-		<p:dialog widgetVar="janela">
+		<p:dialog widgetVar="janela" resizable="false" draggable="false" modal="true">
 			<h:form id="aform" >
 			<p:panel>
 				<p:photoCam id="pc" widgetVar="pc" listener="#{profileBean.cameraBean.onCapture}"/>
