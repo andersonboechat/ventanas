@@ -59,7 +59,11 @@
 			<p:commandButton value="#{msg['no']}" type="button" styleClass="ui-confirmdialog-no" icon="ui-icon-close" style="float: left; width: 200px; margin-left: 14%" />
 			<p:commandButton value="#{msg['yes']}" type="button" styleClass="ui-confirmdialog-yes" icon="ui-icon-check" style="float: right; width: 200px; margin-right: 14%"/>
 		</p:confirmDialog>
-		<p:confirmDialog message="Este veículo está cadastrado como visitante. Clique no botão Salvar se desejar associa-lo ao seu apartamento." header="Veículo cadastrado" severity="alert" widgetVar="alertDialog" showEffect="fade" hideEffect="fade">
+		<p:confirmDialog header="Veículo encontrado" severity="alert" widgetVar="alertDialog" showEffect="fade" hideEffect="fade">
+			<f:facet name="message">
+				<p:messages id="alertMsg" severity="warn" />
+				<h:outputText value="Este veículo já está cadastrado como visitante. Você deseja torna-lo um veículo morador associando ao #{vehicleViewer.displayDomain(vehicleViewer.vehicle.domain)}?" />
+			</f:facet>
 			<p:panel style="text-align: center; border: none;">
 				<p:commandButton value="OK" update=":tabs:vehicle-details-form:vehicle-details" oncomplete="PF('alertDialog').hide();" partialSubmit="true" process="@this" style="margin: 0px auto"/>
 			</p:panel>
@@ -111,8 +115,23 @@
 					</p:row>
 		        </p:panelGrid>
 				<h:panelGrid columns="2" style="border: 0px solid black; float: right; margin: 10px 0px 5px">
-					<p:commandButton value="Salvar" actionListener="#{vehicleViewer.onVehicleSave}" update="@widgetVar(parkingTable),@widgetVar(vehicleTable),:outputMsg" oncomplete="if (!args.validationFailed) { if(!args.exception) {PF('vehicleDialog').hide();} else { if(args.alert) {PF('alertDialog').show();}}}" style="float: right; width: 80px; margin: 0px 0px 0px 5px;"/>
-					<p:commandButton value="Cancelar" type="button" onclick="PF('vehicleDialog').hide();" style="float: right; width: 80px; margin: 0px 0px 0px 5px;" global="false"/>
+					<p:commandButton value="Salvar" actionListener="#{vehicleViewer.onVehicleSave}" 
+									 style="float: right; width: 80px; margin: 0px 0px 0px 5px;">
+						<p:confirmDialog message="Os dados abaixo estão corretos?" header="Confirmação de dados" widgetVar="confirm" severity="alert" showEffect="fade" hideEffect="fade">
+							<p:panelGrid columns="2" style="text-align: center; border: none;">
+								<h:outputText value="Veículo: #{vehicleViewer.vehicle.type.label}"/>
+								<h:outputText value="Placa / Número de Serie: #{vehicleViewer.vehicle.license}"/>
+							</p:panelGrid>
+							<p:panel style="text-align: center; border: none;">
+								<p:commandButton value="#{msg['no']}" type="button" onclick="PF('confirm').hide();" style="margin: 0px auto; float:right;"/>
+								<p:commandButton value="#{msg['yes']}" update="@widgetVar(parkingTable),@widgetVar(vehicleTable),:outputMsg" 
+												 oncomplete="if (!args.validationFailed) { if(!args.exception) {PF('vehicleDialog').hide();} else { if(args.alert) {PF('alertDialog').show();}}}" 
+												 style="margin: 0px auto"/>
+							</p:panel>
+						</p:confirmDialog>
+					</p:commandButton>
+					<p:commandButton value="Cancelar" type="button" onclick="PF('vehicleDialog').hide();" 
+									 style="float: right; width: 80px; margin: 0px 0px 0px 5px;" global="false"/>
 				</h:panelGrid>
 			</p:panelGrid>
 		</h:form>		

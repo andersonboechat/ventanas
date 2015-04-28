@@ -11,9 +11,12 @@ import javax.faces.application.FacesMessage;
 import javax.faces.bean.ManagedBean;
 import javax.faces.bean.ManagedProperty;
 import javax.faces.bean.ViewScoped;
+import javax.faces.component.UIComponent;
+import javax.faces.component.UIInput;
 import javax.faces.context.FacesContext;
 import javax.faces.event.AjaxBehaviorEvent;
 import javax.faces.event.ValueChangeEvent;
+import javax.faces.validator.ValidatorException;
 
 import org.apache.commons.beanutils.BeanUtils;
 import org.apache.commons.collections.CollectionUtils;
@@ -21,6 +24,8 @@ import org.apache.log4j.Logger;
 import org.apache.myfaces.commons.util.MessageUtils;
 import org.primefaces.context.RequestContext;
 import org.primefaces.event.FileUploadEvent;
+
+import com.sun.faces.util.MessageFactory;
 
 import br.com.abware.accountmgm.bean.model.ModelDataModel;
 
@@ -248,6 +253,17 @@ public class VehicleBean extends BaseBean {
 	public void onImageCropp() {
 		fileUploadBean.onCropp();
 	}
+	
+	public void validateVehicleType(FacesContext context, UIComponent component, Object value) {
+		if (! (value instanceof VehicleType)) {
+			FacesMessage message = MessageFactory.getMessage(UIInput.REQUIRED_MESSAGE_ID, null);
+			throw new ValidatorException(message);  
+		}
+
+		VehicleType type = (VehicleType) value;
+
+		
+	}  
 
 	public ImageUploadBean getImageUploadBean() {
 		return imageUploadBean;
