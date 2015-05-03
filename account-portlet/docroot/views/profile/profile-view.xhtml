@@ -18,8 +18,8 @@
 			<p:panelGrid id="person-details" styleClass="no-background no-border" style="margin: 10px 0px 20px 0px; width: 100%" cellpadding="10">
 				<p:row>
 					<p:column styleClass="my-account-col1">
-						<p:panelGrid columns="1" columnClasses="person-image" style="text-align: center">
-							<p:graphicImage id="portrait" value="#{profileBean.person.picture.path}" width="198" height="300" style="border: 1px solid black;"/>
+						<p:panelGrid columns="1" styleClass="no-margin">
+							<p:graphicImage id="portrait" value="#{profileBean.person.picture.path}" styleClass="foto"/>
 				        </p:panelGrid>
 						<p:panelGrid columns="2" columnClasses="picture" styleClass="pic-cmds" style="text-align: center; float: right">
 							<p:commandLink title="#{msg['send.picture']}" update=":profile-picture-form" oncomplete="PF('profilePictureDialog').show();" partialSubmit="true" process="@this" global="false" styleClass="column">

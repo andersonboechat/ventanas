@@ -17,7 +17,9 @@
 			.cropper2 {padding: 0;}
 			.cropper2 div {margin: 0 !important; padding: 0 !important;}
 			.cropper2 .img { margin: 0 !important;}
-			.car-image {background: url("/account-portlet/images/car_icon.png") no-repeat center; text-align: center; margin: 0px auto;}
+			.car-image {background: url("/account-portlet/images/car.png") no-repeat center; text-align: center; margin: 0px auto;}
+			.moto-image {background: url("/account-portlet/images/moto.png") no-repeat center; text-align: center; margin: 0px auto;}
+			.bike-image {background: url("/account-portlet/images/bike.png") no-repeat center; text-align: center; margin: 0px auto;}
 			.car-thumb {background-image: url("/account-portlet/images/car_icon.png") ;}
 			.column {padding: 6px; }
 			.column12 {width: 40px; font-size: 13px;}
@@ -41,9 +43,41 @@
 			.fieldClm {border: 1px solid red !important;padding-right: 34px !important;}
 			.fieldClm input {width: 100%; }
 			.person-image {
-				border: none !important; width: 198px; height: 300px; padding: 0px !important; margin:  0px !important;
+				border: none !important;  padding: 0px !important; margin:  0px !important;
 			}
-			.foto img {height: 100px; width: 66px}
+
+			.portrait img {
+				margin: 0px !important;
+				padding: 0px !important;
+				display: table-cell;
+				
+			}
+
+			.portrait td {
+				padding: 6px !important;
+				background-color: white !important;
+				margin: 0px !important;
+			}
+
+			.portrait .ui-panelgrid-cell {
+				-webkit-border-radius: 3px !important;
+				-moz-border-radius: 3px !important;
+				border-radius: 3px !important;
+				-webkit-box-shadow: 0px 0px 6px 0px #cccccc;
+				-moz-box-shadow: 0px 0px 6px 0px #cccccc;
+				box-shadow: 0px 0px 6px 0px #cccccc;
+			}
+			
+			.foto {
+				border: 6px solid white;
+				-webkit-border-radius: 3px !important;
+				-moz-border-radius: 3px !important;
+				border-radius: 3px !important;
+				-webkit-box-shadow: 0px 0px 6px 0px #cccccc;
+				-moz-box-shadow: 0px 0px 6px 0px #cccccc;
+				box-shadow: 0px 0px 6px 0px #cccccc;			
+			}
+			
 			.person-image div {border: none !important;}
 			.no-border {border: none !important;}
 			.no-border tr {border: none !important;}
@@ -95,11 +129,22 @@
 			.ui-datatable .ui-datatable-header {border-color: #cccccc !important;}
 			
 			.ui-datepicker {padding: 0 !important; text-align: center !important;}
-			.ui-datepicker-header {background: green !important; margin: 0 !important}
+			.ui-datepicker-header {background: url("/account-portlet/images/dockbar_bg.png") !important; margin: 0 !important; font-size: 12px !important; padding: 8px !important;}
 			.ui-datepicker tr {border: 0px solid black !important; text-align: center !important;}
-			.ui-datepicker td {border: 0px solid black !important; color: #797979 !important;}
-			.ui-datepicker tbody {padding: 0px 20px !important; border: 1px solid black !important;}
+			.ui-datepicker .ui-state-default {color: #797979 !important; text-align: center !important;
+							-webkit-border-radius: 3px !important;
+				-moz-border-radius: 3px !important;
+				border-radius: 3px !important;
+			}
 			
+			.ui-datepicker td .ui-state-hover {background: #35516d !important; color: #ffffff !important;}
+			.ui-datepicker div {color: #797979 !important;}
+			.ui-datepicker tbody {padding: 0px 20px !important; border: 0px solid black !important;}
+			.ui-datepicker-prev, .ui-datepicker-next {color: white !important; padding: 6px !important;}
+			.ui-datepicker-next {background-position:-32px -160px !important;}
+			.ui-datepicker-month, .ui-datepicker-title {padding-right: 15px !important;}
+			
+			.ui-confirmdialog-no {}
 			
 			.pwd-panel {margin: 20px 0px 0px !important; padding: 0px !important;font-size: 12px;}
 			.pwd-panel .ui-panel-content  {margin: 0px !important; padding: 0px !important;}

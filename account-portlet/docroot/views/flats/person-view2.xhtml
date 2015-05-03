@@ -35,7 +35,7 @@
 		             selection="#{personViewer.selectedPeople}" rowKey="#{person.id}" disabledSelection="#{!personViewer.canEditPerson(person)}">
 		    <p:ajax event="page" global="false"/>
 	   		<p:column selectionMode="multiple" style="width: 17px;"/>
-			<p:column style="width: 53px;">
+			<p:column style="width: 63px;">
 				<p:graphicImage value="#{person.picture.path}" styleClass="foto" height="80" width="52"/>
 			</p:column>
 			<p:column style="vertical-align: top">
@@ -60,14 +60,14 @@
 		</p:dataTable>
 	</h:form>
 
-	<p:dialog header="#{msg['dlg.user.signon']}" widgetVar="personDialog" draggable="true" resizable="false" modal="true" closable="false" visible="false">
+	<p:dialog header="#{msg['dlg.user.signon']}" widgetVar="personDialog" draggable="true" resizable="false" modal="true" closable="false" visible="false" style="background: #f9f9f9">
 		<h:form id="person-details-form">
 			<p:panelGrid id="model-details" styleClass="no-background no-border" style="margin: 10px 0px 20px 0px;" cellpadding="10">
 				<p:row>
 					<p:column styleClass="my-account-col1">
 						<p:panelGrid id="portrait" columns="1" columnClasses="person-image" style="text-align: center">
-							<p:graphicImage value="http://localhost/image/user_male_portrait?img_id=0" width="198" height="300" rendered="#{empty imageUploader.image.path}" style="border: 1px solid black;"/>
-							<p:graphicImage value="#{imageUploader.image.path}" width="198" height="300" rendered="#{not empty imageUploader.image.path}" style="border: 1px solid black;"/>
+							<p:graphicImage value="http://localhost/image/user_male_portrait?img_id=0" width="198" height="300" rendered="#{empty imageUploader.image.path}" styleClass="foto"/>
+							<p:graphicImage value="#{imageUploader.image.path}" width="198" height="300" rendered="#{not empty imageUploader.image.path}" styleClass="foto"/>
 				        </p:panelGrid>
 						<p:panelGrid columns="2" columnClasses="picture" styleClass="pic-cmds" style="text-align: center; float: right">
 							<p:commandLink title="#{msg['send.picture']}" oncomplete="PF('personPictureDialog').show();" partialSubmit="true" process="@this" global="false" styleClass="column">
