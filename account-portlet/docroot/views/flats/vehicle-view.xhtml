@@ -36,13 +36,12 @@
 		        <p:graphicImage value="#{vehicle.image.path}" styleClass="foto bike-image" style="background-size: 100px 90px;" width="100" height="90" rendered="#{vehicle.type == 'BIKE'}"/>
 			</p:column>
 			<p:column style="vertical-align: top">
-				<h:outputText value="#{msg[vehicle.type.label]}" style="font-size: 15px; font-weight: bold;"/>
-				<p:panelGrid columns="2" columnClasses="column12" styleClass="no-border no-margin no-background">
-					<p:outputLabel value="Placa:" rendered="#{vehicle.type != 'BIKE'}"/>
-					<p:outputLabel value="Serial:" rendered="#{vehicle.type == 'BIKE'}"/>
-        			<h:outputText value="#{vehicle.license}"/>
+				<p:panelGrid columns="1"  styleClass="no-border no-margin no-background" style="font-size: 13px; font-weight: normal;">
+					<h:outputText value="#{msg[vehicle.type.label]}" style="font-size: 15px; font-weight: bold;"/>
+					<p:outputLabel value="Placa: #{vehicle.license}" rendered="#{vehicle.type != 'BIKE'}"/>
+					<p:outputLabel value="Número de serie: #{vehicle.license}" rendered="#{vehicle.type == 'BIKE'}"/>
+	  				<h:outputText value="#{vehicleViewer.displayDomain(vehicle.domain)}"/>
 				</p:panelGrid>
-  				<h:outputText value="#{vehicleViewer.displayDomain(vehicle.domain)}"/>
 			</p:column>
 			<p:column style="width: 35px">
 				<p:commandLink update=":tabs:vehicle-details-form:vehicle-details" actionListener="#{vehicleViewer.onVehicleEdit}" oncomplete="PF('vehicleDialog').show();" partialSubmit="true" process="@this">
@@ -73,7 +72,7 @@
 
 	<h:form id="vehicle-details-form" enctype="multipart/form-data">
 		<p:dialog header="Cadastro de Veículo" widgetVar="vehicleDialog" draggable="true" resizable="false" modal="true" visible="false" style="padding: 3px; background: #f9f9f9">
-			<p:panelGrid id="vehicle-details" columns="1" styleClass="no-border no-background" style="width: 380px;">
+			<p:panelGrid id="vehicle-details" columns="1" styleClass="no-border2 no-background" style="width: 380px;">
 				<p:row>
 					<p:column colspan="2">
 						<p:panel id="portrait" styleClass="no-border no-margin">
@@ -106,7 +105,7 @@
 				<p:row>
 					<p:column><p:outputLabel for="vehicleType" value="Tipo:"/></p:column>
 					<p:column>
-						<p:selectOneMenu widgetVar="vehicleType" id="vehicleType" value="#{vehicleViewer.vehicle.type}" required="true" requiredMessage="Selecione o tipo do veículo" style="width: 115px; float: right">
+						<p:selectOneMenu widgetVar="vehicleType" id="vehicleType" value="#{vehicleViewer.vehicle.type}" required="true" requiredMessage="Selecione o tipo do veículo" style="width: 115px; float: right;">
 							<f:selectItem itemLabel="Selecione" noSelectionOption="true"/>
 							<f:selectItems var="type" value="#{vehicleViewer.types.get(flatBean.vehicleBean.vehicle.domain)}" itemValue="#{type}" itemLabel="#{msg[type.label]}"/>
 							<p:ajax event="change" update="vehicle-details" global="false"/>
@@ -115,8 +114,8 @@
 				</p:row>
 				<p:row>
 					<p:column>
-						<p:outputLabel for="license" value="Placa:" rendered="#{vehicleViewer.vehicle.type != 'BIKE'}"/>
-						<p:outputLabel for="serial" value="Número de Serie:" rendered="#{vehicleViewer.vehicle.type == 'BIKE'}"/>
+						<p:outputLabel for="license" value="Placa:" rendered="#{vehicleViewer.vehicle.type != 'BIKE'}" style="text-align: right"/>
+						<p:outputLabel for="serial" value="Número de Serie:" rendered="#{vehicleViewer.vehicle.type == 'BIKE'}" style="text-align: right"/>
 					</p:column>
 					<p:column>
 				    	<p:inputMask widgetVar="license" id="license" mask="aaa?-9999" value="#{vehicleViewer.vehicle.license}" style="width: 100px; text-transform: uppercase; float: right;" readonly="#{vehicleViewer.vehicle.id > 0}" rendered="#{vehicleViewer.vehicle.type != 'BIKE'}" required="true" requiredMessage="Informe a placa do veículo"/>
