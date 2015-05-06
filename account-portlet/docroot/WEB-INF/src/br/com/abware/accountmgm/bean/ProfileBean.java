@@ -27,6 +27,7 @@ import br.com.abware.jcondo.core.model.Person;
 import br.com.abware.jcondo.core.model.Phone;
 import br.com.abware.jcondo.core.model.PhoneType;
 
+import br.com.atilo.jcondo.commons.collections.PersonTypePredicate;
 import br.com.atilo.jcondo.core.service.PersonDetailServiceImpl;
 
 @ManagedBean
@@ -75,31 +76,26 @@ public class ProfileBean extends BaseBean {
 	@PostConstruct
 	public void init() {
 		try {
-			HashSet<Person> ps = new HashSet<Person>();
 			person = personService.getPerson();
 			personDetail = personDetailService.getPersonDetail(person);
 			phones = personDetail.getPhones();
 			phoneTypes = Arrays.asList(PhoneType.values());
 			
-			for (Membership membership : person.getMemberships()) {
-				if (membership.getType() == PersonType.OWNER || membership.getType() == PersonType.RENTER) {
-					ps.addAll(personService.getPeople(membership.getDomain()));
-				}
-			}
+			boolean isOwner = CollectionUtils.find(person.getMemberships(), new PersonTypePredicate(PersonType.OWNER)) == null ? true : false;
+			boolean isRenter = CollectionUtils.find(person.getMemberships(), new PersonTypePredicate(PersonType.RENTER)) == null ? true : false;
 
-			if (!CollectionUtils.isEmpty(ps)) {
+			if (isOwner || isRenter) {
 				kinships = personDetail.getKinships();
-
-				ps.remove(person);
-				people = new ArrayList<Person>(ps);
+				people = personService.getPeople(person);
 
 				List<Person> relatives = (List<Person>) CollectionUtils.collect(kinships, new RelativeTransformer());
-
 				people.removeAll(relatives);
+
 				father = getParent(KinType.FATHER);
 				mother = getParent(KinType.MOTHER);
 				people.remove(father);
 				people.remove(mother);
+				people.remove(person);
 			}
 			
 			imageUploadBean = new ImageUploadBean(198, 300);

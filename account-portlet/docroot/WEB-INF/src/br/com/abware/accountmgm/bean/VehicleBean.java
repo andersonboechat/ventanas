@@ -127,34 +127,8 @@ public class VehicleBean extends BaseBean {
 
 			MessageUtils.addMessage(FacesMessage.SEVERITY_INFO, msg, null);
 		} catch (ModelExistException e) {
-			Vehicle v = vehicleService.getVehicle(vehicle.getLicense());
-
-			// Veiculo esta associado a um apartamento
-			if (v.getDomain() != null) {
-				String details;
-
-				if (flats.indexOf(v.getDomain()) >= 0) {
-					details = "Este veículo está cadastrado para o apartamento " + ((Flat) v.getDomain()).getBlock() + "/" + ((Flat) v.getDomain()).getNumber();
-				} else {
-					details = "Este veículo está cadastrado para um apartamento";
-				}
-
-				FacesContext context = FacesContext.getCurrentInstance();
-				String component = context.getViewRoot().findComponent("outputMsg").getClientId();
-				context.addMessage(component, new FacesMessage(FacesMessage.SEVERITY_WARN, e.getLocalizedMessage(), details));
-			} else {
-			// Veiculo eh visitante
-				try {
-					Domain domain = vehicle.getDomain();
-					BeanUtils.copyProperties(vehicle, v);
-					vehicle.setDomain(domain);
-				} catch (Exception ex) {
-					LOGGER.error("Falha ao clonar veiculo", ex);
-				}
-
-				RequestContext.getCurrentInstance().addCallbackParam("alert", true);
-			}
-
+			MessageUtils.addMessage(FacesMessage.SEVERITY_WARN, e.getMessage(), e.getArgs(), "tabs:vehicle-details-form:alertMsg");
+			RequestContext.getCurrentInstance().addCallbackParam("alert", true);
 			RequestContext.getCurrentInstance().addCallbackParam("exception", true);
 		} catch (BusinessException e) {
 			MessageUtils.addMessage(FacesMessage.SEVERITY_WARN, e.getMessage(), e.getArgs());
@@ -165,6 +139,18 @@ public class VehicleBean extends BaseBean {
 		}
 	}
 
+	public void onVehicleClaim() {
+		try {
+			vehicleService.claim(vehicle);
+		} catch (BusinessException e) {
+			MessageUtils.addMessage(FacesMessage.SEVERITY_WARN, e.getMessage(), e.getArgs());
+			RequestContext.getCurrentInstance().addCallbackParam("exception", true);
+		} catch (Exception e) {
+			MessageUtils.addMessage(FacesMessage.SEVERITY_ERROR, "general.failure", null);
+			RequestContext.getCurrentInstance().addCallbackParam("exception", true);
+		}	
+	}
+	
 	public void onVehicleCreate() throws Exception {
 		vehicle = new Vehicle();
 		vehicle.setDomain(new Flat());

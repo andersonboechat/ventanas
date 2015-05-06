@@ -59,20 +59,11 @@
 			<p:commandButton value="#{msg['no']}" type="button" styleClass="ui-confirmdialog-no" icon="ui-icon-close" style="float: right; width: 85px; margin-right: 16%" />
 			<p:commandButton value="#{msg['yes']}" type="button" styleClass="ui-confirmdialog-yes" icon="ui-icon-check" style="width: 85px; margin-left: 16%"/>
 		</p:confirmDialog>
-		<p:confirmDialog header="Veículo encontrado" severity="alert" widgetVar="alertDialog" showEffect="fade" hideEffect="fade">
-			<f:facet name="message">
-				<p:messages id="alertMsg" severity="warn" />
-				<h:outputText value="Este veículo já está cadastrado como visitante. Você deseja torna-lo um veículo morador associando ao #{vehicleViewer.displayDomain(vehicleViewer.vehicle.domain)}?" />
-			</f:facet>
-			<p:panel style="text-align: center; border: none;">
-				<p:commandButton value="OK" update=":tabs:vehicle-details-form:vehicle-details" oncomplete="PF('alertDialog').hide();" partialSubmit="true" process="@this" style="margin: 0px auto"/>
-			</p:panel>
-		</p:confirmDialog>
 	</h:form>
 
 	<h:form id="vehicle-details-form" enctype="multipart/form-data">
 		<p:dialog header="Cadastro de Veículo" widgetVar="vehicleDialog" draggable="true" resizable="false" modal="true" visible="false" style="padding: 3px; background: #f9f9f9">
-			<p:panelGrid id="vehicle-details" columns="1" styleClass="no-border2 no-background" style="width: 380px;">
+			<p:panelGrid id="vehicle-details" columns="1" styleClass="no-border no-background" style="width: 380px;">
 				<p:row>
 					<p:column colspan="2">
 						<p:panel id="portrait" styleClass="no-border no-margin">
@@ -91,7 +82,7 @@
 				<p:row>
 					<p:column colspan="2" style="text-align: right; padding-right: 20px">
 						<p:selectOneMenu id="flat" value="#{vehicleViewer.vehicle.domain}" filter="true" required="true" requiredMessage="Selecione um apartamento"
-										 rendered="#{vehicleViewer.flats.size() > 1}" converter="selectItemsConverter">
+										 rendered="#{vehicleViewer.flats.size() > 1}" converter="selectItemsConverter" style="float: right;">
 							<f:selectItem itemLabel="Selecione o apartamento" noSelectionOption="true"/>
 							<f:selectItems var="flat" value="#{vehicleViewer.flats}" itemLabel="Apartamento #{flat.number} - Bloco #{flat.block}" itemValue="#{flat}"/>
 							<p:ajax event="change" update="vehicleType" partialSubmit="true" process="@this" global="false"/>
@@ -142,11 +133,20 @@
 					<h:outputText value="#{vehicleViewer.vehicle.license}" style="text-transform: uppercase;"/>
 				</p:panelGrid>
 			</p:outputPanel>
-			<p:panel style="text-align: center; border: 0px solid black; width: 85%; margin: 0 auto;">
+			<p:panel style="text-align: center; border: 0px solid black; width: 200px; margin: 0 auto;">
 				<p:commandButton value="#{msg['no']}" type="button" onclick="PF('confirmData').hide();" icon="ui-icon-close" style=" float:right;"/>
 				<p:commandButton value="#{msg['yes']}" actionListener="#{vehicleViewer.onVehicleSave}" update="@widgetVar(parkingTable),@widgetVar(vehicleTable),:outputMsg" 
 								 oncomplete="PF('confirmData').hide(); if (!args.validationFailed) { if(!args.exception) {PF('vehicleDialog').hide();} else { if(args.alert) {PF('alertDialog').show();}}}" 
-								 icon="ui-icon-check" style="margin-left: 10px;"/>
+								 icon="ui-icon-check" style="margin-left: 5px;"/>
+			</p:panel>
+		</p:confirmDialog>
+		<p:confirmDialog header="Atenção" widgetVar="alertDialog" showEffect="fade" hideEffect="fade" styleClass="alert">
+			<f:facet name="message">
+				<p:messages id="alertMsg" severity="warn" autoUpdate="true" styleClass="no-background no-margin" />
+			</f:facet>
+			<p:panel style="text-align: center; border: 0px solid black; width: 200px; margin: 0 auto;">
+				<p:commandButton value="#{msg['no']}" type="button" onclick="PF('alertDialog').hide();" icon="ui-icon-close" style=" float:right;"/>
+				<p:commandButton value="#{msg['yes']}" actionListener="#{vehicleViewer.onVehicleClaim}" update=":outputMsg"	oncomplete="PF('vehicleDialog').hide();" icon="ui-icon-check" style="margin-left: 5px;"/>
 			</p:panel>
 		</p:confirmDialog>
 	</h:form>

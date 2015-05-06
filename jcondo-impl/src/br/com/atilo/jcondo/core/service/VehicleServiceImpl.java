@@ -1,10 +1,18 @@
 package br.com.atilo.jcondo.core.service;
 
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang.time.DateFormatUtils;
+import org.apache.log4j.Logger;
+
+import com.liferay.portal.kernel.io.unsync.UnsyncStringWriter;
+import com.liferay.portal.kernel.velocity.VelocityContext;
+import com.liferay.portal.kernel.velocity.VelocityEngineUtil;
+import com.liferay.util.ContentUtil;
 
 import br.com.abware.jcondo.exception.ModelExistException;
 import br.com.abware.jcondo.core.model.Parking;
@@ -12,15 +20,19 @@ import br.com.abware.jcondo.core.model.Vehicle;
 import br.com.abware.jcondo.core.model.VehicleType;
 import br.com.atilo.jcondo.core.persistence.manager.SecurityManagerImpl;
 import br.com.atilo.jcondo.core.persistence.manager.VehicleManagerImpl;
+import br.com.atilo.jcondo.util.MailService;
 import br.com.abware.jcondo.core.Permission;
 import br.com.abware.jcondo.core.model.Domain;
 import br.com.abware.jcondo.core.model.Flat;
 import br.com.abware.jcondo.core.model.Image;
 import br.com.abware.jcondo.core.model.Person;
 import br.com.abware.jcondo.core.service.BaseService;
+import br.com.abware.jcondo.crm.model.Occurrence;
 import br.com.abware.jcondo.exception.BusinessException;
 
 public class VehicleServiceImpl implements BaseService<Vehicle> {
+	
+	private static final Logger LOGGER = Logger.getLogger(VehicleServiceImpl.class);
 	
 	public static final String LICENSE_PATTERN = "[A-Za-z]{3,3}[0-9]{4,4}";
 
@@ -287,4 +299,28 @@ public class VehicleServiceImpl implements BaseService<Vehicle> {
 		vehicle.setImage(v.getImage());
 	}
 
+	public void claim(Vehicle vehicle) {
+		LOGGER.info("Enviando reivindicacao de veiculo " + occurrence.getId());
+
+		String mailBodyTemplate = ContentUtil.get("br/com/atilo/jcondo/core/mail/vehicle-claim-notify.vm");
+		LOGGER.debug(mailBodyTemplate);
+
+		VelocityContext variables = VelocityEngineUtil.getStandardToolsContext();
+		variables.put("occurrence", occurrence);
+		variables.put("occurrenceLabel", rb.getString(occurrence.getType().getLabel()).toLowerCase());
+		variables.put("occurrenceDate", DateFormatUtils.format(occurrence.getDate(), "dd 'de' MMMM 'de' yyyy 'às' HH:mm"));
+		variables.put("answer", occurrence.getAnswer());
+		variables.put("answerDate", DateFormatUtils.format(occurrence.getAnswer().getDate(), "dd 'de' MMMM 'de' yyyy 'às' HH:mm"));
+		UnsyncStringWriter writer = new UnsyncStringWriter();
+		VelocityEngineUtil.mergeTemplate("OAN", mailBodyTemplate, variables, writer);
+
+		String mailBody = writer.toString();
+		LOGGER.debug(mailBody);
+
+		String mailTo = occurrence.getPerson().getEmailAddress();
+		String mailSubject = MessageFormat.format(rb.getString("occurrence.answer.subject"), 
+												  rb.getString(occurrence.getType().getLabel()).toLowerCase());
+
+		MailService.send(mailTo, mailSubject, mailBody);
+	}
 }

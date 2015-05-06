@@ -23,7 +23,7 @@
 		    	<p:selectOneMenu id="flat" value="#{flatBean.flat}" filter="true" filterMatchMode="contains" converter="selectItemsConverter" rendered="#{flatBean.flats.size() > 1}">
 		    		<f:selectItem itemLabel="Todos Apartamentos" noSelectionOption="true"/>
 					<f:selectItems var="flat" value="#{flatBean.flats}" itemLabel="Apartamento #{flat.number} - Bloco #{flat.block}" itemValue="#{flat}"/>
-					<p:ajax event="change" listener="#{flatBean.onFlatSelect}" update="flat-details,:tabs:person-form:personTable,:tabs:vehicle-form:vehicleTable,:tabs:supplier-form:supplierTable" global="false"/>
+					<p:ajax event="change" listener="#{flatBean.onFlatSelect}" update="flat-details,:tabs:person-form:personTable,:tabs:vehicle-form:vehicleTable,:tabs:supplier-form:supplierTable"/>
 		    	</p:selectOneMenu>
 			</p:panelGrid>
 			<p:panelGrid id="flat-details" columns="2" columnClasses="parkings,documents" styleClass="no-background no-border" style="margin: 10px 0px 20px 0px;" cellpadding="10">
