@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+
+<f:view
+	xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:c="http://java.sun.com/jsp/jstl/core"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:ui="http://java.sun.com/jsf/facelets">
+<ui:composition template="../main-template.xhtml">
+	<ui:define name="app-view">
+		<p:growl id="messages" showDetail="false" autoUpdate="true"/>
+
+		<h:form id="person-registration-form">	
+			<p:panelGrid id="person-details" styleClass="no-background no-border" style="margin: 10px 0px 20px 0px; width: 100%" cellpadding="10">
+				<p:row>
+					<p:column styleClass="my-account-col1">
+						<p:panelGrid columns="1" styleClass="no-margin">
+							<p:graphicImage id="portrait" value="#{personBean.person.picture.path}" styleClass="foto"/>
+				        </p:panelGrid>
+						<p:commandLink title="#{msg['take.picture']}" update=":profile-picture-form" oncomplete="PF('personCameraDialog').show();" partialSubmit="true" global="false" process="@this" styleClass="column" rendered="false">
+							<h:graphicImage value="../images/take-pic.png" width="38" height="31"/>
+							<f:setPropertyActionListener target="#{personBean.person.picture.path}" value=""/>
+						</p:commandLink>
+					</p:column>
+					<p:column styleClass="my-account-col2">
+						<p:panelGrid columns="2" styleClass="userPanel" style="width: 100%; margin: 0; padding: 0;">
+						<p:row>
+							<p:column styleClass="labelClm"><p:outputLabel for="firstName" value="Nome: "/></p:column>
+							<p:column colspan="3" styleClass="fieldClm">
+								<p:inputText id="firstName" value="#{personBean.person.firstName}" 
+											 required="true" requiredMessage="#{msg['person.firstname.empty']}"/>
+							</p:column>
+						</p:row>									
+						<p:row>
+							<p:column styleClass="labelClm"><p:outputLabel for="lastName" value="Sobrenome: "/></p:column>
+							<p:column styleClass="fieldClm">
+								<p:inputText id="lastName" value="#{personBean.person.lastName}"
+											 required="true" requiredMessage="#{msg['person.lastname.empty']}"/>
+							</p:column>
+						</p:row>
+						<p:row>
+							<p:column styleClass="labelClm"><p:outputLabel for="identity" value="CPF: "/></p:column>
+							<p:column styleClass="fieldClm">
+								<p:inputMask id="identity" value="#{personBean.person.identity}" mask="999.999.999-99"/>
+							</p:column>
+						</p:row>
+						</p:panelGrid>
+					</p:column>
+				</p:row>
+				<p:row>
+					<p:column colspan="2">
+						<p:commandButton value="Cadastrar" actionListener="#{personBean.onPersonSave}" update=":outputMsg" style="float: right; width: 85px; margin: 10px 10px 0px 5px;"/>
+					</p:column>
+				</p:row>
+			</p:panelGrid>
+		</h:form>
+	
+		<p:dialog id="personCameraDialog" widgetVar="personCameraDialog" resizable="false" draggable="false" modal="true" header="Retrato" visible="false">
+			<h:form id="profile-camera-form">
+				<p:photoCam id="pc" widgetVar="pc" listener="#{personBean.cameraBean.onCapture}" rendered="#{empty personBean.cameraBean.image.path}"/>
+				<p:imageCropper id="capturedImage" value="#{personBean.cameraBean.croppedImage}" image="#{personBean.cameraBean.image.path}" initialCoords="0,0,198,300" minSize="198,300" maxSize="198,300" rendered="#{not empty personBean.cameraBean.image.path}"/>
+				<p:commandButton value="Capturar" type="button" onclick="PF('pc').capture();"/>
+				<p:commandButton value="Recortar" actionListener="#{personBean.cameraBean.onCropp}" update=":person-registration-form:portrait" global="false" oncomplete="PF('personCameraDialog').hide();">
+					<f:setPropertyActionListener value="#{personBean.cameraBean.image}" target="#{personBean.person.picture}"></f:setPropertyActionListener>
+				</p:commandButton>
+			</h:form>
+		</p:dialog>
+
+	</ui:define>
+</ui:composition>	
+</f:view>

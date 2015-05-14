@@ -71,6 +71,15 @@ public class PersonBean extends BaseBean implements Observer {
 	private long selectedDomainId;
 
 	private List<Gender> genders;
+
+	
+	public PersonBean() {
+		person = new Person();
+		filters = new HashMap<String, Object>();
+		imageUploadBean = new ImageUploadBean(198, 300);
+		cameraBean = new CameraBean(198, 300);
+		genders = Arrays.asList(Gender.values());
+	}
 	
 	@SuppressWarnings("unchecked")
 	public void init(List<? extends Domain> domains) {
@@ -85,11 +94,6 @@ public class PersonBean extends BaseBean implements Observer {
 			}
 
 			model = new ModelDataModel<Person>(new ArrayList<Person>(people));
-			person = new Person();
-			filters = new HashMap<String, Object>();
-			imageUploadBean = new ImageUploadBean(198, 300);
-			cameraBean = new CameraBean(198, 300);
-			genders = Arrays.asList(Gender.values());
 		} catch (Exception e) {
 			LOGGER.fatal("Failure on person initialization", e);
 			MessageUtils.addMessage(FacesMessage.SEVERITY_FATAL, "general.failure", null);
