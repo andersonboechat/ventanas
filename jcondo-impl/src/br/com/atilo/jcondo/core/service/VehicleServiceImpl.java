@@ -300,27 +300,27 @@ public class VehicleServiceImpl implements BaseService<Vehicle> {
 	}
 
 	public void claim(Vehicle vehicle) {
-		LOGGER.info("Enviando reivindicacao de veiculo " + occurrence.getId());
-
-		String mailBodyTemplate = ContentUtil.get("br/com/atilo/jcondo/core/mail/vehicle-claim-notify.vm");
-		LOGGER.debug(mailBodyTemplate);
-
-		VelocityContext variables = VelocityEngineUtil.getStandardToolsContext();
-		variables.put("occurrence", occurrence);
-		variables.put("occurrenceLabel", rb.getString(occurrence.getType().getLabel()).toLowerCase());
-		variables.put("occurrenceDate", DateFormatUtils.format(occurrence.getDate(), "dd 'de' MMMM 'de' yyyy 'às' HH:mm"));
-		variables.put("answer", occurrence.getAnswer());
-		variables.put("answerDate", DateFormatUtils.format(occurrence.getAnswer().getDate(), "dd 'de' MMMM 'de' yyyy 'às' HH:mm"));
-		UnsyncStringWriter writer = new UnsyncStringWriter();
-		VelocityEngineUtil.mergeTemplate("OAN", mailBodyTemplate, variables, writer);
-
-		String mailBody = writer.toString();
-		LOGGER.debug(mailBody);
-
-		String mailTo = occurrence.getPerson().getEmailAddress();
-		String mailSubject = MessageFormat.format(rb.getString("occurrence.answer.subject"), 
-												  rb.getString(occurrence.getType().getLabel()).toLowerCase());
-
-		MailService.send(mailTo, mailSubject, mailBody);
+//		LOGGER.info("Enviando reivindicacao de veiculo " + occurrence.getId());
+//
+//		String mailBodyTemplate = ContentUtil.get("br/com/atilo/jcondo/core/mail/vehicle-claim-notify.vm");
+//		LOGGER.debug(mailBodyTemplate);
+//
+//		VelocityContext variables = VelocityEngineUtil.getStandardToolsContext();
+//		variables.put("occurrence", occurrence);
+//		variables.put("occurrenceLabel", rb.getString(occurrence.getType().getLabel()).toLowerCase());
+//		variables.put("occurrenceDate", DateFormatUtils.format(occurrence.getDate(), "dd 'de' MMMM 'de' yyyy 'às' HH:mm"));
+//		variables.put("answer", occurrence.getAnswer());
+//		variables.put("answerDate", DateFormatUtils.format(occurrence.getAnswer().getDate(), "dd 'de' MMMM 'de' yyyy 'às' HH:mm"));
+//		UnsyncStringWriter writer = new UnsyncStringWriter();
+//		VelocityEngineUtil.mergeTemplate("OAN", mailBodyTemplate, variables, writer);
+//
+//		String mailBody = writer.toString();
+//		LOGGER.debug(mailBody);
+//
+//		String mailTo = occurrence.getPerson().getEmailAddress();
+//		String mailSubject = MessageFormat.format(rb.getString("occurrence.answer.subject"), 
+//												  rb.getString(occurrence.getType().getLabel()).toLowerCase());
+//
+//		MailService.send(mailTo, mailSubject, mailBody);
 	}
 }

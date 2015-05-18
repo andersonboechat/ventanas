@@ -4,5 +4,6 @@
 <display>
 	<category name="category.jcondo">
 		<portlet id="jcondo-agenda" />
+		<portlet id="jcondo-next-bookings" />
 	</category>
 </display>

@@ -169,4 +169,67 @@
 			<role-name>administrator</role-name>
 		</security-role-ref>
 	</portlet>
+	<portlet>
+		<portlet-name>vehicle-registration</portlet-name>
+		<display-name>Cadastro de Veículo</display-name>
+		<portlet-class>javax.portlet.faces.GenericFacesPortlet</portlet-class>
+		<init-param>
+			<name>javax.portlet.faces.defaultViewId.view</name>
+			<value>/views/security/vehicle-registration.xhtml</value>
+		</init-param>
+		<expiration-cache>0</expiration-cache>
+		<supports>
+			<mime-type>text/html</mime-type>
+		</supports>
+		<portlet-info>
+			<title>Cadastro de Veículo</title>
+			<short-title>Veículo</short-title>
+			<keywords>Vehicle Registration</keywords>
+		</portlet-info>
+		<security-role-ref>
+			<role-name>administrator</role-name>
+		</security-role-ref>
+	</portlet>
+	<portlet>
+		<portlet-name>person-registration</portlet-name>
+		<display-name>Cadastro de Usuário</display-name>
+		<portlet-class>javax.portlet.faces.GenericFacesPortlet</portlet-class>
+		<init-param>
+			<name>javax.portlet.faces.defaultViewId.view</name>
+			<value>/views/security/person-registration.xhtml</value>
+		</init-param>
+		<expiration-cache>0</expiration-cache>
+		<supports>
+			<mime-type>text/html</mime-type>
+		</supports>
+		<portlet-info>
+			<title>Cadastro de Usuário</title>
+			<short-title>Usuário</short-title>
+			<keywords>Person Registration</keywords>
+		</portlet-info>
+		<security-role-ref>
+			<role-name>administrator</role-name>
+		</security-role-ref>
+	</portlet>
+	<portlet>
+		<portlet-name>quick-search</portlet-name>
+		<display-name>Cadastro de Usuário</display-name>
+		<portlet-class>javax.portlet.faces.GenericFacesPortlet</portlet-class>
+		<init-param>
+			<name>javax.portlet.faces.defaultViewId.view</name>
+			<value>/views/security/search.xhtml</value>
+		</init-param>
+		<expiration-cache>0</expiration-cache>
+		<supports>
+			<mime-type>text/html</mime-type>
+		</supports>
+		<portlet-info>
+			<title>Busca Rápida</title>
+			<short-title>Busca</short-title>
+			<keywords>Quick Search</keywords>
+		</portlet-info>
+		<security-role-ref>
+			<role-name>administrator</role-name>
+		</security-role-ref>
+	</portlet>
 </portlet-app>

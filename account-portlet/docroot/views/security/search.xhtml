@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+
+<f:view
+	xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:c="http://java.sun.com/jsp/jstl/core"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:ui="http://java.sun.com/jsf/facelets">
+<ui:composition template="../main-template.xhtml">
+	<ui:define name="app-view">
+		<h:form id="search-form">
+			<p:panelGrid columns="2" styleClass="no-border no-background">
+			<p:fieldset legend="Usuários" style="margin: 5px; height: 200px;">	
+				<p:panelGrid columns="2" styleClass="no-border no-background">
+					<p:outputLabel value="Nome: "/>
+					<p:inputText id="name" value="#{searchBean.personName}" style="width: 120px;"/>
+					<p:outputLabel value="CPF: "/>
+					<p:inputMask id="identity" value="#{searchBean.identity}" mask="999.999.999-99" style="width: 120px;"/>
+					<p:outputLabel value="Apartamento: "/>
+			    	<p:selectOneMenu value="#{searchBean.flat}" filter="true" converter="selectItemsConverter">
+			    		<f:selectItem itemLabel="Selecione" noSelectionOption="true"/>
+						<f:selectItems var="flat" value="#{searchBean.flats}" itemLabel="Apto. #{flat.number} - Bl. #{flat.block}" itemValue="#{flat}"/>
+			    	</p:selectOneMenu>
+				</p:panelGrid>
+				<p:commandButton value="Buscar" actionListener="#{searchBean.onPersonSearch}" style="float: right; margin: 10px 10px; padding: 3px"/>
+			</p:fieldset>
+			<p:fieldset legend="Veículos" style=" margin: 5px; height: 200px;">
+				<p:panelGrid columns="2" styleClass="no-border no-background">
+					<p:outputLabel value="Placa: "/>
+					<p:inputMask mask="aaa?-9999" value="#{vehicleViewer.vehicle.license}" style="width: 120px; text-transform: uppercase;"/>
+					<p:outputLabel value="Apartamento: "/>
+			    	<p:selectOneMenu value="#{searchBean.flat}" filter="true" converter="selectItemsConverter">
+			    		<f:selectItem itemLabel="Selecione" noSelectionOption="true"/>
+						<f:selectItems var="flat" value="#{searchBean.flats}" itemLabel="Apto. #{flat.number} - Bl. #{flat.block}" itemValue="#{flat}"/>
+			    	</p:selectOneMenu>
+				</p:panelGrid>
+				<p:commandButton value="Buscar" actionListener="#{searchBean.onVehicleSearch}" style="float: right; margin: 10px 10px; padding: 3px"/>
+			</p:fieldset>
+			</p:panelGrid>
+		</h:form>
+	</ui:define>
+</ui:composition>
+</f:view>

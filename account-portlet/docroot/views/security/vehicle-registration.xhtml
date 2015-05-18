@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+
+<f:view
+	xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:c="http://java.sun.com/jsp/jstl/core"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:ui="http://java.sun.com/jsf/facelets">
+<ui:composition template="../main-template.xhtml">
+	<ui:define name="app-view">
+		<c:set var="vehicleViewer" value="#{vehicleRegistrationBean}"/>
+		<c:set var="photoCamera" value="#{vehicleRegistrationBean.cameraBean}"/>
+		
+		<h:form id="vehicle-registration-form" enctype="multipart/form-data">
+			<p:panelGrid id="vehicle-details" columns="2" columnClasses="no-margin,vehicle-form" styleClass="no-border no-background" style="vertical-align: top;">
+				<p:column>
+					<p:panel widgetVar="portrait" id="portrait" styleClass="no-border no-margin" style="">
+						<p:graphicImage value="#{vehicleViewer.vehicle.image.path}" styleClass="foto car-image" width="#{photoCamera.width}" height="#{photoCamera.height}" rendered="#{vehicleViewer.vehicle.type == null}"/>
+					</p:panel>
+					<p:commandLink title="Capturar foto" oncomplete="PF('photoCameraDialog').show();" partialSubmit="true" process="@this" style="float: right; margin: 5px 12px; padding:0;" global="false">
+						<h:graphicImage value="../images/take-pic.png" styleClass="no-margin"/>
+						<f:setPropertyActionListener target="#{vehicleViewer.vehicle.image.path}" value=""/>
+					</p:commandLink>
+				</p:column>
+				<p:column>
+					<p:panelGrid columns="2" styleClass="no-border no-background" style="width: 100%; margin-top: 5px;">
+						<p:column><p:outputLabel for="vehicleType" value="Tipo:"/></p:column>
+						<p:column>
+							<p:selectOneMenu widgetVar="vehicleType" id="vehicleType" value="#{vehicleViewer.vehicle.type}" required="true" requiredMessage="Selecione o tipo do veículo" style="width: 115px; float: right;">
+								<f:selectItem itemLabel="Selecione" noSelectionOption="true"/>
+								<f:selectItems var="type" value="#{vehicleRegistrationBean.types}" itemValue="#{type}" itemLabel="#{msg[type.label]}"/>
+							</p:selectOneMenu>
+						</p:column>
+						<p:column>
+							<p:outputLabel for="license" value="Placa:" style="text-align: right"/>
+						</p:column>
+						<p:column>
+					    	<p:inputMask widgetVar="license" id="license" mask="aaa?-9999" value="#{vehicleViewer.vehicle.license}" style="width: 100px; text-transform: uppercase; float: right;" readonly="#{vehicleViewer.vehicle.id > 0}" required="true" requiredMessage="Informe a placa do veículo"/>
+						</p:column>
+					</p:panelGrid>
+					<p:panelGrid columns="1" style="padding: 0; width: 100%" styleClass="no-border">
+						<p:outputLabel value="Observação:"/>
+						<p:inputTextarea style="padding: 5px;" cols="25" rows="9" autoResize="false"></p:inputTextarea>
+						<p:commandButton value="Cadastrar" style="float: right; margin: 5px 0px; padding: 3px;"/>
+					</p:panelGrid>
+				</p:column>
+			</p:panelGrid>
+		</h:form>
+		
+		<p:dialog id="photoCameraDialog" widgetVar="photoCameraDialog" resizable="false" draggable="false" modal="true" header="Câmera Fotográfica" visible="false" style="background: #f9f9f9">
+			<h:form id="vehicle-camera-form">
+				<p:panelGrid columns="1" styleClass="no-border no-margin no-background" style="text-align: center; margin: 0 auto;">
+					<p:photoCam id="pc" widgetVar="pc" listener="#{photoCamera.onCapture}" update=":vehicle-registration-form:portrait" styleClass="foto"/>
+					<p:commandButton value="Capturar" type="button" onclick="PF('pc').capture();PF('photoCameraDialog').hide();" style="margin-top: 15px; padding: 3px;"/>
+		        </p:panelGrid>  
+			</h:form>
+		</p:dialog>
+
+	</ui:define>
+</ui:composition>
+</f:view>

@@ -10,5 +10,8 @@
 		<portlet id="supplier-management" />
 		<portlet id="vehicle-management" />
 		<portlet id="profile-management" />
+		<portlet id="vehicle-registration" />
+		<portlet id="person-registration" />
+		<portlet id="quick-search" />
 	</category>
 </display>
