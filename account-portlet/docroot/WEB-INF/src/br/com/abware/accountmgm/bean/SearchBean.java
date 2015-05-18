@@ -1,13 +1,18 @@
 package br.com.abware.accountmgm.bean;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import javax.annotation.PostConstruct;
 import javax.faces.bean.ManagedBean;
 import javax.faces.bean.ViewScoped;
 
+import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 
+import br.com.abware.accountmgm.util.DomainPredicate;
 import br.com.abware.jcondo.core.model.Flat;
 import br.com.abware.jcondo.core.model.Person;
 
@@ -28,6 +33,8 @@ public class SearchBean extends BaseBean {
 	private Flat flat;
 	
 	private List<Flat> flats;
+	
+	private List<Person> people;
 
 	@PostConstruct
 	public void init() {
@@ -38,8 +45,37 @@ public class SearchBean extends BaseBean {
 		}
 	}
 
-	public void onPersonSearch() {
-		
+	public void onPersonSearch() throws Exception {
+		if (!StringUtils.isEmpty(personName)) {
+			people = personService.getPeople(person);
+		}
+
+		if (!StringUtils.isEmpty(identity)) {
+			Person person;
+			if (CollectionUtils.isEmpty(people)) {
+				person = personService.getPerson(identity);
+			} else {
+				Person person = (Person) CollectionUtils.find(people, new DomainPredicate(flat));
+			}
+
+			if (person != null) {
+				people = Arrays.asList(person);
+			} else {
+				
+			}
+		}
+
+		if (flat != null) {
+			if (CollectionUtils.isEmpty(people)) {
+				people = personService.getPeople(flat);	
+			} else {
+				for (Person person : people) {
+					if(!CollectionUtils.exists(person.getMemberships(), new DomainPredicate(flat))) {
+						people.remove(person);
+					}
+				}
+			}
+		}
 	}
 	
 	public void onVehicleSearch() {
