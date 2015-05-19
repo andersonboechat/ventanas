@@ -30,6 +30,7 @@ import com.liferay.portal.kernel.workflow.WorkflowConstants;
 import com.liferay.portal.model.User;
 import com.liferay.portal.service.ServiceContext;
 import com.liferay.portal.service.UserLocalServiceUtil;
+import com.liferay.portal.util.comparator.UserFirstNameComparator;
 
 public class PersonManagerImpl extends JCondoManager<PersonEntity, Person> {
 
@@ -194,19 +195,38 @@ public class PersonManagerImpl extends JCondoManager<PersonEntity, Person> {
 	}
 
 	public Person findPerson() throws PersistenceException {
+		return findPerson(helper.getUser().getUserId());
+	}
+	
+	public Person findPerson(long userId) throws PersistenceException {
 		String key = generateKey();
 		String queryString = "FROM PersonEntity WHERE userId = :userId";
 
 		try {
 			openManager(key);
 			Query query = em.createQuery(queryString);
-			query.setParameter("userId", helper.getUser().getUserId());
+			query.setParameter("userId", userId);
 			return getModel((PersonEntity) query.getSingleResult());
 		} catch (Exception e) {
 			throw new PersistenceException(e, "psn.mgr.find.person.fail");
 		} finally {
 			closeManager(key);
 		}
+	}
+
+	public List<Person> findPeople(String name) throws Exception {
+		List<Person> people = new ArrayList<Person>();
+		List<User> users;
+		users = UserLocalServiceUtil.search(helper.getCompanyId(), name, StringUtils.EMPTY, 
+											name, StringUtils.EMPTY, StringUtils.EMPTY, 
+											WorkflowConstants.STATUS_APPROVED, null, false, 
+											-1, -1, new UserFirstNameComparator());
+
+		for (User user : users) {
+			people.add(findPerson(user.getUserId()));
+		}
+
+		return people;
 	}
 	
 	@SuppressWarnings("unchecked")

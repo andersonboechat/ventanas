@@ -64,6 +64,10 @@ public class PersonServiceImpl  {
 		return types;
 	}
 
+	public List<Person> getPeople(String name) throws Exception {
+		return personManager.findPeople(name);
+	}
+
 	public List<Person> getPeople(Person person) throws Exception {
 		Set<Person> people = new HashSet<Person>(); 
 

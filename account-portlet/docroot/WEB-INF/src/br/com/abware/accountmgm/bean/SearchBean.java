@@ -1,6 +1,5 @@
 package br.com.abware.accountmgm.bean;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -13,6 +12,7 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 
 import br.com.abware.accountmgm.util.DomainPredicate;
+import br.com.abware.accountmgm.util.IdentityPredicate;
 import br.com.abware.jcondo.core.model.Flat;
 import br.com.abware.jcondo.core.model.Person;
 
@@ -47,7 +47,7 @@ public class SearchBean extends BaseBean {
 
 	public void onPersonSearch() throws Exception {
 		if (!StringUtils.isEmpty(personName)) {
-			people = personService.getPeople(person);
+			people = personService.getPeople(personName);
 		}
 
 		if (!StringUtils.isEmpty(identity)) {
@@ -55,13 +55,11 @@ public class SearchBean extends BaseBean {
 			if (CollectionUtils.isEmpty(people)) {
 				person = personService.getPerson(identity);
 			} else {
-				Person person = (Person) CollectionUtils.find(people, new DomainPredicate(flat));
+				person = (Person) CollectionUtils.find(people, new IdentityPredicate(identity));
 			}
 
 			if (person != null) {
 				people = Arrays.asList(person);
-			} else {
-				
 			}
 		}
 
@@ -69,8 +67,8 @@ public class SearchBean extends BaseBean {
 			if (CollectionUtils.isEmpty(people)) {
 				people = personService.getPeople(flat);	
 			} else {
-				for (Person person : people) {
-					if(!CollectionUtils.exists(person.getMemberships(), new DomainPredicate(flat))) {
+				for (int i = people.size() - 1; i >= 0; i--) {
+					if(!CollectionUtils.exists(people.get(i).getMemberships(), new DomainPredicate(flat))) {
 						people.remove(person);
 					}
 				}
