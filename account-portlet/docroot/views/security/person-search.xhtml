@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+
+<f:view
+	xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:c="http://java.sun.com/jsp/jstl/core"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:ui="http://java.sun.com/jsf/facelets">
+<ui:composition template="../main-template.xhtml">
+	<ui:define name="app-view">
+
+		<h:form id="search-form">
+			<p:panelGrid columns="7" styleClass="no-border no-background no-margin" style="width: 100%">
+				<p:outputLabel value="Nome: "/>
+				<p:inputText widgetVar="name" value="#{searchBean.personName}" style="width: 120px;"/>
+				<p:outputLabel value="CPF: "/>
+				<p:inputMask widgetVar="identity" value="#{searchBean.identity}" mask="999.999.999-99" style="width: 100px"/>
+				<p:outputLabel value="Apartamento: "/>
+		    	<p:selectOneMenu widgetVar="flat" value="#{searchBean.personFlat}" filter="true" converter="selectItemsConverter" style="vertical-align: top">
+		    		<f:selectItem itemLabel="Selecione" noSelectionOption="true"/>
+					<f:selectItems var="flat" value="#{searchBean.flats}" itemLabel="Apto. #{flat.number} - Bl. #{flat.block}" itemValue="#{flat}"/>
+		    	</p:selectOneMenu>
+				<p:commandButton value="Buscar" actionListener="#{searchBean.onPersonSearch}" update="personTable,:outputMsg" style="float: right; margin: 0px 0px; padding: 2px;"/>
+			</p:panelGrid>
+			<p:spacer height="1px" width="80%" style="background: black; margin: 0 auto; text-align: center"/>
+			<p:panelGrid columns="3" styleClass="no-border no-background no-margin" style="width: 100%">
+				<p:column>
+					<p:commandLink title="Autorizar entrada dos usuários selecionados" oncomplete="PF('grantAccessDialog').show();" style="float: left; margin: 5px 5px;">
+						<h:graphicImage value="../images/ok.png"/>
+					</p:commandLink>
+				</p:column>
+				<p:column>
+					<p:commandLink title="Bloquear entrada dos usuários selecionados" oncomplete="PF('denyAccessDialog').show();" style="float: left; margin: 5px 5px;">
+						<h:graphicImage value="../images/cancel2.png"/>
+					</p:commandLink>
+				</p:column>
+				<p:column>
+					<p:commandLink title="Cadastrar usuário" oncomplete="PF('denyAccessDialog').show();" style="float: right; margin: 5px 5px;">
+						<h:graphicImage value="../images/user_add.png"/>
+					</p:commandLink>
+				</p:column>
+			</p:panelGrid>
+			<p:dataTable widgetVar="personTable" id="personTable" var="person" value="#{searchBean.people}"  
+			             paginator="true" rows="5" paginatorPosition="bottom" emptyMessage="Nenhum usuário encontrado"
+			             paginatorTemplate="{PreviousPageLink} {PageLinks} {NextPageLink}" 
+			             rowKey="#{person.id}" style="margin: 0;" selection="#{searchBean.selectedPeople}">
+				<p:column selectionMode="multiple" style="width: 17px;"/>
+				<p:column style="width: 64px">
+					<p:graphicImage value="#{person.picture.path}" styleClass="foto" height="80" width="52"/>
+				</p:column>
+				<p:column style="vertical-align: top">
+					<p:panelGrid columns="1" styleClass="no-background no-border">
+		       			<h:outputText value="#{person.firstName} #{person.lastName}" style="font-size: 14px; color: black; font-weight: bold;"/>
+		       			<h:outputText value="CPF: #{person.identity}" style="font-size: 12px; color: black; font-weight: normal;"/>
+		       			<h:outputText value="#{searchBean.displayAccessInstructions(person)}" />
+					</p:panelGrid>
+				</p:column>
+				<p:column style="width: 35px">
+					<p:commandLink title="Autorizar entrada deste usuário" update=":access-log-form" oncomplete="PF('grantAccessDialog').show();">
+						<h:graphicImage value="../images/ok.png"/>
+						<f:setPropertyActionListener target="#{searchBean.person}" value="#{person}"/>
+					</p:commandLink>
+				</p:column>
+				<p:column style="width: 35px">
+					<p:commandLink title="Bloquear entrada deste usuário" oncomplete="PF('denyAccessDialog').show();">
+						<h:graphicImage value="../images/cancel2.png"/>
+					</p:commandLink>
+				</p:column>
+			</p:dataTable>
+		</h:form>
+
+		<p:dialog header="Registro de Acesso" widgetVar="grantAccessDialog" draggable="false" resizable="false" modal="true" closable="true" visible="false" style="background: #f9f9f9;">
+			<h:form id="access-log-form">
+				<p:panelGrid columns="2" styleClass="no-border no-background no-margin2" style="width: 100%">
+					<h:outputText value="Tipo:"/>
+			    	<p:selectOneMenu value="#{searchBean.accessType}">
+			    		<f:selectItem itemLabel="Selecione" noSelectionOption="true"/>
+						<f:selectItems var="type" value="#{searchBean.accessTypes}" itemLabel="#{msg[type.label]}" itemValue="#{type}"/>
+						<p:ajax event="change" update="access-log-form" global="false"/>
+			    	</p:selectOneMenu>
+					<p:outputLabel value="Destino: " rendered="#{searchBean.accessType == 'INBOUND'}"/>
+			    	<p:selectOneMenu value="#{searchBean.personFlat}" filter="true" converter="selectItemsConverter" style="vertical-align: top" rendered="#{searchBean.accessType == 'INBOUND'}">
+			    		<f:selectItem itemLabel="Selecione" noSelectionOption="true"/>
+						<f:selectItems var="flat" value="#{searchBean.flats}" itemLabel="Apto. #{flat.number} - Bl. #{flat.block}" itemValue="#{flat}"/>
+			    	</p:selectOneMenu>
+					<h:outputText value="Autorizador:" rendered="#{searchBean.accessType == 'INBOUND' and not searchBean.isAccessAuthorized(searchBean.person)}"/>
+			    	<p:selectOneMenu value="#{searchBean.accessType}" rendered="#{searchBean.accessType == 'INBOUND' and not searchBean.isAccessAuthorized(searchBean.person)}">
+			    		<f:selectItem itemLabel="Selecione" noSelectionOption="true"/>
+						<f:selectItems var="type" value="#{searchBean.accessTypes}" itemLabel="#{msg[type.label]}" itemValue="#{type}"/>
+			    	</p:selectOneMenu>
+					<h:outputText value="Veículo:"/>
+			    	<p:selectOneMenu value="#{searchBean.accessType}">
+			    		<f:selectItem itemLabel="Selecione" noSelectionOption="true"/>
+						<f:selectItems var="type" value="#{searchBean.accessTypes}" itemLabel="#{msg[type.label]}" itemValue="#{type}"/>
+			    	</p:selectOneMenu>
+			    	<h:outputText value="Observações:"/>
+					<p:inputTextarea id="comment"></p:inputTextarea>
+				</p:panelGrid>
+			</h:form>
+		</p:dialog>
+
+
+	</ui:define>
+</ui:composition>
+</f:view>

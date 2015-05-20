@@ -22,6 +22,7 @@ import br.com.abware.jcondo.exception.BusinessException;
 import br.com.abware.jcondo.exception.PersistenceException;
 
 import br.com.atilo.jcondo.commons.collections.MembershipPredicate;
+import br.com.atilo.jcondo.commons.collections.PersonTypeTransformer;
 import br.com.atilo.jcondo.core.persistence.manager.PersonManagerImpl;
 import br.com.atilo.jcondo.core.persistence.manager.SecurityManagerImpl;
 
@@ -41,6 +42,31 @@ public class PersonServiceImpl  {
 		CONDOMINIUM.setRelatedId(10179);
 	}
 
+	public boolean isAccessAuthorized(Person person) throws Exception {
+		if (person == null || person.getMemberships() == null) {
+			return false;
+		}
+		
+		boolean isAccessAuthorized = false;
+
+		for (Membership membership : person.getMemberships()) {
+			PersonType type = membership.getType();
+			if (type == PersonType.RENTER || type == PersonType.RESIDENT || 
+					type == PersonType.DEPENDENT ||	type == PersonType.GUEST || type == PersonType.EMPLOYEE) {
+				isAccessAuthorized = true;
+				break;
+			} else if (type == PersonType.OWNER) {
+				List<Person> renters = personManager.findPeopleByType(membership.getDomain(), PersonType.RENTER);
+				if (renters.isEmpty()) {
+					isAccessAuthorized = true;
+					break;
+				}
+			}
+		}
+
+		return isAccessAuthorized;
+	}
+	
 	public List<PersonType> getTypes(Domain domain) throws Exception {
 		List<PersonType> types = new ArrayList<PersonType>();
 		PersonType[] ts;
@@ -100,10 +126,9 @@ public class PersonServiceImpl  {
 		return people;
 	}
 
-	public Person getPerson(String identity) {
-		return null;
+	public Person getPerson(String identity) throws PersistenceException {
+		return personManager.findPerson(identity);
 	}
-	
 	
 	public Person getPerson() throws Exception {
 		return personManager.findPerson();

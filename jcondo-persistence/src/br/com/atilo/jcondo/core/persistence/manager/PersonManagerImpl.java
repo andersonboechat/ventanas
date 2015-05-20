@@ -214,6 +214,24 @@ public class PersonManagerImpl extends JCondoManager<PersonEntity, Person> {
 		}
 	}
 
+	public Person findPerson(String identity) throws PersistenceException {
+		String key = generateKey();
+		String queryString = "FROM PersonEntity WHERE identity = :identity";
+
+		try {
+			openManager(key);
+			Query query = em.createQuery(queryString);
+			query.setParameter("identity", identity);
+			return getModel((PersonEntity) query.getSingleResult());
+		} catch (NoResultException e) {
+			return null;
+		} catch (Exception e) {
+			throw new PersistenceException(e, "psn.mgr.find.person.fail");
+		} finally {
+			closeManager(key);
+		}
+	}
+
 	public List<Person> findPeople(String name) throws Exception {
 		List<Person> people = new ArrayList<Person>();
 		List<User> users;

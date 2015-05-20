@@ -9,6 +9,7 @@
 	xmlns:ui="http://java.sun.com/jsf/facelets">
 <ui:composition template="../main-template.xhtml">
 	<ui:define name="app-view">
+
 		<h:form id="search-form">
 			<p:panelGrid columns="2" styleClass="no-border no-background">
 			<p:fieldset legend="Usuários" style="margin: 5px; height: 200px;">	
@@ -18,27 +19,66 @@
 					<p:outputLabel value="CPF: "/>
 					<p:inputMask id="identity" value="#{searchBean.identity}" mask="999.999.999-99" style="width: 120px;"/>
 					<p:outputLabel value="Apartamento: "/>
-			    	<p:selectOneMenu value="#{searchBean.flat}" filter="true" converter="selectItemsConverter">
+			    	<p:selectOneMenu value="#{searchBean.personFlat}" filter="true" converter="selectItemsConverter">
 			    		<f:selectItem itemLabel="Selecione" noSelectionOption="true"/>
 						<f:selectItems var="flat" value="#{searchBean.flats}" itemLabel="Apto. #{flat.number} - Bl. #{flat.block}" itemValue="#{flat}"/>
 			    	</p:selectOneMenu>
 				</p:panelGrid>
-				<p:commandButton value="Buscar" actionListener="#{searchBean.onPersonSearch}" style="float: right; margin: 10px 10px; padding: 3px"/>
+				<p:commandButton value="Buscar" actionListener="#{searchBean.onPersonSearch}" update=":person-search-form,:outputMsg" oncomplete="if (!args.validationFailed &amp;&amp; !args.exception) {PF('personDialog').show();}" style="float: right; margin: 10px 10px; padding: 3px"/>
 			</p:fieldset>
 			<p:fieldset legend="Veículos" style=" margin: 5px; height: 200px;">
 				<p:panelGrid columns="2" styleClass="no-border no-background">
 					<p:outputLabel value="Placa: "/>
-					<p:inputMask mask="aaa?-9999" value="#{vehicleViewer.vehicle.license}" style="width: 120px; text-transform: uppercase;"/>
+					<p:inputMask mask="aaa?-9999" value="#{searchBean.license}" style="width: 120px; text-transform: uppercase;"/>
 					<p:outputLabel value="Apartamento: "/>
-			    	<p:selectOneMenu value="#{searchBean.flat}" filter="true" converter="selectItemsConverter">
+			    	<p:selectOneMenu value="#{searchBean.vehicleFlat}" filter="true" converter="selectItemsConverter">
 			    		<f:selectItem itemLabel="Selecione" noSelectionOption="true"/>
 						<f:selectItems var="flat" value="#{searchBean.flats}" itemLabel="Apto. #{flat.number} - Bl. #{flat.block}" itemValue="#{flat}"/>
 			    	</p:selectOneMenu>
 				</p:panelGrid>
-				<p:commandButton value="Buscar" actionListener="#{searchBean.onVehicleSearch}" style="float: right; margin: 10px 10px; padding: 3px"/>
+				<p:commandButton value="Buscar" actionListener="#{searchBean.onVehicleSearch}" update=":outputMsg" oncomplete="if (!args.validationFailed &amp;&amp; !args.exception) {PF('vehicleDialog').show();}" style="float: right; margin: 10px 10px; padding: 3px"/>
 			</p:fieldset>
 			</p:panelGrid>
 		</h:form>
+		
+		<p:dialog header="Busca de Usuários" widgetVar="personDialog" draggable="false" resizable="false" modal="true" closable="true" visible="false" style="background: #f9f9f9; padding: 0" width="600">
+			<h:form id="person-search-form">
+				<p:commandLink title="Autorizar entrada dos usuários selecionados" oncomplete="PF('grantAccessDialog').show();" style="float: left; margin: 5px 5px;">
+					<h:graphicImage value="../images/ok.png"/>
+				</p:commandLink>
+				<p:commandLink title="Bloquear entrada dos usuários selecionados" oncomplete="PF('denyAccessDialog').show();" style="float: left; margin: 5px 5px;">
+					<h:graphicImage value="../images/cancel2.png"/>
+				</p:commandLink>
+				<p:commandButton value="Fechar" type="button" onclick="PF('personDialog').hide();" style="float: right; margin: 5px 0px; padding: 3px;"/>
+				<p:dataTable widgetVar="personTable" id="personTable" var="person" value="#{searchBean.people}"  
+				             paginator="true" rows="5" paginatorPosition="bottom" emptyMessage="Nenhum usuário cadastrado"
+				             paginatorTemplate="{PreviousPageLink} {PageLinks} {NextPageLink}" 
+				             rowKey="#{person.id}" style="margin: 0; float: left;">
+					<p:column selectionMode="multiple" style="width: 17px;"/>
+					<p:column style="width: 64px">
+						<p:graphicImage value="#{person.picture.path}" styleClass="foto" height="80" width="52"/>
+					</p:column>
+					<p:column style="vertical-align: top">
+						<p:panelGrid columns="1" styleClass="no-background no-border">
+			       			<h:outputText value="#{person.firstName} #{person.lastName}" style="font-size: 14px; color: black; font-weight: bold;"/>
+			       			<h:outputText value="CPF: #{person.identity}" style="font-size: 12px; color: black; font-weight: normal;"/>
+			       			<h:outputText value="#{searchBean.displayAccessInstructions(person)}" />
+						</p:panelGrid>
+					</p:column>
+					<p:column style="width: 35px">
+						<p:commandLink title="Autorizar entrada deste usuário" oncomplete="PF('grantAccessDialog').show();">
+							<h:graphicImage value="../images/ok.png"/>
+						</p:commandLink>
+					</p:column>
+					<p:column style="width: 35px">
+						<p:commandLink title="Bloquear entrada deste usuário" oncomplete="PF('denyAccessDialog').show();">
+							<h:graphicImage value="../images/cancel2.png"/>
+						</p:commandLink>
+					</p:column>
+				</p:dataTable>
+			</h:form>
+		</p:dialog>
+			
 	</ui:define>
 </ui:composition>
 </f:view>
