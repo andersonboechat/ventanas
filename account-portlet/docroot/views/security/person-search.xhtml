@@ -11,20 +11,22 @@
 	<ui:define name="app-view">
 
 		<h:form id="search-form">
-			<p:panelGrid columns="7" styleClass="no-border no-background no-margin" style="width: 100%">
-				<p:outputLabel value="Nome: "/>
-				<p:inputText widgetVar="name" value="#{searchBean.personName}" style="width: 120px;"/>
+			<p:panelGrid columns="7" styleClass="no-border no-background no-margin" style="width: 100%; margin: 10px 5px;">
+				<p:outputLabel value="Nome: " style="margin: 10px;"/>
+				<p:inputText widgetVar="name" value="#{searchBean.personName}" style="width: 150px;"/>
 				<p:outputLabel value="CPF: "/>
 				<p:inputMask widgetVar="identity" value="#{searchBean.identity}" mask="999.999.999-99" style="width: 100px"/>
-				<p:outputLabel value="Apartamento: "/>
-		    	<p:selectOneMenu widgetVar="flat" value="#{searchBean.personFlat}" filter="true" converter="selectItemsConverter" style="vertical-align: top">
+				<p:outputLabel value="Apto.: "/>
+		    	<p:selectOneMenu widgetVar="flat" value="#{searchBean.personFlat}" filter="true" filterMatchMode="contains" converter="selectItemsConverter" style="vertical-align: top">
 		    		<f:selectItem itemLabel="Selecione" noSelectionOption="true"/>
 					<f:selectItems var="flat" value="#{searchBean.flats}" itemLabel="Apto. #{flat.number} - Bl. #{flat.block}" itemValue="#{flat}"/>
 		    	</p:selectOneMenu>
-				<p:commandButton value="Buscar" actionListener="#{searchBean.onPersonSearch}" update="personTable,:outputMsg" style="float: right; margin: 0px 0px; padding: 2px;"/>
+				<p:commandLink title="Buscar" actionListener="#{searchBean.onPersonSearch}" update="personTable,:outputMsg" style="float: right; margin: 10px; padding: 2px;">
+					<h:graphicImage value="../images/search.png" width="28" height="28"/>
+				</p:commandLink>
 			</p:panelGrid>
-			<p:spacer height="1px" width="80%" style="background: black; margin: 0 auto; text-align: center"/>
-			<p:panelGrid columns="3" styleClass="no-border no-background no-margin" style="width: 100%">
+			<p:spacer style="background: grey; margin: 0px 60px 10px; padding: 0;" width="80%" height="1px" styleClass="no-border"/>
+			<p:panelGrid columns="3" columnClasses="column20,column20" styleClass="no-border no-background no-margin" style="width: 100%">
 				<p:column>
 					<p:commandLink title="Autorizar entrada dos usuários selecionados" oncomplete="PF('grantAccessDialog').show();" style="float: left; margin: 5px 5px;">
 						<h:graphicImage value="../images/ok.png"/>
