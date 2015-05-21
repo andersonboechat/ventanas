@@ -11,8 +11,27 @@
 	<ui:define name="app-view">
 
 		<h:form id="search-form">
-			<p:panelGrid columns="7" styleClass="no-border no-background no-margin" style="width: 100%; margin: 10px 5px;">
-				<p:outputLabel value="Nome: " style="margin: 10px;"/>
+			<p:panelGrid columns="2" columnClasses="column20,nada" styleClass="no-border no-background no-margin" style="width: 100%">
+				<p:column>
+					<p:commandLink title="Cadastrar usuário" update=":person-registration-form" oncomplete="PF('personRegistrationDialog').show();" style="float: left; margin: 5px 5px;">
+						<h:graphicImage value="../images/user_add.png"/>
+						<f:setPropertyActionListener target="#{searchBean.person}" value=""/>
+					</p:commandLink>
+				</p:column>
+				<p:column>
+					<p:panel id="userCount" style="width: 200px; float: right;" styleClass="users no-margin">
+						<p:commandLink title="Autorizar entrada dos usuários selecionados" oncomplete="PF('grantAccessDialog').show();" style="margin: 0; padding: 0; ">
+							<h:graphicImage value="../images/ok.png" style="vertical-align: middle; margin: 3px 0px"/>
+						</p:commandLink>
+						<h:outputText value="#{searchBean.selectedPeople.length} usuários selecionados" style="vertical-align: middle; margin: 0px 3px"/>
+					</p:panel>
+				</p:column>
+			</p:panelGrid>
+			<p:panelGrid columns="8" styleClass="no-border no-background no-margin" style="width: 100%; margin: 10px 5px;">
+				<p:commandLink title="Selecionar este usuário" update="userCount" actionListener="#{searchBean.onPeopleSelect}" style="margin: 7px">
+					<h:graphicImage value="../images/plus.png" width="28" height="28"/>
+				</p:commandLink>
+				<p:outputLabel value="Nome: " style="margin: 0px;"/>
 				<p:inputText widgetVar="name" value="#{searchBean.personName}" style="width: 150px;"/>
 				<p:outputLabel value="CPF: "/>
 				<p:inputMask widgetVar="identity" value="#{searchBean.identity}" mask="999.999.999-99" style="width: 100px"/>
@@ -24,24 +43,6 @@
 				<p:commandLink title="Buscar" actionListener="#{searchBean.onPersonSearch}" update="personTable,:outputMsg" style="float: right; margin: 10px; padding: 2px;">
 					<h:graphicImage value="../images/search.png" width="28" height="28"/>
 				</p:commandLink>
-			</p:panelGrid>
-			<p:spacer style="background: grey; margin: 0px 60px 10px; padding: 0;" width="80%" height="1px" styleClass="no-border"/>
-			<p:panelGrid columns="3" columnClasses="column20,column20" styleClass="no-border no-background no-margin" style="width: 100%">
-				<p:column>
-					<p:commandLink title="Autorizar entrada dos usuários selecionados" oncomplete="PF('grantAccessDialog').show();" style="float: left; margin: 5px 5px;">
-						<h:graphicImage value="../images/ok.png"/>
-					</p:commandLink>
-				</p:column>
-				<p:column>
-					<p:commandLink title="Bloquear entrada dos usuários selecionados" oncomplete="PF('denyAccessDialog').show();" style="float: left; margin: 5px 5px;">
-						<h:graphicImage value="../images/cancel2.png"/>
-					</p:commandLink>
-				</p:column>
-				<p:column>
-					<p:commandLink title="Cadastrar usuário" oncomplete="PF('denyAccessDialog').show();" style="float: right; margin: 5px 5px;">
-						<h:graphicImage value="../images/user_add.png"/>
-					</p:commandLink>
-				</p:column>
 			</p:panelGrid>
 			<p:dataTable widgetVar="personTable" id="personTable" var="person" value="#{searchBean.people}"  
 			             paginator="true" rows="5" paginatorPosition="bottom" emptyMessage="Nenhum usuário encontrado"
@@ -59,14 +60,20 @@
 					</p:panelGrid>
 				</p:column>
 				<p:column style="width: 35px">
-					<p:commandLink title="Autorizar entrada deste usuário" update=":access-log-form" oncomplete="PF('grantAccessDialog').show();">
+					<p:commandLink title="Alterar este usuário" update=":person-registration-form" oncomplete="PF('personRegistrationDialog').show();">
+						<h:graphicImage value="../images/edit.png"/>
+						<f:setPropertyActionListener target="#{searchBean.person}" value="#{person}"/>
+					</p:commandLink>
+				</p:column>
+				<p:column style="width: 35px">
+					<p:commandLink title="Liberar a entrada deste usuário" update=":access-log-form" oncomplete="PF('grantAccessDialog').show();">
 						<h:graphicImage value="../images/ok.png"/>
 						<f:setPropertyActionListener target="#{searchBean.person}" value="#{person}"/>
 					</p:commandLink>
 				</p:column>
 				<p:column style="width: 35px">
-					<p:commandLink title="Bloquear entrada deste usuário" oncomplete="PF('denyAccessDialog').show();">
-						<h:graphicImage value="../images/cancel2.png"/>
+					<p:commandLink title="Selecionar este usuário" update=":search-form:userCount" actionListener="#{searchBean.onPersonSelect(person)}" partialSubmit="true" process="@this">
+						<h:graphicImage value="../images/plus.png"/>
 					</p:commandLink>
 				</p:column>
 			</p:dataTable>
@@ -81,15 +88,16 @@
 						<f:selectItems var="type" value="#{searchBean.accessTypes}" itemLabel="#{msg[type.label]}" itemValue="#{type}"/>
 						<p:ajax event="change" update="access-log-form" global="false"/>
 			    	</p:selectOneMenu>
-					<p:outputLabel value="Destino: " rendered="#{searchBean.accessType == 'INBOUND'}"/>
-			    	<p:selectOneMenu value="#{searchBean.personFlat}" filter="true" converter="selectItemsConverter" style="vertical-align: top" rendered="#{searchBean.accessType == 'INBOUND'}">
+					<p:outputLabel value="Destino: " disabled="#{empty searchBean.accessType or searchBean.accessType == 'OUTBOUND'}"/>
+			    	<p:selectOneMenu value="#{searchBean.personFlat}" filter="true" converter="selectItemsConverter" style="vertical-align: top" disabled="#{empty searchBean.accessType or searchBean.accessType == 'OUTBOUND'}">
 			    		<f:selectItem itemLabel="Selecione" noSelectionOption="true"/>
 						<f:selectItems var="flat" value="#{searchBean.flats}" itemLabel="Apto. #{flat.number} - Bl. #{flat.block}" itemValue="#{flat}"/>
+						<p:ajax event="change" listener="#{searchBean.onFlatSelect}" update="access-log-form" global="false"/>
 			    	</p:selectOneMenu>
-					<h:outputText value="Autorizador:" rendered="#{searchBean.accessType == 'INBOUND' and not searchBean.isAccessAuthorized(searchBean.person)}"/>
-			    	<p:selectOneMenu value="#{searchBean.accessType}" rendered="#{searchBean.accessType == 'INBOUND' and not searchBean.isAccessAuthorized(searchBean.person)}">
+					<h:outputText value="Autorizador:" disabled="#{searchBean.accessType == 'OUTBOUND' or searchBean.isAccessAuthorized(searchBean.person)}"/>
+			    	<p:selectOneMenu value="#{searchBean.authorizer}" disabled="#{searchBean.accessType == 'OUTBOUND' or searchBean.isAccessAuthorized(searchBean.person)}">
 			    		<f:selectItem itemLabel="Selecione" noSelectionOption="true"/>
-						<f:selectItems var="type" value="#{searchBean.accessTypes}" itemLabel="#{msg[type.label]}" itemValue="#{type}"/>
+						<f:selectItems var="person" value="#{searchBean.authorizers}" itemLabel="#{person.fullName}" itemValue="#{person}"/>
 			    	</p:selectOneMenu>
 					<h:outputText value="Veículo:"/>
 			    	<p:selectOneMenu value="#{searchBean.accessType}">
@@ -102,6 +110,60 @@
 			</h:form>
 		</p:dialog>
 
+		<p:dialog header="Cadastro de Usuário" widgetVar="personRegistrationDialog" draggable="false" resizable="false" modal="true" closable="true" visible="false" style="background: #f9f9f9;">
+			<h:form id="person-registration-form">
+				<p:panelGrid id="person-details" columns="2" columnClasses="no-margin,vehicle-form" styleClass="no-border no-background" style="vertical-align: top;">
+					<p:column>
+						<p:panel widgetVar="portrait2" id="portrait2" styleClass="no-border no-margin" style="">
+							<p:graphicImage value="#{searchBean.person.picture.path}" styleClass="foto" width="#{personPhotoCam.width}" height="#{personPhotoCam.height}"/>
+						</p:panel>
+						<p:commandLink title="Capturar foto" update=":person-camera-form:capturedImage" oncomplete="PF('personCameraDialog').show();" partialSubmit="true" process="@this" style="float: right; margin: 5px 12px; padding:0;" global="false">
+							<h:graphicImage value="../images/take-pic.png" styleClass="no-margin"/>
+							<f:setPropertyActionListener target="#{searchBean.person.picture.path}" value=""/>
+						</p:commandLink>
+					</p:column>
+					<p:column>
+						<p:panelGrid columns="2" styleClass="userPanel" style="width: 100%; margin: 0; padding: 0;">
+							<p:column styleClass="labelClm"><p:outputLabel for="firstName" value="Nome: "/></p:column>
+							<p:column colspan="3" styleClass="fieldClm">
+								<p:inputText id="firstName" value="#{searchBean.person.firstName}" 
+											 required="true" requiredMessage="#{msg['person.firstname.empty']}"/>
+							</p:column>
+							<p:column styleClass="labelClm"><p:outputLabel for="lastName" value="Sobrenome: "/></p:column>
+							<p:column styleClass="fieldClm">
+								<p:inputText id="lastName" value="#{searchBean.person.lastName}"
+											 required="true" requiredMessage="#{msg['person.lastname.empty']}"/>
+							</p:column>
+							<p:column styleClass="labelClm"><p:outputLabel for="identity" value="CPF: "/></p:column>
+							<p:column styleClass="fieldClm">
+								<p:inputMask id="identity" value="#{searchBean.person.identity}" mask="999.999.999-99"/>
+							</p:column>
+						</p:panelGrid>
+						<p:panelGrid columns="1" style="padding: 0; width: 100%" styleClass="no-border">
+							<p:commandButton value="Cadastrar" actionListener="#{personController.onSave}" update=":outputMsg" 
+											 style="float: right; margin: 5px 0px; padding: 3px"/>
+						</p:panelGrid>
+					</p:column>
+				</p:panelGrid>
+			</h:form>
+		</p:dialog>
+
+		<p:dialog id="personCameraDialog" widgetVar="personCameraDialog" resizable="true" draggable="true" modal="true" header="Câmera fotográfica" visible="false" style="background: #f9f9f9">
+			<h:form id="person-camera-form">
+				<p:panelGrid columns="2" styleClass="">
+					<p:photoCam widgetVar="photoCam" listener="#{personRegistrationBean.personCameraBean.onCapture}" update="capturedImage"/>
+					<p:outputPanel id="capturedImage">
+						<p:imageCropper value="#{personRegistrationBean.personCameraBean.croppedImage}" image="#{personRegistrationBean.personCameraBean.image.path}" 
+										initialCoords="0,0,158,240" minSize="158,240" maxSize="158,240"/>
+					</p:outputPanel>
+				</p:panelGrid>
+				<p:commandButton value="Capturar" type="button" onclick="PF('photoCam').capture();"/>
+				<p:commandButton value="Recortar" actionListener="#{personRegistrationBean.personCameraBean.onCropp}" 
+								 update=":person-registration-form:portrait2" global="false" oncomplete="PF('personCameraDialog').hide();">
+					<f:setPropertyActionListener value="#{personRegistrationBean.personCameraBean.image}" target="#{personController.person.picture}"/>
+				</p:commandButton>
+			</h:form>
+		</p:dialog>
 
 	</ui:define>
 </ui:composition>

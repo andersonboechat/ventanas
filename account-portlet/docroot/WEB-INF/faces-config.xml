@@ -14,6 +14,11 @@
 		<converter-id>parkingConverter</converter-id>
 		<converter-class>br.com.abware.accountmgm.util.faces.ParkingConverter</converter-class>
 	</converter>
+	<converter>
+		<display-name>ModelListConverter</display-name>
+		<converter-id>modelListConverter</converter-id>
+		<converter-class>br.com.atilo.jcondo.commons.faces.ModelListConverter</converter-class>
+	</converter>	
 	<lifecycle>
 		<phase-listener>com.liferay.faces.util.lifecycle.DebugPhaseListener</phase-listener>
 	</lifecycle>

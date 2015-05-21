@@ -10,10 +10,12 @@ import javax.faces.bean.ManagedBean;
 import javax.faces.bean.ViewScoped;
 
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.apache.myfaces.commons.util.MessageUtils;
 import org.primefaces.context.RequestContext;
+import org.primefaces.model.DualListModel;
 
 import br.com.abware.accountmgm.util.DomainPredicate;
 import br.com.abware.accountmgm.util.IdentityPredicate;
@@ -27,7 +29,9 @@ import br.com.abware.jcondo.core.model.Vehicle;
 public class SearchBean extends BaseBean {
 
 	private static Logger LOGGER = Logger.getLogger(SearchBean.class);
-	
+
+	private DualListModel<Person> personList;
+
 	private CameraBean cameraBean;
 
 	private Person person;
@@ -48,28 +52,35 @@ public class SearchBean extends BaseBean {
 	
 	private List<Person> people;
 	
-	private List<Person> selectedPeople;
+	private Person[] selectedPeople;
 	
 	private List<AccessType> accessTypes;
 	
 	private AccessType accessType;
 
+	private List<Person> authorizers;
+	
+	private Person authorizer;
+	
 	@PostConstruct
 	public void init() {
 		try {
 			flats = flatService.getFlats();
 			cameraBean = new CameraBean(158, 240);
 			accessTypes = Arrays.asList(AccessType.values());
+			personList = new DualListModel<Person>(new ArrayList<Person>(), new ArrayList<Person>());
+			people = new ArrayList<Person>();
 		} catch (Exception e) {
 			LOGGER.fatal("");
 		}
 	}
 
-	public void onPersonSearch() throws Exception {
-		people = null;
+	public void onPersonSearch2() throws Exception {
+		List<Person> people = personList.getSource(); 
+		people.clear();
 
 		if (!StringUtils.isEmpty(personName)) {
-			people = personService.getPeople(personName);
+			people.addAll(personService.getPeople(personName));
 			
 			if (CollectionUtils.isEmpty(people)) {
 				MessageUtils.addMessage(FacesMessage.SEVERITY_INFO, "person.search.not.found", null);
@@ -87,7 +98,7 @@ public class SearchBean extends BaseBean {
 			}
 
 			if (person != null) {
-				people = new ArrayList<Person>();
+				people.clear();
 				people.add(person);
 			} else {
 				MessageUtils.addMessage(FacesMessage.SEVERITY_INFO, "person.search.not.found", null);
@@ -98,7 +109,57 @@ public class SearchBean extends BaseBean {
 
 		if (personFlat != null) {
 			if (CollectionUtils.isEmpty(people)) {
-				people = personService.getPeople(personFlat);	
+				people.addAll(personService.getPeople(personFlat));	
+			} else {
+				for (int i = people.size() - 1; i >= 0; i--) {
+					if(!CollectionUtils.exists(people.get(i).getMemberships(), new DomainPredicate(personFlat))) {
+						people.remove(i);
+					}
+				}
+			}
+		}
+
+		if (CollectionUtils.isEmpty(people)) {
+			MessageUtils.addMessage(FacesMessage.SEVERITY_INFO, "person.search.not.found", null);
+			RequestContext.getCurrentInstance().addCallbackParam("exception", true);
+		}
+	
+	}
+	
+	public void onPersonSearch() throws Exception {
+		people.clear();
+
+		if (!StringUtils.isEmpty(personName)) {
+			people.addAll(personService.getPeople(personName));
+			
+			if (CollectionUtils.isEmpty(people)) {
+				MessageUtils.addMessage(FacesMessage.SEVERITY_INFO, "person.search.not.found", null);
+				RequestContext.getCurrentInstance().addCallbackParam("exception", true);
+				return;
+			}
+		}
+
+		if (!StringUtils.isEmpty(identity)) {
+			Person person;
+			if (CollectionUtils.isEmpty(people)) {
+				person = personService.getPerson(identity);
+			} else {
+				person = (Person) CollectionUtils.find(people, new IdentityPredicate(identity));
+			}
+
+			if (person != null) {
+				people.clear();
+				people.add(person);
+			} else {
+				MessageUtils.addMessage(FacesMessage.SEVERITY_INFO, "person.search.not.found", null);
+				RequestContext.getCurrentInstance().addCallbackParam("exception", true);
+				return;
+			}
+		}
+
+		if (personFlat != null) {
+			if (CollectionUtils.isEmpty(people)) {
+				people.addAll(personService.getPeople(personFlat));	
 			} else {
 				for (int i = people.size() - 1; i >= 0; i--) {
 					if(!CollectionUtils.exists(people.get(i).getMemberships(), new DomainPredicate(personFlat))) {
@@ -118,6 +179,18 @@ public class SearchBean extends BaseBean {
 		
 	}
 	
+	public void onFlatSelect() throws Exception {
+		authorizers = personService.getPeople(personFlat);
+	}
+
+	public void onPersonSelect(Person person) {
+		ArrayUtils.add(selectedPeople, person);
+	}
+
+	public void onPeopleSelect() {
+		LOGGER.info(selectedPeople);
+	}	
+	
 	public void onVehicleSearch() {
 		
 	}
@@ -134,6 +207,14 @@ public class SearchBean extends BaseBean {
 		return personService.isAccessAuthorized(person);
 	}
 	
+	public DualListModel<Person> getPersonList() {
+		return personList;
+	}
+
+	public void setPersonList(DualListModel<Person> personList) {
+		this.personList = personList;
+	}
+
 	public CameraBean getCameraBean() {
 		return cameraBean;
 	}
@@ -214,11 +295,11 @@ public class SearchBean extends BaseBean {
 		this.people = people;
 	}
 
-	public List<Person> getSelectedPeople() {
+	public Person[] getSelectedPeople() {
 		return selectedPeople;
 	}
 
-	public void setSelectedPeople(List<Person> selectedPeople) {
+	public void setSelectedPeople(Person[] selectedPeople) {
 		this.selectedPeople = selectedPeople;
 	}
 
@@ -236,5 +317,21 @@ public class SearchBean extends BaseBean {
 
 	public void setAccessType(AccessType accessType) {
 		this.accessType = accessType;
+	}
+
+	public List<Person> getAuthorizers() {
+		return authorizers;
+	}
+
+	public void setAuthorizers(List<Person> authorizers) {
+		this.authorizers = authorizers;
+	}
+
+	public Person getAuthorizer() {
+		return authorizer;
+	}
+
+	public void setAuthorizer(Person authorizer) {
+		this.authorizer = authorizer;
 	}
 }
