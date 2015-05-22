@@ -73,7 +73,7 @@ public class VehicleServiceImpl implements BaseService<Vehicle> {
 	public Vehicle getVehicle(String license)  {
 		Vehicle vehicle = null;
 		try {
-			vehicle = vehicleManager.findByLicense(license);
+			vehicle = vehicleManager.findByLicense(license.replaceAll("[^A-Za-z0-9]", ""));
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
