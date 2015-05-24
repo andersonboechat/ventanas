@@ -2,6 +2,7 @@ package br.com.abware.accountmgm.bean;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -9,6 +10,7 @@ import java.util.Set;
 import javax.annotation.PostConstruct;
 import javax.faces.application.FacesMessage;
 import javax.faces.bean.ManagedBean;
+import javax.faces.bean.ManagedProperty;
 import javax.faces.bean.ViewScoped;
 
 import org.apache.commons.collections.CollectionUtils;
@@ -16,19 +18,16 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.apache.myfaces.commons.util.MessageUtils;
 import org.primefaces.context.RequestContext;
-import org.primefaces.event.FlowEvent;
-import org.primefaces.model.DualListModel;
 
 import br.com.abware.accountmgm.util.DomainPredicate;
 import br.com.abware.accountmgm.util.IdentityPredicate;
-import br.com.abware.jcondo.core.model.AccessType;
+import br.com.abware.jcondo.access.model.PassageEvent;
+import br.com.abware.jcondo.access.model.PassageType;
 import br.com.abware.jcondo.core.model.Flat;
-import br.com.abware.jcondo.core.model.Image;
 import br.com.abware.jcondo.core.model.Person;
 import br.com.abware.jcondo.core.model.Vehicle;
-import br.com.abware.jcondo.core.model.VehicleAccessLog;
-import br.com.abware.jcondo.core.model.VehicleType;
-import br.com.atilo.jcondo.commons.BeanUtils;
+import br.com.abware.jcondo.exception.BusinessException;
+import br.com.atilo.jcondo.event.service.PassageEventServiceImpl;
 
 @ManagedBean
 @ViewScoped
@@ -36,23 +35,19 @@ public class SearchBean extends BaseBean {
 
 	private static Logger LOGGER = Logger.getLogger(SearchBean.class);
 
-	private DualListModel<Person> personList;
+	private final PassageEventServiceImpl passageEventService = new PassageEventServiceImpl();
 
-	private CameraBean cameraBean;
+	@ManagedProperty(value="#{vehicleRegistrationBean}")
+	private VehicleRegistrationBean vehicleBean;
 
-	private Person person;
+	@ManagedProperty(value="#{personRegistrationBean}")
+	private PersonRegistrationBean personBean;
 
-	private String personName;
+	private String name;
 
 	private String identity;
 
-	private Vehicle vehicle;
-
-	private String license;
-
-	private Flat personFlat;
-
-	private Flat vehicleFlat;
+	private Flat flat;
 
 	private List<Flat> flats;
 
@@ -62,15 +57,17 @@ public class SearchBean extends BaseBean {
 
 	private Person[] tablePeople;
 
-	private List<AccessType> accessTypes;
+	private List<PassageType> passageTypes;
 
-	private AccessType accessType;
+	private PassageType passageType;
 
 	private List<Person> authorizers;
 
 	private Person authorizer;
+	
+	private Flat destiny;
 
-	private List<VehicleType> vehicleTypes;
+	private String comment;
 	
 	private boolean skipVehicleStep;
 
@@ -78,75 +75,20 @@ public class SearchBean extends BaseBean {
 	public void init() {
 		try {
 			flats = flatService.getFlats();
-			cameraBean = new CameraBean(158, 240);
-			accessTypes = Arrays.asList(AccessType.values());
-			vehicleTypes = Arrays.asList(VehicleType.CAR, VehicleType.MOTO);
-			personList = new DualListModel<Person>(new ArrayList<Person>(), new ArrayList<Person>());
+			passageTypes = Arrays.asList(PassageType.values());
+			passageType = PassageType.INBOUND;
 			foundPeople = new ArrayList<Person>();
 			selectedPeople = new HashSet<Person>();
-			vehicle = new Vehicle();
-			vehicle.setImage(new Image());
 		} catch (Exception e) {
 			LOGGER.fatal("");
 		}
 	}
 
-	public void onPersonSearch2() throws Exception {
-		List<Person> people = personList.getSource(); 
-		people.clear();
-
-		if (!StringUtils.isEmpty(personName)) {
-			people.addAll(personService.getPeople(personName));
-			
-			if (CollectionUtils.isEmpty(people)) {
-				MessageUtils.addMessage(FacesMessage.SEVERITY_INFO, "person.search.not.found", null);
-				RequestContext.getCurrentInstance().addCallbackParam("exception", true);
-				return;
-			}
-		}
-
-		if (!StringUtils.isEmpty(identity)) {
-			Person person;
-			if (CollectionUtils.isEmpty(people)) {
-				person = personService.getPerson(identity);
-			} else {
-				person = (Person) CollectionUtils.find(people, new IdentityPredicate(identity));
-			}
-
-			if (person != null) {
-				people.clear();
-				people.add(person);
-			} else {
-				MessageUtils.addMessage(FacesMessage.SEVERITY_INFO, "person.search.not.found", null);
-				RequestContext.getCurrentInstance().addCallbackParam("exception", true);
-				return;
-			}
-		}
-
-		if (personFlat != null) {
-			if (CollectionUtils.isEmpty(people)) {
-				people.addAll(personService.getPeople(personFlat));	
-			} else {
-				for (int i = people.size() - 1; i >= 0; i--) {
-					if(!CollectionUtils.exists(people.get(i).getMemberships(), new DomainPredicate(personFlat))) {
-						people.remove(i);
-					}
-				}
-			}
-		}
-
-		if (CollectionUtils.isEmpty(people)) {
-			MessageUtils.addMessage(FacesMessage.SEVERITY_INFO, "person.search.not.found", null);
-			RequestContext.getCurrentInstance().addCallbackParam("exception", true);
-		}
-	
-	}
-	
 	public void onPersonSearch() throws Exception {
 		foundPeople.clear();
 
-		if (!StringUtils.isEmpty(personName)) {
-			foundPeople.addAll(personService.getPeople(personName));
+		if (!StringUtils.isEmpty(name)) {
+			foundPeople.addAll(personService.getPeople(name));
 			
 			if (CollectionUtils.isEmpty(foundPeople)) {
 				MessageUtils.addMessage(FacesMessage.SEVERITY_INFO, "person.search.not.found", null);
@@ -173,12 +115,12 @@ public class SearchBean extends BaseBean {
 			}
 		}
 
-		if (personFlat != null) {
+		if (flat != null) {
 			if (CollectionUtils.isEmpty(foundPeople)) {
-				foundPeople.addAll(personService.getPeople(personFlat));	
+				foundPeople.addAll(personService.getPeople(flat));	
 			} else {
 				for (int i = foundPeople.size() - 1; i >= 0; i--) {
-					if(!CollectionUtils.exists(foundPeople.get(i).getMemberships(), new DomainPredicate(personFlat))) {
+					if(!CollectionUtils.exists(foundPeople.get(i).getMemberships(), new DomainPredicate(flat))) {
 						foundPeople.remove(i);
 					}
 				}
@@ -190,13 +132,9 @@ public class SearchBean extends BaseBean {
 			RequestContext.getCurrentInstance().addCallbackParam("exception", true);
 		}
 	}
-
-	public void onPersonSave() {
-		
-	}
 	
 	public void onFlatSelect() throws Exception {
-		authorizers = personService.getPeople(personFlat);
+		authorizers = personService.getPeople(flat);
 	}
 
 	public void onPersonSelect(Person person) {
@@ -212,22 +150,61 @@ public class SearchBean extends BaseBean {
 	}
 
 	public void onLicenseChange() {
-		Vehicle v = vehicleService.getVehicle(vehicle.getLicense());
+		Vehicle v = vehicleService.getVehicle(vehicleBean.getVehicle().getLicense());
 		
 		if (v == null) {
 			MessageUtils.addMessage(FacesMessage.SEVERITY_WARN, "vhc.not.found", null);
 			return;
 		} else {
-			vehicle = v;
+			vehicleBean.setVehicle(v);
 		}
-
 	}
 
-	public void onFlow(FlowEvent event) {
-		if (vehicle == null) {
-			vehicle = new Vehicle();
-			vehicle.setImage(new Image());
+	public void onEventCreate() {
+		try {
+			PassageEvent event;
+			Date now = new Date();
+
+			if (authorizer == null) {
+				for (Person person : selectedPeople) {
+					if (!personService.isAccessAuthorized(person)) {
+						MessageUtils.addMessage(FacesMessage.SEVERITY_ERROR, "authorizer.empty", null);
+					}
+				}
+			}
+
+			for (Person person : selectedPeople) {
+				event = new PassageEvent(now, comment, passageType, 
+										 person, vehicleBean.getVehicle(), 
+										 flat, authorizer);
+				passageEventService.register(event);
+			}
+
+			MessageUtils.addMessage(FacesMessage.SEVERITY_INFO, "passage.event.save.success", null);
+		} catch (BusinessException e) {
+			MessageUtils.addMessage(FacesMessage.SEVERITY_WARN, e.getMessage(), e.getArgs());
+			RequestContext.getCurrentInstance().addCallbackParam("exception", true);
+		} catch (Exception e) {
+			LOGGER.fatal("", e);
+			MessageUtils.addMessage(FacesMessage.SEVERITY_ERROR, "passage.event.save.fail", null);
+			RequestContext.getCurrentInstance().addCallbackParam("exception", true);
 		}
+	}
+	
+	public boolean doAuthorization() {
+		try {
+			if (passageType == PassageType.INBOUND) {
+				for (Person person : selectedPeople) {
+					if (!personService.isAccessAuthorized(person)) {
+						return true;
+					}
+				}
+			}
+		} catch (Exception e) {
+			LOGGER.warn("fail to check if person access is authorized", e);
+		}
+
+		return false;
 	}
 	
 	public String displayAccessInstructions(Person person) throws Exception {
@@ -241,37 +218,29 @@ public class SearchBean extends BaseBean {
 	public boolean isAccessAuthorized(Person person) throws Exception {
 		return personService.isAccessAuthorized(person);
 	}
-	
-	public DualListModel<Person> getPersonList() {
-		return personList;
+
+	public VehicleRegistrationBean getVehicleBean() {
+		return vehicleBean;
 	}
 
-	public void setPersonList(DualListModel<Person> personList) {
-		this.personList = personList;
+	public void setVehicleBean(VehicleRegistrationBean vehicleBean) {
+		this.vehicleBean = vehicleBean;
 	}
 
-	public CameraBean getCameraBean() {
-		return cameraBean;
+	public PersonRegistrationBean getPersonBean() {
+		return personBean;
 	}
 
-	public void setCameraBean(CameraBean cameraBean) {
-		this.cameraBean = cameraBean;
+	public void setPersonBean(PersonRegistrationBean personBean) {
+		this.personBean = personBean;
 	}
 
-	public Person getPerson() {
-		return person;
+	public String getName() {
+		return name;
 	}
 
-	public void setPerson(Person person) {
-		this.person = person;
-	}
-
-	public String getPersonName() {
-		return personName;
-	}
-
-	public void setPersonName(String personName) {
-		this.personName = personName;
+	public void setName(String name) {
+		this.name = name;
 	}
 
 	public String getIdentity() {
@@ -282,36 +251,12 @@ public class SearchBean extends BaseBean {
 		this.identity = identity;
 	}
 
-	public Vehicle getVehicle() {
-		return vehicle;
+	public Flat getFlat() {
+		return flat;
 	}
 
-	public void setVehicle(Vehicle vehicle) {
-		this.vehicle = vehicle;
-	}
-
-	public String getLicense() {
-		return license;
-	}
-
-	public void setLicense(String license) {
-		this.license = license;
-	}
-
-	public Flat getPersonFlat() {
-		return personFlat;
-	}
-
-	public void setPersonFlat(Flat flat) {
-		this.personFlat = flat;
-	}
-
-	public Flat getVehicleFlat() {
-		return vehicleFlat;
-	}
-
-	public void setVehicleFlat(Flat vehicleFlat) {
-		this.vehicleFlat = vehicleFlat;
+	public void setFlat(Flat flat) {
+		this.flat = flat;
 	}
 
 	public List<Flat> getFlats() {
@@ -326,8 +271,8 @@ public class SearchBean extends BaseBean {
 		return foundPeople;
 	}
 
-	public void setFoundPeople(List<Person> people) {
-		this.foundPeople = people;
+	public void setFoundPeople(List<Person> foundPeople) {
+		this.foundPeople = foundPeople;
 	}
 
 	public Set<Person> getSelectedPeople() {
@@ -342,24 +287,24 @@ public class SearchBean extends BaseBean {
 		return tablePeople;
 	}
 
-	public void setTablePeople(Person[] selectedPeople) {
-		this.tablePeople = selectedPeople;
+	public void setTablePeople(Person[] tablePeople) {
+		this.tablePeople = tablePeople;
 	}
 
-	public List<AccessType> getAccessTypes() {
-		return accessTypes;
+	public List<PassageType> getPassageTypes() {
+		return passageTypes;
 	}
 
-	public void setAccessTypes(List<AccessType> accessTypes) {
-		this.accessTypes = accessTypes;
+	public void setPassageTypes(List<PassageType> passageTypes) {
+		this.passageTypes = passageTypes;
 	}
 
-	public AccessType getAccessType() {
-		return accessType;
+	public PassageType getPassageType() {
+		return passageType;
 	}
 
-	public void setAccessType(AccessType accessType) {
-		this.accessType = accessType;
+	public void setPassageType(PassageType passageType) {
+		this.passageType = passageType;
 	}
 
 	public List<Person> getAuthorizers() {
@@ -378,12 +323,20 @@ public class SearchBean extends BaseBean {
 		this.authorizer = authorizer;
 	}
 
-	public List<VehicleType> getVehicleTypes() {
-		return vehicleTypes;
+	public Flat getDestiny() {
+		return destiny;
 	}
 
-	public void setVehicleTypes(List<VehicleType> vehicleTypes) {
-		this.vehicleTypes = vehicleTypes;
+	public void setDestiny(Flat destiny) {
+		this.destiny = destiny;
+	}
+
+	public String getComment() {
+		return comment;
+	}
+
+	public void setComment(String comment) {
+		this.comment = comment;
 	}
 
 	public boolean isSkipVehicleStep() {
@@ -393,4 +346,6 @@ public class SearchBean extends BaseBean {
 	public void setSkipVehicleStep(boolean skipVehicleStep) {
 		this.skipVehicleStep = skipVehicleStep;
 	}
+
+
 }

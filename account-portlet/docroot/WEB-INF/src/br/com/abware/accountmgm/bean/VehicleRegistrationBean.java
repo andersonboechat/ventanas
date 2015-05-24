@@ -1,5 +1,6 @@
 package br.com.abware.accountmgm.bean;
 
+import java.util.Arrays;
 import java.util.List;
 
 import javax.annotation.PostConstruct;
@@ -33,7 +34,7 @@ public class VehicleRegistrationBean extends BaseBean {
 	@PostConstruct
 	public void init() {
 		try {
-			types = vehicleService.getTypes(null);
+			types = Arrays.asList(VehicleType.CAR, VehicleType.MOTO);
 			vehicle = createVehicle();
 			cameraBean = new CameraBean(320, 240);
 			cameraBean.setImage(vehicle.getImage());
@@ -45,10 +46,14 @@ public class VehicleRegistrationBean extends BaseBean {
 
 	public void onSave() {
 		try {
-			vehicleService.register(vehicle);
-			vehicle = createVehicle();
-			cameraBean.setImage(vehicle.getImage());
-			MessageUtils.addMessage(FacesMessage.SEVERITY_INFO, "vehicle.create.success", null);
+			if (vehicle.getId() == 0) {
+				vehicleService.register(vehicle);
+				MessageUtils.addMessage(FacesMessage.SEVERITY_INFO, "vehicle.create.success", null);
+			} else {
+				vehicleService.update(vehicle);
+				MessageUtils.addMessage(FacesMessage.SEVERITY_INFO, "vehicle.update.success", null);
+			}
+
 		} catch (ModelExistException e) {
 			MessageUtils.addMessage(FacesMessage.SEVERITY_WARN, e.getMessage(), e.getArgs(), "tabs:vehicle-details-form:alertMsg");
 			RequestContext.getCurrentInstance().addCallbackParam("alert", true);

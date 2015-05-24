@@ -25,7 +25,7 @@ public class PersonEntity extends BaseEntity {
 
     private String identity;
 
-    @OneToMany(cascade=CascadeType.ALL, fetch=FetchType.EAGER, mappedBy="person", orphanRemoval=true)
+    @OneToMany(cascade=CascadeType.ALL, mappedBy="person", orphanRemoval=true)
     private List<MembershipEntity> memberships;
 
     public PersonEntity() {

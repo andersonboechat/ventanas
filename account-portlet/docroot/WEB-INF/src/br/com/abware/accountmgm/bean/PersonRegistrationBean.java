@@ -23,7 +23,7 @@ public class PersonRegistrationBean extends BaseBean {
 
 	private static Logger LOGGER = Logger.getLogger(PersonRegistrationBean.class);
 
-	private CameraBean personCameraBean;
+	private CameraBean cameraBean;
 
 	private Person person;
 
@@ -32,8 +32,7 @@ public class PersonRegistrationBean extends BaseBean {
 	@PostConstruct
 	public void init() {
 		try {
-			personCameraBean = new CameraBean(158, 240);
-			createPerson();
+			cameraBean = new CameraBean(158, 240);
 			genders = Arrays.asList(Gender.values());
 		} catch (Exception e) {
 			LOGGER.fatal("Failure on person initialization", e);
@@ -44,9 +43,14 @@ public class PersonRegistrationBean extends BaseBean {
 
 	public void onSave() {
 		try {
-			personService.register(person);
-			createPerson();
-			MessageUtils.addMessage(FacesMessage.SEVERITY_INFO, "flats.user.add.success", null);
+			if (person.getId() == 0) {
+				personService.register(person);	
+				MessageUtils.addMessage(FacesMessage.SEVERITY_INFO, "flats.user.add.success", null);
+			} else {
+				personService.register(person);	
+				MessageUtils.addMessage(FacesMessage.SEVERITY_INFO, "flats.user.update.success", null);
+			}
+			
 		} catch (BusinessException e) {
 			LOGGER.warn("Business failure on person saving: " + e.getMessage());
 			MessageUtils.addMessage(FacesMessage.SEVERITY_WARN, e.getMessage(), e.getArgs());
@@ -61,15 +65,15 @@ public class PersonRegistrationBean extends BaseBean {
 	public void createPerson() throws Exception {
 		person = new Person();
 		person.setPicture(new Image());
-		personCameraBean.setImage(person.getPicture());
+		cameraBean.setImage(person.getPicture());
 	}
 
-	public CameraBean getPersonCameraBean() {
-		return personCameraBean;
+	public CameraBean getCameraBean() {
+		return cameraBean;
 	}
 
-	public void setPersonCameraBean(CameraBean personCameraBean) {
-		this.personCameraBean = personCameraBean;
+	public void setCameraBean(CameraBean cameraBean) {
+		this.cameraBean = cameraBean;
 	}
 
 	public Person getPerson() {
