@@ -47,10 +47,10 @@ public class VehicleRegistrationBean extends BaseBean {
 	public void onSave() {
 		try {
 			if (vehicle.getId() == 0) {
-				vehicleService.register(vehicle);
+				vehicle = vehicleService.register(vehicle);
 				MessageUtils.addMessage(FacesMessage.SEVERITY_INFO, "vehicle.create.success", null);
 			} else {
-				vehicleService.update(vehicle);
+				vehicle = vehicleService.update(vehicle);
 				MessageUtils.addMessage(FacesMessage.SEVERITY_INFO, "vehicle.update.success", null);
 			}
 
@@ -69,7 +69,6 @@ public class VehicleRegistrationBean extends BaseBean {
 	
 	public Vehicle createVehicle() {
 		Vehicle vehicle = new Vehicle();
-		vehicle.setDomain(new Flat());
 		vehicle.setImage(new Image());
 		return vehicle;
 	}

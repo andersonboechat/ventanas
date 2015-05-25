@@ -153,6 +153,9 @@ public class SearchBean extends BaseBean {
 		Vehicle v = vehicleService.getVehicle(vehicleBean.getVehicle().getLicense());
 		
 		if (v == null) {
+			String license = vehicleBean.getVehicle().getLicense();
+			vehicleBean.setVehicle(vehicleBean.createVehicle());
+			vehicleBean.getVehicle().setLicense(license);
 			MessageUtils.addMessage(FacesMessage.SEVERITY_WARN, "vhc.not.found", null);
 			return;
 		} else {

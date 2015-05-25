@@ -131,15 +131,19 @@ public class VehicleServiceImpl implements BaseService<Vehicle> {
 			throw new BusinessException("vhc.license.empty");
 		}
 
-		if(vehicle.getType() != VehicleType.BIKE && !vehicle.getLicense().matches(LICENSE_PATTERN)) {
+		String license = vehicle.getLicense().replaceAll("[^A-Za-z0-9]", "");
+		
+		if(vehicle.getType() != VehicleType.BIKE && !license.matches(LICENSE_PATTERN)) {
 			throw new BusinessException("vhc.license.invalid", vehicle.getLicense());
 		}
 
-		Vehicle v = vehicleManager.findByLicense(vehicle.getLicense());
+		Vehicle v = vehicleManager.findByLicense(license);
 
 		if (v != null) {
 			throw new ModelExistException(null, "vhc.exists", vehicle.getLicense());
 		}
+
+		vehicle.setLicense(license);
 
 		if (vehicle.getDomain() != null) {
 			if (!(vehicle.getDomain() instanceof Flat)) {
@@ -148,23 +152,23 @@ public class VehicleServiceImpl implements BaseService<Vehicle> {
 			if (flatService.getFlat(vehicle.getDomain().getId()) == null) {
 				throw new BusinessException("vhc.domain.unknown", vehicle.getDomain().getId());
 			}
-		}
 
-		// Verifica se tem vaga para o apartamento especificado
-		// Visitantes podem acessar o condominio apenas para deixar/buscar passageiros
-		// Motos e Bicicletas são veículos extras
-		if(vehicle.getType() == VehicleType.CAR) {
-			List<Parking> parkings = parkingService.getFreeParkings(vehicle.getDomain());
-
-			if (CollectionUtils.isEmpty(parkings)) {
-				throw new BusinessException("vhc.parking.unavailable");
+			// Verifica se tem vaga para o apartamento especificado
+			// Visitantes podem acessar o condominio apenas para deixar/buscar passageiros
+			// Motos e Bicicletas são veículos extras
+			if(vehicle.getType() == VehicleType.CAR) {
+				List<Parking> parkings = parkingService.getFreeParkings(vehicle.getDomain());
+	
+				if (CollectionUtils.isEmpty(parkings)) {
+					throw new BusinessException("vhc.parking.unavailable");
+				}
+	
+				v = vehicleManager.save(vehicle);
+	
+				Parking parking = parkings.get(0);
+				parking.setVehicle(v);
+				parkingService.update(parking);
 			}
-
-			v = vehicleManager.save(vehicle);
-
-			Parking parking = parkings.get(0);
-			parking.setVehicle(v);
-			parkingService.update(parking);
 		} else {
 			v = vehicleManager.save(vehicle);
 		}
@@ -177,7 +181,7 @@ public class VehicleServiceImpl implements BaseService<Vehicle> {
 			throw new BusinessException("vhc.update.denied");
 		}
 
-		if(vehicle.getType() != VehicleType.BIKE && !vehicle.getLicense().matches(LICENSE_PATTERN)) {
+		if(vehicle.getType() != VehicleType.BIKE && !vehicle.getLicense().replaceAll("[^A-Za-z0-9]", "").matches(LICENSE_PATTERN)) {
 			throw new BusinessException("vhc.license.invalid");
 		}
 

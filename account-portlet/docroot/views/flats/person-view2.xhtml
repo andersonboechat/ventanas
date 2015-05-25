@@ -74,9 +74,9 @@
 								<h:graphicImage value="../images/send-pic.png"/>
 								<f:setPropertyActionListener target="#{imageUploader.image.path}" value=""/>
 							</p:commandLink>
-							<p:commandLink title="#{msg['take.picture']}" oncomplete="PF('photoCameraDialog').show();" partialSubmit="true" global="false" process="@this" styleClass="column" rendered="false">
+							<p:commandLink title="#{msg['take.picture']}" update=":tabs:person-camera-form" oncomplete="PF('personCameraDialog').show();" partialSubmit="true" global="false" process="@this" styleClass="column">
 								<h:graphicImage value="../images/take-pic.png" width="38" height="31"/>
-								<f:setPropertyActionListener target="#{imageUploader.image.path}" value=""/>
+								<f:setPropertyActionListener target="#{personCamera.image.path}" value=""/>
 							</p:commandLink>
 						</p:panelGrid>
 					</p:column>
@@ -158,7 +158,7 @@
 		</h:form>
 	</p:dialog>
 
-	<p:dialog id="personPictureDialog" widgetVar="personPictureDialog" resizable="false" draggable="false" modal="true" header="Upload de Imagem">
+	<p:dialog id="personPictureDialog" widgetVar="personPictureDialog" header="Envio de foto" resizable="false" draggable="false" modal="true" dynamic="true">
 		<h:form id="person-picture-form" enctype="multipart/form-data">
 			<p:fileUpload id="image" label="Selecionar Foto" fileUploadListener="#{imageUploader.onImageUpload}" auto="true" update="person-picture-form" rendered="#{empty imageUploader.image.path}"/>
 			<p:panel rendered="#{!(empty imageUploader.image.path)}" style="border: 0px !important;">
@@ -175,14 +175,26 @@
 		</h:form>
 	</p:dialog>
 	
-	<p:dialog id="photoCameraDialog" widgetVar="photoCameraDialog" resizable="false" draggable="false" modal="true" header="Retrato" visible="false">
+	<p:dialog id="personCameraDialog" widgetVar="personCameraDialog" header="Captura de Imagem" resizable="true" 
+			  draggable="false" modal="true" closeOnEscape="true" visible="false" dynamic="true" style="background: #f9f9f9">
 		<h:form id="person-camera-form">
-			<p:imageCropper widgetVar="capturedImage" id="capturedImage" value="#{photoCamera.croppedImage}" image="#{photoCamera.image.path}" initialCoords="0,0,198,300" minSize="198,300" maxSize="198,300" rendered="#{not empty photoCamera.image.path}"/>
-			<p:commandButton value="Capturar" type="button" onclick="PF('janela').show();"/>
-			<p:commandButton value="Recortar" actionListener="#{photoCamera.onCropp}" update="@widgetVar(portrait)" global="false" oncomplete="PF('photoCameraDialog').hide();">
-				<f:setPropertyActionListener value="#{photoCamera.image}" target="#{personViewer.person.picture}"></f:setPropertyActionListener>
+			<p:panelGrid columns="2" styleClass="no-border2 no-background2">
+				<p:photoCam widgetVar="photoCam1" listener="#{personCamera.onCapture}" update="croppedPhoto" styleClass="foto"/>
+				<p:outputPanel id="croppedPhoto" style="width: 320px; height: 240px" styleClass="foto">
+					<p:imageCropper value="#{personCamera.croppedImage}" image="#{personCamera.image.path}" 
+									initialCoords="0,0,#{personCamera.width},#{personCamera.height}" 
+									minSize="#{personCamera.width},#{personCamera.height}" 
+									maxSize="#{personCamera.width},#{personCamera.height}"/>
+				</p:outputPanel>
+			</p:panelGrid>
+			<p:commandButton value="Recortar" actionListener="#{personCamera.onCropp}" 
+							 update=":tabs:person-details-form:portrait" global="false" oncomplete="PF('personCameraDialog').hide();"
+							 style="float: right; padding: 2px; margin: 15px 5px;">
+				<f:setPropertyActionListener value="#{personCamera.image}" target="#{personViewer.person.picture}"/>
 			</p:commandButton>
+			<p:commandButton value="Capturar" type="button" onclick="PF('photoCam1').capture();" style="float: right; padding: 2px; margin: 15px 5px;"/>
 		</h:form>
 	</p:dialog>
+
 
 </f:view>

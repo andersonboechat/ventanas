@@ -12,18 +12,18 @@
 		<c:set var="vehicleHandler" value="#{searchBean.vehicleBean}"/>
 		<c:set var="vehicleCamera" value="#{vehicleHandler.cameraBean}"/>		
 		<c:set var="personHandler" value="#{searchBean.personBean}"/>
-		<c:set var="personCamera" value="#{personHandler.cameraBean}"/>		
+		<c:set var="personCamera" value="#{personHandler.cameraBean}"/>
 
 		<h:form id="search-form">
 			<p:panelGrid columns="2" columnClasses="column20,nada" styleClass="no-border no-background no-margin" style="width: 100%">
 				<p:column>
 					<p:commandLink title="Cadastrar usuário" update=":person-registration-form" 
-								   actionListener="#{personHandler.createPerson}" oncomplete="PF('personRegistrationDialog').show();" style="float: left; margin: 5px 5px;">
+								   actionListener="#{personHandler.createPerson}" oncomplete="PF('personRegistrationDialog').show();" style="float: left; margin: 10px;">
 						<h:graphicImage value="../images/user_add.png"/>
 					</p:commandLink>
 				</p:column>
 				<p:column>
-					<p:panel id="userCount" style="width: 220px; float: right;" styleClass="users no-margin">
+					<p:panel id="userCount" style="float: right; margin: 10px;" styleClass="users no-margin2">
 						<p:commandLink title="Autorizar entrada dos usuários selecionados" update=":access-log-form" 
 									   oncomplete="PF('grantAccessDialog').show();" style="margin: 0; padding: 0;"
 									   disabled="#{searchBean.selectedPeople.size() == 0}">
@@ -33,20 +33,17 @@
 					</p:panel>
 				</p:column>
 			</p:panelGrid>
-			<p:panelGrid columns="8" styleClass="no-border no-background no-margin" style="width: 100%; margin: 10px 5px;">
-				<p:commandLink title="Selecionar este usuário" update="userCount" actionListener="#{searchBean.onPeopleSelect}" style="margin: 7px">
+			<p:panelGrid columns="5" styleClass="no-border no-background no-margin" style="width: 100%; margin: 10px 5px;">
+				<p:commandLink title="Selecionar os usuários marcados abaixo" update="userCount" actionListener="#{searchBean.onPeopleSelect}" style="margin: 7px">
 					<h:graphicImage value="../images/plus.png" width="28" height="28"/>
 				</p:commandLink>
-				<p:outputLabel value="Nome: " style="margin: 0px;"/>
-				<p:inputText widgetVar="name" value="#{searchBean.name}" style="width: 150px;"/>
-				<p:outputLabel value="CPF: "/>
-				<p:inputMask widgetVar="identity" value="#{searchBean.identity}" mask="999.999.999-99" style="width: 100px"/>
-				<p:outputLabel value="Apto.: "/>
-		    	<p:selectOneMenu widgetVar="flat" value="#{searchBean.flat}" filter="true" filterMatchMode="contains" converter="selectItemsConverter" style="vertical-align: top">
-		    		<f:selectItem itemLabel="Selecione" noSelectionOption="true"/>
-					<f:selectItems var="flat" value="#{searchBean.flats}" itemLabel="Apto. #{flat.number} - Bl. #{flat.block}" itemValue="#{flat}"/>
+				<p:inputText widgetVar="name" value="#{searchBean.name}" placeholder="-- Nome --" style="width: 195px; font-style: italic;"/>
+				<p:inputMask widgetVar="identity" value="#{searchBean.identity}" mask="999.999.999-99" placeholder="-- CPF --" style="width: 100px; font-style: italic;"/>
+		    	<p:selectOneMenu widgetVar="flat" value="#{searchBean.flat}" filter="true" filterMatchMode="contains" converter="selectItemsConverter" style="line-height: 21px; vertical-align: top;font-style: italic;">
+		    		<f:selectItem itemLabel="-- Apartamento --" noSelectionOption="true"/>
+					<f:selectItems var="flat" value="#{searchBean.flats}" itemLabel="Apartamento #{flat.number} - Bloco #{flat.block}" itemValue="#{flat}"/>
 		    	</p:selectOneMenu>
-				<p:commandLink title="Buscar" actionListener="#{searchBean.onPersonSearch}" update="personTable,:outputMsg" style="float: right; margin: 10px; padding: 2px;">
+				<p:commandLink title="Buscar" actionListener="#{searchBean.onPersonSearch}" update="personTable,:outputMsg" style="float: right; margin: 0px 10px 0px 0px; padding: 2px;">
 					<h:graphicImage value="../images/search.png" width="28" height="28"/>
 				</p:commandLink>
 			</p:panelGrid>
@@ -145,7 +142,7 @@
 							</p:column>
 						</p:dataTable>
 					</p:panelGrid>
-					<p:commandButton value="Avançar" onclick="PF('wiz').next();" style="float: right; padding: 2px; width: 85px; margin-right: 8px;"/>
+					<p:commandButton value="Avançar" onclick="PF('wiz').next();" disabled="#{empty searchBean.selectedPeople}" style="float: right; padding: 2px; width: 85px; margin-right: 8px;"/>
 				</p:tab>
 				<p:tab id="vehicle">
 					<p:panelGrid columns="1" style="width: 600px; height: 405px; margin: 0" styleClass="no-border no-background">
@@ -166,7 +163,7 @@
 							    	<p:inputMask widgetVar="license" id="license" mask="aaa?-9999" value="#{vehicleHandler.vehicle.license}" 
 							    				style="width: 100px; text-transform: uppercase; float: right;" disabled="#{searchBean.skipVehicleStep}" 
 							    				required="true" requiredMessage="Informe a placa do veículo">
-							    		<p:ajax event="change" listener="#{searchBean.onLicenseChange}" update="vehicle-details,:outputMsg"/>
+							    		<p:ajax event="change" listener="#{searchBean.onLicenseChange}" update="vehicle-details,end,:outputMsg"/>
 							    	</p:inputMask>
 									<p:outputLabel for="vehicleType" value="Tipo:"/>
 									<p:selectOneMenu id="vehicleType" value="#{vehicleHandler.vehicle.type}" style="width: 115px; float: right;"
@@ -178,7 +175,7 @@
 								<p:panelGrid columns="1" style="padding: 0; width: 100%" styleClass="no-border">
 									<p:outputLabel value="Descrição:"/>
 									<p:inputTextarea disabled="#{searchBean.skipVehicleStep}" style="padding: 5px;" cols="25" rows="9" autoResize="false"></p:inputTextarea>
-									<p:commandButton value="Salvar" actionListener="#{vehicleHandler.onSave}" update=":outputMsg" disabled="#{searchBean.skipVehicleStep}" style="float: right; margin: 5px 0px; padding: 3px;"/>
+									<p:commandButton value="Salvar" actionListener="#{vehicleHandler.onSave}" update="vehicle-details,end,:outputMsg" disabled="#{searchBean.skipVehicleStep}" style="float: right; margin: 5px 0px; padding: 3px;"/>
 								</p:panelGrid>
 							</p:column>
 						</p:panelGrid>
@@ -200,7 +197,7 @@
 				<p:panelGrid id="person-details" columns="2" columnClasses="no-margin,vehicle-form" styleClass="no-border no-background" style="vertical-align: top;">
 					<p:column>
 						<p:panel widgetVar="portrait" id="portrait" styleClass="no-border no-margin" style="">
-							<p:graphicImage value="#{personHandler.person.picture.path}" styleClass="foto" width="#{personCamera.width}" height="#{personCamera.height}"/>
+							<p:graphicImage value="#{personHandler.person.picture.path}" styleClass="foto user-image" width="#{personCamera.width}" height="#{personCamera.height}"/>
 						</p:panel>
 						<p:commandLink title="Capturar foto" update=":person-camera-form:capturedImage" oncomplete="PF('personCameraDialog').show();" partialSubmit="true" process="@this" style="float: right; margin: 5px 12px; padding:0;" global="false">
 							<h:graphicImage value="../images/take-pic.png" styleClass="no-margin"/>

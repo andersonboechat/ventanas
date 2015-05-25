@@ -2,7 +2,6 @@ package br.com.abware.accountmgm.bean;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashSet;
 import java.util.List;
 
 import javax.annotation.PostConstruct;
@@ -22,7 +21,6 @@ import br.com.abware.jcondo.core.PersonDetail;
 import br.com.abware.jcondo.core.PersonType;
 import br.com.abware.jcondo.core.model.KinType;
 import br.com.abware.jcondo.core.model.Kinship;
-import br.com.abware.jcondo.core.model.Membership;
 import br.com.abware.jcondo.core.model.Person;
 import br.com.abware.jcondo.core.model.Phone;
 import br.com.abware.jcondo.core.model.PhoneType;
@@ -98,8 +96,8 @@ public class ProfileBean extends BaseBean {
 				people.remove(person);
 			}
 			
-			imageUploadBean = new ImageUploadBean(198, 300);
-			cameraBean = new CameraBean(198, 300);
+			imageUploadBean = new ImageUploadBean(158, 240);
+			cameraBean = new CameraBean(158, 240);
 			genders = Arrays.asList(Gender.values());
 		} catch (Exception e) {
 			LOGGER.error("", e);

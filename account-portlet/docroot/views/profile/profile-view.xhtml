@@ -19,18 +19,19 @@
 				<p:row>
 					<p:column styleClass="my-account-col1">
 						<p:panelGrid columns="1" styleClass="no-margin">
-							<p:graphicImage id="portrait" value="#{profileBean.person.picture.path}" styleClass="foto"/>
-				        </p:panelGrid>
+							<p:graphicImage id="portrait" value="#{profileBean.person.picture.path}" styleClass="foto" width="#{profileCamera.width}" height="#{profileCamera.height}"/>
 						<p:panelGrid columns="2" columnClasses="picture" styleClass="pic-cmds" style="text-align: center; float: right">
 							<p:commandLink title="#{msg['send.picture']}" update=":profile-picture-form" oncomplete="PF('profilePictureDialog').show();" partialSubmit="true" process="@this" global="false" styleClass="column">
 								<h:graphicImage value="../images/send-pic.png"/>
 								<f:setPropertyActionListener target="#{profileBean.person.picture.path}" value=""/>
 							</p:commandLink>
-							<p:commandLink title="#{msg['take.picture']}" update=":profile-picture-form" oncomplete="PF('profileCameraDialog').show();" partialSubmit="true" global="false" process="@this" styleClass="column" rendered="false">
+							<p:commandLink title="#{msg['take.picture']}" update=":profile-camera-form" oncomplete="PF('profileCameraDialog').show();" partialSubmit="true" global="false" process="@this" styleClass="column">
 								<h:graphicImage value="../images/take-pic.png" width="38" height="31"/>
-								<f:setPropertyActionListener target="#{profileBean.person.picture.path}" value=""/>
+								<f:setPropertyActionListener target="#{profileCamera.image.path}" value=""/>
 							</p:commandLink>
 						</p:panelGrid>
+				        </p:panelGrid>
+
 					</p:column>
 					<p:column styleClass="my-account-col2">
 						<p:panelGrid columns="4" styleClass="userPanel" style="width: 100%; margin: 0; padding: 0;">
@@ -188,21 +189,23 @@
 			</p:panelGrid>
 		</h:form>
 		<h:form>
-		<p:panel widgetVar="pwd-panel" header="Alteração de Senha" styleClass="pwd-panel" style="float: right; padding: 0px !important">
-			<p:panelGrid columns="2">
-				<p:outputLabel for="pwd" value="Senha atual"/>
-				<p:password id="pwd" value="#{profileBean.password}" maxlength="8" required="true" requiredMessage="Informe a senha atual"/>
-				<p:outputLabel for="newPwd" value="Nova senha"/>
-				<p:password id="newPwd" value="#{profileBean.newPassword}" maxlength="8" match="confirmPwd" required="true" 
-							requiredMessage="Informe a nova senha" validatorMessage="A confirmação da nova senha não confere"/>
-				<p:outputLabel for="confirmPwd" value="Confirmar senha" style=" white-space: nowrap;"/>
-				<p:password id="confirmPwd" value="#{profileBean.newPassword}" maxlength="8" required="true" 
-							requiredMessage="Confirme a nova senha" validatorMessage="A confirmação da nova senha não confere"/>
-			</p:panelGrid>
-			<p:commandButton value="Alterar senha" actionListener="#{profileBean.onPasswordChange}" global="false" style="float: right; margin: 10px"/>
-		</p:panel>
-	</h:form>
-		<p:dialog id="profilePictureDialog" widgetVar="profilePictureDialog" modal="true" header="Retrato">
+			<p:panel widgetVar="pwd-panel" header="Alteração de Senha" styleClass="pwd-panel" style="float: right; padding: 0px !important">
+				<p:panelGrid columns="2">
+					<p:outputLabel for="pwd" value="Senha atual"/>
+					<p:password id="pwd" value="#{profileBean.password}" maxlength="8" required="true" requiredMessage="Informe a senha atual"/>
+					<p:outputLabel for="newPwd" value="Nova senha"/>
+					<p:password id="newPwd" value="#{profileBean.newPassword}" maxlength="8" match="confirmPwd" required="true" 
+								requiredMessage="Informe a nova senha" validatorMessage="A confirmação da nova senha não confere"/>
+					<p:outputLabel for="confirmPwd" value="Confirmar senha" style=" white-space: nowrap;"/>
+					<p:password id="confirmPwd" value="#{profileBean.newPassword}" maxlength="8" required="true" 
+								requiredMessage="Confirme a nova senha" validatorMessage="A confirmação da nova senha não confere"/>
+				</p:panelGrid>
+				<p:commandButton value="Alterar senha" actionListener="#{profileBean.onPasswordChange}" global="false" style="float: right; margin: 10px"/>
+			</p:panel>
+		</h:form>
+
+		<p:dialog id="profilePictureDialog" widgetVar="profilePictureDialog" header="Envio de Imagem" resizable="false" 
+				  draggable="false" modal="true" visible="false" dynamic="true" style="background: #f9f9f9">
 			<h:form id="profile-picture-form" enctype="multipart/form-data">
 				<p:fileUpload id="image" label="Selecionar Foto" fileUploadListener="#{profilePictureUploader.onImageUpload}" auto="true" update="profile-picture-form" rendered="#{empty profilePictureUploader.image.path}"/>
 				<p:panel rendered="#{!(empty profilePictureUploader.image.path)}" style="border: 0px !important;">
@@ -218,24 +221,25 @@
 				</p:panel>
 			</h:form>
 		</p:dialog>
-	
-		<p:dialog id="profileCameraDialog" widgetVar="profileCameraDialog" resizable="false" draggable="false" modal="true" header="Retrato" visible="false">
+
+		<p:dialog id="profileCameraDialog" widgetVar="profileCameraDialog" header="Captura de Imagem" resizable="false" 
+				  draggable="false" modal="true" closeOnEscape="true" visible="false" dynamic="true" style="background: #f9f9f9">
 			<h:form id="profile-camera-form">
-				<p:photoCam id="pc" widgetVar="pc" listener="#{profileBean.cameraBean.onCapture}" rendered="#{empty profileBean.cameraBean.image.path}"/>
-				<p:imageCropper id="capturedImage" value="#{profileBean.cameraBean.croppedImage}" image="#{profileBean.cameraBean.image.path}" initialCoords="0,0,198,300" minSize="198,300" maxSize="198,300" rendered="#{not empty profileBean.cameraBean.image.path}"/>
-				<p:commandButton value="Capturar" type="button" onclick="PF('janela').show();"/>
-				<p:commandButton value="Recortar" actionListener="#{profileBean.cameraBean.onCropp}" update=":profile-form:portrait" global="false" oncomplete="PF('profileCameraDialog').hide();">
-					<f:setPropertyActionListener value="#{profileBean.cameraBean.image}" target="#{profileBean.person.picture}"></f:setPropertyActionListener>
+				<p:panelGrid columns="2" styleClass="no-border no-background">
+					<p:photoCam widgetVar="pc" listener="#{profileCamera.onCapture}" update="ci" styleClass="foto"/>
+					<p:outputPanel id="ci" style="width: 320px; height: 240px" styleClass="foto">
+						<p:imageCropper value="#{profileCamera.croppedImage}" image="#{profileCamera.image.path}" 
+										initialCoords="0,0,#{profileCamera.width},#{profileCamera.height}" 
+										minSize="#{profileCamera.width},#{profileCamera.height}" 
+										maxSize="#{profileCamera.width},#{profileCamera.height}"/>
+					</p:outputPanel>
+				</p:panelGrid>
+				<p:commandButton value="Recortar" actionListener="#{profileCamera.onCropp}" 
+								 update=":profile-form:portrait" global="false" oncomplete="PF('profileCameraDialog').hide();"
+								 style="float: right; padding: 2px; margin: 15px 5px;">
+					<f:setPropertyActionListener value="#{profileCamera.image}" target="#{profileBean.person.picture}"/>
 				</p:commandButton>
-			</h:form>
-		</p:dialog>
-	
-		<p:dialog widgetVar="janela" resizable="false" draggable="false" modal="true">
-			<h:form id="aform" >
-			<p:panel>
-				<p:photoCam id="pc" widgetVar="pc" listener="#{profileBean.cameraBean.onCapture}"/>
-				<p:commandButton value="Capturar" onclick="PF('pc').capture();" update=":profile-camera-form:capturedImage"/>
-			</p:panel>
+				<p:commandButton value="Capturar" type="button" onclick="PF('pc').capture();" style="float: right; padding: 2px; margin: 15px 5px;"/>
 			</h:form>
 		</p:dialog>
 	</ui:define>
