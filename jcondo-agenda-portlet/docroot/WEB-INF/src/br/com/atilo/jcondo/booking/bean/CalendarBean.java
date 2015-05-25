@@ -62,6 +62,12 @@ public class CalendarBean extends BaseBean {
 
 	private int endTime;
 
+	private String firstName;
+
+	private String lastName;
+
+	private String identity;
+
 	@PostConstruct
 	public void init() {
 		try {
@@ -225,7 +231,33 @@ public class CalendarBean extends BaseBean {
 		int i = tv.getChildren().indexOf(event.getTab());
 		model = (CalendarModel) MODELS.get(i);
 	}
-	
+
+	public void onGuestAdd() {
+		try {
+			Person guest = new Person();
+
+			guest.setFirstName(firstName);
+			guest.setLastName(lastName);
+			guest.setIdentity(identity);
+
+			if (CollectionUtils.isEmpty(booking.getGuests())) {
+				booking.setGuests(new ArrayList<Person>());
+			}
+
+			booking.getGuests().add(guest);
+		} catch (Exception e) {
+			// TODO: handle exception
+		}
+	}
+
+	public void onGuestRemove(Person person) {
+		try {
+			booking.getGuests().remove(person);
+		} catch (Exception e) {
+			// TODO: handle exception
+		}
+	}
+
 	public void validateCheckbox(FacesContext context, UIComponent component, Object value) {  
 		if (value instanceof Boolean && ((Boolean) value).equals(Boolean.FALSE)) {
 			FacesMessage message = MessageUtils.getMessage(UIInput.REQUIRED_MESSAGE_ID, null);
@@ -325,6 +357,30 @@ public class CalendarBean extends BaseBean {
 
 	public void setEndTime(int endTime) {
 		this.endTime = endTime;
+	}
+
+	public String getFirstName() {
+		return firstName;
+	}
+
+	public void setFirstName(String firstName) {
+		this.firstName = firstName;
+	}
+
+	public String getLastName() {
+		return lastName;
+	}
+
+	public void setLastName(String lastName) {
+		this.lastName = lastName;
+	}
+
+	public String getIdentity() {
+		return identity;
+	}
+
+	public void setIdentity(String identity) {
+		this.identity = identity;
 	}
 
 }

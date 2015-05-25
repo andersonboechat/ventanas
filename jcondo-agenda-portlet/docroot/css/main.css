@@ -265,3 +265,7 @@
 .agenda .fc-event-time {
 	display: none;
 }
+
+.ui-datatable-data {
+	height: 150px;
+}
