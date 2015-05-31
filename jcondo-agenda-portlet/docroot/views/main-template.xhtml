@@ -42,15 +42,25 @@
 			.person-image {
 				border: none !important; width: 198px; height: 300px; padding: 0px !important; margin:  0px !important;
 			}
-			.foto img {height: 100px; width: 66px}
+			.foto {
+				border: 6px solid white;
+				-webkit-border-radius: 3px !important;
+				-moz-border-radius: 3px !important;
+				border-radius: 3px !important;
+				-webkit-box-shadow: 0px 0px 6px 0px #cccccc;
+				-moz-box-shadow: 0px 0px 6px 0px #cccccc;
+				box-shadow: 0px 0px 6px 0px #cccccc;			
+			}
 			.person-image div {border: none !important;}
 			.no-border {border: none !important;}
 			.no-border tr {border: none !important;}
 			.no-border .ui-datatable td {border: none !important;}
+			.no-border .ui-datatable tbody {border: none !important;}
 			.no-border .ui-datagrid-content {border: none !important;}
 			.no-border .ui-panelgrid-cell  {border: none !important;}
 			.no-margin {margin:  0px !important; padding: 0px !important;}
 			.no-margin td {margin:  0px !important; padding: 0px !important;}
+			.no-margin tbody {margin:  0px !important; padding: 0px !important;}
 			.no-background {background-color: transparent;}
 			.no-background .ui-datatable td  {background-color: transparent !important;}
 			.no-background .ui-panelgrid-cell {background-color: transparent !important;}
@@ -116,6 +126,10 @@
 			.room-picture {width: 15px;}
 			
 			.status .ui-dialog-titlebar {display: none}
+			
+			.guest-name input {width: 360px; font-style: italic; font-size: 12px; font-family: sans-serif;}
+			
+			.panel .ui-panel-content  {margin: 0px !important; padding: 0px !important;}
 		</style>
 	</h:head>
 	<h:body>

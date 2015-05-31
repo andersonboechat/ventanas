@@ -6,6 +6,7 @@ import org.apache.commons.beanutils.BeanUtilsBean;
 import org.apache.commons.beanutils.ConvertUtilsBean;
 
 import br.com.abware.jcondo.booking.model.Bookable;
+import br.com.abware.jcondo.booking.model.Guest;
 import br.com.abware.jcondo.booking.model.Room;
 import br.com.abware.jcondo.booking.model.RoomBooking;
 import br.com.abware.jcondo.core.PersonStatus;
@@ -20,6 +21,7 @@ import br.com.abware.jcondo.core.model.Supplier;
 import br.com.abware.jcondo.core.model.Vehicle;
 import br.com.abware.jcondo.crm.model.Answer;
 import br.com.abware.jcondo.crm.model.Occurrence;
+import br.com.atilo.jcondo.booking.persistence.entity.GuestEntity;
 import br.com.atilo.jcondo.booking.persistence.entity.RoomBookingEntity;
 import br.com.atilo.jcondo.booking.persistence.entity.RoomEntity;
 import br.com.atilo.jcondo.core.persistence.entity.AdministrationEntity;
@@ -61,7 +63,9 @@ public class BeanUtils extends org.apache.commons.beanutils.BeanUtils {
 		 cub.register(bc, AnswerEntity.class);
 		 cub.register(bc, Supplier.class);
 		 cub.register(bc, SupplierEntity.class);
-
+		 cub.register(bc, Guest.class);
+		 cub.register(bc, GuestEntity.class);
+		 
 		 DomainConverter dc = new DomainConverter();
 		 cub.register(dc, DomainEntity.class);
 		 cub.register(dc, Domain.class);

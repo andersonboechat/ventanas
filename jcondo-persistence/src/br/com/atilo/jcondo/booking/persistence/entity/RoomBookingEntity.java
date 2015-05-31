@@ -2,14 +2,13 @@ package br.com.atilo.jcondo.booking.persistence.entity;
 
 import java.util.List;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
-import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
-
-import br.com.atilo.jcondo.core.persistence.entity.PersonEntity;
 
 /**
  * The persistent class for the rb_booking database table.
@@ -25,11 +24,11 @@ public class RoomBookingEntity extends BookingEntity {
 	@JoinColumn(name="resourceId", updatable=false)
 	private RoomEntity resource;
 
-	@ManyToMany
-	@JoinTable(name="jco_booking_person", 
+	@OneToMany(cascade=CascadeType.ALL)
+	@JoinTable(name="jco_booking_guest", 
 			   joinColumns={@JoinColumn(name="bookingId", referencedColumnName="id")}, 
-			   inverseJoinColumns={@JoinColumn(name="personId", referencedColumnName="id")})
-	private List<PersonEntity> guests;
+			   inverseJoinColumns={@JoinColumn(name="id", referencedColumnName="id")})
+	private List<GuestEntity> guests;
 
 	public RoomBookingEntity() {
 	}
@@ -42,11 +41,11 @@ public class RoomBookingEntity extends BookingEntity {
 		this.resource = resource;
 	}
 
-	public List<PersonEntity> getGuests() {
+	public List<GuestEntity> getGuests() {
 		return guests;
 	}
 
-	public void setGuests(List<PersonEntity> guests) {
+	public void setGuests(List<GuestEntity> guests) {
 		this.guests = guests;
 	}
 

@@ -19,6 +19,7 @@ import org.apache.commons.lang.time.DateFormatUtils;
 import org.apache.commons.lang.time.DateUtils;
 import org.apache.log4j.Logger;
 import org.apache.myfaces.commons.util.MessageUtils;
+import org.primefaces.component.autocomplete.AutoComplete;
 import org.primefaces.component.tabview.TabView;
 import org.primefaces.context.RequestContext;
 import org.primefaces.event.SelectEvent;
@@ -29,6 +30,7 @@ import org.primefaces.model.ScheduleModel;
 import com.sun.faces.util.MessageFactory;
 
 import br.com.abware.jcondo.booking.model.BookingStatus;
+import br.com.abware.jcondo.booking.model.Guest;
 import br.com.abware.jcondo.booking.model.Room;
 import br.com.abware.jcondo.booking.model.RoomBooking;
 import br.com.abware.jcondo.core.model.Flat;
@@ -62,6 +64,8 @@ public class CalendarBean extends BaseBean {
 
 	private int endTime;
 
+	private Person guest;
+	
 	private String firstName;
 
 	private String lastName;
@@ -234,17 +238,15 @@ public class CalendarBean extends BaseBean {
 
 	public void onGuestAdd() {
 		try {
-			Person guest = new Person();
-
-			guest.setFirstName(firstName);
-			guest.setLastName(lastName);
-			guest.setIdentity(identity);
+			Guest guest = new Guest(new String(firstName), new String(lastName));
 
 			if (CollectionUtils.isEmpty(booking.getGuests())) {
-				booking.setGuests(new ArrayList<Person>());
+				booking.setGuests(new ArrayList<Guest>());
 			}
 
 			booking.getGuests().add(guest);
+			firstName = null;
+			lastName = null;
 		} catch (Exception e) {
 			// TODO: handle exception
 		}
@@ -256,6 +258,10 @@ public class CalendarBean extends BaseBean {
 		} catch (Exception e) {
 			// TODO: handle exception
 		}
+	}
+	
+	public void onGuestSelect(SelectEvent event) {
+		guest = (Person) ((AutoComplete) event.getSource()).getValue();
 	}
 
 	public void validateCheckbox(FacesContext context, UIComponent component, Object value) {  
@@ -285,6 +291,10 @@ public class CalendarBean extends BaseBean {
 		}
 
 		return false;
+	}
+	
+	public List<Person> findGuests(String name) throws Exception {
+		return personService.getPeople(name);
 	}
 
 	public boolean isTimeSelectionEnabled() {
@@ -357,6 +367,14 @@ public class CalendarBean extends BaseBean {
 
 	public void setEndTime(int endTime) {
 		this.endTime = endTime;
+	}
+
+	public Person getGuest() {
+		return guest;
+	}
+
+	public void setGuest(Person guest) {
+		this.guest = guest;
 	}
 
 	public String getFirstName() {

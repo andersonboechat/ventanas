@@ -18,7 +18,12 @@
 		<display-name>ModelListConverter</display-name>
 		<converter-id>modelListConverter</converter-id>
 		<converter-class>br.com.atilo.jcondo.commons.faces.ModelListConverter</converter-class>
-	</converter>	
+	</converter>
+	<converter>
+		<display-name>JsonConverter</display-name>
+		<converter-id>jsonConverter</converter-id>
+		<converter-class>br.com.atilo.jcondo.commons.faces.JsonConverter</converter-class>
+	</converter>
 	<lifecycle>
 		<phase-listener>com.liferay.faces.util.lifecycle.DebugPhaseListener</phase-listener>
 	</lifecycle>

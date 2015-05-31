@@ -14,6 +14,11 @@
 		<converter-id>selectItemsConverter</converter-id>
 		<converter-class>br.com.atilo.jcondo.commons.faces.SelectItemsConverter</converter-class>
 	</converter>
+	<converter>
+		<display-name>JsonConverter</display-name>
+		<converter-id>jsonConverter</converter-id>
+		<converter-class>br.com.atilo.jcondo.commons.faces.JsonConverter</converter-class>
+	</converter>
 	<lifecycle>
 		<phase-listener>com.liferay.faces.util.lifecycle.DebugPhaseListener</phase-listener>
 	</lifecycle>
