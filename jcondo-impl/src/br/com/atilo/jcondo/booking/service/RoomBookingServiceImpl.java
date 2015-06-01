@@ -12,6 +12,7 @@ import org.apache.log4j.Logger;
 import org.joda.time.Interval;
 
 import br.com.abware.jcondo.booking.model.BookingStatus;
+import br.com.abware.jcondo.booking.model.Guest;
 import br.com.abware.jcondo.booking.model.Room;
 import br.com.abware.jcondo.booking.model.RoomBooking;
 import br.com.abware.jcondo.core.Permission;
@@ -184,5 +185,30 @@ public class RoomBookingServiceImpl {
 
 		booking.setStatus(BookingStatus.BOOKED);
 		return bookingManager.save(booking);
+	}
+
+	@SuppressWarnings("unchecked")
+	public void updateGuests(RoomBooking booking) throws Exception {
+//		if (!securityManager.hasPermission(booking, Permission.UPDATE)) {
+//			throw new BusinessException("bkg.guests.edit.denied");
+//		}
+
+		RoomBooking rb = bookingManager.findById(booking.getId());
+
+		if (rb == null) {
+			throw new BusinessException("bkg.not.found");
+		}
+
+		if (rb.getGuests() == null) {
+			rb.setGuests(booking.getGuests());
+		} else {
+			List<Guest> removedGuests = (List<Guest>) CollectionUtils.subtract(rb.getGuests(), booking.getGuests());
+			List<Guest> addedGuests = (List<Guest>) CollectionUtils.subtract(booking.getGuests(), rb.getGuests());
+
+			rb.getGuests().removeAll(removedGuests);
+			rb.getGuests().addAll(addedGuests);
+		}
+
+		bookingManager.save(rb);
 	}
 }

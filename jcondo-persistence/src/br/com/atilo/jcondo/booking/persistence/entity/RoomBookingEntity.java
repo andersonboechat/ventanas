@@ -1,11 +1,11 @@
 package br.com.atilo.jcondo.booking.persistence.entity;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
-import javax.persistence.JoinTable;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
@@ -24,13 +24,11 @@ public class RoomBookingEntity extends BookingEntity {
 	@JoinColumn(name="resourceId", updatable=false)
 	private RoomEntity resource;
 
-	@OneToMany(cascade=CascadeType.ALL)
-	@JoinTable(name="jco_booking_guest", 
-			   joinColumns={@JoinColumn(name="bookingId", referencedColumnName="id")}, 
-			   inverseJoinColumns={@JoinColumn(name="id", referencedColumnName="id")})
+	@OneToMany(cascade=CascadeType.ALL, mappedBy="booking", orphanRemoval=true)
 	private List<GuestEntity> guests;
 
 	public RoomBookingEntity() {
+		this.guests = new ArrayList<GuestEntity>();
 	}
 
 	public RoomEntity getResource() {

@@ -3,9 +3,13 @@ package br.com.atilo.jcondo.booking.persistence.entity;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+import javax.persistence.OneToOne;
 import javax.persistence.Table;
 
 import br.com.atilo.jcondo.core.persistence.entity.BaseEntity;
+import br.com.atilo.jcondo.core.persistence.entity.PersonEntity;
 
 
 
@@ -16,19 +20,25 @@ import br.com.atilo.jcondo.core.persistence.entity.BaseEntity;
 @Entity
 @Table(name="jco_booking_guest")
 public class GuestEntity extends BaseEntity {
+
 	private static final long serialVersionUID = 1L;
 
 	@Id
 	@GeneratedValue
 	private long id;
 
-	private long bookingId;
-
-	private long personId;
-
 	private String firstName;
 
 	private String lastName;
+
+	@ManyToOne
+	@JoinColumn(name="bookingId")
+	private RoomBookingEntity booking;
+
+	@OneToOne
+	@JoinColumn(name="personId")
+	private PersonEntity person;
+
 
 	public GuestEntity() {
 	}
@@ -39,14 +49,6 @@ public class GuestEntity extends BaseEntity {
 
 	public void setId(long id) {
 		this.id = id;
-	}
-
-	public long getBookingId() {
-		return this.bookingId;
-	}
-
-	public void setBookingId(long bookingId) {
-		this.bookingId = bookingId;
 	}
 
 	public String getFirstName() {
@@ -65,12 +67,20 @@ public class GuestEntity extends BaseEntity {
 		this.lastName = lastName;
 	}
 
-	public long getPersonId() {
-		return this.personId;
+	public RoomBookingEntity getBooking() {
+		return booking;
 	}
 
-	public void setPersonId(long personId) {
-		this.personId = personId;
+	public void setBooking(RoomBookingEntity booking) {
+		this.booking = booking;
+	}
+
+	public PersonEntity getPerson() {
+		return person;
+	}
+
+	public void setPerson(PersonEntity person) {
+		this.person = person;
 	}
 
 }

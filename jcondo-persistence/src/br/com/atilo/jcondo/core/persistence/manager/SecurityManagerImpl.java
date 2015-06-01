@@ -16,6 +16,7 @@ import com.liferay.portal.service.UserLocalServiceUtil;
 import com.liferay.portal.service.permission.PortalPermissionUtil;
 import com.liferay.portal.service.permission.UserPermissionUtil;
 
+import br.com.abware.jcondo.booking.model.RoomBooking;
 import br.com.abware.jcondo.core.Permission;
 import br.com.abware.jcondo.core.PersonType;
 import br.com.abware.jcondo.core.model.Administration;
@@ -264,10 +265,11 @@ public class SecurityManagerImpl {
 			return checkPermission(permissionChecker, ((Membership) model).getType(), ((Membership) model).getDomain(), permission);
 		} else if (model instanceof Vehicle) {
 			return checkPermission(permissionChecker, model, ((Vehicle) model).getDomain(), permission);
+		} else if (model instanceof RoomBooking) {
+			return checkPermission(permissionChecker, model, ((RoomBooking) model).getDomain(), permission);
 		} else {
 			return checkPermission(permissionChecker, model, permission);
 		}
-
 	}
 
 	private boolean checkPermission(PermissionChecker permissionChecker, BaseModel model, Domain domain, Permission permission) {

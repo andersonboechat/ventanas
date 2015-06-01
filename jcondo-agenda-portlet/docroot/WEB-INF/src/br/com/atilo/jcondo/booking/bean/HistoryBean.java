@@ -1,5 +1,6 @@
 package br.com.atilo.jcondo.booking.bean;
 
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
@@ -10,11 +11,13 @@ import javax.faces.application.FacesMessage;
 import javax.faces.bean.ManagedBean;
 import javax.faces.bean.ViewScoped;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.time.DateUtils;
 import org.apache.log4j.Logger;
 import org.apache.myfaces.commons.util.MessageUtils;
 
 import br.com.abware.jcondo.booking.model.BookingStatus;
+import br.com.abware.jcondo.booking.model.Guest;
 import br.com.abware.jcondo.booking.model.RoomBooking;
 import br.com.abware.jcondo.core.model.Person;
 import br.com.atilo.jcondo.booking.service.RoomBookingServiceImpl;
@@ -31,6 +34,10 @@ public class HistoryBean extends BaseBean {
 	private RoomBooking booking;
 	
 	private Person person;
+
+	private String firstName;
+
+	private String lastName;	
 
 	@PostConstruct
 	public void init() {
@@ -58,6 +65,43 @@ public class HistoryBean extends BaseBean {
 			MessageUtils.addMessage(FacesMessage.SEVERITY_FATAL, "booking.cancel.failure", null);
 		}
 	}
+	
+	public void onGuestAdd() {
+		try {
+			Guest guest = new Guest(new String(firstName), new String(lastName));
+
+			if (CollectionUtils.isEmpty(booking.getGuests())) {
+				booking.setGuests(new ArrayList<Guest>());
+			}
+
+			booking.getGuests().add(guest);
+			firstName = null;
+			lastName = null;
+		} catch (Exception e) {
+			LOGGER.error(e.getMessage(), e);
+			MessageUtils.addMessage(FacesMessage.SEVERITY_FATAL, "booking.guest.add.failure", null);
+		}
+	}
+
+	public void onGuestRemove(Guest guest) {
+		try {
+			booking.getGuests().remove(guest);
+		} catch (Exception e) {
+			LOGGER.error(e.getMessage(), e);
+			MessageUtils.addMessage(FacesMessage.SEVERITY_FATAL, "booking.guest.remove.failure", null);
+		}
+	}
+	
+	public void onGuestsSave() {
+		try {
+			bookingService.updateGuests(booking);
+			MessageUtils.addMessage(FacesMessage.SEVERITY_INFO, "booking.guests.update.success", null);
+		} catch (Exception e) {
+			LOGGER.error(e.getMessage(), e);
+			MessageUtils.addMessage(FacesMessage.SEVERITY_FATAL, "booking.guests.update.failure", null);
+		}
+	}
+	
 
 	public boolean isCancelEnabled(RoomBooking booking) {
 		Date today = DateUtils.truncate(new Date(), Calendar.DAY_OF_MONTH);
@@ -89,6 +133,30 @@ public class HistoryBean extends BaseBean {
 
 	public void setBooking(RoomBooking booking) {
 		this.booking = booking;
+	}
+
+	public Person getPerson() {
+		return person;
+	}
+
+	public void setPerson(Person person) {
+		this.person = person;
+	}
+
+	public String getFirstName() {
+		return firstName;
+	}
+
+	public void setFirstName(String firstName) {
+		this.firstName = firstName;
+	}
+
+	public String getLastName() {
+		return lastName;
+	}
+
+	public void setLastName(String lastName) {
+		this.lastName = lastName;
 	}
 
 }

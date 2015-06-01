@@ -7,10 +7,14 @@ import java.util.List;
 import javax.persistence.NoResultException;
 import javax.persistence.Query;
 
+import br.com.abware.jcondo.booking.model.Guest;
 import br.com.abware.jcondo.booking.model.Room;
 import br.com.abware.jcondo.booking.model.RoomBooking;
 import br.com.abware.jcondo.core.model.Person;
+import br.com.abware.jcondo.exception.PersistenceException;
+import br.com.atilo.jcondo.booking.persistence.entity.GuestEntity;
 import br.com.atilo.jcondo.booking.persistence.entity.RoomBookingEntity;
+import br.com.atilo.jcondo.commons.BeanUtils;
 import br.com.atilo.jcondo.core.persistence.manager.JCondoManager;
 
 public class RoomBookingManagerImpl extends JCondoManager<RoomBookingEntity, RoomBooking> {
@@ -23,6 +27,49 @@ public class RoomBookingManagerImpl extends JCondoManager<RoomBookingEntity, Roo
 	@Override
 	protected Class<RoomBookingEntity> getEntityClass() {
 		return RoomBookingEntity.class;
+	}
+	
+	@Override
+	protected RoomBookingEntity getEntity(RoomBooking model) throws Exception {
+		try {
+			RoomBookingEntity roomBooking = super.getEntity(model);
+			
+			List<GuestEntity> guests = new ArrayList<GuestEntity>();
+			for (Guest guest : model.getGuests()) {
+				GuestEntity entity = new GuestEntity();
+				BeanUtils.copyProperties(entity, guest);
+				entity.setBooking(roomBooking);
+				entity.setUpdateDate(new Date());
+				entity.setUpdateUser(helper.getUserId());
+				guests.add(entity);
+			}
+			roomBooking.setGuests(guests);
+			
+			return roomBooking;
+		} catch (Exception e) {
+			throw new PersistenceException(e, "psn.mgr.get.entity.fail");
+		}
+		
+	}
+	
+	@Override
+	protected RoomBooking getModel(RoomBookingEntity entity) throws Exception {
+		try {
+			RoomBooking roomBooking = super.getModel(entity);
+			
+			List<Guest> guests = new ArrayList<Guest>();
+			//Hibernate.initialize(entity.getGuests());
+			for (GuestEntity guest : entity.getGuests()) {
+				Guest model = new Guest();
+				BeanUtils.copyProperties(model, guest);
+				guests.add(model);
+			}
+			roomBooking.setGuests(guests);
+			
+			return roomBooking;
+		} catch (Exception e) {
+			throw new PersistenceException(e, "psn.mgr.get.model.failed");
+		}
 	}
 
 	@SuppressWarnings("unchecked")

@@ -150,7 +150,15 @@ public abstract class JCondoManager<Entity extends BaseEntity, Model extends Bas
 	}
 
 	public Model findById(Object id) throws Exception {
-		return getModel(findEntityById(id));
+		String key = generateKey();
+		try {
+			openManager(key);
+			return getModel(em.find(getEntityClass(), id));
+		} catch (Exception e) {
+			throw new PersistenceException(e, "mgr.find.entity.fail");
+		} finally {
+			closeManager(key);
+		}
 	}
 
 	protected Entity findEntityById(Object id) throws Exception {

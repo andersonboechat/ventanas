@@ -4,6 +4,7 @@ import java.util.Date;
 
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
@@ -43,7 +44,7 @@ public class BookingEntity extends BaseEntity {
 
 	@OneToOne
 	@JoinColumn(name="domainId")
-	private DomainEntity domain;	
+	private DomainEntity domain;
 
 	public long getId() {
 		return id;

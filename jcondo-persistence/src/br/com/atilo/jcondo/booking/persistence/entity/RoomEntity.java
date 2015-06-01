@@ -40,7 +40,7 @@ public class RoomEntity extends BaseEntity {
 	private double price;
 	
 	//bi-directional many-to-one association to Booking
-	@OneToMany(mappedBy="resource")
+	@OneToMany(mappedBy="resource", orphanRemoval=true)
 	private List<RoomBookingEntity> bookings;
 
 	public RoomEntity() {
