@@ -37,7 +37,7 @@
 			</p:column>
 			<p:column style="width: 35px">
 				<p:commandLink title="#{msg['this.book.guests']}" actionListener="#{historyViewer.setBooking(booking)}" partialSubmit="true" 
-					process="@this" oncomplete="PF('bookingGuests').show();" update=":booking-guests-form:personTable" disabled="#{not historyViewer.isCancelEnabled(booking)}">
+					process="@this" oncomplete="PF('bookingGuests').show();" update=":booking-guests-form">
 					<h:graphicImage value="../images/list.png" />
 				</p:commandLink>
 			</p:column>
@@ -64,7 +64,8 @@
 					<p:outputLabel value="Sobrenome: "/>
 					<p:inputText widgetVar="lastName" value="#{historyViewer.lastName}" style="width: 200px; font-style: italic;"/>
 					<p:commandLink title="Incluir" actionListener="#{historyViewer.onGuestAdd}" update="guest-search,personTable,:outputMsg" 
-								   partialSubmit="true" process="@parent" style="float: right; padding: 2px;">
+								   partialSubmit="true" process="@parent" style="float: right; padding: 2px;" 
+								   disabled="#{not historyViewer.isCancelEnabled(historyViewer.booking)}">
 						<h:graphicImage value="../images/plus.png" width="28" height="28"/>
 					</p:commandLink>
 				</p:panelGrid>
@@ -76,7 +77,9 @@
 							<h:outputText value="#{person.firstName} #{person.lastName}" style="font-size: 14px; color: black; font-weight: bold;text-transform: uppercase; margin: 6px;"/>
 						</p:column>
 						<p:column style="width: 55px">
-							<p:commandLink title="Remover este convidado da lista" update="personTable,:outputMsg" actionListener="#{historyViewer.onGuestRemove(person)}" partialSubmit="true" process="@this">
+							<p:commandLink title="Remover este convidado da lista" update="personTable,:outputMsg" 
+										   actionListener="#{historyViewer.onGuestRemove(person)}" partialSubmit="true" process="@this"
+										   disabled="#{not historyViewer.isCancelEnabled(historyViewer.booking)}">
 								<h:graphicImage value="../images/cancel2.png" style="margin: 6px;"/>
 							</p:commandLink>
 						</p:column>
@@ -84,7 +87,9 @@
 				</p:panel>
 				<p:panelGrid columns="2" style="float: right; height: 30px; overflow: hidden; margin: 20px 0px 10px 0px;">
 					<p:commandButton value="#{msg.cancel}" type="button" onclick="PF('bookingGuests').hide();" style="float: right; padding: 2px; width: 85px; margin-right: 10px;"/>
-					<p:commandButton value="#{msg.save}" actionListener="#{historyViewer.onGuestsSave}" update=":outputMsg" oncomplete="PF('bookingGuests').hide();" style="padding: 2px; width: 88px; float: right;"/>
+					<p:commandButton value="#{msg.save}" actionListener="#{historyViewer.onGuestsSave}" update=":outputMsg" 
+									  disabled="#{not historyViewer.isCancelEnabled(historyViewer.booking)}" oncomplete="PF('bookingGuests').hide();" 
+									  style="padding: 2px; width: 88px; float: right;"/>
 				</p:panelGrid>
 			</p:panelGrid>		
 		</h:form>	

@@ -39,6 +39,8 @@ public class RoomEntity extends BaseEntity {
 
 	private double price;
 	
+	private int capacity;
+	
 	//bi-directional many-to-one association to Booking
 	@OneToMany(mappedBy="resource", orphanRemoval=true)
 	private List<RoomBookingEntity> bookings;
@@ -100,6 +102,14 @@ public class RoomEntity extends BaseEntity {
 
 	public void setPrice(double price) {
 		this.price = price;
+	}
+
+	public int getCapacity() {
+		return capacity;
+	}
+
+	public void setCapacity(int capacity) {
+		this.capacity = capacity;
 	}
 
 	public List<RoomBookingEntity> getBookings() {

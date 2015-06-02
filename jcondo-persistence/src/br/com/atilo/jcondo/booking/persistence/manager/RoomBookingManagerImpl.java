@@ -60,7 +60,6 @@ public class RoomBookingManagerImpl extends JCondoManager<RoomBookingEntity, Roo
 			RoomBooking roomBooking = super.getModel(entity);
 			
 			List<Guest> guests = new ArrayList<Guest>();
-			//Hibernate.initialize(entity.getGuests());
 			for (GuestEntity guest : entity.getGuests()) {
 				Guest model = new Guest();
 				BeanUtils.copyProperties(model, guest);

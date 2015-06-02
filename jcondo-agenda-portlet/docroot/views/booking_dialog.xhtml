@@ -103,9 +103,9 @@
 				</p:tab>
 			</p:wizard>
 		</p:dialog>
-		<p:confirmDialog global="true" width="600" style="padding: 0px" showEffect="fade" hideEffect="fade" visible="false">
-			<p:commandButton value="#{msg['no']}" type="button" styleClass="ui-confirmdialog-no" icon="ui-icon-close" style="float: left; width: 200px; margin-left: 14%" />
-			<p:commandButton value="#{msg['yes']}" type="button" styleClass="ui-confirmdialog-yes" icon="ui-icon-check" style="float: right; width: 200px; margin-right: 14%"/>
+		<p:confirmDialog global="true" width="400" style="padding: 0px" showEffect="fade" hideEffect="fade" visible="false">
+			<p:commandButton value="#{msg['no']}" type="button" styleClass="ui-confirmdialog-no" icon="ui-icon-close" style="float: right; padding: 2px 6px; margin-left: 3px; margin-right: 27%" />
+			<p:commandButton value="#{msg['yes']}" type="button" styleClass="ui-confirmdialog-yes" icon="ui-icon-check" style="float: right; padding: 2px 6px; margin-right: 3px; margin-left: 27%"/>
 		</p:confirmDialog>
 		<p:dialog widgetVar="passwordDialog-#{tabId}" header="#{msg['passoword.dialog.header']}" modal="true" resizable="false" showEffect="fade" hideEffect="fade" visible="false">
 			<h:outputText value="#{msg['password.confirm']}" style="font-size: 14px;"/>

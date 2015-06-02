@@ -7,20 +7,39 @@
 	xmlns:p="http://primefaces.org/ui"
 	xmlns:ui="http://java.sun.com/jsf/facelets">
 	<h:form id="rooms-form">
-		<p:carousel widgetVar="rooms" var="room" value="#{roomBean.rooms}" headerText="Espaços" numVisible="1"  style="margin-top: 5px">
-			<p:panelGrid columns="1" styleClass="no-background no-border" style="width: 370px">
+		<p:carousel widgetVar="rooms" var="room" value="#{roomViewer.rooms}" headerText="Espaços" numVisible="1" itemStyle="height: 220px;">
+			<p:panelGrid columns="1" styleClass="no-background no-border" style="width: 370px; text-align: justify;">
 				<p:column>
-					<p:panel styleClass="no-border #{historyBean.getRoomStyle(room)}" style="width: 30px; height: 30px; float: left"/>
-					<h:outputText value="#{room.name}" style="font-size: 14px; color: black; font-weight: bold;"/><br/>
-					<h:outputText value="Valor: "/>
-					<h:outputText value="#{room.price}"><f:convertNumber type="currency" /></h:outputText><br/>
-					<h:outputText value="#{room.description}" escape="false"/>
+					<p:panelGrid columns="3" columnClasses="room-icon,room-name,room-picture" styleClass="no-background no-border no-margin" style="width: 100%;">
+						<p:panel styleClass="no-border #{historyBean.getRoomStyle(room)}" style="width: 30px; height: 30px; float: left"/>
+						<p:column>
+							<h:outputText value="#{room.name}" style="font-size: 14px; color: black; font-weight: bold;"/><br/>
+							<h:outputLink value="#{room.agreement.path}?targetExtension=pdf" target="_blank" rendered="#{not empty room.agreement.path}" styleClass="agreement">Termo de Responsabilidade</h:outputLink>
+						</p:column>
+						<p:commandLink title="Fotos do espaço" actionListener="#{roomViewer.setRoom(room)}" update=":room-pictures-form" 
+									   oncomplete="PF('roomPicturesDialog').show();">
+							<h:graphicImage value="../images/pictures.png" width="34" height="34" />
+						</p:commandLink>
+					</p:panelGrid>
 				</p:column>
-				<p:dataGrid widgetVar="pictures" var="picture" value="#{room.images}" columns="4" 
-					styleClass="no-background no-border" style="margin: 10px">
-					<p:column><p:graphicImage value="#{picture.path}" width="80" height="60"/></p:column>
-				</p:dataGrid>
+				<p:column rendered="false">
+					<h:outputText value="Valor: "/><h:outputText value="#{room.price}"><f:convertNumber type="currency" /></h:outputText>
+				</p:column>
+				<p:column>
+					<h:outputText value="Capacidade: " style="font-weight: bold"/>
+					<h:outputText value="#{room.capacity} pessoas"/>
+				</p:column>
+
+				<h:outputText value="#{room.description}" escape="false"/>
 			</p:panelGrid>
 		</p:carousel>
 	</h:form>
+
+	<p:dialog widgetVar="roomPicturesDialog" header="Fotos do Espaço" dynamic="true" modal="true" resizable="false" draggable="false" closable="true" closeOnEscape="true" styleClass="room-pictures">
+		<h:form id="room-pictures-form">
+			<p:galleria var="image" value="#{roomViewer.room.images}" panelWidth="448" panelHeight="339" showCaption="false" autoPlay="false">
+			    <p:graphicImage value="${image.path}" title="${image.name}" width="488" height="336"/>
+			</p:galleria>
+		</h:form>
+	</p:dialog>
 </f:view>
