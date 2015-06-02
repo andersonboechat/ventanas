@@ -33,18 +33,20 @@ public class RoomBookingManagerImpl extends JCondoManager<RoomBookingEntity, Roo
 	protected RoomBookingEntity getEntity(RoomBooking model) throws Exception {
 		try {
 			RoomBookingEntity roomBooking = super.getEntity(model);
-			
-			List<GuestEntity> guests = new ArrayList<GuestEntity>();
-			for (Guest guest : model.getGuests()) {
-				GuestEntity entity = new GuestEntity();
-				BeanUtils.copyProperties(entity, guest);
-				entity.setBooking(roomBooking);
-				entity.setUpdateDate(new Date());
-				entity.setUpdateUser(helper.getUserId());
-				guests.add(entity);
+
+			if (model.getGuests() != null) {
+				List<GuestEntity> guests = new ArrayList<GuestEntity>();
+				for (Guest guest : model.getGuests()) {
+					GuestEntity entity = new GuestEntity();
+					BeanUtils.copyProperties(entity, guest);
+					entity.setBooking(roomBooking);
+					entity.setUpdateDate(new Date());
+					entity.setUpdateUser(helper.getUserId());
+					guests.add(entity);
+				}
+				roomBooking.setGuests(guests);
 			}
-			roomBooking.setGuests(guests);
-			
+
 			return roomBooking;
 		} catch (Exception e) {
 			throw new PersistenceException(e, "psn.mgr.get.entity.fail");
