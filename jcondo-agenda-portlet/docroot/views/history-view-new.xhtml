@@ -9,7 +9,7 @@
 	<h:form id="bookings-form">
 		<p:dataTable widgetVar="bookingTable" var="booking" value="#{historyViewer.bookings}"	paginator="true" paginatorPosition="bottom" 
 			paginatorTemplate="{PreviousPageLink} {NextPageLink}" rows="5" rowKey="#{booking.id}" 
-			emptyMessage="Não há reservas" styleClass="no-header no-border no-background" style="margin-top: 15px; width: 378px; height: 100%">
+			emptyMessage="#{msg['no.bookings']}" styleClass="no-header no-border no-background" style="margin-top: 15px; width: 378px; height: 100%">
 		    <p:ajax event="page" global="false"/>
 			<f:facet name="header">
 				<p:panelGrid columns="1" columnClasses="docs-header" styleClass="no-border no-margin no-background" style="width: 100%; height: 25px">
@@ -59,17 +59,17 @@
 		<h:form id="booking-guests-form">
 			<p:panelGrid columns="1" styleClass="no-margin no-border" style="width: 700px;">
 				<p:panelGrid id="guest-search" columns="5" styleClass="no-border no-background no-margin2" style="width: 100%; margin: 10px 0px 10px 0px;">
-					<p:outputLabel value="Nome: "/>
+					<p:outputLabel value="#{msg['name']}: "/>
 					<p:inputText widgetVar="firstName" value="#{historyViewer.firstName}" style="width: 200px; font-style: italic;"/>
-					<p:outputLabel value="Sobrenome: "/>
+					<p:outputLabel value="#{msg['surname']}: "/>
 					<p:inputText widgetVar="lastName" value="#{historyViewer.lastName}" style="width: 200px; font-style: italic;"/>
-					<p:commandLink title="Incluir" actionListener="#{historyViewer.onGuestAdd}" update="guest-search,personTable,:outputMsg" 
+					<p:commandLink title="#{msg['add']}" actionListener="#{historyViewer.onGuestAdd}" update="guest-search,personTable,:outputMsg" 
 								   partialSubmit="true" process="@parent" style="float: right; padding: 2px;" 
 								   disabled="#{not historyViewer.isCancelEnabled(historyViewer.booking)}">
 						<h:graphicImage value="../images/plus.png" width="28" height="28"/>
 					</p:commandLink>
 				</p:panelGrid>
-				<p:panel header="Convidados" style="height: 405px; padding: 0px" styleClass="no-margin2 panel">
+				<p:panel header="#{msg['guest.list.header']}" style="height: 405px; padding: 0px" styleClass="no-margin2 panel">
 					<p:dataTable widgetVar="personTable" id="personTable" var="person" value="#{historyViewer.booking.guests}"  
 					             rowKey="#{person.id}" style="margin: 0px 0px 0px; width: 100%;" 
 					             scrollable="true" scrollHeight="370" emptyMessage="" styleClass="no-header no-margin">
@@ -77,7 +77,7 @@
 							<h:outputText value="#{person.firstName} #{person.lastName}" style="font-size: 14px; color: black; font-weight: bold;text-transform: uppercase; margin: 6px;"/>
 						</p:column>
 						<p:column style="width: 55px">
-							<p:commandLink title="Remover este convidado da lista" update="personTable,:outputMsg" 
+							<p:commandLink title="#{msg['remove.guest']}" update="personTable,:outputMsg" 
 										   actionListener="#{historyViewer.onGuestRemove(person)}" partialSubmit="true" process="@this"
 										   disabled="#{not historyViewer.isCancelEnabled(historyViewer.booking)}">
 								<h:graphicImage value="../images/cancel2.png" style="margin: 6px;"/>
