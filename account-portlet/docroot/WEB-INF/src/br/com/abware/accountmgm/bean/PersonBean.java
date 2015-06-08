@@ -76,8 +76,8 @@ public class PersonBean extends BaseBean implements Observer {
 	public PersonBean() {
 		person = new Person();
 		filters = new HashMap<String, Object>();
-		imageUploadBean = new ImageUploadBean(198, 300);
-		cameraBean = new CameraBean(320, 240);
+		imageUploadBean = new ImageUploadBean(158, 240);
+		cameraBean = new CameraBean(158, 240);
 		genders = Arrays.asList(Gender.values());
 	}
 	

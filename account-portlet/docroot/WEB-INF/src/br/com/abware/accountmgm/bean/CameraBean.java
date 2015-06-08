@@ -31,7 +31,9 @@ public class CameraBean {
 
 	private Image image;
 
-	private CroppedImage croppedImage;	
+	private CroppedImage croppedImage;
+	
+	private boolean render;
 
 	public CameraBean(int width, int height) {
 		this();
@@ -121,6 +123,14 @@ public class CameraBean {
 
 	public void setCroppedImage(CroppedImage croppedImage) {
 		this.croppedImage = croppedImage;
+	}
+
+	public boolean isRender() {
+		return render;
+	}
+
+	public void setRender(boolean render) {
+		this.render = render;
 	}
 
 }

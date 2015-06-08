@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+
+<f:view xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:c="http://java.sun.com/jsp/jstl/core"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:ui="http://java.sun.com/jsf/facelets">
+	<h:head>
+		<style>
+			.bookings .ui-tabs-selected {border-bottom: 1px solid transparent !important;}
+			.bookings .ui-tabs-nav {background: none !important; position: relative !important; top: 0cm;}
+			.bookings .ui-tabs { padding: 0 !important; border: 0px !important;}
+			.bookings .ui-tabs-panel {margin: 0 !important; padding: 0px !important; border: 1px solid grey !important;}		
+		</style>
+	</h:head>
+	<h:form id="next-bookings-form">
+		<c:choose>
+			<c:when test="#{not empty nextBookingsBean.bookings}">
+				<p:tabView orientation="left" var="booking" value="#{nextBookingsBean.bookings}" styleClass="bookings">
+					<p:tab title="Apt. #{booking.domain.number} - Bl #{booking.domain.block}">
+						<p:panelGrid columns="1" style="background: #FFFFFF; height: 250px; margin-top: 0px;" styleClass="no-margin2 no-border">
+							<h:outputText value="#{booking.resource.name}"/>
+							<p:dataTable widgetVar="guestTable" var="guest" value="#{booking.guests}" rowKey="#{guest.id}" 
+								emptyMessage="Nenhum convidado informado" styleClass="no-header no-border" style="margin-top: 15px">
+								<f:facet name="header">
+									<p:panelGrid columns="1" columnClasses="docs-header" styleClass="no-background no-border no-margin" style="width: 100%; height: 25px">
+										<h:outputText value="Convidados"/>
+									</p:panelGrid>
+								</f:facet>
+								<p:column>
+									<h:outputText value="#{guest.firstName} #{guest.lastName}" style="font-size: 14px; color: black; font-weight: bold;text-transform: uppercase; margin: 6px;"/>
+								</p:column>
+								<p:column style="width: 35px">
+									<p:commandLink value="Sim" actionListener="#{nextBookingsBean.onCheckIn}"/>
+									<p:commandLink value="Não" actionListener="#{nextBookingsBean.onCheckOut}"/>
+								</p:column>
+							</p:dataTable>
+						</p:panelGrid>
+					</p:tab>
+				</p:tabView>
+			</c:when>
+			<c:otherwise>
+				<p:messages id="no-bookings" severity="info" autoUpdate="true" style="margin: 10px;"/>
+			</c:otherwise>
+		</c:choose>
+	</h:form>
+</f:view>

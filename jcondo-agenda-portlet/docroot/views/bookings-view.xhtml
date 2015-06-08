@@ -17,32 +17,142 @@
 	<h:form id="next-bookings-form">
 		<c:choose>
 			<c:when test="#{not empty nextBookingsBean.bookings}">
-				<p:tabView orientation="left" var="booking" value="#{nextBookingsBean.bookings}" styleClass="bookings">
-					<p:tab title="Apt. #{booking.domain.number} - Bl #{booking.domain.block}">
-						<p:panelGrid columns="1" style="background: #FFFFFF; height: 250px; margin-top: 0px;" styleClass="no-margin2 no-border">
-							<h:outputText value="#{booking.resource.name}"/>
-							<p:dataTable widgetVar="guestTable" var="guest" value="#{booking.guests}" rowKey="#{guest.id}" 
-								emptyMessage="Nenhum convidado informado" styleClass="no-header no-border" style="margin-top: 15px">
-								<f:facet name="header">
-									<p:panelGrid columns="1" columnClasses="docs-header" styleClass="no-background no-border no-margin" style="width: 100%; height: 25px">
-										<h:outputText value="Convidados"/>
-									</p:panelGrid>
-								</f:facet>
-								<p:column>
-									<h:outputText value="#{guest.firstName} #{guest.lastName}" style="font-size: 14px; color: black; font-weight: bold;text-transform: uppercase; margin: 6px;"/>
-								</p:column>
-								<p:column style="width: 35px">
-									<p:commandLink value="Sim" actionListener="#{nextBookingsBean.onCheckIn}"/>
-									<p:commandLink value="Não" actionListener="#{nextBookingsBean.onCheckOut}"/>
-								</p:column>
-							</p:dataTable>
+				<p:dataTable widgetVar="bookingTable" id="bookingTable" var="booking" value="#{nextBookingsBean.bookings}" 
+							 emptyMessage="#{msg['empty.list']}" rowKey="#{booking.id}" rowExpandMode="single" styleClass="no-header no-border">
+					<p:ajax event="rowToggle" global="false"/>
+					<p:ajax event="page" global="false"/>
+					<f:facet name="header">
+						<p:panelGrid columns="1" columnClasses="docs-header" styleClass="no-border no-margin no-background" style="width: 100%; text-align: left; height: 25px">
+							<h:outputText value="Reservas de Hoje"/>
 						</p:panelGrid>
-					</p:tab>
-				</p:tabView>
+					</f:facet>
+					<p:column style="width:12px"><p:rowToggler/></p:column>
+					<p:column width="25%">
+						<h:outputText value="#{booking.resource.name}"/>
+					</p:column>
+					<p:column>
+						<h:outputText value="#{booking.person.fullName} - Apt. #{booking.domain.number} - Bl. #{booking.domain.block}" style="float: right; padding-right: 10px;"/>
+					</p:column>
+					<p:rowExpansion>
+						<p:dataTable widgetVar="guestTable" var="guest" value="#{booking.guests}" rowKey="#{guest.id}" 
+							paginator="true" paginatorPosition="top" paginatorAlwaysVisible="false"
+							emptyMessage="Nenhum convidado informado" rows="10" styleClass="no-header no-border" style="margin: 0">
+							<f:facet name="header">
+								<p:panelGrid columns="1" columnClasses="docs-header" styleClass="no-background no-border no-margin" style="width: 100%; height: 25px">
+									<h:outputText value="Convidados"/>
+								</p:panelGrid>
+							</f:facet>
+							<p:column style="line-height: 30px;">
+								<h:outputText value="#{guest.firstName} #{guest.lastName}" style="font-size: 14px; color: black; font-weight: bold;text-transform: uppercase; margin: 6px;"/>
+							</p:column>
+							<p:column style="width: 35px">
+								<p:commandLink title="Liberar entrada deste convidado" actionListener="#{nextBookingsBean.onCheckIn}">
+									<p:graphicImage value="../images/minus.png"/>
+								</p:commandLink>
+							</p:column>
+						</p:dataTable>
+					</p:rowExpansion>
+				</p:dataTable>
 			</c:when>
 			<c:otherwise>
 				<p:messages id="no-bookings" severity="info" autoUpdate="true" style="margin: 10px;"/>
 			</c:otherwise>
 		</c:choose>
 	</h:form>
+	<p:dialog id="checkinDialog" widgetVar="checkinDialog" header="#{msg['booking.dialog.header']}" modal="true" draggable="false" 
+			  resizable="false" showEffect="fade" hideEffect="fade" dynamic="true" onHide="PF('wizard').loadStep('term-of-use', true);">
+		<p:wizard widgetVar="wizard" showStepStatus="false" showNavBar="false">
+			<p:tab id="term-of-use">
+				<p:panelGrid id="bookingDetails-#{tabId}" columns="1" styleClass="no-margin no-border" style="width: 700px;">
+					<p:panelGrid columns="2" styleClass="no-margin no-border" style="width: 100%;">
+						<p:column>
+							<h:outputText value="#{msg['room']}: #{calendarBean.booking.resource.name} " style="font-size: 14px;"/>
+							<p:panelGrid columns="5" style="font-size: 14px; margin-bottom: 10px;">
+								<h:outputText value="#{calendarBean.booking.beginDate}" style="margin: 0px 3px 0px 0px;">
+									<f:convertDateTime pattern="'#{msg['day']}:' dd/MM/yyyy" />
+								</h:outputText>
+								<h:outputText value="das" style="margin: 0px 3px 0px 0px"/>
+								<h:outputText value="#{calendarBean.beginTime}:00h" style="margin: 0px 3px 0px 0px;" rendered="#{not(calendarBean.isTimeSelectionEnabled())}"/>
+								<p:selectOneMenu id="startTime" value="#{calendarBean.beginTime}" required="true" requiredMessage="#{msg['hour.begin.not.selected']}"
+												 rendered="#{calendarBean.isTimeSelectionEnabled()}" style="margin: 0px 3px 0px 0px; font-size: 12px;">
+									<f:selectItem itemLabel="#{msg['start']}" noSelectionOption="true"/>
+									<c:forEach var="i" begin="10" end="21">
+										<f:selectItem itemLabel="${i}:00h" itemValue="${i}"/>
+									</c:forEach>
+								</p:selectOneMenu>
+								<h:outputText value="às" style="margin: 0px 3px 0px 0px"/>
+								<h:outputText value="#{calendarBean.endTime}:00h" style="margin: 0px 3px 0px 0px" rendered="#{not(calendarBean.isTimeSelectionEnabled())}"/>
+								<p:selectOneMenu id="endTime" value="#{calendarBean.endTime}" required="true" requiredMessage="#{msg['hour.end.not.selected']}"
+												 rendered="#{calendarBean.isTimeSelectionEnabled()}" style="font-size: 12px;">
+									<f:selectItem itemLabel="#{msg['end']}" noSelectionOption="true"/>
+									<c:forEach var="i" begin="11" end="22">
+										<f:selectItem itemLabel="${i}:00h" itemValue="${i}"/>
+									</c:forEach>
+								</p:selectOneMenu>
+							</p:panelGrid>
+						</p:column>
+						<p:column>
+							<p:selectOneMenu value="#{calendarBean.booking.domain}" rendered="#{calendarBean.flats.size() > 1}" required="true" requiredMessage="#{msg['flat.not.selected']}" 
+											 converter="selectItemsConverter" style="float: right; vertical-align: top">
+								<f:selectItem itemLabel="#{msg['flat']}" noSelectionOption="true"/>
+								<f:selectItems value="#{calendarBean.flats}" var="flat" itemLabel="#{msg['flat']} #{flat.number} - #{msg['block']} #{flat.block}" itemValue="#{flat}"/>
+							</p:selectOneMenu>
+							<h:outputText value="#{msg['flat']} #{calendarBean.flats.get(0).number} - #{msg['block']} #{calendarBean.flats.get(0).block}" 
+										  rendered="#{calendarBean.flats.size() == 1}" style=" float: right; font-size: 14px;"/>
+						</p:column>
+					</p:panelGrid>
+	
+					<p:panel header="#{msg['agreement.term']}" styleClass="no-margin panel">
+						<p:media id="agreement" width="100%" height="350px" style="margin: 0px 0px 0px;" value="#{calendarBean.booking.resource.agreement.path}?targetExtension=pdf" player="pdf">  
+							<h:outputText value="#{msg['media.not.supported']}" escape="false"/>
+						</p:media>
+					</p:panel>
+	
+					<p:selectBooleanCheckbox id="deal" value="#{calendarBean.deal}" itemLabel="#{msg['agreement.deal']}" 
+											 validator="#{calendarBean.validateCheckbox}" validatorMessage="#{msg['agreement.deal.unchecked']}"
+											 style="margin: 10px 0px 0px"/>
+
+					<p:panelGrid columns="2" style="float: right; height: 30px; overflow: hidden; margin: 20px 0px 10px 0px;">
+						<p:commandButton id="cancelBookingBtn" value="#{msg.cancel}" type="button" onclick="PF('bookingDialog-#{tabId}').hide();" global="false" style="padding: 2px; margin-right: 10px; width: 85px"/>
+						<p:commandButton value="#{msg['forward']}" onclick="PF('wizard').next();" style="float: right; padding: 2px; width: 85px;"/>
+					</p:panelGrid>
+				</p:panelGrid>
+			</p:tab>
+			<p:tab id="guests">
+				<p:panelGrid id="bookingGuests-#{tabId}" columns="1" styleClass="no-margin no-border" style="width: 700px;">
+					<p:panelGrid id="guest-search" columns="5" styleClass="no-border no-background no-margin2" style="width: 100%; margin: 10px 0px 10px 0px;">
+						<p:outputLabel value="#{msg['name']}: "/>
+						<p:inputText widgetVar="firstName" value="#{calendarBean.firstName}" style="width: 200px; font-style: italic;"/>
+						<p:outputLabel value="#{msg['surname']}: "/>
+						<p:inputText widgetVar="lastName" value="#{calendarBean.lastName}" style="width: 200px; font-style: italic;"/>
+						<p:commandLink title="#{msg['add']}" actionListener="#{calendarBean.onGuestAdd}" update="guest-search,personTable,:outputMsg" partialSubmit="true" process="@parent" style="float: right; padding: 2px;">
+							<h:graphicImage value="../images/plus.png" width="28" height="28"/>
+						</p:commandLink>
+					</p:panelGrid>
+
+					<p:panel header="#{msg['guest.list.header']}" style="height: 405px; padding: 0px" styleClass="no-margin2 panel">
+						<p:dataTable widgetVar="personTable" id="personTable" var="person" value="#{calendarBean.booking.guests}"  
+						             rowKey="#{person.id}" style="margin: 0px 0px 0px; width: 100%;" 
+						             scrollable="true" scrollHeight="370" emptyMessage="" styleClass="no-header no-margin">
+							<p:column>
+								<h:outputText value="#{person.firstName} #{person.lastName}" style="font-size: 14px; color: black; font-weight: bold;text-transform: uppercase; margin: 6px;"/>
+							</p:column>
+							<p:column style="width: 55px">
+								<p:commandLink title="#{msg['remove.guest']}" update="personTable,:outputMsg" actionListener="#{calendarBean.onGuestRemove}" partialSubmit="true" process="@this">
+									<h:graphicImage value="../images/cancel2.png" style="margin: 6px;"/>
+								</p:commandLink>
+							</p:column>
+						</p:dataTable>
+					</p:panel>
+					<p:panelGrid columns="2" style="float: right; height: 30px; overflow: hidden; margin: 20px 0px 10px 0px;">
+						<p:commandButton value="#{msg['back']}" onclick="PF('wizard').back();" style="float: right; padding: 2px; width: 85px; margin-right: 10px;"/>
+						<p:commandButton id="bookingConfirmBtn" value="#{msg.book}" rendered="#{not(calendarBean.isCancelEnable())}" oncomplete="PF('passwordDialog-#{tabId}').show();" style="padding: 2px; width: 88px; float: right;">
+							<p:confirm header="#{msg['confirm.dialog.header']}" message="#{msg['bkg.deadline']}" icon="ui-icon-alert"/>
+						</p:commandButton>
+						<p:commandButton id="bookingBtn" value="#{msg.book}" rendered="#{calendarBean.isCancelEnable()}" oncomplete="PF('passwordDialog-#{tabId}').show();" style="padding: 2px; width: 88px; float: right;"/>
+					</p:panelGrid>
+				</p:panelGrid>
+			</p:tab>
+		</p:wizard>
+	</p:dialog>
 </f:view>
