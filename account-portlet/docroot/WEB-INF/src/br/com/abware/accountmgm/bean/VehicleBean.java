@@ -142,9 +142,9 @@ public class VehicleBean extends BaseBean {
 	public void onVehicleClaim() {
 		try {
 			vehicleService.claim(vehicle);
-		} catch (BusinessException e) {
-			MessageUtils.addMessage(FacesMessage.SEVERITY_WARN, e.getMessage(), e.getArgs());
-			RequestContext.getCurrentInstance().addCallbackParam("exception", true);
+//		} catch (BusinessException e) {
+//			MessageUtils.addMessage(FacesMessage.SEVERITY_WARN, e.getMessage(), e.getArgs());
+//			RequestContext.getCurrentInstance().addCallbackParam("exception", true);
 		} catch (Exception e) {
 			MessageUtils.addMessage(FacesMessage.SEVERITY_ERROR, "general.failure", null);
 			RequestContext.getCurrentInstance().addCallbackParam("exception", true);
