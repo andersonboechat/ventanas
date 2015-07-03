@@ -1,8 +1,8 @@
--- MySQL dump 10.13  Distrib 5.6.23, for Win64 (x86_64)
+-- MySQL dump 10.13  Distrib 5.6.23, for Win32 (x86)
 --
--- Host: localhost    Database: jcondo
+-- Host: 127.0.0.1    Database: ventanas
 -- ------------------------------------------------------
--- Server version	5.6.19-log
+-- Server version	5.6.22
 
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
 /*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
@@ -23,7 +23,7 @@ DROP TABLE IF EXISTS `jco_access_log`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `jco_access_log` (
-  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `id` bigint(20) NOT NULL,
   `entity` int(1) NOT NULL,
   `type` int(1) NOT NULL,
   `date` datetime NOT NULL,
@@ -58,7 +58,7 @@ DROP TABLE IF EXISTS `jco_booking`;
 CREATE TABLE `jco_booking` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `domainId` bigint(20) NOT NULL,
-  `personId` bigint(20) DEFAULT '0',
+  `personId` bigint(20) NOT NULL,
   `resourceId` bigint(20) NOT NULL,
   `beginDate` datetime NOT NULL,
   `endDate` datetime NOT NULL,
@@ -67,7 +67,7 @@ CREATE TABLE `jco_booking` (
   `updateDate` datetime NOT NULL,
   `updateUser` bigint(20) NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=365 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=14 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -86,6 +86,20 @@ CREATE TABLE `jco_booking_guest` (
   `updateDate` datetime NOT NULL,
   `updateUser` bigint(20) NOT NULL,
   PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=8 DEFAULT CHARSET=latin1;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `jco_booking_person`
+--
+
+DROP TABLE IF EXISTS `jco_booking_person`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `jco_booking_person` (
+  `bookingId` bigint(20) NOT NULL,
+  `personId` bigint(20) NOT NULL,
+  PRIMARY KEY (`bookingId`,`personId`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -105,7 +119,7 @@ CREATE TABLE `jco_domain` (
   `updateDate` datetime NOT NULL,
   `updateUser` bigint(20) NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=1332 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=23 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -116,7 +130,7 @@ DROP TABLE IF EXISTS `jco_event`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `jco_event` (
-  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `id` bigint(20) NOT NULL,
   `date` datetime NOT NULL,
   `detail` varchar(200) DEFAULT NULL,
   `updateDate` datetime NOT NULL,
@@ -156,7 +170,7 @@ CREATE TABLE `jco_kinship` (
   `updateDate` datetime NOT NULL,
   `updateUser` bigint(20) NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=9 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -174,7 +188,7 @@ CREATE TABLE `jco_membership` (
   `updateDate` datetime NOT NULL,
   `updateUser` bigint(20) NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=130 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=16 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -195,7 +209,7 @@ CREATE TABLE `jco_occurrence` (
   `updateDate` datetime NOT NULL,
   `updateUser` bigint(20) NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=18 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -209,11 +223,11 @@ CREATE TABLE `jco_occurrence_answer` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `personId` bigint(20) NOT NULL,
   `text` varchar(1000) NOT NULL,
-  `date` datetime NOT NULL,
+  `date` datetime DEFAULT NULL,
   `updateDate` datetime NOT NULL,
   `updateUser` bigint(20) NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -234,7 +248,7 @@ CREATE TABLE `jco_parking` (
   `updateUser` bigint(20) NOT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `code_UNIQUE` (`code`)
-) ENGINE=InnoDB AUTO_INCREMENT=1491 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=18 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -270,7 +284,45 @@ CREATE TABLE `jco_person` (
   `updateUser` bigint(20) NOT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `identity_UNIQUE` (`identity`)
-) ENGINE=InnoDB AUTO_INCREMENT=274 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=22 DEFAULT CHARSET=latin1;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `jco_person_deficiency`
+--
+
+DROP TABLE IF EXISTS `jco_person_deficiency`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `jco_person_deficiency` (
+  `id` bigint(20) NOT NULL,
+  `personId` bigint(20) NOT NULL,
+  `type` int(1) NOT NULL,
+  `description` varchar(45) DEFAULT NULL,
+  `updateDate` datetime NOT NULL,
+  `updateUser` bigint(20) NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `person_deficiency_UNIQUE` (`type`,`personId`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `jco_pet`
+--
+
+DROP TABLE IF EXISTS `jco_pet`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `jco_pet` (
+  `id` bigint(20) NOT NULL,
+  `domainId` bigint(20) NOT NULL,
+  `imageId` bigint(20) DEFAULT NULL,
+  `type` int(2) NOT NULL,
+  `description` varchar(45) DEFAULT NULL,
+  `updateDate` datetime NOT NULL,
+  `updateUser` bigint(20) NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -288,6 +340,7 @@ CREATE TABLE `jco_resource` (
   `description` varchar(1000) DEFAULT NULL,
   `available` tinyint(1) NOT NULL DEFAULT '1',
   `price` double DEFAULT '0',
+  `capacity` int(2) DEFAULT '0',
   `updateDate` datetime NOT NULL,
   `updateUser` bigint(20) NOT NULL,
   PRIMARY KEY (`id`)
@@ -329,7 +382,7 @@ CREATE TABLE `jco_vehicle` (
   PRIMARY KEY (`id`),
   UNIQUE KEY `license_UNIQUE` (`license`),
   KEY `domain_INDEX` (`domainId`)
-) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=34 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -347,30 +400,6 @@ CREATE TABLE `jco_vehicle_access_log` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Dumping routines for database 'jcondo'
---
-/*!50003 DROP PROCEDURE IF EXISTS `parkings_generate` */;
-/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
-/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
-/*!50003 SET @saved_col_connection = @@collation_connection */ ;
-/*!50003 SET character_set_client  = utf8 */ ;
-/*!50003 SET character_set_results = utf8 */ ;
-/*!50003 SET collation_connection  = utf8_general_ci */ ;
-/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
-/*!50003 SET sql_mode              = 'STRICT_TRANS_TABLES,NO_AUTO_CREATE_USER,NO_ENGINE_SUBSTITUTION' */ ;
-DELIMITER ;;
-CREATE DEFINER=`root`@`localhost` PROCEDURE `parkings_generate`(amount INT)
-BEGIN
-	SET @i=0;
-	insert into jcondo.jco_parking select 0, f.id, null, null, lpad(@i:=@i+1, 3, '0'), 0, current_timestamp, 10405 from jcondo.jco_flat f, jcondo.jco_parking_tmp p where f.number = p.number and f.block = p.block;
-END ;;
-DELIMITER ;
-/*!50003 SET sql_mode              = @saved_sql_mode */ ;
-/*!50003 SET character_set_client  = @saved_cs_client */ ;
-/*!50003 SET character_set_results = @saved_cs_results */ ;
-/*!50003 SET collation_connection  = @saved_col_connection */ ;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 
 /*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
@@ -381,4 +410,4 @@ DELIMITER ;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2015-05-31 20:25:47
+-- Dump completed on 2015-07-03 17:13:40
