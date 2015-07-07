@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+
+<f:view
+	xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:c="http://java.sun.com/jsp/jstl/core"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:ui="http://java.sun.com/jsf/facelets">
+<ui:composition template="../main-template.xhtml">
+	<ui:define name="app-view">
+		<c:set var="personViewer" value="#{flatView.personBean}"/>
+		<c:set var="imageUploader" value="#{flatView.personBean.imageUploadBean}"/>
+		<c:set var="personCamera" value="#{flatView.personBean.cameraBean}"/>
+		<c:set var="vehicleViewer" value="#{flatView.vehicleBean}"/>
+		<c:set var="vehiclePictureUploader" value="#{flatView.vehicleBean.imageUploadBean}"/>	
+		<c:set var="supplierViewer" value="#{flatView.supplierBean}"/>
+		<c:set var="documentViewer" value="#{flatView.documentBean}"/>
+
+		<h:form id="flat-form">
+			<p:panelGrid id="flat-filters" columns="1" styleClass="no-background no-border flats" columnClasses="menu-cmds-col3">
+		    	<h:outputText value="Apartamento #{flatView.flats.get(0).number} - Bloco #{flatView.flats.get(0).block}" rendered="#{flatView.flats.size() == 1}" style="font-size: 14px; color: black; font-weight: bold;"/>
+		    	<p:selectOneMenu id="flat" value="#{flatView.flat}" filter="true" filterMatchMode="contains" converter="selectItemsConverter" rendered="#{flatView.flats.size() > 1}">
+					<f:selectItems var="flat" value="#{flatView.flats}" itemLabel="Apartamento #{flat.number} - Bloco #{flat.block}" itemValue="#{flat}"/>
+					<p:ajax event="change" listener="#{flatView.onFlatSelect}" update=":tabs:person-form:personTable,:tabs:vehicle-form:vehicleTable"/>
+		    	</p:selectOneMenu>
+		    	<p:fieldset legend="Contato Principal" styleClass="no-background" style="width: 400px;">
+		    		<p:panelGrid columns="2" styleClass="no-background no-border" style="width: 100%">
+			    		<p:graphicImage value="http://localhost/image/user_male_portrait?img_id=11707&amp;pfdrid_c=true" styleClass="foto" height="80" width="52" style="float: left"/>
+						<p:panelGrid columns="2" styleClass="no-background no-border" style="float: left; width: 100%">
+							<h:outputText value="Nome:" style="font-size: 14px; color: black; font-weight: bold;"/>
+			       			<h:outputText value="Rose Beltrão das Neves" style="font-size: 14px; color: black; "/>
+			       			<h:outputText value="Telefone:" style="font-size: 14px; color: black; font-weight: bold;"/>
+			       			<h:outputText value="+55 21 98765-4321" style="font-size: 14px; color: black;"/>
+						</p:panelGrid>
+					</p:panelGrid>
+				</p:fieldset>
+			</p:panelGrid>
+		</h:form>
+
+		<p:tabView id="tabs" style="padding: 0">
+			<p:tab title="Pessoas"><ui:include src="person-view.xhtml"/></p:tab>
+			<p:tab title="Veículos"><ui:include src="vehicle-view.xhtml"/></p:tab>
+			<p:tab title="Documentos">
+				<p:dataTable id="documentTable" widgetVar="documentTable" var="doc" value="#{documentViewer.model}" scrollable="true" 
+					paginator="true" paginatorAlwaysVisible="false" paginatorPosition="bottom" paginatorTemplate="{PreviousPageLink} {CurrentPageReport} {NextPageLink}"
+					emptyMessage="Nenhum documento encontrado" styleClass="no-header">
+					<f:facet name="header">
+						<p:panelGrid columns="1" columnClasses="docs-header" styleClass="no-background no-border no-margin" style="width: 100%;">
+							<h:outputText value="Documentos"/>
+						</p:panelGrid>
+					</f:facet>
+					<p:column>
+						<p:commandLink value="#{doc.name}" partialSubmit="true" process="@this" target="blank">
+							<f:setPropertyActionListener target="#{documentViewer.document}" value="#{doc}"/>
+						</p:commandLink>
+					</p:column>
+					<p:column style="width: 29%; text-align: center">
+						<h:outputText value="Apt. #{doc.domain.number} - Bl. #{doc.domain.block}"/>
+					</p:column>						
+				</p:dataTable>
+			</p:tab>
+		</p:tabView>
+		
+		<p:dialog header="Documentos" widgetVar="documentDialog" draggable="true" resizable="false" modal="true" closable="false" visible="false">
+			<h:form id="document-form">
+				<p:panelGrid id="model-details" columns="1" styleClass="no-border" style="margin: 10px 0px 20px 0px; text-align: justify" cellpadding="10">
+			    	<h:outputText value="Escolha o apartamento para o qual deseja alugar esta vaga e confirme clicando no botão Alugar."/>
+			    	<p:selectOneMenu id="parkingDomain" value="#{documentViewer.document}" converter="selectItemsConverter">
+			    		<f:selectItem itemLabel="Selecione" noSelectionOption="true"/>
+						<f:selectItems var="flat" value="#{flatView.flats}" itemLabel="Apartamento #{flat.number} - Bloco #{flat.block}" itemValue="#{flat}"/>
+			    	</p:selectOneMenu>
+				</p:panelGrid>
+				<p:commandButton value="Cancelar" oncomplete="PF('documentDialog').hide();" partialSubmit="true" process="@this" style="float: right; width: 80px; margin: 0px 0px 10px 5px;">
+					<f:setPropertyActionListener target="#{documentViewer.document}" value=""/>
+				</p:commandButton>
+				<p:commandButton value="Enviar" actionListener="#{documentViewer.onSend}" update=":outputMsg" oncomplete="if (!args.validationFailed &amp;&amp; !args.exception) {PF('documentDialog').hide();}" style="float: right; width: 80px; margin: 0px 0px 10px 5px;"/>
+			</h:form>
+		</p:dialog>
+	</ui:define>
+</ui:composition>
+</f:view>

@@ -1,0 +1,195 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+
+<f:view
+	xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:c="http://java.sun.com/jsp/jstl/core"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:ui="http://java.sun.com/jsf/facelets">
+
+	<h:form id="person-form">
+		<p:panelGrid columns="2" styleClass="menu-cmds no-background no-border2" columnClasses="menu-cmds-col1,menu-cmds-col2">
+			<p:column>
+				<p:panelGrid columns="2" styleClass="menu-cmds" columnClasses="menu-cmds-col1,menu-cmds-col2">
+					<p:column>
+						<p:commandLink title="Cadastrar usuário" actionListener="#{personViewer.onPersonCreate}" 
+										 partialSubmit="true" process="@this" update="@widgetVar(personDialog)" oncomplete="PF('personDialog').show();"
+										 style="font-size: 12px; margin: 0; padding:0">
+							<h:graphicImage value="../images/user_add.png" width="30" height="30" style="margin: 0px 10px 0px 0px; vertical-align: middle"/>
+						</p:commandLink>
+						<p:commandLink title="Excluir usuários selecionados" actionListener="#{personViewer.onPeopleDelete}" 
+										partialSubmit="true" process="@this,personTable" update="personTable" style="font-size: 12px; margin: 0; padding:0">
+							<h:graphicImage value="../images/user_erase.png" width="30" height="30" style="margin: 0; vertical-align: middle"/>
+							<p:confirm header="#{msg['person.delete.confirm']}" message="#{msg['person.delete.message']}" icon="ui-icon-alert"/>
+						</p:commandLink>
+					</p:column>
+					<p:column>
+						<p:inputText id="personName" value="#{personViewer.personName}" placeholder="Buscar pelo nome" style="font-style: italic; width: 100%">
+							<p:ajax event="change" listener="#{personViewer.onPersonSearch}" update="personTable" partialSubmit="true" process="@this"/>
+						</p:inputText>
+					</p:column>
+				</p:panelGrid>
+		
+				<p:dataTable widgetVar="personTable" id="personTable" var="person" value="#{personViewer.model}"  
+				             paginator="false" emptyMessage="Nenhum usuário cadastrado" selection="#{personViewer.selectedPeople}" 
+				             rowKey="#{person.id}" disabledSelection="#{!personViewer.canEditPerson(person)}">
+				    <p:ajax event="page" global="false"/>
+					<p:column style="width: 63px;">
+						<p:graphicImage value="#{person.picture.path}" styleClass="foto" height="50" width="32"/>
+					</p:column>
+					<p:column style="vertical-align: top">
+						<p:panelGrid columns="1" styleClass="no-background no-border">
+			       			<h:outputText value="#{person.firstName} #{person.lastName}" style="font-size: 14px; color: black; font-weight: bold;"/>
+			       			<p:dataGrid var="membership" value="#{person.memberships}" columns="1" styleClass="no-background no-border no-margin memberships">
+								<h:outputText value="#{personViewer.displayMembership(membership)}" />
+			       			</p:dataGrid>
+						</p:panelGrid>
+					</p:column>
+					<p:column style="width: 35px">
+						<p:commandLink title="Editar este usuário" actionListener="#{personViewer.onPersonEdit}" oncomplete="PF('personDialog').show();" partialSubmit="true" process="@this" update="@widgetVar(personDialog)" global="false" disabled="#{!personViewer.canEditPerson(person)}">
+							<h:graphicImage value="../images/edit.png"/>
+						</p:commandLink>
+					</p:column>
+					<p:column style="width: 35px">
+						<p:commandLink title="Excluir este usuário" actionListener="#{personViewer.onPersonDelete}" oncomplete="if (!args.validationFailed &amp;&amp; !args.exception) {PF('personTable').update();}" partialSubmit="true" process="@this" global="false" update="@widgetVar(personTable),:outputMsg" disabled="#{!personViewer.canEditPerson(person)}">
+							<h:graphicImage value="../images/cancel2.png" />
+							<p:confirm header="#{msg['person.delete.confirm']}" message="#{msg['person.delete.message']}" icon="ui-icon-alert"/>
+						</p:commandLink>
+					</p:column>
+				</p:dataTable>
+			</p:column>
+			<p:column>
+				<p:panelGrid columns="1">
+					<p:commandLink value="Moradores"/>
+					<p:commandLink value="Convidados"/>
+					<p:commandLink value="Visitantes"/>
+					<p:commandLink value="Empregados"/>
+				</p:panelGrid>
+			</p:column>
+		</p:panelGrid>
+	</h:form>
+
+	<p:dialog header="#{msg['dlg.user.signon']}" widgetVar="personDialog" draggable="true" resizable="false" modal="true" closable="false" visible="false" style="background: #f9f9f9">
+		<h:form id="person-details-form">
+			<p:panelGrid id="model-details" styleClass="no-background no-border" style="margin: 10px 0px 20px 0px;" cellpadding="10">
+				<p:row>
+					<p:column styleClass="my-account-col1">
+						<p:panelGrid columns="1" styleClass="no-margin">
+							<p:graphicImage id="portrait" value="#{personViewer.person.picture.path}" styleClass="foto user-image" width="#{imageUploader.width}" height="#{imageUploader.height}"/>
+							<p:panelGrid columns="2" columnClasses="picture" styleClass="pic-cmds" style="text-align: center; float: right">
+								<p:commandLink title="#{msg['send.picture']}" update=":tabs:person-picture-form" oncomplete="PF('personPictureDialog').show();" partialSubmit="true" process="@this" global="false" styleClass="column">
+									<h:graphicImage value="../images/send-pic.png"/>
+									<f:setPropertyActionListener target="#{imageUploader.image.path}" value=""/>
+								</p:commandLink>
+								<p:commandLink title="#{msg['take.picture']}" actionListener="#{personCamera.setRender(true)}" update=":tabs:person-camera-form" oncomplete="PF('personCameraDialog').show();" partialSubmit="true" global="false" process="@this" styleClass="column">
+									<h:graphicImage value="../images/take-pic.png" width="38" height="31"/>
+									<f:setPropertyActionListener target="#{personCamera.image.path}" value=""/>
+								</p:commandLink>
+							</p:panelGrid>
+				        </p:panelGrid>
+					</p:column>
+					<p:column styleClass="my-account-col2">
+						<p:panelGrid columns="4" styleClass="userPanel" style=" margin: 0; padding: 0;">
+						<p:row>
+							<p:column styleClass="labelClm"><p:outputLabel for="email" value="Email: "/></p:column>
+							<p:column colspan="3" styleClass="fieldClm">
+								<p:inputText id="email" value="#{personViewer.person.emailAddress}" required="true" 
+											 requiredMessage="#{msg['person.email.empty']}" readonly="#{!personViewer.canEditInfo()}"/>
+							</p:column>
+						</p:row>
+						<p:row>
+							<p:column styleClass="labelClm"><p:outputLabel for="firstName" value="Nome: "/></p:column>
+							<p:column colspan="3" styleClass="fieldClm">
+								<p:inputText id="firstName" value="#{personViewer.person.firstName}" required="true" 
+											 requiredMessage="#{msg['person.firstname.empty']}" readonly="#{!personViewer.canEditInfo()}"/>
+							</p:column>
+						</p:row>									
+						<p:row>
+							<p:column styleClass="labelClm"><p:outputLabel for="lastName" value="Sobrenome: "/></p:column>
+							<p:column colspan="3" styleClass="fieldClm">
+								<p:inputText id="lastName" value="#{personViewer.person.lastName}" required="true" 
+											 requiredMessage="#{msg['person.lastname.empty']}" readonly="#{!personViewer.canEditInfo()}"/>
+							</p:column>
+						</p:row>
+						<p:row>
+							<p:column styleClass="labelClm"><p:outputLabel for="identity" value="CPF: "/></p:column>
+							<p:column colspan="3" styleClass="fieldClm">
+								<p:inputMask id="identity" value="#{personViewer.person.identity}" mask="999.999.999-99" required="true" 
+											 requiredMessage="#{msg['person.identity.empty']}" readonly="#{!personViewer.canEditInfo()}"/>
+							</p:column>
+						</p:row>
+						<p:row>
+							<p:column styleClass="labelClm"><p:outputLabel for="male" value="Sexo:"/></p:column>
+							<p:column>
+								<p:selectOneMenu id="male" value="#{personViewer.person.gender}" required="false" style="vertical-align: middle">
+									<f:selectItems var="gender" value="#{personViewer.genders}" itemLabel="#{msg[gender.label]}"/>
+								</p:selectOneMenu>
+							</p:column>
+							<p:column styleClass="labelClm"><p:outputLabel for="birthday" value="Nascimento:"/></p:column>
+							<p:column styleClass="fieldClm">
+								<p:calendar id="birthday" mode="popup" pattern="dd/MM/yyyy" value="#{personViewer.person.birthday}"
+											navigator="true" yearRange="c-100:c+0" styleClass="birthday" mask="true" locale="pt" readonly="#{!personViewer.canEditInfo()}"/>
+							</p:column>
+						</p:row>
+						<p:row>
+							<p:column styleClass="labelClm"><p:outputLabel for="type" value="Tipo: "/></p:column>
+							<p:column colspan="3" styleClass="fieldClm">
+								<h:outputText value="#{msg[personViewer.getMembership()]}" rendered="#{!personViewer.canEditPerson(personViewer.person)}"/>
+								<p:selectOneMenu id="type" style="vertical-align: middle; width: 150px; margin-right: 0px;" rendered="#{personViewer.canEditPerson(personViewer.person)}">
+									<f:selectItems var="type" value="#{personViewer.types}" itemLabel="#{msg[type.label]}"/>
+								</p:selectOneMenu>
+							</p:column>
+						</p:row>
+						</p:panelGrid>
+					</p:column>
+				</p:row>
+			</p:panelGrid>
+			<p:commandButton value="Cancelar" type="button" onclick="PF('personDialog').hide();" style="float: right; width: 90px; margin: 0px 18px 10px 0px;"/>
+			<p:commandButton value="Salvar" actionListener="#{personViewer.onPersonSave}" update="@widgetVar(personTable), :outputMsg" oncomplete="if (!args.validationFailed) { if(!args.exception) {PF('personDialog').hide();} else { if(args.alert) {PF('alertDialog').show();}}}" style="float: right; width: 90px; margin: 0px 10px 10px 5px;"/>
+		</h:form>
+	</p:dialog>
+
+	<p:dialog id="personPictureDialog" widgetVar="personPictureDialog" header="Envio de foto" resizable="false" 
+			  draggable="false" modal="true">
+		<h:form id="person-picture-form" enctype="multipart/form-data">
+			<p:fileUpload id="image1" label="Selecionar Foto" fileUploadListener="#{imageUploader.onImageUpload}" auto="true" update="person-picture-form" rendered="#{empty imageUploader.image.path}"/>
+			<p:panel rendered="#{!(empty imageUploader.image.path)}" style="border: 0px !important;">
+				<p:panel styleClass="cropper2">
+					<p:imageCropper value="#{imageUploader.croppedImage}" image="#{imageUploader.image.path}" initialCoords="0,0,#{imageUploader.width},#{imageUploader.height}" minSize="#{imageUploader.width},#{imageUploader.height}" maxSize="#{imageUploader.width},#{imageUploader.height}"/>
+				</p:panel>
+				<p:panel style="margin: 0px auto; text-align: center; padding: 15px 0px; border: none;">
+					<p:commandButton value="Recortar" actionListener="#{imageUploader.onImageCropp}" update=":tabs:person-details-form:portrait" oncomplete="PF('personPictureDialog').hide();">
+						<f:setPropertyActionListener value="#{imageUploader.image}" target="#{personViewer.person.picture}"/>
+					</p:commandButton>
+					<p:commandButton value="Cancelar" oncomplete="PF('personPictureDialog').hide();" partialSubmit="true" process="@this" global="false">
+						<f:setPropertyActionListener target="#{imageUploader.image.path}" value=""/>
+					</p:commandButton>
+				</p:panel>
+			</p:panel>
+		</h:form>
+	</p:dialog>
+	
+	<p:dialog id="personCameraDialog" widgetVar="personCameraDialog" header="Captura de Imagem" resizable="false" 
+			  draggable="false" modal="true" closeOnEscape="true" visible="false" style="background: #f9f9f9">
+		<h:form id="person-camera-form">
+			<p:panelGrid columns="2" styleClass="no-border no-background">
+				<p:photoCam widgetVar="photoCam1" listener="#{personCamera.onCapture}" update="croppedPhoto" styleClass="foto" rendered="#{personCamera.render}"/>
+				<p:outputPanel id="croppedPhoto" style="width: 320px; height: 240px" styleClass="foto">
+					<p:imageCropper value="#{personCamera.croppedImage}" image="#{personCamera.image.path}" 
+									initialCoords="0,0,#{personCamera.width},#{personCamera.height}" 
+									minSize="#{personCamera.width},#{personCamera.height}" 
+									maxSize="#{personCamera.width},#{personCamera.height}"/>
+				</p:outputPanel>
+			</p:panelGrid>
+			<p:commandButton value="Recortar" actionListener="#{personCamera.onCropp}" 
+							 update=":tabs:person-details-form:portrait" global="false" oncomplete="PF('personCameraDialog').hide();"
+							 style="float: right; padding: 2px; margin: 15px 5px;">
+				<f:setPropertyActionListener value="#{personCamera.image}" target="#{personViewer.person.picture}"/>
+			</p:commandButton>
+			<p:commandButton value="Capturar" type="button" onclick="PF('photoCam1').capture();" style="float: right; padding: 2px; margin: 15px 5px;"/>
+		</h:form>
+	</p:dialog>
+
+
+</f:view>

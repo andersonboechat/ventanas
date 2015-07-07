@@ -49,7 +49,7 @@
 		<portlet-class>javax.portlet.faces.GenericFacesPortlet</portlet-class>
 		<init-param>
 			<name>javax.portlet.faces.defaultViewId.view</name>
-			<value>/views/flats/flat-view2.xhtml</value>
+			<value>/views/flat/flat-view.xhtml</value>
 		</init-param>
 		<expiration-cache>0</expiration-cache>
 		<supports>
