@@ -1,5 +1,6 @@
 package br.com.atilo.jcondo.manager.flat;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.annotation.PostConstruct;
@@ -7,11 +8,16 @@ import javax.faces.application.FacesMessage;
 import javax.faces.bean.ManagedBean;
 import javax.faces.bean.ManagedProperty;
 import javax.faces.bean.ViewScoped;
+import javax.faces.event.AjaxBehaviorEvent;
 
 import org.apache.log4j.Logger;
 import org.apache.myfaces.commons.util.MessageUtils;
+import org.primefaces.component.selectoneradio.SelectOneRadio;
+import org.primefaces.context.RequestContext;
 
 import br.com.abware.jcondo.core.model.Flat;
+import br.com.abware.jcondo.core.model.PetType;
+import br.com.abware.jcondo.exception.BusinessException;
 import br.com.atilo.jcondo.core.service.FlatServiceImpl;
 import br.com.atilo.jcondo.core.service.PersonServiceImpl;
 
@@ -40,6 +46,8 @@ public class FlatBean {
 	private List<Flat> flats;
 
 	private Flat flat;
+	
+	private List<PetType> petTypes;
 
 	@PostConstruct
 	public void init() {
@@ -50,6 +58,10 @@ public class FlatBean {
 			vehicleBean.init(flat);
 			supplierBean.init(flat);
 			documentBean.init(flat);
+			
+			petTypes = new ArrayList<PetType>();
+			petTypes.add(PetType.DOG);
+			petTypes.add(PetType.OTHER);
 		} catch (Exception e) {
 			LOGGER.fatal("Failure on flat initialization", e);
 			MessageUtils.addMessage(FacesMessage.SEVERITY_FATAL, "general.failure", null);
@@ -65,9 +77,15 @@ public class FlatBean {
 	
 	public void onFlatSave() {
 		try {
+			flat = flatService.update(flat);
+			MessageUtils.addMessage(FacesMessage.SEVERITY_INFO, "flats.success", null);
+		} catch (BusinessException e) {
+			LOGGER.warn("Business failure on flat update: " + e.getMessage());
+			MessageUtils.addMessage(FacesMessage.SEVERITY_WARN, e.getMessage(), e.getArgs());
+			RequestContext.getCurrentInstance().addCallbackParam("exception", true);
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			LOGGER.error("Failure on flat update", e);
+			MessageUtils.addMessage(FacesMessage.SEVERITY_FATAL, "general.failure", null);
 		}
 	}
 
@@ -81,6 +99,11 @@ public class FlatBean {
 	public void onFlatsDelete() throws Exception {
 	}
 
+	public void onOptionSelect(AjaxBehaviorEvent event) {
+		Boolean value = (Boolean) ((SelectOneRadio) event.getSource()).getValue();
+		RequestContext.getCurrentInstance().addCallbackParam("value", value);
+	}	
+	
 	public DocumentBean getDocumentBean() {
 		return documentBean;
 	}
@@ -127,6 +150,14 @@ public class FlatBean {
 
 	public void setFlat(Flat flat) {
 		this.flat = flat;
+	}
+
+	public List<PetType> getPetTypes() {
+		return petTypes;
+	}
+
+	public void setPetTypes(List<PetType> petTypes) {
+		this.petTypes = petTypes;
 	}
 
 }

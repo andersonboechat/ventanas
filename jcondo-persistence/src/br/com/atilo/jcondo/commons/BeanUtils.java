@@ -4,6 +4,7 @@ import java.lang.reflect.InvocationTargetException;
 
 import org.apache.commons.beanutils.BeanUtilsBean;
 import org.apache.commons.beanutils.ConvertUtilsBean;
+import org.apache.commons.beanutils.converters.BooleanConverter;
 
 import br.com.abware.jcondo.booking.model.Bookable;
 import br.com.abware.jcondo.booking.model.Guest;
@@ -17,6 +18,7 @@ import br.com.abware.jcondo.core.model.Image;
 import br.com.abware.jcondo.core.model.Membership;
 import br.com.abware.jcondo.core.model.Parking;
 import br.com.abware.jcondo.core.model.Person;
+import br.com.abware.jcondo.core.model.PetType;
 import br.com.abware.jcondo.core.model.Supplier;
 import br.com.abware.jcondo.core.model.Vehicle;
 import br.com.abware.jcondo.crm.model.Answer;
@@ -65,6 +67,7 @@ public class BeanUtils extends org.apache.commons.beanutils.BeanUtils {
 		 cub.register(bc, SupplierEntity.class);
 		 cub.register(bc, Guest.class);
 		 cub.register(bc, GuestEntity.class);
+		 cub.register(bc, PetType.class);
 		 
 		 DomainConverter dc = new DomainConverter();
 		 cub.register(dc, DomainEntity.class);
@@ -74,6 +77,8 @@ public class BeanUtils extends org.apache.commons.beanutils.BeanUtils {
 		 cub.register(bkc, Bookable.class);
 		 
 		 cub.register(new PersonStatusConverter(), PersonStatus.class);
+		 
+		 cub.register(new BooleanConverter(null), Boolean.class);
 	}
 	
 	public static void copyProperties(Object dest, Object orig) throws IllegalAccessException, InvocationTargetException {

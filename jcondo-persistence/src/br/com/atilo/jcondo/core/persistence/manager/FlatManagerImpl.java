@@ -19,6 +19,7 @@ import com.liferay.portal.service.ResourceLocalServiceUtil;
 import br.com.abware.jcondo.core.model.Administration;
 import br.com.abware.jcondo.core.model.Flat;
 import br.com.abware.jcondo.core.model.Person;
+import br.com.abware.jcondo.core.model.PetType;
 
 import br.com.atilo.jcondo.core.persistence.entity.FlatEntity;
 
@@ -34,6 +35,13 @@ public class FlatManagerImpl extends JCondoManager<FlatEntity, Flat> {
 	@Override
 	protected Class<FlatEntity> getEntityClass() {
 		return FlatEntity.class;
+	}
+	
+	@Override
+	protected Flat getModel(FlatEntity entity) throws Exception {
+		Flat flat = super.getModel(entity);
+		flat.setPetTypes(new ArrayList<PetType>(flat.getPetTypes()));
+		return flat;
 	}
 
 	public Flat save(Flat flat) throws Exception {
@@ -64,7 +72,7 @@ public class FlatManagerImpl extends JCondoManager<FlatEntity, Flat> {
 		String key = generateKey();
 		try {
 			openManager(key);
-			String queryString = "SELECT f FROM FlatEntity f JOIN f.people p WHERE p.id = :id ORDER BY f.block, f.number";
+			String queryString = "SELECT f FROM FlatEntity f JOIN f.memberships m WHERE m.person.id = :id ORDER BY f.block, f.number";
 			Query query = em.createQuery(queryString);
 			query.setParameter("id", person.getId());
 			return getModels(query.getResultList());

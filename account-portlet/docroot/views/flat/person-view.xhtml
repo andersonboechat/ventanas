@@ -9,65 +9,56 @@
 	xmlns:ui="http://java.sun.com/jsf/facelets">
 
 	<h:form id="person-form">
-		<p:panelGrid columns="2" styleClass="menu-cmds no-background no-border2" columnClasses="menu-cmds-col1,menu-cmds-col2">
+		<p:panelGrid columns="2" styleClass="no-border person-cmds" columnClasses="person-cmds-left,person-cmds-right">
+			<p:inputText id="personName" value="#{personViewer.personName}" placeholder="Buscar pelo nome" style="font-style: italic; width: 100%">
+				<p:ajax event="change" listener="#{personViewer.onPersonSearch}" update="personTable" partialSubmit="true" process="@this"/>
+			</p:inputText>
+
+			<p:commandButton value="Cadastrar uma pessoa" actionListener="#{personViewer.onPersonCreate}" 
+							 partialSubmit="true" process="@this" update="@widgetVar(personDialog)" oncomplete="PF('personDialog').show();"
+							 style="font-size: 12px; margin: 0; padding:0"/>
 			<p:column>
-				<p:panelGrid columns="2" styleClass="menu-cmds" columnClasses="menu-cmds-col1,menu-cmds-col2">
-					<p:column>
-						<p:commandLink title="Cadastrar usuário" actionListener="#{personViewer.onPersonCreate}" 
-										 partialSubmit="true" process="@this" update="@widgetVar(personDialog)" oncomplete="PF('personDialog').show();"
-										 style="font-size: 12px; margin: 0; padding:0">
-							<h:graphicImage value="../images/user_add.png" width="30" height="30" style="margin: 0px 10px 0px 0px; vertical-align: middle"/>
-						</p:commandLink>
-						<p:commandLink title="Excluir usuários selecionados" actionListener="#{personViewer.onPeopleDelete}" 
-										partialSubmit="true" process="@this,personTable" update="personTable" style="font-size: 12px; margin: 0; padding:0">
-							<h:graphicImage value="../images/user_erase.png" width="30" height="30" style="margin: 0; vertical-align: middle"/>
-							<p:confirm header="#{msg['person.delete.confirm']}" message="#{msg['person.delete.message']}" icon="ui-icon-alert"/>
-						</p:commandLink>
-					</p:column>
-					<p:column>
-						<p:inputText id="personName" value="#{personViewer.personName}" placeholder="Buscar pelo nome" style="font-style: italic; width: 100%">
-							<p:ajax event="change" listener="#{personViewer.onPersonSearch}" update="personTable" partialSubmit="true" process="@this"/>
-						</p:inputText>
-					</p:column>
-				</p:panelGrid>
-		
-				<p:dataTable widgetVar="personTable" id="personTable" var="person" value="#{personViewer.model}"  
-				             paginator="false" emptyMessage="Nenhum usuário cadastrado" selection="#{personViewer.selectedPeople}" 
-				             rowKey="#{person.id}" disabledSelection="#{!personViewer.canEditPerson(person)}">
-				    <p:ajax event="page" global="false"/>
-					<p:column style="width: 63px;">
-						<p:graphicImage value="#{person.picture.path}" styleClass="foto" height="50" width="32"/>
-					</p:column>
-					<p:column style="vertical-align: top">
-						<p:panelGrid columns="1" styleClass="no-background no-border">
-			       			<h:outputText value="#{person.firstName} #{person.lastName}" style="font-size: 14px; color: black; font-weight: bold;"/>
-			       			<p:dataGrid var="membership" value="#{person.memberships}" columns="1" styleClass="no-background no-border no-margin memberships">
-								<h:outputText value="#{personViewer.displayMembership(membership)}" />
-			       			</p:dataGrid>
-						</p:panelGrid>
-					</p:column>
-					<p:column style="width: 35px">
-						<p:commandLink title="Editar este usuário" actionListener="#{personViewer.onPersonEdit}" oncomplete="PF('personDialog').show();" partialSubmit="true" process="@this" update="@widgetVar(personDialog)" global="false" disabled="#{!personViewer.canEditPerson(person)}">
-							<h:graphicImage value="../images/edit.png"/>
-						</p:commandLink>
-					</p:column>
-					<p:column style="width: 35px">
-						<p:commandLink title="Excluir este usuário" actionListener="#{personViewer.onPersonDelete}" oncomplete="if (!args.validationFailed &amp;&amp; !args.exception) {PF('personTable').update();}" partialSubmit="true" process="@this" global="false" update="@widgetVar(personTable),:outputMsg" disabled="#{!personViewer.canEditPerson(person)}">
-							<h:graphicImage value="../images/cancel2.png" />
-							<p:confirm header="#{msg['person.delete.confirm']}" message="#{msg['person.delete.message']}" icon="ui-icon-alert"/>
-						</p:commandLink>
-					</p:column>
-				</p:dataTable>
+				<p:selectOneMenu id="ordering" style="font-size: 13px;">
+					<f:selectItem itemLabel="Todos" itemValue="all"/>
+					<f:selectItem itemLabel="Moradores" itemValue="resident"/>
+					<f:selectItem itemLabel="Convidados" itemValue="guest"/>
+					<f:selectItem itemLabel="Visitantes" itemValue="visitor"/>
+					<f:selectItem itemLabel="Empregados" itemValue="employee"/>
+					<p:ajax event="change" listener="#{personViewer.onPersonTypeSelect}" update="@widgetVar(personTable)"/>
+	    		</p:selectOneMenu>
 			</p:column>
-			<p:column>
-				<p:panelGrid columns="1">
-					<p:commandLink value="Moradores"/>
-					<p:commandLink value="Convidados"/>
-					<p:commandLink value="Visitantes"/>
-					<p:commandLink value="Empregados"/>
-				</p:panelGrid>
-			</p:column>
+
+			<p:commandButton value="Enviar mensagens a todos desta lista" actionListener="#{personViewer.onPersonCreate}" 
+							 partialSubmit="true" process="@this" update="@widgetVar(personDialog)" oncomplete="PF('personDialog').show();"
+							 style="font-size: 12px; margin: 0; padding:0"/>
 		</p:panelGrid>
+
+		<p:dataTable widgetVar="personTable" id="personTable" var="person" value="#{personViewer.model}"  
+		             paginator="false" emptyMessage="Nenhum usuário cadastrado" 
+		             rowKey="#{person.id}" disabledSelection="#{!personViewer.canEditPerson(person)}" styleClass="no-header no-border"
+		             tableStyleClass="no-border">
+		    <p:ajax event="page" global="false"/>
+			<p:column style="width: 47px;">
+				<p:graphicImage value="#{person.picture.path}" styleClass="foto" height="66" width="43"/>
+			</p:column>
+			<p:column style="vertical-align: top">
+				<p:panelGrid columns="1" styleClass="no-background no-border">
+	       			<h:outputText value="#{person.firstName} #{person.lastName}" style="font-size: 14px; color: black; font-weight: bold;"/>
+	       			<h:outputText value="#{personViewer.displayMembership(person)}" />
+				</p:panelGrid>
+			</p:column>
+			<p:column style="width: 35px">
+				<p:commandLink title="Editar este usuário" actionListener="#{personViewer.onPersonEdit}" oncomplete="PF('personDialog').show();" partialSubmit="true" process="@this" update="@widgetVar(personDialog)" global="false" disabled="#{!personViewer.canEditPerson(person)}">
+					<h:graphicImage value="../images/edit.png"/>
+				</p:commandLink>
+			</p:column>
+			<p:column style="width: 35px">
+				<p:commandLink title="Excluir este usuário" actionListener="#{personViewer.onPersonDelete}" oncomplete="if (!args.validationFailed &amp;&amp; !args.exception) {PF('personTable').update();}" partialSubmit="true" process="@this" global="false" update="@widgetVar(personTable),:outputMsg" disabled="#{!personViewer.canEditPerson(person)}">
+					<h:graphicImage value="../images/cancel2.png" />
+					<p:confirm header="#{msg['person.delete.confirm']}" message="#{msg['person.delete.message']}" icon="ui-icon-alert"/>
+				</p:commandLink>
+			</p:column>
+		</p:dataTable>
 	</h:form>
 
 	<p:dialog header="#{msg['dlg.user.signon']}" widgetVar="personDialog" draggable="true" resizable="false" modal="true" closable="false" visible="false" style="background: #f9f9f9">
@@ -75,9 +66,9 @@
 			<p:panelGrid id="model-details" styleClass="no-background no-border" style="margin: 10px 0px 20px 0px;" cellpadding="10">
 				<p:row>
 					<p:column styleClass="my-account-col1">
-						<p:panelGrid columns="1" styleClass="no-margin">
+						<p:panelGrid columns="1" styleClass="no-margin no-border">
 							<p:graphicImage id="portrait" value="#{personViewer.person.picture.path}" styleClass="foto user-image" width="#{imageUploader.width}" height="#{imageUploader.height}"/>
-							<p:panelGrid columns="2" columnClasses="picture" styleClass="pic-cmds" style="text-align: center; float: right">
+							<p:panelGrid columns="2" columnClasses="picture" styleClass="pic-cmds no-border no-background" style="text-align: center; float: right">
 								<p:commandLink title="#{msg['send.picture']}" update=":tabs:person-picture-form" oncomplete="PF('personPictureDialog').show();" partialSubmit="true" process="@this" global="false" styleClass="column">
 									<h:graphicImage value="../images/send-pic.png"/>
 									<f:setPropertyActionListener target="#{imageUploader.image.path}" value=""/>
@@ -90,7 +81,7 @@
 				        </p:panelGrid>
 					</p:column>
 					<p:column styleClass="my-account-col2">
-						<p:panelGrid columns="4" styleClass="userPanel" style=" margin: 0; padding: 0;">
+						<p:panelGrid columns="4" styleClass="userPanel no-border no-background" style=" margin: 0; padding: 0;">
 						<p:row>
 							<p:column styleClass="labelClm"><p:outputLabel for="email" value="Email: "/></p:column>
 							<p:column colspan="3" styleClass="fieldClm">
@@ -135,8 +126,8 @@
 						<p:row>
 							<p:column styleClass="labelClm"><p:outputLabel for="type" value="Tipo: "/></p:column>
 							<p:column colspan="3" styleClass="fieldClm">
-								<h:outputText value="#{msg[personViewer.getMembership()]}" rendered="#{!personViewer.canEditPerson(personViewer.person)}"/>
-								<p:selectOneMenu id="type" style="vertical-align: middle; width: 150px; margin-right: 0px;" rendered="#{personViewer.canEditPerson(personViewer.person)}">
+								<h:outputText value="#{msg[personViewer.membership.type.label]}" rendered="#{!personViewer.canChangeType(personViewer.membership)}"/>
+								<p:selectOneMenu id="type" value="#{personViewer.membership.type}" style="vertical-align: middle; width: 150px; margin-right: 0px;" rendered="#{personViewer.canChangeType(personViewer.membership)}">
 									<f:selectItems var="type" value="#{personViewer.types}" itemLabel="#{msg[type.label]}"/>
 								</p:selectOneMenu>
 							</p:column>
@@ -146,7 +137,7 @@
 				</p:row>
 			</p:panelGrid>
 			<p:commandButton value="Cancelar" type="button" onclick="PF('personDialog').hide();" style="float: right; width: 90px; margin: 0px 18px 10px 0px;"/>
-			<p:commandButton value="Salvar" actionListener="#{personViewer.onPersonSave}" update="@widgetVar(personTable), :outputMsg" oncomplete="if (!args.validationFailed) { if(!args.exception) {PF('personDialog').hide();} else { if(args.alert) {PF('alertDialog').show();}}}" style="float: right; width: 90px; margin: 0px 10px 10px 5px;"/>
+			<p:commandButton value="Salvar" actionListener="#{personViewer.onPersonSave}" update="@widgetVar(personTable),:outputMsg" oncomplete="if (!args.validationFailed) { if(!args.exception) {PF('personDialog').hide();} else { if(args.alert) {PF('alertDialog').show();}}}" style="float: right; width: 90px; margin: 0px 10px 10px 5px;"/>
 		</h:form>
 	</p:dialog>
 

@@ -64,7 +64,7 @@ public class VehicleBean {
 			model = new ModelDataModel<Vehicle>(vehicleService.getVehicles(flat));
 			types = vehicleService.getTypes(flat);
 			vehicle = new Vehicle();
-			vehicle.setDomain(new Flat());
+			vehicle.setDomain(flat);
 			vehicle.setImage(new Image());
 			filters = new HashMap<String, Object>();
 			imageUploadBean = new ImageUploadBean(364, 300);
@@ -115,7 +115,7 @@ public class VehicleBean {
 	
 	public void onVehicleCreate() throws Exception {
 		vehicle = new Vehicle();
-		vehicle.setDomain(new Flat());
+		vehicle.setDomain(flat);
 		vehicle.setImage(new Image());
 		visitor = false;
 		imageUploadBean.setImage(vehicle.getImage());

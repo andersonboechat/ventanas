@@ -85,15 +85,13 @@ public class FlatServiceImpl {
 			throw new BusinessException("flt.update.denied");
 		}
 
-//		Flat f = flatManager.findByNumberAndBlock(flat.getNumber(), flat.getBlock());
-//
-//		if (f == null) {
-//			throw new Exception("Este apartamento nao encontrado");
-//		}
-//
-//		return flatManager.save(flat);
+		Flat f = flatManager.findByNumberAndBlock(flat.getNumber(), flat.getBlock());
 
-		return flat;
+		if (f == null) {
+			throw new Exception("Este apartamento nao encontrado");
+		}
+
+		return flatManager.save(flat);
 	}
 
 	public void delete(Flat flat) {

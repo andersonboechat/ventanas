@@ -1,18 +1,11 @@
 package br.com.atilo.jcondo.core.service;
 
-import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
-import org.apache.commons.lang.time.DateFormatUtils;
 import org.apache.log4j.Logger;
-
-import com.liferay.portal.kernel.io.unsync.UnsyncStringWriter;
-import com.liferay.portal.kernel.velocity.VelocityContext;
-import com.liferay.portal.kernel.velocity.VelocityEngineUtil;
-import com.liferay.util.ContentUtil;
 
 import br.com.abware.jcondo.exception.ModelExistException;
 import br.com.abware.jcondo.core.model.Parking;
@@ -20,14 +13,12 @@ import br.com.abware.jcondo.core.model.Vehicle;
 import br.com.abware.jcondo.core.model.VehicleType;
 import br.com.atilo.jcondo.core.persistence.manager.SecurityManagerImpl;
 import br.com.atilo.jcondo.core.persistence.manager.VehicleManagerImpl;
-import br.com.atilo.jcondo.util.MailService;
 import br.com.abware.jcondo.core.Permission;
 import br.com.abware.jcondo.core.model.Domain;
 import br.com.abware.jcondo.core.model.Flat;
 import br.com.abware.jcondo.core.model.Image;
 import br.com.abware.jcondo.core.model.Person;
 import br.com.abware.jcondo.core.service.BaseService;
-import br.com.abware.jcondo.crm.model.Occurrence;
 import br.com.abware.jcondo.exception.BusinessException;
 
 public class VehicleServiceImpl implements BaseService<Vehicle> {
@@ -46,12 +37,14 @@ public class VehicleServiceImpl implements BaseService<Vehicle> {
 
 	public List<VehicleType> getTypes(Domain domain) throws Exception {
 		List<VehicleType> types = new ArrayList<VehicleType>();
+		types.add(VehicleType.CAR);
+		types.add(VehicleType.MOTO);
 
-		for (VehicleType type : VehicleType.values()) {
+//		for (VehicleType type : VehicleType.values()) {
 //			if (securityManager.hasPermission(type, Permission.VIEW)) {
-				types.add(type);
+//				types.add(type);
 //			}
-		}
+//		}
 
 		return types;
 	}
@@ -169,11 +162,9 @@ public class VehicleServiceImpl implements BaseService<Vehicle> {
 				parking.setVehicle(v);
 				parkingService.update(parking);
 			}
-		} else {
-			v = vehicleManager.save(vehicle);
 		}
 
-		return v;
+		return vehicleManager.save(vehicle);
 	}
 
 	public Vehicle update(Vehicle vehicle) throws Exception {
@@ -241,20 +232,39 @@ public class VehicleServiceImpl implements BaseService<Vehicle> {
 	}
 
 	public void assignTo(Vehicle vehicle, Domain domain) throws Exception {
-		if (!securityManager.hasPermission(domain, Permission.ASSIGN_VEHICLE)) {
-			throw new BusinessException("vhc.domain.assign.denied", domain);
-		}
-
 		Vehicle v = getVehicle(vehicle.getId());
 
 		if (v == null) {
 			throw new ModelExistException(null, "vehicle.not.exists");
 		}
 
-		if (domain != null)  {
+		if (domain == null) {
+			if (v.getDomain() == null) {
+				return;
+			}
+
+			if (!securityManager.hasPermission(v.getDomain(), Permission.REMOVE_VEHICLE)) {
+				throw new BusinessException("vhc.domain.assign.denied", domain);
+			}
+
+			if (v.getType() == VehicleType.CAR) {
+				for (Parking parking : parkingService.getBusyParkings(v.getDomain())) {
+					if (parking.getVehicle().equals(v)) {
+						parking.setVehicle(null);
+						parkingService.update(parking);
+					}
+				}
+			}
+		} else {
 			if (domain.equals(v.getDomain())) {
 				return;
-			} else if (v.getDomain() != null) {
+			}
+
+			if (!securityManager.hasPermission(domain, Permission.ASSIGN_VEHICLE)) {
+				throw new BusinessException("vhc.domain.assign.denied", domain);
+			}
+
+			if (v.getDomain() != null) {
 				throw new Exception("vhc.domain.exists");
 			} else if (!(vehicle.getDomain() instanceof Flat)) {
 				throw new BusinessException("vhc.domain.not.flat");
@@ -273,18 +283,7 @@ public class VehicleServiceImpl implements BaseService<Vehicle> {
 					parkingService.update(parking);
 				}
 			}
-		} else { 
-			if (v.getDomain() == null) {
-				return;
-			}
-
-			for (Parking parking : parkingService.getBusyParkings(v.getDomain())) {
-				if (parking.getVehicle().equals(v)) {
-					parking.setVehicle(null);
-					parkingService.update(parking);
-				}
-			}
-		}
+		}  
 
 		v.setDomain(domain);
 		vehicleManager.save(v);

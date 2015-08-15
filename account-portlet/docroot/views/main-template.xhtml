@@ -83,14 +83,19 @@
 			.person-image div {border: none !important;}
 			.no-border {border: none !important;}
 			.no-border {border: none !important;}
-			.no-border tr {border: none !important;}
-			.no-border td {border: none !important;}
-			.no-margin {margin:  0px !important; padding: 0px !important;}
-			.no-margin td {margin:  0px !important; padding: 0px !important;}
+			.no-border3 tr {border: none !important;}
+			.no-border3 td {border: none !important;}
+			
+			.no-border>table>tbody>tr {border: none !important;}
+			.no-border>tbody>tr {border: none !important;}
+			.no-border>tbody>tr>td {border: none !important;}
+			
+			.no-margin3 {margin:  0px !important; padding: 0px !important;}
+			.no-margin>tbody>tr>td {margin:  0px !important; padding: 0px !important;}
 			.no-background {background-color: transparent !important;}
 			.no-background div {background-color: transparent;}
-			.no-background tr {background-color: transparent !important;}
-			.no-background td {background-color: transparent !important;}
+			.no-background>tbody>tr {background-color: transparent !important;}
+			.no-background>tbody>tr>td {background-color: transparent !important;}
 			.flats {float: right; margin: 0px; padding: 0;}
 			.flats tr {margin: 0px; padding: 0;}
 			.flats td {margin: 0px; padding: 0;}
@@ -183,6 +188,113 @@
 			.access-type .ui-radiobutton {margin-left: 15px; margin-right: 5px}
 			
 			.ui-button {padding: 3px !important}
+			
+			.flat-left {
+				vertical-align: top;
+				width: 35%;
+			}
+			
+			.flat-right {
+				vertical-align: top;
+				width: 65%;
+			}
+			
+			.person-left {
+				vertical-align: top;
+				margin:  0px !important; padding: 0px !important;
+			}
+			
+			.person-right {
+				vertical-align: top;
+				width: 30%;
+				margin-left: 20px;
+				
+			}
+			
+			.person-type {
+				line-height: 40px;
+				padding-left: 20px;
+			}
+
+			.person-type:hover {
+				line-height: 40px;
+				background: #f9f9f9;
+			}
+			
+			.person-type a {
+				text-decoration: none;
+				font-weight: normal;
+				margin-left: 15px;
+			}
+			
+			.person-cmds {
+				width: 100%;
+				border-left: 1px solid #cccccc !important;
+				border-right: 1px solid #cccccc !important;
+				border-top: 1px solid #cccccc !important;
+			}
+
+			.person-cmds td {
+				background: #f9f9f9;
+			}
+			
+			.person-cmds-left {
+				
+				
+			}
+
+			.person-cmds-right {
+				text-align: right;
+			}
+			
+			.questions {
+				text-align: left;
+				width: 100%;
+				padding: 6px 6px 6px 6px !important;
+			}
+			
+			.questions>tbody {
+				padding: 6px 6px 6px 6px !important;
+			}
+			
+			.questions label {
+				margin: 0px 15px 0px 5px;
+			}
+			
+			.vehicle-box .ui-panel-titlebar {
+				background: #cccccc;
+				border: none !important;
+				border-radius: 0px !important;
+				-webkit-border-radius: 0px !important;
+				-moz-border-radius: 0px !important;
+			}
+			
+			.vehicle-box {
+				padding: 0 !important;
+				-webkit-box-shadow: 1px 2px 3px 0px #cccccc;
+				-moz-box-shadow: 1px 2px 3px 0px #cccccc;
+				box-shadow: 1px 2px 3px 0px #cccccc;
+				background: #f9f9f9;
+				text-align:center; 
+				height: 200px;
+			}
+			
+			.flat-box .ui-panel-titlebar {
+				border: none !important;
+				border-bottom: 1px solid #cccccc !important; 
+				border-radius: 0px !important;
+				-webkit-border-radius: 0px !important;
+				-moz-border-radius: 0px !important;
+			}
+			
+			.flat-box {
+				padding: 0 !important;
+				-webkit-box-shadow: 1px 2px 3px 0px #cccccc;
+				-moz-box-shadow: 1px 2px 3px 0px #cccccc;
+				box-shadow: 1px 2px 3px 0px #cccccc;
+				background: #f9f9f9;
+				text-align:left; 
+			}
 		</style>
 	</h:head>
 	<h:body>

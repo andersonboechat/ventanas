@@ -1,6 +1,8 @@
 package br.com.atilo.jcondo.manager.flat;
 
 import java.util.Arrays;
+
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -15,6 +17,8 @@ import org.apache.commons.beanutils.BeanUtils;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.log4j.Logger;
 import org.apache.myfaces.commons.util.MessageUtils;
+import org.primefaces.component.selectonemenu.SelectOneMenu;
+import org.primefaces.component.selectoneradio.SelectOneRadio;
 import org.primefaces.context.RequestContext;
 
 import br.com.abware.accountmgm.bean.model.ModelDataModel;
@@ -53,15 +57,9 @@ public class PersonBean {
 
 	private String personName;
 
-	private Long block;
-	
-	private Long number;
-
 	private Flat flat;
 
 	private Person person;
-
-	private Person[] selectedPeople;
 
 	private List<PersonType> types;
 
@@ -69,9 +67,9 @@ public class PersonBean {
 
 	private List<Gender> genders;
 
+	private Membership membership;
 	
 	public PersonBean() {
-		person = new Person();
 		filters = new HashMap<String, Object>();
 		imageUploadBean = new ImageUploadBean(158, 240);
 		cameraBean = new CameraBean(158, 240);
@@ -83,6 +81,7 @@ public class PersonBean {
 			model = new ModelDataModel<Person>(personService.getPeople(flat));
 			types = personService.getTypes(flat);
 			this.flat = flat;
+			onPersonCreate();
 		} catch (Exception e) {
 			LOGGER.fatal("Failure on person initialization", e);
 			MessageUtils.addMessage(FacesMessage.SEVERITY_FATAL, "general.failure", null);
@@ -94,21 +93,10 @@ public class PersonBean {
 		filters.put("fullName", personName);
 		model.filter(filters);
 	}
-
-	public void onBlockSelect(AjaxBehaviorEvent event) throws Exception {
-		filters.put("memberships.domain.block", block);
-		model.filter(filters);
-	}
-
-	public void onNumberSelect(AjaxBehaviorEvent event) throws Exception {
-		filters.put("memberships.domain.number", number);
-		model.filter(filters);
-	}
 	
 	public void onPersonSave() {
 		try {
 			Person p;
-			person.setPicture(imageUploadBean.getImage());
 
 			if (person.getId() == 0) {
 				p = personService.register(person);
@@ -132,8 +120,9 @@ public class PersonBean {
 
 	public void onPersonCreate() throws Exception {
 		person = new Person();
-		person.setPicture(new Image());
-		imageUploadBean.setImage(person.getPicture());
+		membership = new Membership(null, flat);
+		person.setMemberships(new ArrayList<Membership>());
+		person.getMemberships().add(membership);
 	}
 
 	public void onPersonDelete() throws Exception {
@@ -154,42 +143,55 @@ public class PersonBean {
 		}	
 	}
 
-	public void onPeopleDelete() throws Exception {
-		try {
-			for (Person person : selectedPeople) {
-				person.getMemberships().removeAll(CollectionUtils.select(person.getMemberships(), new DomainPredicate(flat)));
-				person = personService.update(person);
-				model.removeModel(person);
-			}
-		} catch (BusinessException e) {
-			LOGGER.warn("Business failure on people delete: " + e.getMessage());
-			MessageUtils.addMessage(FacesMessage.SEVERITY_WARN, e.getMessage(), e.getArgs());
-			RequestContext.getCurrentInstance().addCallbackParam("exception", true);
-		} catch (Exception e) {
-			LOGGER.error("Unexpected failure on people delete", e);
-			MessageUtils.addMessage(FacesMessage.SEVERITY_ERROR, "general.failure", null);
-			RequestContext.getCurrentInstance().addCallbackParam("exception", true);
-		}	
-	}
-
 	public void onPersonEdit() throws Exception {
 		try {
 			BeanUtils.copyProperties(person, model.getRowData());
 			imageUploadBean.setImage(person.getPicture());
+			membership = (Membership) CollectionUtils.find(person.getMemberships(), new DomainPredicate(flat));
 		} catch (Exception e) {
 			LOGGER.error("Unexpected failure on person editing", e);
 			MessageUtils.addMessage(FacesMessage.SEVERITY_ERROR, "general.failure", null);
 			RequestContext.getCurrentInstance().addCallbackParam("exception", true);
-		}	
+		}
 	}
 
-	public String displayMembership(Membership membership) {
-		if (membership != null) {
-			if (membership.getDomain() instanceof Administration) {
-				return rb.getString(membership.getType().getLabel());				
-			} else {
-				return displayDomain(membership.getDomain()) + " --- " + rb.getString(membership.getType().getLabel());	
-			}
+	@SuppressWarnings("unchecked")
+	public void onPersonTypeSelect(AjaxBehaviorEvent event) throws Exception {
+		filters.clear();
+
+		String type = (String) ((SelectOneMenu) event.getSource()).getValue();
+		if (type.equalsIgnoreCase("resident")) {
+			List<Person> people;
+			filters.put("memberships.type", PersonType.OWNER);
+			model.filter(filters);
+			people = (List<Person>) model.getWrappedData();
+			filters.put("memberships.type", PersonType.RENTER);
+			model.filter(filters);
+			people.addAll((List<Person>) model.getWrappedData());
+			filters.put("memberships.type", PersonType.RESIDENT);
+			model.filter(filters);
+			people.addAll((List<Person>) model.getWrappedData());
+			filters.put("memberships.type", PersonType.DEPENDENT);
+			model.filter(filters);
+			((List<Person>) model.getWrappedData()).addAll(people);
+		} else if (type.equalsIgnoreCase("guest")) {
+			filters.put("memberships.type", PersonType.GUEST);
+			model.filter(filters);
+		} else if (type.equalsIgnoreCase("visitor")) {
+			filters.put("memberships.type", PersonType.VISITOR);
+			model.filter(filters);
+		} else if (type.equalsIgnoreCase("employee")) {
+			filters.put("memberships.type", PersonType.EMPLOYEE);
+			model.filter(filters);
+		} else {
+			model.filter(filters);
+		}
+	}
+	
+	public String displayMembership(Person person) {
+		if (person != null && !CollectionUtils.isEmpty(person.getMemberships())) {
+			Membership membership = (Membership) CollectionUtils.find(person.getMemberships(), new DomainPredicate(flat));
+			return membership != null ? rb.getString(membership.getType().getLabel()) : null;				
 		}
 
 		return null;
@@ -267,36 +269,12 @@ public class PersonBean {
 		this.personName = personName;
 	}
 
-	public Long getBlock() {
-		return block;
-	}
-
-	public void setBlock(Long block) {
-		this.block = block;
-	}
-
-	public Long getNumber() {
-		return number;
-	}
-
-	public void setNumber(Long number) {
-		this.number = number;
-	}
-
 	public Person getPerson() {
 		return person;
 	}
 
 	public void setPerson(Person person) {
 		this.person = person;
-	}
-
-	public Person[] getSelectedPeople() {
-		return selectedPeople;
-	}
-
-	public void setSelectedPeople(Person[] selectedPeople) {
-		this.selectedPeople = selectedPeople;
 	}
 
 	public long getSelectedDomainId() {
@@ -321,6 +299,22 @@ public class PersonBean {
 
 	public void setTypes(List<PersonType> types) {
 		this.types = types;
+	}
+
+	public Flat getFlat() {
+		return flat;
+	}
+
+	public void setFlat(Flat flat) {
+		this.flat = flat;
+	}
+
+	public Membership getMembership() {
+		return membership;
+	}
+
+	public void setMembership(Membership membership) {
+		this.membership = membership;
 	}
 
 }

@@ -17,39 +17,89 @@
 		<c:set var="supplierViewer" value="#{flatView.supplierBean}"/>
 		<c:set var="documentViewer" value="#{flatView.documentBean}"/>
 
+	<h:form>
+		<p:panel styleClass="no-background no-border no-margin" style="width: 100%; text-align: right;" rendered="#{flatView.flats.size() > 1}">
+		   	<p:selectOneMenu id="flat" value="#{flatView.flat}" converter="selectItemsConverter">
+				<f:selectItems var="flat" value="#{flatView.flats}" itemLabel="Apartamento #{flat.number} - Bloco #{flat.block}" itemValue="#{flat}"/>
+				<p:ajax event="change" listener="#{flatView.onFlatSelect}" update=":tabs:person-form:personTable,:tabs:vehicle-form:vehicleTable"/>
+		   	</p:selectOneMenu>
+		</p:panel>   		
+		<p:panel styleClass="no-background no-border" style="width: 100%; text-align: center; font-size: 22px">
+			<h:outputText value="Apartamento #{flatView.flat.number} - Bloco #{flatView.flat.block}"/>
+		</p:panel>
+	</h:form>
+	<p:panelGrid columns="2" columnClasses="flat-left,flat-right" styleClass="no-background no-border">
 		<h:form id="flat-form">
 			<p:panelGrid id="flat-filters" columns="1" styleClass="no-background no-border flats" columnClasses="menu-cmds-col3">
-		    	<h:outputText value="Apartamento #{flatView.flats.get(0).number} - Bloco #{flatView.flats.get(0).block}" rendered="#{flatView.flats.size() == 1}" style="font-size: 14px; color: black; font-weight: bold;"/>
-		    	<p:selectOneMenu id="flat" value="#{flatView.flat}" filter="true" filterMatchMode="contains" converter="selectItemsConverter" rendered="#{flatView.flats.size() > 1}">
-					<f:selectItems var="flat" value="#{flatView.flats}" itemLabel="Apartamento #{flat.number} - Bloco #{flat.block}" itemValue="#{flat}"/>
-					<p:ajax event="change" listener="#{flatView.onFlatSelect}" update=":tabs:person-form:personTable,:tabs:vehicle-form:vehicleTable"/>
-		    	</p:selectOneMenu>
 		    	<p:fieldset legend="Contato Principal" styleClass="no-background" style="width: 400px;">
 		    		<p:panelGrid columns="2" styleClass="no-background no-border" style="width: 100%">
 			    		<p:graphicImage value="http://localhost/image/user_male_portrait?img_id=11707&amp;pfdrid_c=true" styleClass="foto" height="80" width="52" style="float: left"/>
 						<p:panelGrid columns="2" styleClass="no-background no-border" style="float: left; width: 100%">
 							<h:outputText value="Nome:" style="font-size: 14px; color: black; font-weight: bold;"/>
 			       			<h:outputText value="Rose Beltrão das Neves" style="font-size: 14px; color: black; "/>
-			       			<h:outputText value="Telefone:" style="font-size: 14px; color: black; font-weight: bold;"/>
+			       			<h:outputText value="Celular:" style="font-size: 14px; color: black; font-weight: bold;"/>
 			       			<h:outputText value="+55 21 98765-4321" style="font-size: 14px; color: black;"/>
 						</p:panelGrid>
 					</p:panelGrid>
+					<p:commandButton value="Alterar" style="float: right; width: 90px; margin: 0px 0px 5px 5px;"/>
 				</p:fieldset>
+				<p:spacer width="100%" height="1px" style="background: #cccccc"/>
+	    		<p:panel header="Vagas" styleClass="flat-box">
+					<p:panelGrid columns="2" styleClass="no-background no-border" style="width: 100%">
+						<h:outputText value="Vagas escrituradas _________________________________"/>
+						<h:outputText value="2" style="float: right"/>
+						<h:outputText value="Vagas alugadas ___________________________________"/>
+						<h:outputText value="1" style="float: right"/>
+						<h:outputText value="Vagas cedidas _____________________________________"/>
+						<h:outputText value="0" style="float: right"/>
+					</p:panelGrid>
+				</p:panel>				
+				<p:spacer width="100%" height="1px" style="background: #cccccc"/>
+				<p:panel header="Sobre o apartamento" styleClass="flat-box">
+					<p:panelGrid columns="1" styleClass="no-background no-border no-margin questions">
+						<p:outputLabel for="hasPets" value="Existem animais residindo no apartamento?"/>
+						<p:selectOneRadio id="hasPets" widgetVar="hasPets" value="#{flatView.flat.pets}" required="true" 
+										  requiredMessage="Informe se existem animais residindo no apartamento." style="margin-left: 5px;">
+							<f:selectItem itemLabel="Sim" itemValue="true"/>
+							<f:selectItem itemLabel="Não" itemValue="false"/>
+							<p:ajax event="change" listener="#{flatView.onOptionSelect}" update="ptLabel" oncomplete="if ((args.value &amp;&amp; PF('pets').cfg.collapsed) || (!args.value &amp;&amp; !PF('pets').cfg.collapsed) ) {PF('pets').toggle();}" global="false"/>
+						</p:selectOneRadio>
+						<p:panel id="pets" widgetVar="pets" toggleable="true" collapsed="#{not flatView.flat.pets}" styleClass="no-border">
+							<p:panelGrid columns="1" styleClass="no-background no-border">
+								<p:outputLabel id="ptLabel" for="petTypes" value="Quais tipos de animais?" style="margin-left: 0px;"/>
+								<p:selectManyCheckbox id="petTypes" value="#{flatView.flat.petTypes}" required="#{flatView.flat.pets}" requiredMessage="Informe os tipos de animais" converter="jsonConverter">
+									<f:selectItems var="type" value="#{flatView.petTypes}" itemLabel="#{msg[type.label]}" itemValue="#{type}"/>
+								</p:selectManyCheckbox>
+							</p:panelGrid>
+						</p:panel>
+						<p:outputLabel for="hasDisables" value="Existem moradores com dificuldade de locomoção?"/>
+						<p:selectOneRadio id="hasDisables" value="#{flatView.flat.disables}" required="true" requiredMessage="Informe existem moradores com dificuldade de locomoção" style="margin-left: 5px;">
+							<f:selectItem itemLabel="Sim" itemValue="true"/>
+							<f:selectItem itemLabel="Não" itemValue="false"/>
+						</p:selectOneRadio>
+						<p:commandButton value="Salvar" actionListener="#{flatView.onFlatSave}" update=":outputMsg" 
+										 style="float: right; width: 90px; margin: 0px 5px 10px 5px;"/>
+					</p:panelGrid>
+				</p:panel>
 			</p:panelGrid>
 		</h:form>
 
-		<p:tabView id="tabs" style="padding: 0">
+		<p:tabView id="tabs" style="padding: 0; margin-top: 0px">
 			<p:tab title="Pessoas"><ui:include src="person-view.xhtml"/></p:tab>
 			<p:tab title="Veículos"><ui:include src="vehicle-view.xhtml"/></p:tab>
 			<p:tab title="Documentos">
+				<p:panelGrid columns="2" styleClass="no-border person-cmds" columnClasses="person-cmds-left,person-cmds-right">
+					<p:inputText id="fileName" value="#{personViewer.personName}" placeholder="Buscar pelo nome" style="font-style: italic; width: 100%">
+						<p:ajax event="change" listener="#{personViewer.onPersonSearch}" update="documentTable" partialSubmit="true" process="@this"/>
+					</p:inputText>
+		
+					<p:commandButton value="Enviar um documento" actionListener="#{personViewer.onPersonCreate}" 
+									 partialSubmit="true" process="@this" update="@widgetVar(personDialog)" oncomplete="PF('personDialog').show();"
+									 style="font-size: 12px; margin: 0; padding:0"/>
+				</p:panelGrid>			
 				<p:dataTable id="documentTable" widgetVar="documentTable" var="doc" value="#{documentViewer.model}" scrollable="true" 
 					paginator="true" paginatorAlwaysVisible="false" paginatorPosition="bottom" paginatorTemplate="{PreviousPageLink} {CurrentPageReport} {NextPageLink}"
 					emptyMessage="Nenhum documento encontrado" styleClass="no-header">
-					<f:facet name="header">
-						<p:panelGrid columns="1" columnClasses="docs-header" styleClass="no-background no-border no-margin" style="width: 100%;">
-							<h:outputText value="Documentos"/>
-						</p:panelGrid>
-					</f:facet>
 					<p:column>
 						<p:commandLink value="#{doc.name}" partialSubmit="true" process="@this" target="blank">
 							<f:setPropertyActionListener target="#{documentViewer.document}" value="#{doc}"/>
@@ -61,7 +111,7 @@
 				</p:dataTable>
 			</p:tab>
 		</p:tabView>
-		
+	</p:panelGrid>		
 		<p:dialog header="Documentos" widgetVar="documentDialog" draggable="true" resizable="false" modal="true" closable="false" visible="false">
 			<h:form id="document-form">
 				<p:panelGrid id="model-details" columns="1" styleClass="no-border" style="margin: 10px 0px 20px 0px; text-align: justify" cellpadding="10">

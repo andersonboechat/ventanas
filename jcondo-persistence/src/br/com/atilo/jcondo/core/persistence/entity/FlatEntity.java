@@ -2,16 +2,18 @@ package br.com.atilo.jcondo.core.persistence.entity;
 
 import java.util.List;
 
-import javax.persistence.CascadeType;
+import javax.persistence.CollectionTable;
 import javax.persistence.Column;
 import javax.persistence.DiscriminatorValue;
+import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
-import javax.persistence.JoinTable;
-import javax.persistence.ManyToMany;
 import javax.persistence.OneToMany;
+import javax.persistence.OrderColumn;
 import javax.persistence.Table;
+
+import br.com.abware.jcondo.core.model.PetType;
 
 @Entity
 @Table(name="jco_flat")
@@ -26,16 +28,26 @@ public class FlatEntity extends DomainEntity {
 	@Column(updatable=false)
 	private int number;
 
-	@ManyToMany(cascade=CascadeType.ALL, fetch=FetchType.EAGER)
-	@JoinTable(name="jco_membership", joinColumns={@JoinColumn(name="domainId", referencedColumnName="id")}, inverseJoinColumns={@JoinColumn(name="personId", referencedColumnName="id")})
-	private List<PersonEntity> people;
+	@Column(nullable=true, columnDefinition="INT(1)")
+	private Boolean disables;
 
-	@OneToMany(cascade=CascadeType.ALL, fetch=FetchType.LAZY)
-	@JoinColumn(name="ownerDomainId", referencedColumnName="id")
+	@Column(nullable=true, columnDefinition="INT(1)")
+	private Boolean pets;
+	
+	@ElementCollection(targetClass=PetType.class, fetch=FetchType.EAGER) 
+	@CollectionTable(name="jco_flat_pets", joinColumns=@JoinColumn(name="flatId"))
+	@Column(name="typeId")
+	private List<PetType> petTypes;
+
+    @OneToMany(mappedBy="domain")
+    private List<MembershipEntity> memberships;
+	
+	@OneToMany(fetch=FetchType.LAZY)
+	@JoinColumn(name="ownerDomainId", referencedColumnName="id", insertable=false, updatable=false)
 	private List<ParkingEntity> parkings;
 
-	@OneToMany(cascade=CascadeType.ALL, fetch=FetchType.LAZY)
-	@JoinColumn(name="renterDomainId", referencedColumnName="id")
+	@OneToMany(fetch=FetchType.LAZY)
+	@JoinColumn(name="renterDomainId", referencedColumnName="id", insertable=false, updatable=false)
 	private List<ParkingEntity> rentedParkings;
 
 	public int getBlock() {
@@ -54,6 +66,38 @@ public class FlatEntity extends DomainEntity {
 		this.number = number;
 	}
 
+	public Boolean getDisables() {
+		return disables;
+	}
+
+	public void setDisables(Boolean disables) {
+		this.disables = disables;
+	}
+
+	public Boolean getPets() {
+		return pets;
+	}
+
+	public void setPets(Boolean pets) {
+		this.pets = pets;
+	}
+
+	public List<PetType> getPetTypes() {
+		return petTypes;
+	}
+
+	public void setPetTypes(List<PetType> petTypes) {
+		this.petTypes = petTypes;
+	}
+
+	public List<MembershipEntity> getMemberships() {
+		return memberships;
+	}
+
+	public void setMemberships(List<MembershipEntity> memberships) {
+		this.memberships = memberships;
+	}
+
 	public List<ParkingEntity> getParkings() {
 		return parkings;
 	}
@@ -69,5 +113,6 @@ public class FlatEntity extends DomainEntity {
 	public void setRentedParkings(List<ParkingEntity> rentedParkings) {
 		this.rentedParkings = rentedParkings;
 	}
+
 
 }

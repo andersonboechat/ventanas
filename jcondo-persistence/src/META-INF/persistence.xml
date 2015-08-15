@@ -24,7 +24,8 @@
 		<class>br.com.atilo.jcondo.event.persistence.entity.PassageEventEntity</class>
 		<class>br.com.atilo.jcondo.booking.persistence.entity.GuestEntity</class>
 		<class>br.com.atilo.jcondo.core.persistence.entity.PhysicalDeficiencyEntity</class>
-		<class>br.com.atilo.jcondo.core.persistence.entity.PetEntity</class>		
+		<class>br.com.atilo.jcondo.core.persistence.entity.PetEntity</class>
+		<class>br.com.atilo.jcondo.core.persistence.entity.PetTypeEntity</class>
 		<properties>
 			<property name="hibernate.dialect" value="org.hibernate.dialect.MySQLDialect"/>  
 			<property name="hibernate.query.substitutions" value="true 1,false 0"/>
