@@ -38,11 +38,11 @@ public class FlatBean {
 	private PersonBean personBean;
 
 	@ManagedProperty(value="#{vehicleView}")
-	private VehicleBean vehicleBean;	
-
-	@ManagedProperty(value="#{supplierView}")
-	private SupplierBean supplierBean;
+	private VehicleBean vehicleBean;
 	
+	@ManagedProperty(value="#{parkingView}")
+	private ParkingBean parkingBean;
+
 	private List<Flat> flats;
 
 	private Flat flat;
@@ -56,8 +56,8 @@ public class FlatBean {
 			flat = flats.get(0);
 			personBean.init(flat);
 			vehicleBean.init(flat);
-			supplierBean.init(flat);
 			documentBean.init(flat);
+			parkingBean.init(flat);
 			
 			petTypes = new ArrayList<PetType>();
 			petTypes.add(PetType.DOG);
@@ -71,8 +71,8 @@ public class FlatBean {
 	public void onFlatSelect() throws Exception {
 		personBean.init(flat);
 		vehicleBean.init(flat);
-		supplierBean.init(flat);
 		documentBean.init(flat);
+		parkingBean.init(flat);
 	}
 	
 	public void onFlatSave() {
@@ -104,6 +104,17 @@ public class FlatBean {
 		RequestContext.getCurrentInstance().addCallbackParam("value", value);
 	}	
 	
+	public List<Flat> showFlats() {
+		List<Flat> flats = null;
+		try {
+			flats = flatService.getFlats();
+			flats.remove(flat);
+		} catch (Exception e) {
+			LOGGER.error("Failure on getting all flats", e);
+		}
+		return flats;
+	}
+	
 	public DocumentBean getDocumentBean() {
 		return documentBean;
 	}
@@ -128,12 +139,12 @@ public class FlatBean {
 		this.vehicleBean = vehicleBean;
 	}
 
-	public SupplierBean getSupplierBean() {
-		return supplierBean;
+	public ParkingBean getParkingBean() {
+		return parkingBean;
 	}
 
-	public void setSupplierBean(SupplierBean supplierBean) {
-		this.supplierBean = supplierBean;
+	public void setParkingBean(ParkingBean parkingBean) {
+		this.parkingBean = parkingBean;
 	}
 
 	public List<Flat> getFlats() {

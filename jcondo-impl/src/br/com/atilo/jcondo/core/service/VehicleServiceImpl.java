@@ -133,7 +133,7 @@ public class VehicleServiceImpl implements BaseService<Vehicle> {
 		Vehicle v = vehicleManager.findByLicense(license);
 
 		if (v != null) {
-			throw new ModelExistException(null, "vhc.exists", vehicle.getLicense());
+			throw new ModelExistException(null, "vhc.exists", v);
 		}
 
 		vehicle.setLicense(license);
@@ -161,10 +161,14 @@ public class VehicleServiceImpl implements BaseService<Vehicle> {
 				Parking parking = parkings.get(0);
 				parking.setVehicle(v);
 				parkingService.update(parking);
+			} else {
+				v = vehicleManager.save(vehicle);
 			}
+		} else {
+			v = vehicleManager.save(vehicle);
 		}
 
-		return vehicleManager.save(vehicle);
+		return v;
 	}
 
 	public Vehicle update(Vehicle vehicle) throws Exception {
@@ -325,5 +329,10 @@ public class VehicleServiceImpl implements BaseService<Vehicle> {
 //												  rb.getString(occurrence.getType().getLabel()).toLowerCase());
 //
 //		MailService.send(mailTo, mailSubject, mailBody);
+	}
+
+	public String getLabel(Vehicle vehicle) throws Exception {
+		Parking parking = parkingService.getParking(vehicle);
+		return (parking == null || parking.getRenterDomain() != null) ? "vehicle.label.rented" : "vehicle.label.owned";
 	}
 }

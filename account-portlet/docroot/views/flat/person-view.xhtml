@@ -61,12 +61,16 @@
 		</p:dataTable>
 	</h:form>
 
-	<p:dialog header="#{msg['dlg.user.signon']}" widgetVar="personDialog" draggable="true" resizable="false" modal="true" closable="false" visible="false" style="background: #f9f9f9">
+	<p:dialog widgetVar="personDialog" draggable="false" resizable="false" modal="true" closable="false" visible="false" style="background: #f9f9f9">
+		<f:facet name="header">
+			<p:graphicImage value="../images/user_ico.png" style="vertical-align: top; margin-right: 10px;"/>
+			<p:outputLabel value="#{msg['dlg.user.signon']}" style="vertical-align: top; line-height: 25px;"/>
+		</f:facet>
 		<h:form id="person-details-form">
 			<p:panelGrid id="model-details" styleClass="no-background no-border" style="margin: 10px 0px 20px 0px;" cellpadding="10">
 				<p:row>
 					<p:column styleClass="my-account-col1">
-						<p:panelGrid columns="1" styleClass="no-margin no-border">
+						<p:panelGrid columns="1" styleClass="no-margin no-border no-background">
 							<p:graphicImage id="portrait" value="#{personViewer.person.picture.path}" styleClass="foto user-image" width="#{imageUploader.width}" height="#{imageUploader.height}"/>
 							<p:panelGrid columns="2" columnClasses="picture" styleClass="pic-cmds no-border no-background" style="text-align: center; float: right">
 								<p:commandLink title="#{msg['send.picture']}" update=":tabs:person-picture-form" oncomplete="PF('personPictureDialog').show();" partialSubmit="true" process="@this" global="false" styleClass="column">
@@ -141,19 +145,25 @@
 		</h:form>
 	</p:dialog>
 
-	<p:dialog id="personPictureDialog" widgetVar="personPictureDialog" header="Envio de foto" resizable="false" 
-			  draggable="false" modal="true">
+	<p:dialog id="personPictureDialog" widgetVar="personPictureDialog" resizable="false" draggable="false" modal="true" visible="true">
+		<f:facet name="header">
+			<p:graphicImage value="../images/picture_ico.png" style="vertical-align: top; margin-right: 10px;"/>
+			<p:outputLabel value="Envio de Foto" style="vertical-align: top; line-height: 22px"/>
+		</f:facet>			
 		<h:form id="person-picture-form" enctype="multipart/form-data">
 			<p:fileUpload id="image1" label="Selecionar Foto" fileUploadListener="#{imageUploader.onImageUpload}" auto="true" update="person-picture-form" rendered="#{empty imageUploader.image.path}"/>
-			<p:panel rendered="#{!(empty imageUploader.image.path)}" style="border: 0px !important;">
-				<p:panel styleClass="cropper2">
+			<p:panel rendered="#{!(empty imageUploader.image.path)}" styleClass="no-margin no-border">
+				<p:outputPanel style="min-width: 50px !important;" styleClass="foto">
 					<p:imageCropper value="#{imageUploader.croppedImage}" image="#{imageUploader.image.path}" initialCoords="0,0,#{imageUploader.width},#{imageUploader.height}" minSize="#{imageUploader.width},#{imageUploader.height}" maxSize="#{imageUploader.width},#{imageUploader.height}"/>
-				</p:panel>
-				<p:panel style="margin: 0px auto; text-align: center; padding: 15px 0px; border: none;">
-					<p:commandButton value="Recortar" actionListener="#{imageUploader.onImageCropp}" update=":tabs:person-details-form:portrait" oncomplete="PF('personPictureDialog').hide();">
+				</p:outputPanel>
+				<p:panel style="text-align: center; padding: 10px 0px;" styleClass="no-border no-margin">
+					<p:commandButton value="Recortar" actionListener="#{imageUploader.onImageCropp}" 
+									 update=":tabs:person-details-form:portrait" oncomplete="PF('personPictureDialog').hide();"
+									 style="margin-right: 5px;">
 						<f:setPropertyActionListener value="#{imageUploader.image}" target="#{personViewer.person.picture}"/>
 					</p:commandButton>
-					<p:commandButton value="Cancelar" oncomplete="PF('personPictureDialog').hide();" partialSubmit="true" process="@this" global="false">
+					<p:commandButton value="Cancelar" oncomplete="PF('personPictureDialog').hide();" partialSubmit="true" process="@this" 
+									 global="false" style="margin-left: 5px;">
 						<f:setPropertyActionListener target="#{imageUploader.image.path}" value=""/>
 					</p:commandButton>
 				</p:panel>

@@ -14,9 +14,10 @@
 			.pic-cmds {margin: 5px 0px 0px !important;}
 			.pic-cmds td {margin: 0px !important; padding: 0px !important; vertical-align: top;}
 			.no-header thead {display: none}
-			.cropper2 {padding: 0;}
-			.cropper2 div {margin: 0 !important; padding: 0 !important;}
-			.cropper2 .img { margin: 0 !important;}
+			.testando {margin: 0px auto !important; padding: 0px auto !important; text-align: center; min-width: }
+			.cropper2 {margin: 0px auto !important; padding: 0px auto !important; text-align: center; padding: 0;}
+			.cropper2 div {margin: 0 auto !important; padding: 0px auto !important;}
+			.cropper2 .img { margin: 0px auto !important; text-align: center; padding: 0px auto !important;}
 			.user-image {background: url("/account-portlet/images/avatar.png") no-repeat center; text-align: center; margin: 0px auto;}
 			.car-image {background: url("/account-portlet/images/car.png") no-repeat center; text-align: center; margin: 0px auto;}
 			.moto-image {background: url("/account-portlet/images/moto.png") no-repeat center; text-align: center; margin: 0px auto;}
@@ -93,7 +94,7 @@
 			.no-margin3 {margin:  0px !important; padding: 0px !important;}
 			.no-margin>tbody>tr>td {margin:  0px !important; padding: 0px !important;}
 			.no-background {background-color: transparent !important;}
-			.no-background div {background-color: transparent;}
+			.no-background>div {background-color: transparent;}
 			.no-background>tbody>tr {background-color: transparent !important;}
 			.no-background>tbody>tr>td {background-color: transparent !important;}
 			.flats {float: right; margin: 0px; padding: 0;}
@@ -164,11 +165,31 @@
 			.pwd-panel input {width: 60px;}
 			
 			.status .ui-dialog-titlebar {display: none}
+			
+			.ui-dialog-titlebar {
+				background: url("/account-portlet/images/dockbar_bg.png") !important; 
+				color: #fafafa;
+				text-shadow: 1px 1px 5px rgba(84, 84, 84, 1);
+				line-height: 25px;
+				border: 1px solid #335a85 !important;
+			}
+			
+			.ui-dialog {
+				border: none !important;
+			}
+			
+			.ui-dialog-titlebar-close {margin: 4px !important; border: 0px solid white}
+			
+			.ui-dialog-content2 {padding: 0 !important}
+			
+			.ui-dialog-buttonpane {background: #f9f9f9 !important}
 
 			.memberships tbody {border: none !important;}
 			
 			.alert .ui-messages div {border: none !important; color: inherit;}
 			.alert .ui-icon-alert {display: none;}
+			
+			.ui-growl {font-size: 13px;}
 			
 			
 			.vehicle-form {vertical-align: top;}
@@ -298,7 +319,7 @@
 		</style>
 	</h:head>
 	<h:body>
-		<p:growl id="outputMsg" widgetVar="outputMsg"/>
+		<p:growl id="outputMsg" widgetVar="outputMsg" globalOnly="true" sticky="true"/>
 		<f:loadBundle basename="Language" var="msg"/>
 
 		<p:ajaxStatus id="status" onstart="PF('status').show();" oncomplete="PF('status').hide();"/>

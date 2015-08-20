@@ -12,6 +12,7 @@ import javax.faces.context.FacesContext;
 import javax.faces.validator.ValidatorException;
 
 import org.apache.commons.beanutils.BeanUtils;
+import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.apache.myfaces.commons.util.MessageUtils;
 import org.primefaces.context.RequestContext;
@@ -92,9 +93,20 @@ public class VehicleBean {
 
 			MessageUtils.addMessage(FacesMessage.SEVERITY_INFO, msg, null);
 		} catch (ModelExistException e) {
-			MessageUtils.addMessage(FacesMessage.SEVERITY_WARN, e.getMessage(), e.getArgs(), "tabs:vehicle-details-form:alertMsg");
-			RequestContext.getCurrentInstance().addCallbackParam("alert", true);
-			RequestContext.getCurrentInstance().addCallbackParam("exception", true);
+			Vehicle v = (Vehicle) e.getArgs()[0];
+
+			// Vehicle is not associated to any domain. So, it can be taken
+			if (v.getDomain() == null) {
+				vehicle.setId(v.getId());
+				if (StringUtils.isEmpty(vehicle.getImage().getPath())) {
+					vehicle.setImage(v.getImage());
+				}
+				onVehicleSave();
+			} else {
+				MessageUtils.addMessage(FacesMessage.SEVERITY_WARN, e.getMessage(), e.getArgs(), ":tabs:vehicle-details-form:alertMsg");
+				RequestContext.getCurrentInstance().addCallbackParam("alert", true);
+				RequestContext.getCurrentInstance().addCallbackParam("exception", true);
+			}
 		} catch (BusinessException e) {
 			MessageUtils.addMessage(FacesMessage.SEVERITY_WARN, e.getMessage(), e.getArgs());
 			RequestContext.getCurrentInstance().addCallbackParam("exception", true);
@@ -107,6 +119,7 @@ public class VehicleBean {
 	public void onVehicleClaim() {
 		try {
 			vehicleService.claim(vehicle);
+			MessageUtils.addMessage(FacesMessage.SEVERITY_INFO, "vehicle.claim.success", null);
 		} catch (Exception e) {
 			MessageUtils.addMessage(FacesMessage.SEVERITY_ERROR, "general.failure", null);
 			RequestContext.getCurrentInstance().addCallbackParam("exception", true);
@@ -207,6 +220,16 @@ public class VehicleBean {
 		return "Visitante";
 	}
 
+	public String displayLabel(Vehicle vehicle) {
+		try {
+			return vehicleService.getLabel(vehicle);
+		} catch (Exception e) {
+			LOGGER.error("Unexpected failure on getting parking for vehicle " + vehicle, e);
+		}
+
+		return null;
+	}	
+	
 	public ModelDataModel<Vehicle> getModel() {
 		return model;
 	}

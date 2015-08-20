@@ -36,6 +36,8 @@
 				<action-key>REMOVE_MEMBER</action-key>
 				<action-key>ASSIGN_VEHICLE</action-key>
 				<action-key>REMOVE_VEHICLE</action-key>
+				<action-key>RENT_PARKING</action-key>
+				<action-key>UNRENT_PARKING</action-key>
 			</supports>
 			<site-member-defaults/>
 			<guest-defaults/>

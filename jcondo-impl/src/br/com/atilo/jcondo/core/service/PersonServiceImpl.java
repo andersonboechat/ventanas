@@ -22,7 +22,6 @@ import br.com.abware.jcondo.exception.BusinessException;
 import br.com.abware.jcondo.exception.PersistenceException;
 
 import br.com.atilo.jcondo.commons.collections.MembershipPredicate;
-import br.com.atilo.jcondo.commons.collections.PersonTypeTransformer;
 import br.com.atilo.jcondo.core.persistence.manager.PersonManagerImpl;
 import br.com.atilo.jcondo.core.persistence.manager.SecurityManagerImpl;
 

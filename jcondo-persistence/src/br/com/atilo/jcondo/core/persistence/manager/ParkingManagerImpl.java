@@ -8,6 +8,7 @@ import javax.persistence.Query;
 
 import br.com.abware.jcondo.core.model.Domain;
 import br.com.abware.jcondo.core.model.Parking;
+import br.com.abware.jcondo.core.model.Vehicle;
 import br.com.abware.jcondo.exception.PersistenceException;
 import br.com.atilo.jcondo.core.persistence.entity.ParkingEntity;
 
@@ -23,6 +24,21 @@ public class ParkingManagerImpl extends JCondoManager<ParkingEntity, Parking> {
 		return ParkingEntity.class;
 	}
 
+	public Parking findByVehicle(Vehicle vehicle) throws Exception {
+		String key = generateKey();
+		try {
+			openManager(key);
+			String queryString = "FROM ParkingEntity WHERE vehicle.id = :vehicleId";
+			Query query = em.createQuery(queryString);
+			query.setParameter("vehicleId", vehicle.getId());
+			return getModel((ParkingEntity) query.getSingleResult());
+		} catch (NoResultException e) {
+			return null;
+		} finally {
+			closeManager(key);
+		}		
+	}
+	
 	@SuppressWarnings("unchecked")
 	public List<Parking> findNotOwnedParkings() throws Exception {
 		String key = generateKey();
