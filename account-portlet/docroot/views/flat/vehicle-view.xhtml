@@ -80,11 +80,8 @@
 			        <p:inputText id="serial" value="#{vehicleViewer.vehicle.license}" maxlength="15" 
 			        			 style="width: 120px; text-transform: uppercase;" placeholder="Número de Serie" 
 			        			 readonly="#{vehicleViewer.vehicle.id > 0}" rendered="#{vehicleViewer.vehicle.type == 'BIKE'}"/>
-					<p:commandLink title="Enviar foto" update="@widgetVar(tabs:vehicle-picture-form)" oncomplete="PF('vehiclePictureDialog').show();" 
-								   partialSubmit="true" process="@this" style="float: right; margin-right: 5px; padding:0;">
-						<h:graphicImage value="../images/send-pic.png" styleClass="no-margin"/>
-						<f:setPropertyActionListener target="#{vehicleViewer.vehicle.image.path}" value=""/>
-					</p:commandLink>
+			        <p:fileUpload label="" fileUploadListener="#{vehiclePictureUploader.onUpload}" auto="true" 
+			        			  update=":tabs:vehicle-picture-form" oncomplete="PF('vehiclePictureDialog').show();" styleClass="vehicle-picture"/>
 				</p:panelGrid>
 				<p:column>
 					<p:commandButton value="Cancelar" type="button" onclick="PF('vehicleDialog').hide();" 
@@ -130,20 +127,22 @@
 			<p:outputLabel value="Envio de Foto" style="vertical-align: top; line-height: 22px"/>
 		</f:facet>			
 		<h:form id="vehicle-picture-form" enctype="multipart/form-data">
-			<p:fileUpload id="image" label="Selecionar Foto" fileUploadListener="#{vehiclePictureUploader.onImageUpload}" 
-						  mode="advanced" auto="true" allowTypes="/(\.|\/)(gif|jpe?g|png)$/" update="vehicle-picture-form" 
-						  rendered="#{empty vehiclePictureUploader.image.path}"/>
-			<p:panel rendered="#{!(empty vehiclePictureUploader.image.path)}" style="border: 0px !important;" styleClass="no-background">
-				<p:panel styleClass="cropper2 no-background">
+			<p:panelGrid columns="1" columnClasses="cropper" styleClass="no-margin no-border no-background" style="width: 100%;">
+				<p:outputPanel style="width: #{vehiclePictureUploader.image.width}px; height: #{vehiclePictureUploader.image.height}px;" styleClass="foto">
 					<p:imageCropper value="#{vehiclePictureUploader.croppedImage}" image="#{vehiclePictureUploader.image.path}" initialCoords="0,0,#{vehiclePictureUploader.width},#{vehiclePictureUploader.height}" minSize="#{vehiclePictureUploader.width},#{vehiclePictureUploader.height}" maxSize="#{vehiclePictureUploader.width},#{vehiclePictureUploader.height}"/>
-				</p:panel>
-				<p:panel styleClass="no-background" style="margin: 0px auto; text-align: center; padding: 15px 0px; border: none;">
-					<p:commandButton value="Recortar" actionListener="#{vehiclePictureUploader.onImageCropp}" update=":tabs:vehicle-details-form:portrait" oncomplete="PF('vehiclePictureDialog').hide();"/>
-					<p:commandButton value="Cancelar" oncomplete="PF('vehiclePictureDialog').hide();" partialSubmit="true" process="@this">
+				</p:outputPanel>
+				<p:panel style="text-align: center; padding: 10px 0px;" styleClass="no-border no-margin no-background">
+					<p:commandButton value="Recortar" actionListener="#{vehiclePictureUploader.onCropp}" 
+									 update=":tabs:vehicle-details-form:portrait" oncomplete="PF('vehiclePictureDialog').hide();"
+									 style="margin-right: 5px;">
+						<f:setPropertyActionListener value="#{vehiclePictureUploader.image}" target="#{vehicleViewer.vehicle.image}"/>
+					</p:commandButton>
+					<p:commandButton value="Cancelar" oncomplete="PF('vehiclePictureDialog').hide();" partialSubmit="true" process="@this" 
+									 global="false" style="margin-left: 5px;">
 						<f:setPropertyActionListener target="#{vehiclePictureUploader.image.path}" value=""/>
 					</p:commandButton>
 				</p:panel>
-			</p:panel>
+			</p:panelGrid>
 		</h:form>
 	</p:dialog>
 </f:view>

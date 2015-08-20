@@ -18,7 +18,6 @@ import org.apache.commons.collections.CollectionUtils;
 import org.apache.log4j.Logger;
 import org.apache.myfaces.commons.util.MessageUtils;
 import org.primefaces.component.selectonemenu.SelectOneMenu;
-import org.primefaces.component.selectoneradio.SelectOneRadio;
 import org.primefaces.context.RequestContext;
 
 import br.com.abware.accountmgm.bean.model.ModelDataModel;
@@ -28,7 +27,6 @@ import br.com.abware.jcondo.core.PersonType;
 import br.com.abware.jcondo.core.model.Administration;
 import br.com.abware.jcondo.core.model.Domain;
 import br.com.abware.jcondo.core.model.Flat;
-import br.com.abware.jcondo.core.model.Image;
 import br.com.abware.jcondo.core.model.Membership;
 import br.com.abware.jcondo.core.model.Person;
 import br.com.abware.jcondo.core.model.Supplier;
@@ -36,6 +34,7 @@ import br.com.abware.jcondo.exception.BusinessException;
 import br.com.atilo.jcondo.core.service.PersonServiceImpl;
 import br.com.atilo.jcondo.manager.CameraBean;
 import br.com.atilo.jcondo.manager.ImageUploadBean;
+
 
 @ViewScoped
 @ManagedBean(name="personView")
