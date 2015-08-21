@@ -16,9 +16,13 @@ import org.primefaces.component.selectoneradio.SelectOneRadio;
 import org.primefaces.context.RequestContext;
 
 import br.com.abware.jcondo.core.model.Flat;
+import br.com.abware.jcondo.core.model.Person;
 import br.com.abware.jcondo.core.model.PetType;
+import br.com.abware.jcondo.core.model.Phone;
+import br.com.abware.jcondo.core.model.PhoneType;
 import br.com.abware.jcondo.exception.BusinessException;
 import br.com.atilo.jcondo.core.service.FlatServiceImpl;
+import br.com.atilo.jcondo.core.service.PersonDetailServiceImpl;
 import br.com.atilo.jcondo.core.service.PersonServiceImpl;
 
 @ViewScoped
@@ -29,7 +33,9 @@ public class FlatBean {
 
 	private final FlatServiceImpl flatService = new FlatServiceImpl();
 
-	private final PersonServiceImpl personService = new PersonServiceImpl();	
+	private final PersonServiceImpl personService = new PersonServiceImpl();
+	
+	private final PersonDetailServiceImpl personDetailService = new PersonDetailServiceImpl();
 
 	@ManagedProperty(value="#{documentView}")
 	private DocumentBean documentBean;
@@ -48,16 +54,16 @@ public class FlatBean {
 	private Flat flat;
 	
 	private List<PetType> petTypes;
-
+	
+	private List<Phone> phones;
+	
 	@PostConstruct
 	public void init() {
 		try {
 			flats = flatService.getPersonFlats(personService.getPerson());
 			flat = flats.get(0);
-			personBean.init(flat);
-			vehicleBean.init(flat);
-			documentBean.init(flat);
-			parkingBean.init(flat);
+
+			onFlatSelect();
 			
 			petTypes = new ArrayList<PetType>();
 			petTypes.add(PetType.DOG);
@@ -73,6 +79,10 @@ public class FlatBean {
 		vehicleBean.init(flat);
 		documentBean.init(flat);
 		parkingBean.init(flat);
+
+		if (flat.getPerson() != null) {
+			phones = personDetailService.getPhones(flat.getPerson(), PhoneType.MOBILE);
+		}
 	}
 	
 	public void onFlatSave() {
@@ -102,7 +112,22 @@ public class FlatBean {
 	public void onOptionSelect(AjaxBehaviorEvent event) {
 		Boolean value = (Boolean) ((SelectOneRadio) event.getSource()).getValue();
 		RequestContext.getCurrentInstance().addCallbackParam("value", value);
-	}	
+	}
+	
+	public void onPrimaryPersonSelect(Person person) {
+		try {
+			flat = flatService.assignPrimaryPerson(flat.getId(), person.getId());
+			phones = personDetailService.getPhones(flat.getPerson(), PhoneType.MOBILE);
+			MessageUtils.addMessage(FacesMessage.SEVERITY_INFO, "flat.primary.user.change.success", null);
+		} catch (BusinessException e) {
+			LOGGER.warn("Business failure on primary person change: " + e.getMessage());
+			MessageUtils.addMessage(FacesMessage.SEVERITY_WARN, e.getMessage(), e.getArgs());
+			RequestContext.getCurrentInstance().addCallbackParam("exception", true);
+		} catch (Exception e) {
+			LOGGER.error("Failure on primary person change", e);
+			MessageUtils.addMessage(FacesMessage.SEVERITY_FATAL, "general.failure", null);
+		}
+	}
 	
 	public List<Flat> showFlats() {
 		List<Flat> flats = null;
@@ -169,6 +194,14 @@ public class FlatBean {
 
 	public void setPetTypes(List<PetType> petTypes) {
 		this.petTypes = petTypes;
+	}
+
+	public List<Phone> getPhones() {
+		return phones;
+	}
+
+	public void setPhones(List<Phone> phones) {
+		this.phones = phones;
 	}
 
 }

@@ -9,9 +9,12 @@
 	xmlns:ui="http://java.sun.com/jsf/facelets">
 	<h:form id="vehicle-form">
 		<p:panelGrid columns="2" styleClass="no-border person-cmds" columnClasses="person-cmds-left,person-cmds-right">
-			<p:inputText id="license" value="#{vehicleViewer.license}" placeholder="Buscar pela placa" style="font-style: italic; width: 100%">
-				<p:ajax event="change" listener="#{vehicleViewer.onVehicleSearch}" update="vehicleTable" partialSubmit="true" process="@this"/>
-			</p:inputText>
+			<p:column>
+				<p:inputText id="carLicense" widgetVar="carLicense" valueChangeListener="#{vehicleViewer.onVehicleSearch}" 
+							 placeholder="Buscar pela placa" styleClass="searchField"/>
+				<p:commandButton value="Buscar" update="@widgetVar(vehicleTable)" partialSubmit="true" 
+								 process="@widgetVar(carLicense)" styleClass="searchBtn"/>
+			</p:column>
 
 			<p:commandButton value="Cadastrar um veículo" actionListener="#{vehicleViewer.onVehicleCreate}" 
 							 partialSubmit="true" process="@this" update=":tabs:vehicle-details-form" oncomplete="PF('vehicleDialog').show();"
@@ -22,9 +25,16 @@
 					styleClass="no-border no-header">
 	        <p:panel header="#{msg[vehicle.type.label]}" styleClass="vehicle-box">
 	            <h:panelGrid columns="1" style="width:100%">
-			        <p:graphicImage value="#{vehicle.image.path}" styleClass="foto car-image" style="background-size: 100px 90px; margin-bottom: 0px" width="100" height="90" rendered="#{vehicle.type == 'CAR'}"/>
-			        <p:graphicImage value="#{vehicle.image.path}" styleClass="foto moto-image" style="background-size: 100px 90px; margin-bottom: 0px" width="100" height="90" rendered="#{vehicle.type == 'MOTO'}"/>
-			        <p:graphicImage value="#{vehicle.image.path}" styleClass="foto bike-image" style="background-size: 100px 90px; margin-bottom: 0px" width="100" height="90" rendered="#{vehicle.type == 'BIKE'}"/>
+					<p:panel styleClass="car-image foto no-margin no-background" style="width: 100px !important; height: 90px !important; background-size: 100px 90px; margin: 0 auto 5px !important;"  rendered="#{vehicle.type == 'CAR'}">
+				        <p:graphicImage value="#{vehicle.image.path}" width="100" height="90"/>
+					</p:panel>
+					<p:panel styleClass="moto-image foto no-margin no-background" style="width: 100px !important; height: 90px !important; background-size: 100px 90px; margin: 0 auto 5px !important;" rendered="#{vehicle.type == 'MOTO'}">
+				        <p:graphicImage value="#{vehicle.image.path}" width="100" height="90"/>
+					</p:panel>
+					<p:panel styleClass="bike-image foto no-margin no-background" style="width: 100px !important; height: 90px !important; background-size: 100px 90px; margin: 0 auto 5px !important;" rendered="#{vehicle.type == 'BIKE'}">
+				        <p:graphicImage value="#{vehicle.image.path}" style="margin: 0px" width="100" height="90"/>
+					</p:panel>
+
 					<p:outputLabel value="#{vehicle.license} - #{msg[vehicleViewer.displayLabel(vehicle)]}" rendered="#{vehicle.type != 'BIKE'}"/>
 					<p:outputLabel value="#{vehicle.license}" rendered="#{vehicle.type == 'BIKE'}"/>
 
@@ -61,10 +71,18 @@
 			</f:facet>			
 			<p:panelGrid id="vehicle-details" columns="1" styleClass="no-border no-background" style="width: 100%;">
 				<p:panel id="portrait" styleClass="no-border no-margin no-background">
-					<p:graphicImage value="#{vehicleViewer.vehicle.image.path}" styleClass="foto" width="364" height="300" rendered="#{vehicleViewer.vehicle.type == null}"/>
-			        <p:graphicImage value="#{vehicleViewer.vehicle.image.path}" styleClass="foto car-image" width="364" height="300" rendered="#{vehicleViewer.vehicle.type == 'CAR'}"/>
-			        <p:graphicImage value="#{vehicleViewer.vehicle.image.path}" styleClass="foto moto-image" width="364" height="300" rendered="#{vehicleViewer.vehicle.type == 'MOTO'}"/>
-			        <p:graphicImage value="#{vehicleViewer.vehicle.image.path}" styleClass="foto bike-image" width="364" height="300" rendered="#{vehicleViewer.vehicle.type == 'BIKE'}"/>
+					<p:panel styleClass="foto no-margin no-background" style="width: 364px !important; height: 300px !important; background-size: 364px 300px; margin: 0 auto 5px !important;"  rendered="#{vehicleViewer.vehicle.type == null}">
+				        <p:graphicImage value="#{vehicleViewer.vehicle.image.path}" width="364" height="300"/>
+					</p:panel>
+					<p:panel styleClass="car-image foto no-margin no-background" style="width: 364px !important; height: 300px !important; background-size: 364px 300px; margin: 0 auto 5px !important;"  rendered="#{vehicleViewer.vehicle.type == 'CAR'}">
+				        <p:graphicImage value="#{vehicleViewer.vehicle.image.path}" width="364" height="300"/>
+					</p:panel>
+					<p:panel styleClass="moto-image foto no-margin no-background" style="width: 364px !important; height: 300px !important; background-size: 364px 300px; margin: 0 auto 5px !important;" rendered="#{vehicleViewer.vehicle.type == 'MOTO'}">
+				        <p:graphicImage value="#{vehicleViewer.vehicle.image.path}" width="364" height="300"/>
+					</p:panel>
+					<p:panel styleClass="bike-image foto no-margin no-background" style="width: 364px !important; height: 300px !important; background-size: 364px 300px; margin: 0 auto 5px !important;" rendered="#{vehicleViewer.vehicle.type == 'BIKE'}">
+				        <p:graphicImage value="#{vehicleViewer.vehicle.image.path}" style="margin: 0px" width="364" height="300"/>
+					</p:panel>			
 				</p:panel>
 				<p:panelGrid columns="3" styleClass="no-border no-background" style="width: 100%;">
 					<p:selectOneMenu widgetVar="vehicleType" id="vehicleType" value="#{vehicleViewer.vehicle.type}" required="true" 

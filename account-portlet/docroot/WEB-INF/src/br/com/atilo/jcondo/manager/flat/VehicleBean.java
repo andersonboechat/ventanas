@@ -9,6 +9,7 @@ import javax.faces.bean.ViewScoped;
 import javax.faces.component.UIComponent;
 import javax.faces.component.UIInput;
 import javax.faces.context.FacesContext;
+import javax.faces.event.ValueChangeEvent;
 import javax.faces.validator.ValidatorException;
 
 import org.apache.commons.beanutils.BeanUtils;
@@ -177,8 +178,8 @@ public class VehicleBean {
 		}
 	}
 
-	public void onVehicleSearch() throws Exception {
-		filters.put("license", license);
+	public void onVehicleSearch(ValueChangeEvent event) throws Exception {
+		filters.put("license", (String) event.getNewValue());
 		model.filter(filters);
 	}
 

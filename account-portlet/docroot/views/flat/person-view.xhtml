@@ -9,16 +9,16 @@
 	xmlns:ui="http://java.sun.com/jsf/facelets">
 
 	<h:form id="person-form">
-		<p:panelGrid columns="2" styleClass="no-border person-cmds" columnClasses="person-cmds-left,person-cmds-right">
-			<p:inputText id="personName" value="#{personViewer.personName}" placeholder="Buscar pelo nome" style="font-style: italic; width: 100%">
-				<p:ajax event="change" listener="#{personViewer.onPersonSearch}" update="personTable" partialSubmit="true" process="@this"/>
-			</p:inputText>
-
-			<p:commandButton value="Cadastrar uma pessoa" actionListener="#{personViewer.onPersonCreate}" 
-							 partialSubmit="true" process="@this" update="@widgetVar(personDialog)" oncomplete="PF('personDialog').show();"
-							 style="font-size: 12px; margin: 0; padding:0"/>
+		<p:panelGrid columns="3" styleClass="no-border person-cmds" columnClasses="person-cmds-left,person-cmds-left,person-cmds-right">
 			<p:column>
-				<p:selectOneMenu id="ordering" style="font-size: 13px;">
+				<p:inputText id="personName" widgetVar="personName" valueChangeListener="#{personViewer.onPersonSearch}" 
+							 placeholder="Buscar pelo nome" styleClass="searchField"/>
+				<p:commandButton value="Buscar" update="@widgetVar(personTable)" partialSubmit="true" 
+								 process="@widgetVar(personName)" styleClass="searchBtn"/>
+			</p:column>
+
+			<p:column>
+				<p:selectOneMenu id="ordering" style="font-size: 13px; float: right;">
 					<f:selectItem itemLabel="Todos" itemValue="all"/>
 					<f:selectItem itemLabel="Moradores" itemValue="resident"/>
 					<f:selectItem itemLabel="Convidados" itemValue="guest"/>
@@ -28,9 +28,13 @@
 	    		</p:selectOneMenu>
 			</p:column>
 
-			<p:commandButton value="Enviar mensagens a todos desta lista" actionListener="#{personViewer.onPersonCreate}" 
+			<p:commandButton value="Cadastrar uma pessoa" actionListener="#{personViewer.onPersonCreate}" 
 							 partialSubmit="true" process="@this" update="@widgetVar(personDialog)" oncomplete="PF('personDialog').show();"
 							 style="font-size: 12px; margin: 0; padding:0"/>
+
+			<p:commandButton value="Enviar mensagens a todos desta lista" actionListener="#{personViewer.onPersonCreate}" 
+							 partialSubmit="true" process="@this" update="@widgetVar(personDialog)" oncomplete="PF('personDialog').show();"
+							 style="font-size: 12px; margin: 0; padding:0" rendered="false"/>
 		</p:panelGrid>
 
 		<p:dataTable widgetVar="personTable" id="personTable" var="person" value="#{personViewer.model}"  
@@ -38,8 +42,10 @@
 		             rowKey="#{person.id}" disabledSelection="#{!personViewer.canEditPerson(person)}" styleClass="no-header no-border"
 		             tableStyleClass="no-border">
 		    <p:ajax event="page" global="false"/>
-			<p:column style="width: 47px;">
-				<p:graphicImage value="#{person.picture.path}" styleClass="foto" height="66" width="43"/>
+			<p:column style="width: 49px;">
+				<p:panel styleClass="foto no-margin no-background" style="width: 43px !important; height: 66px !important">
+					<p:graphicImage value="#{person.picture.path}" height="66" width="43"/>
+				</p:panel>
 			</p:column>
 			<p:column style="vertical-align: top">
 				<p:panelGrid columns="1" styleClass="no-background no-border">
@@ -71,7 +77,9 @@
 				<p:row>
 					<p:column styleClass="my-account-col1">
 						<p:panelGrid columns="1" styleClass="no-margin no-border no-background">
-							<p:graphicImage id="portrait" value="#{personViewer.person.picture.path}" styleClass="foto user-image" width="#{imageUploader.width}" height="#{imageUploader.height}"/>
+							<p:panel styleClass="user-image foto no-margin no-background2" style="width: #{imageUploader.width}px !important; height: #{imageUploader.height}px !important">
+								<p:graphicImage id="portrait" value="#{personViewer.person.picture.path}" width="#{imageUploader.width}" height="#{imageUploader.height}"/>
+							</p:panel>
 							<p:panelGrid columns="2" columnClasses="picture" styleClass="pic-cmds no-border no-background" style="text-align: center; float: right">
 								<p:fileUpload label="" fileUploadListener="#{imageUploader.onUpload}" auto="true" update=":tabs:person-picture-form" oncomplete="PF('personPictureDialog').show();" />
 								<p:commandLink title="#{msg['take.picture']}" actionListener="#{personCamera.setRender(true)}" update=":tabs:person-camera-form" oncomplete="PF('personCameraDialog').show();" partialSubmit="true" global="false" process="@this" styleClass="column">

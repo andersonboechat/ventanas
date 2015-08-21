@@ -12,6 +12,7 @@ import javax.faces.application.FacesMessage;
 import javax.faces.bean.ManagedBean;
 import javax.faces.bean.ViewScoped;
 import javax.faces.event.AjaxBehaviorEvent;
+import javax.faces.event.ValueChangeEvent;
 
 import org.apache.commons.beanutils.BeanUtils;
 import org.apache.commons.collections.CollectionUtils;
@@ -54,8 +55,6 @@ public class PersonBean {
 
 	private HashMap<String, Object> filters;
 
-	private String personName;
-
 	private Flat flat;
 
 	private Person person;
@@ -88,8 +87,8 @@ public class PersonBean {
 		}
 	}
 
-	public void onPersonSearch(AjaxBehaviorEvent event) throws Exception {
-		filters.put("fullName", personName);
+	public void onPersonSearch(ValueChangeEvent event) throws Exception {
+		filters.put("fullName", (String) event.getNewValue());
 		model.filter(filters);
 	}
 	
@@ -119,6 +118,7 @@ public class PersonBean {
 
 	public void onPersonCreate() throws Exception {
 		person = new Person();
+		person.setPicture(imageUploadBean.getImage());
 		membership = new Membership(null, flat);
 		person.setMemberships(new ArrayList<Membership>());
 		person.getMemberships().add(membership);
@@ -156,9 +156,8 @@ public class PersonBean {
 
 	@SuppressWarnings("unchecked")
 	public void onPersonTypeSelect(AjaxBehaviorEvent event) throws Exception {
-		filters.clear();
-
 		String type = (String) ((SelectOneMenu) event.getSource()).getValue();
+
 		if (type.equalsIgnoreCase("resident")) {
 			List<Person> people;
 			filters.put("memberships.type", PersonType.OWNER);
@@ -183,6 +182,7 @@ public class PersonBean {
 			filters.put("memberships.type", PersonType.EMPLOYEE);
 			model.filter(filters);
 		} else {
+			filters.put("memberships.type", null);
 			model.filter(filters);
 		}
 	}
@@ -209,6 +209,28 @@ public class PersonBean {
 		return null;
 	}
 
+	@SuppressWarnings("unchecked")
+	public List<Person> displayResidents() throws Exception {
+		HashMap<String, Object> newFilters = new HashMap<String, Object>();
+		List<Person> people;
+
+		newFilters.put("memberships.type", PersonType.OWNER);
+		model.filter(newFilters);
+		people = (List<Person>) model.getWrappedData();
+
+		newFilters.put("memberships.type", PersonType.RENTER);
+		model.filter(newFilters);
+		people.addAll((List<Person>) model.getWrappedData());
+
+		newFilters.put("memberships.type", PersonType.RESIDENT);
+		model.filter(newFilters);
+		people.addAll((List<Person>) model.getWrappedData());
+
+		model.filter(filters);
+
+		return people;
+	}
+	
 	public boolean canChangeType() throws Exception {
 		if (person.getId() == 0) {
 			return true;
@@ -258,14 +280,6 @@ public class PersonBean {
 
 	public void setModel(ModelDataModel<Person> model) {
 		this.model = model;
-	}
-
-	public String getPersonName() {
-		return personName;
-	}
-
-	public void setPersonName(String personName) {
-		this.personName = personName;
 	}
 
 	public Person getPerson() {

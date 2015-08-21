@@ -132,7 +132,7 @@ public class PersonServiceImpl  {
 	public Person getPerson() throws Exception {
 		return personManager.findPerson();
 	}
-
+	
 	/**
 
 	 * Papeis de Apartamento: Proprietario, Morador, Dependente, Convidado, Visitante

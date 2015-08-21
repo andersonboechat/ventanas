@@ -31,17 +31,30 @@
 		<p:panelGrid columns="2" columnClasses="flat-left,flat-right" styleClass="no-background no-border">
 			<h:form id="flat-form">
 				<p:panelGrid id="flat-filters" columns="1" styleClass="no-background no-border flats" columnClasses="menu-cmds-col3">
-			    	<p:fieldset legend="Contato Principal" styleClass="no-background" style="width: 400px;">
-			    		<p:panelGrid columns="2" styleClass="no-background no-border" style="width: 100%">
-				    		<p:graphicImage value="http://localhost/image/user_male_portrait?img_id=11707&amp;pfdrid_c=true" styleClass="foto" height="80" width="52" style="float: left"/>
-							<p:panelGrid columns="2" styleClass="no-background no-border" style="float: left; width: 100%">
+			    	<p:fieldset legend="Contato Principal" styleClass="no-background" style="width: 400px;" widgetVar="primaryPerson">
+			    		<p:panelGrid columns="2" columnClasses="primary-left,primary-right" styleClass="no-background no-border" style="width: 100%">
+							<p:panel styleClass="user-image foto no-margin no-background" style="width: 52px; height: 80px; background-size: 52px 80px;">
+						        <p:graphicImage value="#{flatView.flat.person.picture.path}" width="52" height="80"/>
+							</p:panel>
+							<p:panelGrid columns="2" columnClasses="primary-left,primary-right" styleClass="no-background no-border" style="float: left; width: 100%" rendered="#{not empty flatView.flat.person}">
 								<h:outputText value="Nome:" style="font-size: 14px; color: black; font-weight: bold;"/>
-				       			<h:outputText value="Rose Beltrão das Neves" style="font-size: 14px; color: black; "/>
+								<h:outputText value="#{flatView.flat.person.fullName}" style="font-size: 14px; color: black; font-weight: bold;"/>
 				       			<h:outputText value="Celular:" style="font-size: 14px; color: black; font-weight: bold;"/>
-				       			<h:outputText value="+55 21 98765-4321" style="font-size: 14px; color: black;"/>
+				       			<p:dataList var="phone" value="#{flatView.phones}" paginator="false" 
+				       						emptyMessage="não definido" type="definition" styleClass="no-background phones">
+									<h:outputText value="+55 #{phone.extension} #{phone.number}" style="font-size: 14px; color: black; font-weight: bold;"/>
+				       			</p:dataList>
+							</p:panelGrid>
+							<p:panelGrid columns="2" columnClasses="primary-left,primary-right" styleClass="no-background no-border" style="float: left; width: 100%" rendered="#{empty flatView.flat.person}">
+								<p:outputLabel value="Nome:" style="font-size: 14px; color: black; font-weight: bold;"/>
+								<h:outputText value="não definido" style="font-size: 14px; color: black; font-weight: bold;"/>
+								<p:outputLabel value="Celular:" style="font-size: 14px; color: black; font-weight: bold;"/>
+								<p:panelGrid columns="1" columnClasses="primary-left,primary-right" styleClass="no-background no-border no-margin" style="float: left; width: 100%">
+									<h:outputText value="não definido" style="font-size: 14px; color: black; font-weight: bold;"/>
+								</p:panelGrid>
 							</p:panelGrid>
 						</p:panelGrid>
-						<p:commandButton value="Alterar" style="float: right; width: 90px; margin: 0px 0px 5px 5px;"/>
+						<p:commandButton value="Alterar" type="button" onclick="PF('primaryPersonDialog').show();" style="float: right; width: 90px; margin: 0px 0px 5px 5px;"/>
 					</p:fieldset>
 					<p:spacer width="100%" height="1px" style="background: #cccccc"/>
 		    		<p:panel id="parkings" widgetVar="parkings" header="Vagas" styleClass="flat-box">
@@ -102,9 +115,9 @@
 			<p:tabView id="tabs" style="padding: 0; margin-top: 0px">
 				<p:tab title="Pessoas"><ui:include src="person-view.xhtml"/></p:tab>
 				<p:tab title="Veículos"><ui:include src="vehicle-view.xhtml"/></p:tab>
-				<p:tab title="Documentos">
+				<p:tab title="Documentos" rendered="false">
 					<p:panelGrid columns="2" styleClass="no-border person-cmds" columnClasses="person-cmds-left,person-cmds-right">
-						<p:inputText id="fileName" value="#{personViewer.personName}" placeholder="Buscar pelo nome" style="font-style: italic; width: 100%">
+						<p:inputText id="fileName" placeholder="Buscar pelo nome" style="font-style: italic; width: 100%">
 							<p:ajax event="change" listener="#{personViewer.onPersonSearch}" update="documentTable" partialSubmit="true" process="@this"/>
 						</p:inputText>
 			
@@ -127,7 +140,11 @@
 				</p:tab>
 			</p:tabView>
 		</p:panelGrid>		
-		<p:dialog header="Documentos" widgetVar="documentDialog" draggable="true" resizable="false" modal="true" closable="false" visible="false">
+		<p:dialog widgetVar="documentDialog" draggable="true" resizable="false" modal="true" closable="false" visible="false">
+			<f:facet name="header">
+				<p:graphicImage value="../images/picture_ico.png" style="vertical-align: top; margin-right: 10px;"/>
+				<p:outputLabel value="Documentos" style="vertical-align: top; line-height: 22px"/>
+			</f:facet>
 			<h:form id="document-form">
 				<p:panelGrid id="model-details" columns="1" styleClass="no-border" style="margin: 10px 0px 20px 0px; text-align: justify" cellpadding="10">
 			    	<h:outputText value="Escolha o apartamento para o qual deseja alugar esta vaga e confirme clicando no botão Alugar."/>
@@ -142,8 +159,12 @@
 				<p:commandButton value="Enviar" actionListener="#{documentViewer.onSend}" update=":outputMsg" oncomplete="if (!args.validationFailed &amp;&amp; !args.exception) {PF('documentDialog').hide();}" style="float: right; width: 80px; margin: 0px 0px 10px 5px;"/>
 			</h:form>
 		</p:dialog>
-		<p:dialog header="Concessão de uso de vaga" widgetVar="parkingDialog" draggable="true" resizable="false" modal="true" 
+		<p:dialog widgetVar="parkingDialog" draggable="true" resizable="false" modal="true" 
 				  closable="false" visible="false" width="300">
+			<f:facet name="header">
+				<p:graphicImage value="../images/picture_ico.png" style="vertical-align: top; margin-right: 10px;"/>
+				<p:outputLabel value="Concessão de uso de vaga" style="vertical-align: top; line-height: 22px"/>
+			</f:facet>
 			<h:form id="parking-grant-form">
 				<p:panelGrid columns="1" styleClass="no-border" style="margin: 10px 0px 20px 0px; text-align: justify" cellpadding="10">
 			    	<h:outputText value="Escolha o apartamento para o qual você deseja conceder o uso de uma vaga e confirme clicando no botão Conceder."/>
@@ -154,6 +175,31 @@
 				</p:panelGrid>
 				<p:commandButton value="Cancelar" type="button" onclick="PF('parkingDialog').hide();" style="float: right; width: 95px; margin: 0px 0px 10px 5px;"/>
 				<p:commandButton value="Conceder" actionListener="#{parkingViewer.onParkingRent}" update="@widgetVar(parkings),:outputMsg" oncomplete="if (!args.validationFailed &amp;&amp; !args.exception) {PF('parkingDialog').hide();}" style="float: right; width: 95px; margin: 0px 0px 10px 5px;"/>
+			</h:form>
+		</p:dialog>
+		<p:dialog widgetVar="primaryPersonDialog" modal="true" draggable="false" resizable="false" closable="false" 
+				 visible="false" width="500" style="background: #f9f9f9">
+			<f:facet name="header">
+				<p:graphicImage value="../images/user_ico.png" style="vertical-align: top; margin-right: 10px;"/>
+				<p:outputLabel value="Alteração do Contrato Principal" style="vertical-align: top; line-height: 22px"/>
+			</f:facet>
+			<h:form id="primary-person-form">
+				<p:panel styleClass="no-background no-border">
+					<h:outputText value="O contato principal é a pessoa que a Administração entrará em contato primeiro, quando necessário."/>
+				</p:panel>
+				<p:dataTable var="person" value="#{personViewer.displayResidents()}" paginator="false" emptyMessage="Nenhum usuário cadastrado" 
+				             rowKey="#{person.id}" styleClass="no-header no-border" tableStyleClass="no-border">
+					<p:column style="vertical-align: top">
+						<p:commandLink title="Escolher este usuário" partialSubmit="true" process="@this" 
+									   actionListener="#{flatView.onPrimaryPersonSelect(person)}" 
+									   oncomplete="if (!args.validationFailed) {PF('primaryPersonDialog').hide();}" 
+									   update="@widgetVar(primaryPerson),:outputMsg" style="text-decoration: none; width: 100%; cursor: pointer !important; cursor: hand !important;">
+			       			<h:outputText value="#{person.firstName} #{person.lastName}" style="font-size: 14px; color: black; font-weight: bold;"/><br/>
+			       			<h:outputText value="#{personViewer.displayMembership(person)}" style="font-size: 13px; color: black; font-weight: normal;"/>
+						</p:commandLink>
+					</p:column>
+				</p:dataTable>
+				<p:commandButton value="Cancelar" type="button" onclick="PF('primaryPersonDialog').hide();" style="float: right; width: 95px; margin: 10px 0px 10px 5px;"/>
 			</h:form>
 		</p:dialog>
 	</ui:define>

@@ -13,6 +13,7 @@ import br.com.abware.jcondo.exception.PersistenceException;
 
 import br.com.atilo.jcondo.commons.collections.FlatTransformer;
 import br.com.atilo.jcondo.core.persistence.manager.FlatManagerImpl;
+import br.com.atilo.jcondo.core.persistence.manager.PersonManagerImpl;
 import br.com.atilo.jcondo.core.persistence.manager.SecurityManagerImpl;
 
 public class FlatServiceImpl {
@@ -20,6 +21,8 @@ public class FlatServiceImpl {
 	private FlatManagerImpl flatManager = new FlatManagerImpl();
 
 	private SecurityManagerImpl securityManager = new SecurityManagerImpl();
+	
+	private PersonManagerImpl personManager = new PersonManagerImpl();
 	
 	@SuppressWarnings("unchecked")
 	public Flat getHome(Person person) throws Exception {
@@ -79,7 +82,29 @@ public class FlatServiceImpl {
 
 		return flatManager.save(flat);
 	}
-	
+
+	public Flat assignPrimaryPerson(long flatId, long personId) throws Exception {
+		Flat flat = flatManager.findById(flatId);
+
+		if (flat == null) {
+			throw new BusinessException("flt.not.found", flatId);
+		}
+		
+		if (!securityManager.hasPermission(flat, Permission.UPDATE)) {
+			throw new BusinessException("flt.update.denied");
+		}
+
+		Person person = personManager.findById(personId); 
+
+		if (person == null) {
+			throw new BusinessException("psn.not.found", personId);
+		}
+
+		flat.setPerson(person);
+
+		return flatManager.save(flat);
+	}
+
 	public Flat update(Flat flat) throws Exception {
 		if (!securityManager.hasPermission(flat, Permission.UPDATE)) {
 			throw new BusinessException("flt.update.denied");

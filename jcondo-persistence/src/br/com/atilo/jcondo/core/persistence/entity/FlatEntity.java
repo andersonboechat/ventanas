@@ -10,7 +10,7 @@ import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.OneToMany;
-import javax.persistence.OrderColumn;
+import javax.persistence.OneToOne;
 import javax.persistence.Table;
 
 import br.com.abware.jcondo.core.model.PetType;
@@ -22,6 +22,10 @@ public class FlatEntity extends DomainEntity {
 
 	private static final long serialVersionUID = 1L;
 
+	@OneToOne
+	@JoinColumn(name="personId", nullable=true)
+	private PersonEntity person;
+	
 	@Column(updatable=false)
 	private int block;
 
@@ -49,6 +53,14 @@ public class FlatEntity extends DomainEntity {
 	@OneToMany(fetch=FetchType.LAZY)
 	@JoinColumn(name="renterDomainId", referencedColumnName="id", insertable=false, updatable=false)
 	private List<ParkingEntity> rentedParkings;
+
+	public PersonEntity getPerson() {
+		return person;
+	}
+
+	public void setPerson(PersonEntity person) {
+		this.person = person;
+	}
 
 	public int getBlock() {
 		return block;

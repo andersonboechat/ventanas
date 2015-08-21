@@ -9,6 +9,7 @@ import br.com.abware.jcondo.core.PersonDetail;
 import br.com.abware.jcondo.core.model.Kinship;
 import br.com.abware.jcondo.core.model.Person;
 import br.com.abware.jcondo.core.model.Phone;
+import br.com.abware.jcondo.core.model.PhoneType;
 import br.com.abware.jcondo.exception.BusinessException;
 
 import br.com.atilo.jcondo.core.persistence.manager.KinshipManagerImpl;
@@ -52,5 +53,20 @@ public class PersonDetailServiceImpl {
 		detail.setKinships(kinshipManager.findByPerson(person));
 		detail.setPhones(phoneManager.findPhones(person));
 		return detail;
+	}
+	
+	public List<Phone> getPhones(Person person, PhoneType type) throws Exception {
+		List<Phone> phones = phoneManager.findPhones(person);
+
+		if (type != null) {
+			for (int i = phones.size() - 1; i >= 0; i--) {
+				Phone phone = phones.get(i); 
+				if (phone.getType() != type) {
+					phones.remove(phone);
+				}
+			}
+		}
+
+		return phones;
 	}
 }

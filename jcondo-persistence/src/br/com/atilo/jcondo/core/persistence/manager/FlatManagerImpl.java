@@ -26,6 +26,8 @@ import br.com.atilo.jcondo.core.persistence.entity.FlatEntity;
 public class FlatManagerImpl extends JCondoManager<FlatEntity, Flat> {
 
 	private AdministrationManagerImpl adminManager = new AdministrationManagerImpl();
+	
+	private PersonManagerImpl personManager = new PersonManagerImpl();
 
 	@Override
 	protected Class<Flat> getModelClass() {
@@ -41,6 +43,9 @@ public class FlatManagerImpl extends JCondoManager<FlatEntity, Flat> {
 	protected Flat getModel(FlatEntity entity) throws Exception {
 		Flat flat = super.getModel(entity);
 		flat.setPetTypes(new ArrayList<PetType>(flat.getPetTypes()));
+		if (flat.getPerson() != null) {
+			flat.setPerson(personManager.findById(flat.getPerson().getId()));
+		}
 		return flat;
 	}
 
