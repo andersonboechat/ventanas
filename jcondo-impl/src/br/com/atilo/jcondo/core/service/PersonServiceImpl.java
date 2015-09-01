@@ -1,6 +1,7 @@
 package br.com.atilo.jcondo.core.service;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -22,8 +23,10 @@ import br.com.abware.jcondo.exception.BusinessException;
 import br.com.abware.jcondo.exception.PersistenceException;
 
 import br.com.atilo.jcondo.commons.collections.MembershipPredicate;
+import br.com.atilo.jcondo.commons.collections.PersonTypePredicate;
 import br.com.atilo.jcondo.core.persistence.manager.PersonManagerImpl;
 import br.com.atilo.jcondo.core.persistence.manager.SecurityManagerImpl;
+import br.com.caelum.stella.validation.CPFValidator;
 
 public class PersonServiceImpl  {
 
@@ -161,13 +164,33 @@ public class PersonServiceImpl  {
 			if (!securityManager.hasPermission(person, Permission.ADD)) {
 				throw new BusinessException("psn.create.denied");
 			}
-	
+
+			boolean isVisitor = CollectionUtils.exists(person.getMemberships(), new PersonTypePredicate(PersonType.VISITOR));
+			boolean isGuest = CollectionUtils.exists(person.getMemberships(), new PersonTypePredicate(PersonType.GUEST));
+
 			if (StringUtils.isEmpty(person.getIdentity())) {
-				throw new BusinessException("psn.identity.empty");
+				if (isVisitor) {
+					person.setIdentity(null);
+				} else {
+					throw new BusinessException("psn.identity.empty");
+				}
+			} else {
+				try {
+					new CPFValidator().assertValid(person.getIdentity().replaceAll("[^0-9]+", ""));
+				} catch (Exception e) {
+					throw new BusinessException("psn.identity.not.valid", person.getIdentity());
+				}
 			}
-	
-			if (getPerson(person.getIdentity()) != null) {
-				throw new BusinessException("psn.identity.exists", person.getIdentity());
+
+			if (!isVisitor) {	
+				if (getPerson(person.getIdentity()) != null) {
+					throw new BusinessException("psn.identity.exists", person.getIdentity());
+				}
+			}
+
+			if (isVisitor || isGuest) {
+				person.setBirthday(new Date());
+				person.setEmailAddress("");
 			}
 
 			validateDomains(person);
@@ -175,8 +198,12 @@ public class PersonServiceImpl  {
 	
 			Person p = personManager.save(person);
 	
-			for (Membership membership : person.getMemberships()) {
-				securityManager.addMembership(p, membership);
+			try {
+				for (Membership membership : person.getMemberships()) {
+					securityManager.addMembership(p, membership);
+				}
+			} catch (Exception e) {
+				// TODO: Log it!
 			}
 	
 			return p;

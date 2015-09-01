@@ -9,6 +9,7 @@
 	xmlns:ui="http://java.sun.com/jsf/facelets">
 
 	<h:form id="person-form">
+		<p:growl id="nada"/>
 		<p:panelGrid columns="3" styleClass="no-border person-cmds" columnClasses="person-cmds-left,person-cmds-left,person-cmds-right">
 			<p:column>
 				<p:inputText id="personName" widgetVar="personName" valueChangeListener="#{personViewer.onPersonSearch}" 
@@ -67,7 +68,7 @@
 		</p:dataTable>
 	</h:form>
 
-	<p:dialog widgetVar="personDialog" draggable="false" resizable="false" modal="true" closable="false" visible="false" style="background: #f9f9f9">
+	<p:dialog widgetVar="personDialog" draggable="false" resizable="false" modal="true" closable="false" visible="true" style="background: #f9f9f9">
 		<f:facet name="header">
 			<p:graphicImage value="../images/user_ico.png" style="vertical-align: top; margin-right: 10px;"/>
 			<p:outputLabel value="#{msg['dlg.user.signon']}" style="vertical-align: top; line-height: 25px;"/>
@@ -90,32 +91,44 @@
 				        </p:panelGrid>
 					</p:column>
 					<p:column styleClass="my-account-col2">
-						<p:panelGrid columns="4" styleClass="userPanel no-border no-background" style=" margin: 0; padding: 0;">
+						<p:panelGrid columns="2" styleClass="userPanel no-border no-background" style=" margin: 0; padding: 0;">
 						<p:row>
-							<p:column styleClass="labelClm"><p:outputLabel for="email" value="Email: "/></p:column>
+							<p:column styleClass="labelClm"><p:outputLabel for="type" value="Tipo: "/></p:column>
 							<p:column colspan="3" styleClass="fieldClm">
-								<p:inputText id="email" value="#{personViewer.person.emailAddress}" required="true" 
-											 requiredMessage="#{msg['person.email.empty']}" readonly="#{!personViewer.canEditInfo()}"/>
+								<h:outputText value="#{msg[personViewer.membership.type.label]}" rendered="#{!personViewer.canChangeType(personViewer.membership)}"/>
+								<p:selectOneMenu id="type" value="#{personViewer.membership.type}"
+												 style="vertical-align: middle; width: 150px; margin-right: 0px;" 
+												 rendered="#{personViewer.canChangeType(personViewer.membership)}">
+									<f:selectItems var="type" value="#{personViewer.types}" itemLabel="#{msg[type.label]}"/>
+									<p:ajax event="change" update="person-details-form" global="false"/>
+								</p:selectOneMenu>
 							</p:column>
 						</p:row>
 						<p:row>
 							<p:column styleClass="labelClm"><p:outputLabel for="firstName" value="Nome: "/></p:column>
 							<p:column colspan="3" styleClass="fieldClm">
-								<p:inputText id="firstName" value="#{personViewer.person.firstName}" required="true" 
-											 requiredMessage="#{msg['person.firstname.empty']}" readonly="#{!personViewer.canEditInfo()}"/>
+								<p:inputText id="firstName" value="#{personViewer.person.firstName}" required="true" lang="pt" 
+											 requiredMessage="#{msg['person.firstname.empty']}" readonly="#{!personViewer.canEditInfo()}"
+											 validatorMessage="O nome deve conter somente letras">
+        							<f:validateRegex pattern="^([\s]*\p{L}[\s]*)+$" />
+								</p:inputText>
 							</p:column>
 						</p:row>									
 						<p:row>
 							<p:column styleClass="labelClm"><p:outputLabel for="lastName" value="Sobrenome: "/></p:column>
 							<p:column colspan="3" styleClass="fieldClm">
 								<p:inputText id="lastName" value="#{personViewer.person.lastName}" required="true" 
-											 requiredMessage="#{msg['person.lastname.empty']}" readonly="#{!personViewer.canEditInfo()}"/>
+											 requiredMessage="#{msg['person.lastname.empty']}" readonly="#{!personViewer.canEditInfo()}"
+											 validatorMessage="O sobrenome deve conter somente letras">
+        							<f:validateRegex pattern="^([\s]*\p{L}[\s]*)+$" />
+								</p:inputText>
 							</p:column>
 						</p:row>
 						<p:row>
 							<p:column styleClass="labelClm"><p:outputLabel for="identity" value="CPF: "/></p:column>
 							<p:column colspan="3" styleClass="fieldClm">
-								<p:inputMask id="identity" value="#{personViewer.person.identity}" mask="999.999.999-99" required="true" 
+								<p:inputMask id="identity" value="#{personViewer.person.identity}" mask="999.999.999-99" 
+											 required="#{personViewer.membership.type != 'VISITOR'}" 
 											 requiredMessage="#{msg['person.identity.empty']}" readonly="#{!personViewer.canEditInfo()}"/>
 							</p:column>
 						</p:row>
@@ -126,19 +139,22 @@
 									<f:selectItems var="gender" value="#{personViewer.genders}" itemLabel="#{msg[gender.label]}"/>
 								</p:selectOneMenu>
 							</p:column>
+						</p:row>
+						<p:row rendered="#{personViewer.membership.type != 'VISITOR' and personViewer.membership.type != 'GUEST'}">
 							<p:column styleClass="labelClm"><p:outputLabel for="birthday" value="Nascimento:"/></p:column>
 							<p:column styleClass="fieldClm">
 								<p:calendar id="birthday" mode="popup" pattern="dd/MM/yyyy" value="#{personViewer.person.birthday}"
-											navigator="true" yearRange="c-100:c+0" styleClass="birthday" mask="true" locale="pt" readonly="#{!personViewer.canEditInfo()}"/>
+											navigator="true" yearRange="c-100:c+0" styleClass="birthday" mask="true" locale="pt" 
+											readonly="#{!personViewer.canEditInfo()}" requiredMessage=""
+											required="true"/>
 							</p:column>
 						</p:row>
-						<p:row>
-							<p:column styleClass="labelClm"><p:outputLabel for="type" value="Tipo: "/></p:column>
+						<p:row rendered="#{personViewer.membership.type != 'VISITOR' and personViewer.membership.type != 'GUEST'}">
+							<p:column styleClass="labelClm"><p:outputLabel for="email" value="Email: "/></p:column>
 							<p:column colspan="3" styleClass="fieldClm">
-								<h:outputText value="#{msg[personViewer.membership.type.label]}" rendered="#{!personViewer.canChangeType(personViewer.membership)}"/>
-								<p:selectOneMenu id="type" value="#{personViewer.membership.type}" style="vertical-align: middle; width: 150px; margin-right: 0px;" rendered="#{personViewer.canChangeType(personViewer.membership)}">
-									<f:selectItems var="type" value="#{personViewer.types}" itemLabel="#{msg[type.label]}"/>
-								</p:selectOneMenu>
+								<p:inputText id="email" value="#{personViewer.person.emailAddress}"  
+											 readonly="#{!personViewer.canEditInfo()}" requiredMessage="#{msg['person.email.empty']}"
+											 required="true"/>
 							</p:column>
 						</p:row>
 						</p:panelGrid>
@@ -146,7 +162,7 @@
 				</p:row>
 			</p:panelGrid>
 			<p:commandButton value="Cancelar" type="button" onclick="PF('personDialog').hide();" style="float: right; width: 90px; margin: 0px 18px 10px 0px;"/>
-			<p:commandButton value="Salvar" actionListener="#{personViewer.onPersonSave}" update="@widgetVar(personTable),:outputMsg" oncomplete="if (!args.validationFailed) { if(!args.exception) {PF('personDialog').hide();} else { if(args.alert) {PF('alertDialog').show();}}}" style="float: right; width: 90px; margin: 0px 10px 10px 5px;"/>
+			<p:commandButton value="Salvar" actionListener="#{personViewer.onPersonSave}" update="@widgetVar(personTable),:outputMsg,:tabs:person-form:nada" oncomplete="if (!args.validationFailed) { if(!args.exception) {PF('personDialog').hide();} else { if(args.alert) {PF('alertDialog').show();}}}" style="float: right; width: 90px; margin: 0px 10px 10px 5px;"/>
 		</h:form>
 	</p:dialog>
 

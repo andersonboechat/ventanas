@@ -11,20 +11,19 @@
 	<ui:define name="app-view">
 		<p:growl id="messages" showDetail="false" autoUpdate="true"/>
 		
-		<c:set var="profilePictureUploader" value="#{profileBean.imageUploadBean}"/>
+		<c:set var="profileUploader" value="#{profileBean.imageUploadBean}"/>
 		<c:set var="profileCamera" value="#{profileBean.cameraBean}"/>
 
 		<h:form id="profile-form">	
-			<p:panelGrid id="person-details" styleClass="no-background no-border" style="margin: 10px 0px 20px 0px; width: 100%" cellpadding="10">
+			<p:panelGrid id="person-details" styleClass="no-background no-border" style="margin: 10px 0px 20px 0px; width: 730" cellpadding="10">
 				<p:row>
 					<p:column styleClass="my-account-col1">
-						<p:panelGrid columns="1" styleClass="no-margin">
-							<p:graphicImage id="portrait" value="#{profileBean.person.picture.path}" styleClass="foto" width="#{profileCamera.width}" height="#{profileCamera.height}"/>
-							<p:panelGrid columns="2" columnClasses="picture" styleClass="pic-cmds" style="text-align: center; float: right">
-								<p:commandLink title="#{msg['send.picture']}" update=":profile-picture-form" oncomplete="PF('profilePictureDialog').show();" partialSubmit="true" process="@this" global="false" styleClass="column">
-									<h:graphicImage value="../images/send-pic.png"/>
-									<f:setPropertyActionListener target="#{profileBean.person.picture.path}" value=""/>
-								</p:commandLink>
+						<p:panelGrid columns="1" styleClass="no-margin no-background no-border">
+							<p:panel styleClass="user-image foto no-margin no-background2" style="width: #{profileUploader.width}px !important; height: #{profileUploader.height}px !important">
+								<p:graphicImage id="portrait" value="#{profileBean.person.picture.path}" width="#{profileUploader.width}" height="#{profileUploader.height}"/>
+							</p:panel>
+							<p:panelGrid columns="2" columnClasses="picture" styleClass="pic-cmds no-background no-border" style="text-align: center; float: right">
+								<p:fileUpload label="" fileUploadListener="#{profileUploader.onUpload}" auto="true" update=":profile-picture-form" oncomplete="PF('profileUploaderDialog').show();" />
 								<p:commandLink title="#{msg['take.picture']}" update=":profile-camera-form:ci" oncomplete="PF('profileCameraDialog').show();" partialSubmit="true" global="false" process="@this" styleClass="column">
 									<h:graphicImage value="../images/take-pic.png" width="38" height="31"/>
 									<f:setPropertyActionListener target="#{profileCamera.image.path}" value=""/>
@@ -33,52 +32,66 @@
 				        </p:panelGrid>
 					</p:column>
 					<p:column styleClass="my-account-col2">
-						<p:panelGrid columns="4" styleClass="userPanel" style="width: 100%; margin: 0; padding: 0;">
-						<p:row>
-							<p:column styleClass="labelClm"><p:outputLabel for="email" value="Email: "/></p:column>
-							<p:column colspan="3" styleClass="fieldClm">
+						<p:fieldset legend="Informações de Acesso" styleClass="no-background" style="margin-bottom: 15px;">
+							<p:panelGrid columns="2" styleClass="no-background no-margin1 no-border">
+								<p:outputLabel for="email" value="Email: "/>
 								<p:inputText id="email" value="#{profileBean.person.emailAddress}" 
-											 required="true" requiredMessage="#{msg['person.email.empty']}"/>
-							</p:column>
-						</p:row>
-						<p:row>
-							<p:column styleClass="labelClm"><p:outputLabel for="firstName" value="Nome: "/></p:column>
-							<p:column colspan="3" styleClass="fieldClm">
-								<p:inputText id="firstName" value="#{profileBean.person.firstName}" 
-											 required="true" requiredMessage="#{msg['person.firstname.empty']}"/>
-							</p:column>
-						</p:row>									
-						<p:row>
-							<p:column styleClass="labelClm"><p:outputLabel for="lastName" value="Sobrenome: "/></p:column>
-							<p:column colspan="3" styleClass="fieldClm">
-								<p:inputText id="lastName" value="#{profileBean.person.lastName}"
-											 required="true" requiredMessage="#{msg['person.lastname.empty']}"/>
-							</p:column>
-						</p:row>
-						<p:row>
-							<p:column styleClass="labelClm"><p:outputLabel for="identity" value="CPF: "/></p:column>
-							<p:column colspan="3" styleClass="fieldClm">
-								<p:inputMask id="identity" value="#{profileBean.person.identity}" mask="999.999.999-99"
-											 required="true" requiredMessage="#{msg['person.email.empty']}"/>
-							</p:column>
-						</p:row>
-						<p:row>
-							<p:column styleClass="labelClm"><p:outputLabel for="male" value="Sexo:"/></p:column>
-							<p:column>
-								<p:selectOneMenu id="male" value="#{profileBean.person.gender}" required="false" style="vertical-align: middle">
-									<f:selectItems var="gender" value="#{profileBean.genders}" itemLabel="#{msg[gender.label]}"/>
-								</p:selectOneMenu>
-							</p:column>
-							<p:column style="padding-right: 0px;"><p:outputLabel for="birthday" value="Nascimento:"/></p:column>
-							<p:column styleClass="fieldClm">
-								<p:calendar id="birthday" mode="popup" pattern="dd/MM/yyyy" value="#{profileBean.person.birthday}"
-											navigator="true" yearRange="c-100:c+0" styleClass="birthday" mask="true" locale="pt"/>
-							</p:column>
-						</p:row>
-						</p:panelGrid>
+										 	 required="true" requiredMessage="#{msg['person.email.empty']}"
+										 	 style="width: 95%"/>
+								<p:outputLabel for="newPwd" value="Nova Senha"/>
+								<p:panelGrid columns="3" styleClass="no-background no-margin no-border" style="width: 100%">
+									<p:password id="newPwd" value="#{profileBean.newPassword}" maxlength="8" match="confirmPwd" required="true" 
+											requiredMessage="Informe a nova senha" validatorMessage="A confirmação da nova senha não confere"
+											style="width: 80px; margin-right: 10px;"/>
+									<p:outputLabel for="confirmPwd" value="Confirmar senha" style=" white-space: nowrap; margin-right: 10px;"/>
+									<p:password id="confirmPwd" value="#{profileBean.newPassword}" maxlength="8" required="true" 
+												requiredMessage="Confirme a nova senha" validatorMessage="A confirmação da nova senha não confere"
+												style="width: 80px; float: right"/>
+								</p:panelGrid>
+							</p:panelGrid>
+						</p:fieldset>
+
+						<p:fieldset legend="Informações Pessoais" styleClass="no-background" style="margin-bottom: 15px;">
+							<p:panelGrid columns="4" styleClass="userPanel no-background no-border" style="width: 100%; margin: 0; padding: 0;">
+							<p:row>
+								<p:column styleClass="labelClm"><p:outputLabel for="firstName" value="Nome: "/></p:column>
+								<p:column colspan="3" styleClass="fieldClm">
+									<p:inputText id="firstName" value="#{profileBean.person.firstName}" 
+												 required="true" requiredMessage="#{msg['person.firstname.empty']}"/>
+								</p:column>
+							</p:row>									
+							<p:row>
+								<p:column styleClass="labelClm"><p:outputLabel for="lastName" value="Sobrenome: "/></p:column>
+								<p:column colspan="3" styleClass="fieldClm">
+									<p:inputText id="lastName" value="#{profileBean.person.lastName}"
+												 required="true" requiredMessage="#{msg['person.lastname.empty']}"/>
+								</p:column>
+							</p:row>
+							<p:row>
+								<p:column styleClass="labelClm"><p:outputLabel for="identity" value="CPF: "/></p:column>
+								<p:column colspan="3" styleClass="fieldClm">
+									<p:inputMask id="identity" value="#{profileBean.person.identity}" mask="999.999.999-99"
+												 required="true" requiredMessage="#{msg['person.email.empty']}"/>
+								</p:column>
+							</p:row>
+							<p:row>
+								<p:column styleClass="labelClm"><p:outputLabel for="male" value="Sexo:"/></p:column>
+								<p:column>
+									<p:selectOneMenu id="male" value="#{profileBean.person.gender}" required="false" style="vertical-align: middle">
+										<f:selectItems var="gender" value="#{profileBean.genders}" itemLabel="#{msg[gender.label]}"/>
+									</p:selectOneMenu>
+								</p:column>
+								<p:column style="padding-right: 0px;"><p:outputLabel for="birthday" value="Nascimento:"/></p:column>
+								<p:column styleClass="fieldClm">
+									<p:calendar id="birthday" mode="popup" pattern="dd/MM/yyyy" value="#{profileBean.person.birthday}"
+												navigator="true" yearRange="c-100:c+0" styleClass="birthday" mask="true" locale="pt"/>
+								</p:column>
+							</p:row>
+							</p:panelGrid>
+						</p:fieldset>
 						<p:dataTable id="phoneTable" widgetVar="phoneTable" var="phone" value="#{profileBean.phones}" styleClass="no-header" rows="4"
 							paginator="true" paginatorAlwaysVisible="false" paginatorPosition="bottom" paginatorTemplate="{PreviousPageLink} {CurrentPageReport} {NextPageLink}"
-							emptyMessage="Nenhum telefone informado" style="margin: 10px 18px 10px 10px;">
+							emptyMessage="Nenhum telefone informado" style="margin: 10px 0px 10px 0px;">
 							<f:facet name="header">
 								<p:panelGrid columns="4" columnClasses="docs-header,docs-header,docs-header,docs-cmds" styleClass="no-background no-border no-margin" style="width: 100%;">
 									<h:outputText value="Telefones"/>
@@ -103,86 +116,8 @@
 					</p:column>
 				</p:row>
 				<p:row>
-					<p:column colspan="2">
-						<p:fieldset id="parents" legend="Parentes" style="margin: 0px 9px" styleClass="no-background" rendered="#{profileBean.people != null}">
-							<p:panelGrid style="width: 100%; margin: 0px">
-								<p:row>
-									<p:column styleClass="labelClm"><p:outputLabel for="father" value="Pai: "/></p:column>
-									<p:column styleClass="fieldClm">
-										<p:selectOneMenu id="father" value="#{profileBean.father}" converter="selectItemsConverter">
-											<f:selectItem itemLabel="Selecione" noSelectionOption="true"/>
-											<f:selectItems var="relative" value="#{profileBean.getFathers()}" itemLabel="#{relative.fullName}" itemValue="#{relative}"/>
-											<p:ajax event="change" update=":profile-form:mother,:profile-form:childTable,:profile-form:grandChildTable" global="false"/>
-										</p:selectOneMenu>
-									</p:column>
-									<p:column styleClass="labelClm"><p:outputLabel for="mother" value="Mãe: "/></p:column>
-									<p:column styleClass="fieldClm">
-										<p:selectOneMenu id="mother" value="#{profileBean.mother}" converter="selectItemsConverter">
-											<f:selectItem itemLabel="Selecione" noSelectionOption="true"/>
-											<f:selectItems var="relative" value="#{profileBean.getMothers()}" itemLabel="#{relative.fullName}" itemValue="#{relative}"/>
-											<p:ajax event="change" update=":profile-form:father,:profile-form:childTable,:profile-form:grandChildTable" global="false"/>
-										</p:selectOneMenu>
-									</p:column>
-								</p:row>
-								<p:row>
-									<p:column colspan="4">
-										<p:dataTable id="childTable" widgetVar="childTable" value="#{profileBean.getChildren()}" var="child" styleClass="no-header" rows="4"
-											paginator="true" paginatorAlwaysVisible="false" paginatorPosition="bottom" paginatorTemplate="{PreviousPageLink} {CurrentPageReport} {NextPageLink}"
-											emptyMessage="Nenhum filho informado">
-											<f:facet name="header">
-												<p:panelGrid columns="3" columnClasses="docs-header,docs-header,docs-cmds" styleClass="no-background no-border no-margin" style="width: 100%;">
-													<h:outputText value="Filhos"/>
-													<p:selectOneMenu value="#{profileBean.relative}" converter="selectItemsConverter" style="font-size: 10px; margin-left: 10px; vertical-align: middle; float: right; width: 130px">
-														<f:selectItem itemLabel="Selecione" noSelectionOption="true"/>
-														<f:selectItems var="relative" value="#{profileBean.people}" itemLabel="#{relative.fullName}" itemValue="#{relative}"/>
-													</p:selectOneMenu>
-													<p:commandLink title="Incluir filho" actionListener="#{profileBean.onAddChild}" update=":profile-form:parents" partialSubmit="true" process="@namingcontainer" global="false">
-														<h:graphicImage value="../images/plus.png" width="18" height="18"/>
-													</p:commandLink>
-												</p:panelGrid>
-											</f:facet>
-											<p:column><h:outputText value="#{child.fullName}"/></p:column>
-											<p:column style="width: 12%; text-align: right;">
-												<p:commandLink title="Excluir este parente" actionListener="#{profileBean.onRemoveChild(child)}" update=":profile-form:parents" partialSubmit="true" process="@this" global="false">
-													<h:graphicImage value="../images/cancel2.png" width="25" height="25" style="vertical-align: middle"/>
-												</p:commandLink>										
-											</p:column>
-										</p:dataTable>
-									</p:column>
-								</p:row>
-								<p:row>
-									<p:column colspan="4">
-										<p:dataTable id="grandChildTable" widgetVar="grandChildTable" value="#{profileBean.getGrandChildren()}" var="grandChild" styleClass="no-header" rows="4"
-											paginator="true" paginatorAlwaysVisible="false" paginatorPosition="bottom" paginatorTemplate="{PreviousPageLink} {CurrentPageReport} {NextPageLink}"
-											emptyMessage="Nenhum neto informado">
-											<f:facet name="header">
-												<p:panelGrid columns="3" columnClasses="docs-header,docs-header,docs-cmds" styleClass="no-background no-border no-margin" style="width: 100%;">
-													<h:outputText value="Netos"/>
-													<p:selectOneMenu value="#{profileBean.relative}" converter="selectItemsConverter" style="font-size: 10px; margin-left: 5px; vertical-align: middle; float: right; width: 130px">
-														<f:selectItem itemLabel="Selecione" noSelectionOption="true"/>
-														<f:selectItems var="relative" value="#{profileBean.people}" itemLabel="#{relative.fullName}" itemValue="#{relative}"/>
-													</p:selectOneMenu>
-													<p:commandLink title="Incluir neto" actionListener="#{profileBean.onAddGrandChild}" update=":profile-form:parents" partialSubmit="true" process="@namingcontainer" global="false">
-														<h:graphicImage value="../images/plus.png" width="18" height="18"/>
-													</p:commandLink>
-												</p:panelGrid>
-											</f:facet>
-											<p:column><h:outputText value="#{grandChild.fullName}"/></p:column>
-											<p:column style="width: 12%; text-align: right;">
-												<p:commandLink title="Excluir este parente" actionListener="#{profileBean.onRemoveGrandChild(grandChild)}" update=":profile-form:parents" partialSubmit="true" process="@this" global="false">
-													<h:graphicImage value="../images/cancel2.png" width="25" height="25" style="vertical-align: middle"/>
-												</p:commandLink>										
-											</p:column>
-										</p:dataTable>
-									</p:column>
-								</p:row>
-							</p:panelGrid>
-						</p:fieldset>
-					</p:column>
-				</p:row>
-				<p:row>
-					<p:column colspan="2">
-						<p:commandButton value="Salvar" actionListener="#{profileBean.onSave}" update=":outputMsg" style="float: right; width: 85px; margin: 10px 10px 0px 5px;"/>
+					<p:column colspan="2" styleClass="my-account-col2">
+						<p:commandButton value="Salvar" actionListener="#{profileBean.onSave}" update=":outputMsg" style="float: right; width: 85px; margin: 10px 0px 0px 5px;"/>
 					</p:column>
 				</p:row>
 			</p:panelGrid>
@@ -203,26 +138,38 @@
 			</p:panel>
 		</h:form>
 
-		<p:dialog id="profilePictureDialog" widgetVar="profilePictureDialog" header="Envio de Imagem" resizable="false" 
+		<p:dialog id="profileUploaderDialog" widgetVar="profileUploaderDialog" resizable="false" 
 				  draggable="false" modal="true" visible="false" style="background: #f9f9f9">
+			<f:facet name="header">
+				<p:graphicImage value="../images/user_ico.png" style="vertical-align: top; margin-right: 10px;"/>
+				<p:outputLabel value="#{msg['dlg.user.signon']}" style="vertical-align: top; line-height: 25px;"/>
+			</f:facet>
 			<h:form id="profile-picture-form" enctype="multipart/form-data">
-				<p:fileUpload id="image" label="Selecionar Foto" fileUploadListener="#{profilePictureUploader.onImageUpload}" auto="true" update="profile-picture-form" rendered="#{empty profilePictureUploader.image.path}"/>
-				<p:panel rendered="#{!(empty profilePictureUploader.image.path)}" style="border: 0px !important;">
-					<p:panel styleClass="cropper">
-						<p:imageCropper value="#{profilePictureUploader.croppedImage}" image="#{profilePictureUploader.image.path}" initialCoords="0,0,#{profilePictureUploader.width},#{profilePictureUploader.height}" minSize="#{profilePictureUploader.width},#{profilePictureUploader.height}" maxSize="#{profilePictureUploader.width},#{profilePictureUploader.height}"/>
-					</p:panel>
-					<p:panel style="margin: 0px auto; text-align: center; padding: 15px 0px; border: none;">
-						<p:commandButton value="Recortar" actionListener="#{profilePictureUploader.onImageCropp}" update=":profile-form:portrait" oncomplete="PF('profilePictureDialog').hide();">
-							<f:setPropertyActionListener target="#{profileBean.person.picture}" value="#{profilePictureUploader.image}"/>
+				<p:panelGrid columns="1" columnClasses="cropper" styleClass="no-margin no-border" style="width: 100%;">
+					<p:outputPanel style="width: #{profileUploader.image.width}px; height: #{profileUploader.image.height}px;" styleClass="foto">
+						<p:imageCropper value="#{profileUploader.croppedImage}" image="#{profileUploader.image.path}" initialCoords="0,0,#{profileUploader.width},#{profileUploader.height}" minSize="#{profileUploader.width},#{profileUploader.height}" maxSize="#{profileUploader.width},#{profileUploader.height}"/>
+					</p:outputPanel>
+					<p:panel style="text-align: center; padding: 10px 0px;" styleClass="no-border no-margin">
+						<p:commandButton value="Recortar" actionListener="#{profileUploader.onCropp}" 
+										 update=":profile-form:portrait" oncomplete="PF('profileUploaderDialog').hide();"
+										 style="margin-right: 5px;">
+							<f:setPropertyActionListener value="#{profileUploader.image}" target="#{profileBean.person.picture}"/>
 						</p:commandButton>
-						<p:commandButton value="Cancelar" oncomplete="PF('personPictureDialog').hide();" partialSubmit="true" process="@this"/>
+						<p:commandButton value="Cancelar" oncomplete="PF('profileUploaderDialog').hide();" partialSubmit="true" process="@this" 
+										 global="false" style="margin-left: 5px;">
+							<f:setPropertyActionListener target="#{profileUploader.image.path}" value=""/>
+						</p:commandButton>
 					</p:panel>
-				</p:panel>
+				</p:panelGrid>
 			</h:form>
 		</p:dialog>
 
 		<p:dialog id="profileCameraDialog" widgetVar="profileCameraDialog" header="Captura de Imagem" resizable="false" 
 				  draggable="false" modal="true" closeOnEscape="true" visible="false" dynamic="true" style="background: #f9f9f9">
+			<f:facet name="header">
+				<p:graphicImage value="../images/user_ico.png" style="vertical-align: top; margin-right: 10px;"/>
+				<p:outputLabel value="#{msg['dlg.user.signon']}" style="vertical-align: top; line-height: 25px;"/>
+			</f:facet>
 			<h:form id="profile-camera-form">
 				<p:panelGrid columns="2" styleClass="no-border no-background">
 					<p:photoCam widgetVar="pc" listener="#{profileCamera.onCapture}" update="ci" styleClass="foto"/>

@@ -216,7 +216,7 @@ public class PersonManagerImpl extends JCondoManager<PersonEntity, Person> {
 
 	public Person findPerson(String identity) throws PersistenceException {
 		String key = generateKey();
-		String queryString = "FROM PersonEntity WHERE identity = :identity";
+		String queryString = "FROM PersonEntity WHERE identity = :identity AND identity IS NOT NULL";
 
 		try {
 			openManager(key);

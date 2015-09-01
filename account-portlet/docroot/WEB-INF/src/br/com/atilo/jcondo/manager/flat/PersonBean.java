@@ -28,6 +28,7 @@ import br.com.abware.jcondo.core.PersonType;
 import br.com.abware.jcondo.core.model.Administration;
 import br.com.abware.jcondo.core.model.Domain;
 import br.com.abware.jcondo.core.model.Flat;
+import br.com.abware.jcondo.core.model.Image;
 import br.com.abware.jcondo.core.model.Membership;
 import br.com.abware.jcondo.core.model.Person;
 import br.com.abware.jcondo.core.model.Supplier;
@@ -117,6 +118,7 @@ public class PersonBean {
 	}
 
 	public void onPersonCreate() throws Exception {
+		imageUploadBean.setImage(new Image());
 		person = new Person();
 		person.setPicture(imageUploadBean.getImage());
 		membership = new Membership(null, flat);

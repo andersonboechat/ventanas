@@ -1,6 +1,5 @@
-package br.com.abware.accountmgm.bean;
+package br.com.atilo.jcondo.manager.profile;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -9,32 +8,30 @@ import javax.faces.application.FacesMessage;
 import javax.faces.bean.ManagedBean;
 import javax.faces.bean.ViewScoped;
 
-import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.apache.myfaces.commons.util.MessageUtils;
 
-import br.com.abware.accountmgm.util.KinTypePredicate;
-import br.com.abware.accountmgm.util.RelativeTransformer;
 import br.com.abware.jcondo.core.Gender;
 import br.com.abware.jcondo.core.PersonDetail;
-import br.com.abware.jcondo.core.PersonType;
-import br.com.abware.jcondo.core.model.KinType;
-import br.com.abware.jcondo.core.model.Kinship;
 import br.com.abware.jcondo.core.model.Person;
 import br.com.abware.jcondo.core.model.Phone;
 import br.com.abware.jcondo.core.model.PhoneType;
 
-import br.com.atilo.jcondo.commons.collections.PersonTypePredicate;
 import br.com.atilo.jcondo.core.service.PersonDetailServiceImpl;
+import br.com.atilo.jcondo.core.service.PersonServiceImpl;
+import br.com.atilo.jcondo.manager.CameraBean;
+import br.com.atilo.jcondo.manager.ImageUploadBean;
 
-@ManagedBean(name="profileView")
 @ViewScoped
-public class ProfileBean extends BaseBean {
+@ManagedBean
+public class ProfileBean {
 
 	private static Logger LOGGER = Logger.getLogger(ProfileBean.class);
 	
 	private static final PersonDetailServiceImpl personDetailService = new PersonDetailServiceImpl();
+
+	private PersonServiceImpl personService = new PersonServiceImpl();
 
 	private ImageUploadBean imageUploadBean;
 
@@ -44,15 +41,7 @@ public class ProfileBean extends BaseBean {
 
 	private PersonDetail personDetail;
 
-	private Person father;
-
-	private Person mother;
-
-	private Person relative;
-
 	private List<Person> people;
-
-	private List<Kinship> kinships;
 
 	private List<Gender> genders;
 
@@ -70,7 +59,6 @@ public class ProfileBean extends BaseBean {
 
 	private String confirmPassword;
 
-	@SuppressWarnings("unchecked")
 	@PostConstruct
 	public void init() {
 		try {
@@ -78,24 +66,6 @@ public class ProfileBean extends BaseBean {
 			personDetail = personDetailService.getPersonDetail(person);
 			phones = personDetail.getPhones();
 			phoneTypes = Arrays.asList(PhoneType.values());
-			
-			boolean isOwner = CollectionUtils.find(person.getMemberships(), new PersonTypePredicate(PersonType.OWNER)) == null ? true : false;
-			boolean isRenter = CollectionUtils.find(person.getMemberships(), new PersonTypePredicate(PersonType.RENTER)) == null ? true : false;
-
-			if (isOwner || isRenter) {
-				kinships = personDetail.getKinships();
-				people = personService.getPeople(person);
-
-				List<Person> relatives = (List<Person>) CollectionUtils.collect(kinships, new RelativeTransformer());
-				people.removeAll(relatives);
-
-				father = getParent(KinType.FATHER);
-				mother = getParent(KinType.MOTHER);
-				people.remove(father);
-				people.remove(mother);
-				people.remove(person);
-			}
-			
 			imageUploadBean = new ImageUploadBean(158, 240);
 			cameraBean = new CameraBean(158, 240);
 			genders = Arrays.asList(Gender.values());
@@ -144,44 +114,6 @@ public class ProfileBean extends BaseBean {
 	public void onPhoneDelete(Phone phone) {
 		phones.remove(phone);
 	}
-
-	public void onAddChild() {
-		if (relative == null) {
-			return;
-		}
-
-		kinships.add(new Kinship(person, relative, KinType.CHILD));
-		people.remove(relative);
-		relative = null;
-	}	
-
-	public void onRemoveChild(Person relative) {
-		if (relative == null) {
-			return;
-		}
-
-		kinships.remove(new Kinship(person, relative, KinType.CHILD));
-		people.add(relative);
-	}
-
-	public void onAddGrandChild() {
-		if (relative == null) {
-			return;
-		}
-
-		kinships.add(new Kinship(person, relative, KinType.GRANDCHILD));
-		people.remove(relative);
-		relative = null;
-	}	
-
-	public void onRemoveGrandChild(Person relative) {
-		if (relative == null) {
-			return;
-		}
-
-		kinships.remove(new Kinship(person, relative, KinType.GRANDCHILD));
-		people.add(relative);
-	}
 	
 	public boolean validatePhoneNumber() {
 		if (StringUtils.isEmpty(phoneNumber)) {
@@ -204,38 +136,6 @@ public class ProfileBean extends BaseBean {
 		}
 		
 		return true;
-	}
-
-	public Person getParent(KinType type) {
-		if (type != KinType.FATHER && type != KinType.MOTHER) {
-			return null;
-		}
-		Kinship kinship = (Kinship) CollectionUtils.find(kinships, new KinTypePredicate(type)); 
-		return kinship != null ? kinship.getRelative() : null;
-	}
-
-	@SuppressWarnings("unchecked")
-	public List<Person> getChildren() {
-		List<Kinship> ks = (List<Kinship>) CollectionUtils.select(kinships, new KinTypePredicate(KinType.CHILD));
-		return (List<Person>) CollectionUtils.collect(ks, new RelativeTransformer());
-	}
-
-	@SuppressWarnings("unchecked")
-	public List<Person> getGrandChildren() {
-		List<Kinship> ks = (List<Kinship>) CollectionUtils.select(kinships, new KinTypePredicate(KinType.GRANDCHILD));
-		return (List<Person>) CollectionUtils.collect(ks, new RelativeTransformer());
-	}
-
-	public List<Person> getMothers() {
-		List<Person> mothers = new ArrayList<Person>(people);
-		CollectionUtils.addIgnoreNull(mothers, mother);
-		return mothers;
-	}
-
-	public List<Person> getFathers() {
-		List<Person> fathers = new ArrayList<Person>(people);
-		CollectionUtils.addIgnoreNull(fathers, father);
-		return fathers;
 	}
 
 	public ImageUploadBean getImageUploadBean() {
@@ -262,70 +162,12 @@ public class ProfileBean extends BaseBean {
 		this.person = person;
 	}
 
-	public Person getFather() {
-		return father;
-	}
-
-	public void setFather(Person father) {
-		CollectionUtils.addIgnoreNull(people, this.father);
-		people.remove(father);
-
-		Kinship kinship = (Kinship) CollectionUtils.find(kinships, new KinTypePredicate(KinType.FATHER));
-
-		if (kinship != null) {
-			kinships.remove(kinship);
-		}
-
-		if (father != null) {
-			kinships.add(new Kinship(person, father, KinType.FATHER));
-		}
-
-		this.father = father;
-	}
-
-	public Person getMother() {
-		return mother;
-	}
-
-	public void setMother(Person mother) {
-		CollectionUtils.addIgnoreNull(people, this.mother);
-		people.remove(mother);
-
-		Kinship kinship = (Kinship) CollectionUtils.find(kinships, new KinTypePredicate(KinType.MOTHER));
-
-		if (kinship != null) {
-			kinships.remove(kinship);
-		}
-
-		if (mother != null) {
-			kinships.add(new Kinship(person, mother, KinType.MOTHER));
-		}
-
-		this.mother = mother;
-	}
-
-	public Person getRelative() {
-		return relative;
-	}
-
-	public void setRelative(Person relative) {
-		this.relative = relative;
-	}
-
 	public List<Person> getPeople() {
 		return people;
 	}
 
 	public void setPeople(List<Person> people) {
 		this.people = people;
-	}
-
-	public List<Kinship> getKinships() {
-		return kinships;
-	}
-
-	public void setKinships(List<Kinship> kinships) {
-		this.kinships = kinships;
 	}
 
 	public List<Gender> getGenders() {
