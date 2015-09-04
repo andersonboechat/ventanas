@@ -91,6 +91,7 @@ public class VehicleBean {
 			}
 
 			model.update(v);
+			model.filter(filters);
 
 			MessageUtils.addMessage(FacesMessage.SEVERITY_INFO, msg, null);
 		} catch (ModelExistException e) {

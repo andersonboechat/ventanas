@@ -99,13 +99,14 @@ public class PersonBean {
 
 			if (person.getId() == 0) {
 				p = personService.register(person);
-				model.addModel(p);
 				MessageUtils.addMessage(FacesMessage.SEVERITY_INFO, "flats.user.add.success", null);
 			} else {
 				p = personService.update(person);
-				model.setModel(p);
 				MessageUtils.addMessage(FacesMessage.SEVERITY_INFO, "flats.user.update.success", null);
 			}
+
+			model.update(p);
+			model.filter(filters);
 		} catch (BusinessException e) {
 			LOGGER.warn("Business failure on person saving: " + e.getMessage());
 			MessageUtils.addMessage(FacesMessage.SEVERITY_WARN, e.getMessage(), e.getArgs());

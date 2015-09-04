@@ -29,26 +29,16 @@ public class ModelDataModel<Model extends BaseModel> extends ListDataModel<Model
 		this.models = models;
 	}
 
-    @SuppressWarnings("unchecked")
 	public void addModel(Model model) {
-    	models.add(0, model);
-		((List<Model>) getWrappedData()).add(0, model);
+    	models.add(model);
 	}
    
-    @SuppressWarnings("unchecked")
 	public void removeModel(Model model) {
     	models.remove(model);
-		((List<Model>) getWrappedData()).remove(model);		
 	}
 
-    @SuppressWarnings("unchecked")
 	public void setModel(Model model) {
-    	int index = ((List<Model>) getWrappedData()).indexOf(model);
-    	if (index >= 0) {
-    		((List<Model>) getWrappedData()).set(index, model);
-    	}
-
-    	index = models.indexOf(model);
+    	int index = models.indexOf(model);
     	if (index >= 0) {
     		models.set(index, model);
     	}
@@ -58,9 +48,9 @@ public class ModelDataModel<Model extends BaseModel> extends ListDataModel<Model
 		int index = models.indexOf(model);
 
 		if (index >= 0) {
-			setModel(model);
+			models.set(index, model);
 		} else {
-			addModel(model);
+			models.add(model);
 		}
 	}
 

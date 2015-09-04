@@ -43,6 +43,9 @@ public class FlatEntity extends DomainEntity {
 	@Column(name="typeId")
 	private List<PetType> petTypes;
 
+	@Column(nullable=true, columnDefinition="INT(1)")
+	private Boolean brigade;
+
     @OneToMany(mappedBy="domain")
     private List<MembershipEntity> memberships;
 	
@@ -100,6 +103,14 @@ public class FlatEntity extends DomainEntity {
 
 	public void setPetTypes(List<PetType> petTypes) {
 		this.petTypes = petTypes;
+	}
+
+	public Boolean getBrigade() {
+		return brigade;
+	}
+
+	public void setBrigade(Boolean brigade) {
+		this.brigade = brigade;
 	}
 
 	public List<MembershipEntity> getMemberships() {

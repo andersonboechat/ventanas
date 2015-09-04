@@ -92,7 +92,7 @@
 								<f:selectItem itemLabel="Não" itemValue="false"/>
 								<p:ajax event="change" listener="#{flatView.onOptionSelect}" update="ptLabel" oncomplete="if ((args.value &amp;&amp; PF('pets').cfg.collapsed) || (!args.value &amp;&amp; !PF('pets').cfg.collapsed) ) {PF('pets').toggle();}" global="false"/>
 							</p:selectOneRadio>
-							<p:panel id="pets" widgetVar="pets" toggleable="true" collapsed="#{not flatView.flat.pets}" styleClass="no-border no-background">
+							<p:panel id="pets" widgetVar="pets" toggleable="true" collapsed="#{not flatView.flat.pets}" styleClass="no-border no-background no-margin">
 								<p:panelGrid columns="1" styleClass="no-background no-border">
 									<p:outputLabel id="ptLabel" for="petTypes" value="Quais tipos de animais?" style="margin-left: 0px;"/>
 									<p:selectManyCheckbox id="petTypes" value="#{flatView.flat.petTypes}" required="#{flatView.flat.pets}" requiredMessage="Informe os tipos de animais" converter="jsonConverter">
@@ -101,7 +101,12 @@
 								</p:panelGrid>
 							</p:panel>
 							<p:outputLabel for="hasDisables" value="Existem moradores com dificuldade de locomoção?"/>
-							<p:selectOneRadio id="hasDisables" value="#{flatView.flat.disables}" required="true" requiredMessage="Informe existem moradores com dificuldade de locomoção" style="margin-left: 5px;">
+							<p:selectOneRadio id="hasDisables" value="#{flatView.flat.disables}" required="true" requiredMessage="Informe se existem moradores com dificuldade de locomoção" style="margin-left: 5px;">
+								<f:selectItem itemLabel="Sim" itemValue="true"/>
+								<f:selectItem itemLabel="Não" itemValue="false"/>
+							</p:selectOneRadio>
+							<p:outputLabel for="hasBrigade" value="Há moradores com treinamento de brigada contra incêndio?"/>
+							<p:selectOneRadio id="hasBrigade" value="#{flatView.flat.brigade}" required="true" requiredMessage="Informe se há moradores com treinamento de brigada contra incêndio" style="margin-left: 5px;">
 								<f:selectItem itemLabel="Sim" itemValue="true"/>
 								<f:selectItem itemLabel="Não" itemValue="false"/>
 							</p:selectOneRadio>

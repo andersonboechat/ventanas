@@ -237,7 +237,6 @@ public class SecurityManagerImpl {
 		UserLocalServiceUtil.addGroupUsers(helper.getScopeGroupId(), new long[] {person.getUserId()});
 	}
 	
-	
 	private void removeOrganization(Person person, Domain domain) throws Exception {
 		UserLocalServiceUtil.unsetOrganizationUsers(domain.getRelatedId(), new long[] {person.getUserId()});
 	}
@@ -318,5 +317,5 @@ public class SecurityManagerImpl {
 		
 		return false;
 	}
-
+	
 }
