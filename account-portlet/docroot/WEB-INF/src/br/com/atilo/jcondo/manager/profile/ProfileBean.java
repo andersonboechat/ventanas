@@ -76,7 +76,7 @@ public class ProfileBean {
 	
 	public void onSave() {
 		try {
-			person.setPicture(imageUploadBean.getImage());
+			//person.setPicture(imageUploadBean.getImage());
 			person = personService.update(person);
 			personDetailService.update(personDetail);
 			MessageUtils.addMessage(FacesMessage.SEVERITY_INFO, "profile.save.success", null);

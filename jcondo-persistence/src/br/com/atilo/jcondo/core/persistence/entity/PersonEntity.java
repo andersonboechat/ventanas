@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javax.persistence.CascadeType;
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
@@ -23,6 +24,9 @@ public class PersonEntity extends BaseEntity {
 	private long userId;
 
     private String identity;
+
+	@Column(nullable=false, columnDefinition="INT(1)")
+    private Boolean registerComplete;
 
     @OneToMany(cascade=CascadeType.ALL, mappedBy="person", orphanRemoval=true)
     private List<MembershipEntity> memberships;
@@ -53,6 +57,14 @@ public class PersonEntity extends BaseEntity {
 
 	public void setIdentity(String identity) {
 		this.identity = identity;
+	}
+
+	public Boolean getRegisterComplete() {
+		return registerComplete;
+	}
+
+	public void setRegisterComplete(Boolean registerComplete) {
+		this.registerComplete = registerComplete;
 	}
 
 	public List<MembershipEntity> getMemberships() {

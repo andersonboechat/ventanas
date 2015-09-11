@@ -122,4 +122,8 @@ public class FlatServiceImpl {
 	public void delete(Flat flat) {
 		
 	}
+
+	public boolean hasPermission(Flat flat, Permission permission) {
+		return securityManager.hasPermission(flat, permission);
+	}
 }
