@@ -15,6 +15,8 @@ import br.com.abware.jcondo.core.model.PhoneType;
 
 public class PhoneManagerImpl extends LiferayManager<com.liferay.portal.model.Phone, Phone> {
 
+	private PersonManagerImpl personManager = new PersonManagerImpl();
+	
 	private PhoneType getPhoneType(String listTypeName) {
 		if (listTypeName.equalsIgnoreCase("business")) {
 			return PhoneType.WORK;
@@ -48,9 +50,8 @@ public class PhoneManagerImpl extends LiferayManager<com.liferay.portal.model.Ph
 		return phone;
 	}
 
-	@Override
-	public Phone save(Phone phone) throws Exception {
-		long classPK = UserLocalServiceUtil.getUserById(helper.getUserId()).getContactId();
+	public Phone save(Person person, Phone phone) throws Exception {
+		long classPK = UserLocalServiceUtil.getUserById(person.getUserId()).getContactId();
 		int typeId = 0;
 
 		for (ListType listType : ListTypeServiceUtil.getListTypes(ListTypeConstants.CONTACT_PHONE)) {
@@ -60,8 +61,13 @@ public class PhoneManagerImpl extends LiferayManager<com.liferay.portal.model.Ph
 			}
 		}
 
-		return getModel(PhoneLocalServiceUtil.addPhone(helper.getUserId(), Contact.class.getName(), classPK, 
+		return getModel(PhoneLocalServiceUtil.addPhone(person.getUserId(), Contact.class.getName(), classPK, 
 													   phone.getNumber(), phone.getExtension(), typeId, false));
+	}
+
+	@Override
+	public Phone save(Phone phone) throws Exception {
+		return save(personManager.findPerson(), phone);
 	}
 
 	@Override

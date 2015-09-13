@@ -77,7 +77,7 @@ public class CalendarBean extends BaseBean {
 		try {
 			model = MODELS.get(0);
 			person = personService.getPerson();
-			flats = flatService.getFlats(person);
+			flats = flatService.getPersonFlats(person);
 			booking = new RoomBooking();
 			booking.setStatus(BookingStatus.BOOKED);
 		} catch (Exception e) {

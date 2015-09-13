@@ -48,4 +48,20 @@ public class KinshipManagerImpl extends JCondoManager<KinshipEntity, Kinship> {
 			closeManager(key);
 		}
 	}
+	
+	public Kinship findByPersonAndRelative(Person person, Person relative) throws Exception {
+		String key = generateKey();
+		try {
+			openManager(key);
+			String queryString = "FROM KinshipEntity WHERE person.id = :personId AND relative.id := relativeId";
+			Query query = em.createQuery(queryString);
+			query.setParameter("personId", person.getId());
+			query.setParameter("relativeId", relative.getId());
+			return getModel((KinshipEntity) query.getSingleResult());
+		} catch (NoResultException e) {
+			return null;
+		} finally {
+			closeManager(key);
+		}
+	}
 }

@@ -21,10 +21,10 @@
 			<p:column>
 				<p:selectOneMenu id="ordering" style="font-size: 13px; float: right;">
 					<f:selectItem itemLabel="Todos" itemValue="all"/>
-					<f:selectItem itemLabel="Moradores" itemValue="resident"/>
-					<f:selectItem itemLabel="Convidados" itemValue="guest"/>
-					<f:selectItem itemLabel="Visitantes" itemValue="visitor"/>
-					<f:selectItem itemLabel="Empregados" itemValue="employee"/>
+					<f:selectItem itemLabel="#{msg['person.type.resident']}" itemValue="resident"/>
+					<f:selectItem itemLabel="#{msg['person.type.guest']}" itemValue="guest"/>
+					<f:selectItem itemLabel="#{msg['person.type.visitor']}" itemValue="visitor"/>
+					<f:selectItem itemLabel="#{msg['person.type.employee']}" itemValue="employee"/>
 					<p:ajax event="change" listener="#{personViewer.onPersonTypeSelect}" update="@widgetVar(personTable)"/>
 	    		</p:selectOneMenu>
 			</p:column>
@@ -68,7 +68,7 @@
 		</p:dataTable>
 	</h:form>
 
-	<p:dialog widgetVar="personDialog" draggable="false" resizable="false" modal="true" closable="false" visible="false" style="background: #f9f9f9">
+	<p:dialog widgetVar="personDialog" draggable="false" resizable="false" modal="true" closable="false" visible="true" style="background: #f9f9f9" dynamic="false">
 		<f:facet name="header">
 			<p:graphicImage value="../images/user_ico.png" style="vertical-align: top; margin-right: 10px;"/>
 			<p:outputLabel value="#{msg['dlg.user.signon']}" style="vertical-align: top; line-height: 25px;"/>
@@ -128,8 +128,8 @@
 							<p:column styleClass="labelClm"><p:outputLabel for="identity" value="CPF: "/></p:column>
 							<p:column colspan="3" styleClass="fieldClm">
 								<p:inputMask id="identity" value="#{personViewer.person.identity}" mask="999.999.999-99" 
-											 required="true" requiredMessage="#{msg['person.identity.empty']}" 
-											 readonly="#{!personViewer.canEditInfo()}"/>
+											 required="#{personViewer.membership.type != VISITOR and personViewer.membership.type != RESIDENT}" 
+											 requiredMessage="#{msg['person.identity.empty']}" readonly="#{!personViewer.canEditInfo()}"/>
 							</p:column>
 						</p:row>
 						<p:row>
@@ -150,11 +150,29 @@
 							</p:column>
 						</p:row>
 						<p:row rendered="#{personViewer.membership.type != 'VISITOR' and personViewer.membership.type != 'GUEST'}">
+							<p:column styleClass="labelClm"><p:outputLabel for="phone" value="Telefone:"/></p:column>
+							<p:column styleClass="fieldClm">
+								<p:selectOneMenu id="phoneType" value="#{personViewer.phone.type}" style="">
+									<f:selectItem itemLabel="Tipo" noSelectionOption="true"/>
+									<f:selectItems var="type" value="#{personViewer.phoneTypes}" itemLabel="#{msg[type.label]}"/>
+								</p:selectOneMenu>					
+								<p:inputMask id="phone" value="#{personViewer.phoneNumber}" mask="(99) 99999999?9" style="width: 100px; vertical-align: top; margin-left: 15px"/>
+							</p:column>
+						</p:row>
+						<p:row rendered="#{personViewer.membership.type != 'VISITOR' and personViewer.membership.type != 'GUEST'}">
 							<p:column styleClass="labelClm"><p:outputLabel for="email" value="Email: "/></p:column>
 							<p:column colspan="3" styleClass="fieldClm">
 								<p:inputText id="email" value="#{personViewer.person.emailAddress}"  
 											 readonly="#{!personViewer.canEditInfo()}" requiredMessage="#{msg['person.email.empty']}"
-											 required="true"/>
+											 required="#{personViewer.membership.type != RESIDENT}"/>
+							</p:column>
+						</p:row>
+						<p:row rendered="#{personViewer.membership.type != 'VISITOR' and personViewer.membership.type != 'EMPLOYEE'}">
+							<p:column styleClass="labelClm"><p:outputLabel for="kinType" value="Parentesco:"/></p:column>
+							<p:column styleClass="fieldClm">
+								<p:selectOneRadio id="kinType" value="#{personViewer.kinship.type}" columns="2" style="margin-left: 5px;">
+									<f:selectItems var="kinType" value="#{personViewer.kinTypes}" itemLabel="#{msg[kinType.label]}"/>
+								</p:selectOneRadio>
 							</p:column>
 						</p:row>
 						</p:panelGrid>

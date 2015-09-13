@@ -16,6 +16,7 @@ import javax.faces.event.ValueChangeEvent;
 
 import org.apache.commons.beanutils.BeanUtils;
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.apache.myfaces.commons.util.MessageUtils;
 import org.primefaces.component.selectonemenu.SelectOneMenu;
@@ -29,10 +30,15 @@ import br.com.abware.jcondo.core.model.Administration;
 import br.com.abware.jcondo.core.model.Domain;
 import br.com.abware.jcondo.core.model.Flat;
 import br.com.abware.jcondo.core.model.Image;
+import br.com.abware.jcondo.core.model.KinType;
+import br.com.abware.jcondo.core.model.Kinship;
 import br.com.abware.jcondo.core.model.Membership;
 import br.com.abware.jcondo.core.model.Person;
+import br.com.abware.jcondo.core.model.Phone;
+import br.com.abware.jcondo.core.model.PhoneType;
 import br.com.abware.jcondo.core.model.Supplier;
 import br.com.abware.jcondo.exception.BusinessException;
+import br.com.atilo.jcondo.core.service.PersonDetailServiceImpl;
 import br.com.atilo.jcondo.core.service.PersonServiceImpl;
 import br.com.atilo.jcondo.manager.CameraBean;
 import br.com.atilo.jcondo.manager.ImageUploadBean;
@@ -47,6 +53,8 @@ public class PersonBean {
 	private static ResourceBundle rb = ResourceBundle.getBundle("Language", new Locale("pt", "BR"));
 
 	private PersonServiceImpl personService = new PersonServiceImpl();
+	
+	private PersonDetailServiceImpl personDetailService = new PersonDetailServiceImpl();
 
 	private ImageUploadBean imageUploadBean;
 	
@@ -60,6 +68,8 @@ public class PersonBean {
 
 	private Person person;
 
+	private Person logPerson;	
+	
 	private List<PersonType> types;
 
 	private long selectedDomainId;
@@ -67,16 +77,35 @@ public class PersonBean {
 	private List<Gender> genders;
 
 	private Membership membership;
-	
+
+	private Phone phone;
+
+	private String phoneNumber;
+
+	private Kinship kinship;
+
+	private List<KinType> kinTypes;
+
+	private List<PhoneType> phoneTypes;
+
 	public PersonBean() {
 		filters = new HashMap<String, Object>();
 		imageUploadBean = new ImageUploadBean(158, 240);
 		cameraBean = new CameraBean(158, 240);
 		genders = Arrays.asList(Gender.values());
+		phoneTypes = Arrays.asList(PhoneType.values());
+		phone = new Phone();
+		kinship = new Kinship(logPerson, person, null);
+		kinTypes = new ArrayList<KinType>();
+		kinTypes.add(KinType.SPOUSE);
+		kinTypes.add(KinType.PARENT);
+		kinTypes.add(KinType.CHILD);
+		kinTypes.add(KinType.OTHER);
 	}
 	
 	public void init(Flat flat) {
 		try {
+			logPerson = personService.getPerson();
 			model = new ModelDataModel<Person>(personService.getPeople(flat));
 			types = personService.getTypes(flat);
 			this.flat = flat;
@@ -103,6 +132,21 @@ public class PersonBean {
 			} else {
 				p = personService.update(person);
 				MessageUtils.addMessage(FacesMessage.SEVERITY_INFO, "flats.user.update.success", null);
+			}
+
+			if (kinship.getType() != null) {
+				personDetailService.saveKinship(kinship);
+			}
+
+			if (StringUtils.isEmpty(phoneNumber)) {
+				if (phone.getId() > 0) {
+					// TODO delete phone
+				}
+			} else {
+				String pn = phoneNumber.replaceAll("[^0-9]+", "");
+				phone.setExtension(pn.substring(0, 3));
+				phone.setNumber(pn.substring(3));
+				personDetailService.savePhone(p, phone);
 			}
 
 			model.update(p);
@@ -150,6 +194,20 @@ public class PersonBean {
 			BeanUtils.copyProperties(person, model.getRowData());
 			imageUploadBean.setImage(person.getPicture());
 			membership = (Membership) CollectionUtils.find(person.getMemberships(), new DomainPredicate(flat));
+
+			phone = personDetailService.getPhone(person);
+
+			if (phone != null) {
+				phoneNumber = phone.getExtension() + phone.getNumber();
+			} else {
+				phone = new Phone();
+			}
+
+			kinship = personDetailService.getKinship(logPerson, person);
+
+			if (kinship == null) {
+				kinship = new Kinship(logPerson, person, null);
+			}
 		} catch (Exception e) {
 			LOGGER.error("Unexpected failure on person editing", e);
 			MessageUtils.addMessage(FacesMessage.SEVERITY_ERROR, "general.failure", null);
@@ -331,6 +389,46 @@ public class PersonBean {
 
 	public void setMembership(Membership membership) {
 		this.membership = membership;
+	}
+
+	public Phone getPhone() {
+		return phone;
+	}
+
+	public void setPhone(Phone phone) {
+		this.phone = phone;
+	}
+
+	public String getPhoneNumber() {
+		return phoneNumber;
+	}
+
+	public void setPhoneNumber(String phoneNumber) {
+		this.phoneNumber = phoneNumber;
+	}
+
+	public Kinship getKinship() {
+		return kinship;
+	}
+
+	public void setKinship(Kinship kinship) {
+		this.kinship = kinship;
+	}
+
+	public List<KinType> getKinTypes() {
+		return kinTypes;
+	}
+
+	public void setKinTypes(List<KinType> kinTypes) {
+		this.kinTypes = kinTypes;
+	}
+
+	public List<PhoneType> getPhoneTypes() {
+		return phoneTypes;
+	}
+
+	public void setPhoneTypes(List<PhoneType> phoneTypes) {
+		this.phoneTypes = phoneTypes;
 	}
 
 }
