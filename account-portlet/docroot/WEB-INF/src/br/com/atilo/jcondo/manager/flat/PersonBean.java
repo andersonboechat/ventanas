@@ -166,7 +166,7 @@ public class PersonBean {
 		imageUploadBean.setImage(new Image());
 		person = new Person();
 		person.setPicture(imageUploadBean.getImage());
-		membership = new Membership(null, flat);
+		membership = new Membership(PersonType.RESIDENT, flat);
 		person.setMemberships(new ArrayList<Membership>());
 		person.getMemberships().add(membership);
 	}

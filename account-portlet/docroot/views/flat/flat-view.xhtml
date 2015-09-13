@@ -59,15 +59,64 @@
 					<p:spacer width="100%" height="1px" style="background: #cccccc"/>
 		    		<p:panel id="parkings" widgetVar="parkings" header="Vagas" styleClass="flat-box">
 						<p:panelGrid columns="2" styleClass="no-background no-border" style="width: 100%">
-							<p:panelGrid columns="1" styleClass="no-background no-border no-margin" style="width: 100%; vertical-align: top">
-								<h:outputText value="Vagas escrituradas: #{parkingViewer.ownedParkingAmount}"/>
-								<h:outputText value="Vagas alugadas: #{parkingViewer.rentedParkingAmount}"/>
+							<p:panelGrid styleClass="no-background no-border no-margin" style="width: 100%; vertical-align: top">
+								<p:row>
+									<p:column style="width: 80px; text-align: right;">
+										<h:outputText value="#{parkingViewer.ownedParkings.size()}" style="margin-right: 5px;"/>
+									</p:column>
+									<p:column>
+										<h:outputText value="vagas escrituradas"/>
+									</p:column>
+								</p:row>
+								<p:row>
+									<p:column style="width: 80px; text-align: right;">
+										<h:outputText value="+ #{parkingViewer.rentedParkings.size()}" style="margin-right: 5px;"/>
+									</p:column>
+									<p:column>
+										<h:outputText value="vagas alugadas"/>
+									</p:column>
+								</p:row>
+								<p:row>
+									<p:column style="width: 80px; text-align: right;">
+										<h:outputText value="- #{parkingViewer.grantedParkings.size()}" style="margin-right: 5px;"/>
+									</p:column>
+									<p:column>
+										<h:outputText value="vagas concedidas"/>
+									</p:column>
+								</p:row>
+								<p:row>
+									<p:column colspan="2"  style="line-height: 5px; vertical-align: top">
+										<p:spacer width="100%" height="1px" style="background: #cccccc; vertical-align: top"/>
+									</p:column>
+								</p:row>
+								<p:row>
+									<p:column style="width: 80px; text-align: right;">
+										<h:outputText value="#{parkingViewer.displayTotalParkings()}" style="margin-right: 5px;"/>
+									</p:column>
+									<p:column>
+										<h:outputText value="vagas disponíveis"/>
+									</p:column>
+								</p:row>
 							</p:panelGrid>
 							<p:commandButton type="button" value="Conceder uma vaga" onclick="PF('parkingDialog').show();" style="float: right;"/>
 						</p:panelGrid>
-						<p:dataTable id="parkingTable" widgetVar="parkingTable" var="parking" value="#{parkingViewer.model}" paginator="false" scrollable="false"
-									 rendered="#{parkingViewer.model.rowCount > 0}" styleClass="no-header" tableStyleClass="no-border"
-									 style="margin: 0px 5px;">
+						<p:dataTable id="rentedParkingTable" widgetVar="rentedParkingTable" var="parking" value="#{parkingViewer.rentedParkings}" 
+									 paginator="true" paginatorAlwaysVisible="false" paginatorPosition="bottom" 
+									 paginatorTemplate="{PreviousPageLink} {NextPageLink}" rows="1" scrollable="false"
+									 rendered="#{parkingViewer.rentedParkings.size() > 0}" styleClass="no-header" tableStyleClass="no-border"
+									 style="margin: 0px 5px 15px;">
+							<f:facet name="header">
+								<h:outputText value="Alugadas" />
+							</f:facet>
+							<p:column>
+								<h:outputText value="Apartamento #{parking.ownerDomain.number} - bloco #{parking.ownerDomain.block}"/>
+							</p:column>
+						</p:dataTable>
+						<p:dataTable id="parkingTable" widgetVar="parkingTable" var="parking" value="#{parkingViewer.grantedParkings}" 
+									 paginator="true" paginatorAlwaysVisible="false" paginatorPosition="bottom" 
+									 paginatorTemplate="{PreviousPageLink} {NextPageLink}" rows="1" scrollable="false"
+									 rendered="#{parkingViewer.grantedParkings.size() > 0}" styleClass="no-header" tableStyleClass="no-border"
+									 style="margin: 0px 5px 15px;">
 							<f:facet name="header">
 								<h:outputText value="Concedidas" />
 							</f:facet>
@@ -81,7 +130,7 @@
 								</p:commandLink>
 							</p:column>
 						</p:dataTable>
-					</p:panel>				
+					</p:panel>	
 					<p:spacer width="100%" height="1px" style="background: #cccccc"/>
 					<p:panel header="Sobre o apartamento" styleClass="flat-box">
 						<p:panelGrid columns="1" styleClass="no-background no-border no-margin questions">
@@ -178,8 +227,11 @@
 						<f:selectItems var="flat" value="#{flatView.showFlats()}" itemLabel="Apartamento #{flat.number} - Bloco #{flat.block}" itemValue="#{flat}"/>
 			    	</p:selectOneMenu>
 				</p:panelGrid>
-				<p:commandButton value="Cancelar" type="button" onclick="PF('parkingDialog').hide();" style="float: right; width: 95px; margin: 0px 0px 10px 5px;"/>
-				<p:commandButton value="Conceder" actionListener="#{parkingViewer.onParkingRent}" update="@widgetVar(parkings),:outputMsg" oncomplete="if (!args.validationFailed &amp;&amp; !args.exception) {PF('parkingDialog').hide();}" style="float: right; width: 95px; margin: 0px 0px 10px 5px;"/>
+				<p:commandButton value="Cancelar" type="button" onclick="PF('parkingDialog').hide();" 
+								 style="float: right; width: 95px; margin: 0px 0px 10px 5px;"/>
+				<p:commandButton value="Conceder" actionListener="#{parkingViewer.onParkingRent}" update="@widgetVar(parkings),:outputMsg" 
+								 oncomplete="if (!args.validationFailed &amp;&amp; !args.exception) {PF('parkingDialog').hide();}" 
+								 style="float: right; width: 95px; margin: 0px 0px 10px 5px;"/>
 			</h:form>
 		</p:dialog>
 		<p:dialog widgetVar="primaryPersonDialog" modal="true" draggable="false" resizable="false" closable="false" 

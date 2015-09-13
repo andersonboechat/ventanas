@@ -35,17 +35,20 @@ public class ParkingBean {
 	private Flat flat;
 
 	private Flat renterFlat;
+	
+	private List<Parking> ownedParkings;
 
-	private int ownedParkingAmount;
+	private List<Parking> rentedParkings;
 
-	private int rentedParkingAmount;
-
+	private List<Parking> grantedParkings;
+	
+	
 	public void init(Flat flat) {
 		try {
 			this.flat = flat;
-			model = new ModelDataModel<Parking>(parkingService.getGrantedParkings(flat));
-			ownedParkingAmount = parkingService.getOwnedParkings(flat).size();
-			rentedParkingAmount = parkingService.getRentedParkings(flat).size();
+			ownedParkings = parkingService.getOwnedParkings(flat);
+			rentedParkings = parkingService.getRentedParkings(flat);
+			grantedParkings = parkingService.getGrantedParkings(flat);
 		} catch (Exception e) {
 			LOGGER.error("", e);
 		}
@@ -86,7 +89,7 @@ public class ParkingBean {
 	public void onParkingRent() {
 		try {
 			parking = parkingService.rent(flat, renterFlat);
-			model.addModel(parking);
+			grantedParkings.add(parking);
 			renterFlat = null;
 			MessageUtils.addMessage(FacesMessage.SEVERITY_INFO, "parking.rent.success", null);
 		} catch (BusinessException e) {
@@ -103,7 +106,7 @@ public class ParkingBean {
 	public void onParkingUnrent(Parking parking) {
 		try {
 			parkingService.unrent(parking.getId());
-			model.removeModel(parking);
+			grantedParkings.remove(parking);
 			MessageUtils.addMessage(FacesMessage.SEVERITY_INFO, "parking.unrent.success", null);
 		} catch (BusinessException e) {
 			LOGGER.warn("Business failure on parking unrent: " + e.getMessage());
@@ -114,7 +117,11 @@ public class ParkingBean {
 			MessageUtils.addMessage(FacesMessage.SEVERITY_ERROR, "general.failure", null);
 			RequestContext.getCurrentInstance().addCallbackParam("exception", true);
 		}	
-	}	
+	}
+	
+	public int displayTotalParkings() {
+		return ownedParkings.size() + rentedParkings.size() - grantedParkings.size();
+	}
 
 	public ModelDataModel<Parking> getModel() {
 		return model;
@@ -136,12 +143,28 @@ public class ParkingBean {
 		this.renterFlat = renterFlat;
 	}
 
-	public int getOwnedParkingAmount() {
-		return ownedParkingAmount;
+	public List<Parking> getOwnedParkings() {
+		return ownedParkings;
 	}
 
-	public int getRentedParkingAmount() {
-		return rentedParkingAmount;
+	public void setOwnedParkings(List<Parking> ownedParkings) {
+		this.ownedParkings = ownedParkings;
+	}
+
+	public List<Parking> getRentedParkings() {
+		return rentedParkings;
+	}
+
+	public void setRentedParkings(List<Parking> rentedParkings) {
+		this.rentedParkings = rentedParkings;
+	}
+
+	public List<Parking> getGrantedParkings() {
+		return grantedParkings;
+	}
+
+	public void setGrantedParkings(List<Parking> grantedParkings) {
+		this.grantedParkings = grantedParkings;
 	}
 
 }
