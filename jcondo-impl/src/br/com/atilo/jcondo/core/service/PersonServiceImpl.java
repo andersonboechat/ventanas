@@ -174,7 +174,9 @@ public class PersonServiceImpl  {
 			}
 
 			if (StringUtils.isEmpty(person.getIdentity())) {
-				throw new BusinessException("psn.identity.empty");
+				if (!hasAnyPersonType(person.getMemberships(), Arrays.asList(PersonType.RESIDENT, PersonType.VISITOR))) {
+					throw new BusinessException("psn.identity.empty");
+				}
 			} else {
 				try {
 					new CPFValidator().assertValid(person.getIdentity().replaceAll("[^0-9]+", ""));
@@ -240,10 +242,14 @@ public class PersonServiceImpl  {
 		}
 	}	
 
-	private boolean isExternalPerson(Person person) {
-		boolean isVisitor = CollectionUtils.exists(person.getMemberships(), new PersonTypePredicate(PersonType.VISITOR));
-		boolean isGuest = CollectionUtils.exists(person.getMemberships(), new PersonTypePredicate(PersonType.GUEST));
-		return isVisitor || isGuest;
+	private boolean hasAnyPersonType(List<Membership> memberships, List<PersonType> types) {
+		for (PersonType type : types) {
+			if (CollectionUtils.exists(memberships, new PersonTypePredicate(type))) {
+				return true;
+			}
+		}
+
+		return false;
 	}
 	
  	private void notifyUserAccountCreation(Person p) throws Exception {
@@ -273,7 +279,9 @@ public class PersonServiceImpl  {
 			Person p;
 
 			if (StringUtils.isEmpty(person.getIdentity())) {
-				throw new BusinessException("psn.identity.empty");
+				if (!hasAnyPersonType(person.getMemberships(), Arrays.asList(PersonType.RESIDENT, PersonType.VISITOR))) {
+					throw new BusinessException("psn.identity.empty");
+				}
 			} else {
 				try {
 					new CPFValidator().assertValid(person.getIdentity().replaceAll("[^0-9]+", ""));

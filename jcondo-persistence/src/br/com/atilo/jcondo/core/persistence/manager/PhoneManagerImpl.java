@@ -47,6 +47,7 @@ public class PhoneManagerImpl extends LiferayManager<com.liferay.portal.model.Ph
 	protected Phone getModel(com.liferay.portal.model.Phone entity)	throws Exception {
 		Phone phone = new Phone(entity.getExtension(), entity.getNumber(), getPhoneType(entity.getType().getName()));
 		phone.setId(entity.getPhoneId());
+		phone.setPrimary(entity.isPrimary());
 		return phone;
 	}
 
@@ -62,7 +63,7 @@ public class PhoneManagerImpl extends LiferayManager<com.liferay.portal.model.Ph
 		}
 
 		return getModel(PhoneLocalServiceUtil.addPhone(person.getUserId(), Contact.class.getName(), classPK, 
-													   phone.getNumber(), phone.getExtension(), typeId, false));
+													   phone.getNumber(), phone.getExtension(), typeId, phone.isPrimary()));
 	}
 
 	@Override

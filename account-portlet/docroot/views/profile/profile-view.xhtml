@@ -14,8 +14,17 @@
 		<c:set var="profileUploader" value="#{profileBean.imageUploadBean}"/>
 		<c:set var="profileCamera" value="#{profileBean.cameraBean}"/>
 
-		<h:form id="profile-form">	
-			<p:panelGrid id="person-details" styleClass="no-background no-border" style="margin: 10px 0px 20px 0px; width: 730" cellpadding="10">
+		<h:form id="profile-form">
+			<p:panelGrid id="person-details" styleClass="no-background no-border" style="margin: -40px auto 20px; width: 730">
+				<p:row>
+					<p:column colspan="2">
+						<p:commandLink type="button" title="Alterar senha de acesso" onclick="PF('changePwdDialog').show();" 
+									   style="float: right; margin: 10px -10px 0px 5px; text-decoration: none">
+							<h:outputText value="Alterar senha de acesso"/>
+							<h:graphicImage value="../images/lock_black.png" style="vertical-align: bottom; margin: 0px 0px 0px 5px"/>
+						</p:commandLink>
+					</p:column>
+				</p:row>
 				<p:row>
 					<p:column styleClass="my-account-col1">
 						<p:panelGrid columns="1" styleClass="no-margin no-background no-border">
@@ -32,87 +41,86 @@
 				        </p:panelGrid>
 					</p:column>
 					<p:column styleClass="my-account-col2">
-						<p:fieldset legend="Informações de Acesso" styleClass="no-background" style="margin-bottom: 15px;">
-							<p:panelGrid columns="2" styleClass="no-background no-margin1 no-border">
-								<p:outputLabel for="email" value="Email: "/>
-								<p:inputText id="email" value="#{profileBean.person.emailAddress}" 
-										 	 required="true" requiredMessage="#{msg['person.email.empty']}"
-										 	 style="width: 95%"/>
-								<p:outputLabel for="newPwd" value="Nova Senha"/>
-								<p:panelGrid columns="3" styleClass="no-background no-margin no-border" style="width: 100%">
-									<p:password id="newPwd" value="#{profileBean.newPassword}" maxlength="8" match="confirmPwd" required="true" 
-											requiredMessage="Informe a nova senha" validatorMessage="A confirmação da nova senha não confere"
-											style="width: 80px; margin-right: 10px;"/>
-									<p:outputLabel for="confirmPwd" value="Confirmar senha" style=" white-space: nowrap; margin-right: 10px;"/>
-									<p:password id="confirmPwd" value="#{profileBean.newPassword}" maxlength="8" required="true" 
-												requiredMessage="Confirme a nova senha" validatorMessage="A confirmação da nova senha não confere"
-												style="width: 80px; float: right"/>
-								</p:panelGrid>
-							</p:panelGrid>
-						</p:fieldset>
-
-						<p:fieldset legend="Informações Pessoais" styleClass="no-background" style="margin-bottom: 15px;">
-							<p:panelGrid columns="4" styleClass="userPanel no-background no-border" style="width: 100%; margin: 0; padding: 0;">
-							<p:row>
-								<p:column styleClass="labelClm"><p:outputLabel for="firstName" value="Nome: "/></p:column>
-								<p:column colspan="3" styleClass="fieldClm">
-									<p:inputText id="firstName" value="#{profileBean.person.firstName}" 
-												 required="true" requiredMessage="#{msg['person.firstname.empty']}"/>
-								</p:column>
-							</p:row>									
-							<p:row>
-								<p:column styleClass="labelClm"><p:outputLabel for="lastName" value="Sobrenome: "/></p:column>
-								<p:column colspan="3" styleClass="fieldClm">
-									<p:inputText id="lastName" value="#{profileBean.person.lastName}"
-												 required="true" requiredMessage="#{msg['person.lastname.empty']}"/>
-								</p:column>
-							</p:row>
-							<p:row>
-								<p:column styleClass="labelClm"><p:outputLabel for="identity" value="CPF: "/></p:column>
-								<p:column colspan="3" styleClass="fieldClm">
-									<p:inputMask id="identity" value="#{profileBean.person.identity}" mask="999.999.999-99"
-												 required="true" requiredMessage="#{msg['person.email.empty']}"/>
-								</p:column>
-							</p:row>
-							<p:row>
-								<p:column styleClass="labelClm"><p:outputLabel for="male" value="Sexo:"/></p:column>
-								<p:column>
-									<p:selectOneMenu id="male" value="#{profileBean.person.gender}" required="false" style="vertical-align: middle">
-										<f:selectItems var="gender" value="#{profileBean.genders}" itemLabel="#{msg[gender.label]}"/>
-									</p:selectOneMenu>
-								</p:column>
-								<p:column style="padding-right: 0px;"><p:outputLabel for="birthday" value="Nascimento:"/></p:column>
-								<p:column styleClass="fieldClm">
-									<p:calendar id="birthday" mode="popup" pattern="dd/MM/yyyy" value="#{profileBean.person.birthday}"
-												navigator="true" yearRange="c-100:c+0" styleClass="birthday" mask="true" locale="pt"/>
-								</p:column>
-							</p:row>
-							</p:panelGrid>
-						</p:fieldset>
-						<p:dataTable id="phoneTable" widgetVar="phoneTable" var="phone" value="#{profileBean.phones}" styleClass="no-header" rows="4"
-							paginator="true" paginatorAlwaysVisible="false" paginatorPosition="bottom" paginatorTemplate="{PreviousPageLink} {CurrentPageReport} {NextPageLink}"
-							emptyMessage="Nenhum telefone informado" style="margin: 10px 0px 10px 0px;">
-							<f:facet name="header">
-								<p:panelGrid columns="4" columnClasses="docs-header,docs-header,docs-header,docs-cmds" styleClass="no-background no-border no-margin" style="width: 100%;">
-									<h:outputText value="Telefones"/>
-									<p:inputMask id="phoneNumber" mask="(99) 99999999?9" value="#{profileBean.phoneNumber}" style="width: 100px; height: 8px; padding: 0px 0px 0px 3px" placeholder="Número"/>
-									<p:selectOneMenu id="phoneType" value="#{profileBean.phoneType}" style="font-size: 10px; margin-left: 10px; vertical-align: middle; float: right; width: 100px;">
-										<f:selectItem itemLabel="Tipo" noSelectionOption="true"/>
-										<f:selectItems var="type" value="#{profileBean.phoneTypes}" itemLabel="#{msg[type.label]}"/>
-									</p:selectOneMenu>
-									<p:commandLink title="Incluir telefone" actionListener="#{profileBean.onPhoneAdd}" update="phoneTable,:outputMsg" partialSubmit="true" process="@parent" global="false">
-										<h:graphicImage value="../images/plus.png" width="18" height="18"/>
-									</p:commandLink>
-								</p:panelGrid>
-							</f:facet>
-							<p:column><h:outputText value="(#{phone.extension}) #{phone.number}"/></p:column>
-							<p:column><h:outputText value="#{msg[phone.type.label]}"/></p:column>
-							<p:column style="width: 12%; text-align: right;">
-								<p:commandLink title="Excluir este telefone" actionListener="#{profileBean.onPhoneDelete(phone)}" update="phoneTable" partialSubmit="true" process="@this" global="false">
-									<h:graphicImage value="../images/cancel2.png" width="25" height="25" style="vertical-align: middle"/>
-								</p:commandLink>										
+						<p:panelGrid styleClass="userPanel no-background no-border" style="width: 100%; margin: 0; padding: 0;">
+						<p:row>
+							<p:column styleClass="labelClm"><p:outputLabel for="firstName" value="Nome: "/></p:column>
+							<p:column styleClass="fieldClm">
+								<p:inputText id="firstName" value="#{profileBean.person.firstName}" 
+											 required="true" requiredMessage="#{msg['person.firstname.empty']}"/>
 							</p:column>
-						</p:dataTable>
+						</p:row>									
+						<p:row>
+							<p:column styleClass="labelClm"><p:outputLabel for="lastName" value="Sobrenome: "/></p:column>
+							<p:column styleClass="fieldClm">
+								<p:inputText id="lastName" value="#{profileBean.person.lastName}"
+											 required="true" requiredMessage="#{msg['person.lastname.empty']}"/>
+							</p:column>
+						</p:row>
+						<p:row>
+							<p:column styleClass="labelClm"><p:outputLabel for="identity" value="CPF: "/></p:column>
+							<p:column styleClass="fieldClm">
+								<p:inputMask id="identity" value="#{profileBean.person.identity}" mask="999.999.999-99"
+											 required="true" requiredMessage="#{msg['person.email.empty']}"/>
+							</p:column>
+						</p:row>
+						<p:row>
+							<p:column styleClass="labelClm"><p:outputLabel for="male" value="Sexo:"/></p:column>
+							<p:column styleClass="fieldClm">
+								<p:selectOneRadio id="male" value="#{profileBean.person.gender}" required="false" 
+												  styleClass="kintype" style="vertical-align: middle">
+									<f:selectItems var="gender" value="#{profileBean.genders}" itemLabel="#{msg[gender.label]}"/>
+								</p:selectOneRadio>								
+							</p:column>
+						</p:row>
+						<p:row>
+							<p:column style="padding-right: 0px;"><p:outputLabel for="birthday" value="Nascimento:"/></p:column>
+							<p:column styleClass="fieldClm">
+								<p:calendar id="birthday" mode="popup" pattern="dd/MM/yyyy" value="#{profileBean.person.birthday}"
+											navigator="true" yearRange="c-100:c+0" mask="true" locale="pt"
+											required="true" requiredMessage="#{msg['person.birthday.empty']}"/>
+							</p:column>
+						</p:row>
+						<p:row>
+							<p:column styleClass="labelClm"><p:outputLabel for="email" value="Email: "/></p:column>
+							<p:column styleClass="fieldClm">
+								<p:inputText id="email" value="#{profileBean.person.emailAddress}"  
+											 requiredMessage="#{msg['person.email.empty']}"
+											 required="true"/>
+							</p:column>
+						</p:row>
+						</p:panelGrid>
+						<p:fieldset legend="Telefones" styleClass="no-background" style="margin: 15px 0px 15px;">
+							<p:panelGrid id="cmds" columns="5" styleClass="no-background no-border no-margin" style="width: 100%;">
+								<p:selectOneMenu id="phoneType" value="#{profileBean.phoneType}" required="false"
+												 style="vertical-align: middle; width: 100px;" styleClass="select">
+									<f:selectItem itemLabel="Tipo" noSelectionOption="true"/>
+									<f:selectItems var="type" value="#{profileBean.phoneTypes}" itemLabel="#{msg[type.label]}"/>
+								</p:selectOneMenu>
+								<p:inputMask id="phoneNumber" mask="(99) 99999999?9" value="#{profileBean.phoneNumber}" 
+											 style="width: 100px;" placeholder="Número"/>
+								<p:selectBooleanCheckbox id="principal" value="#{profileBean.primaryPhone}"/>
+								<h:outputLabel for="principal" value="Principal"/>
+								<p:commandLink title="Incluir telefone" actionListener="#{profileBean.onPhoneAdd}" 
+											   update="phoneTable,cmds,:outputMsg" partialSubmit="true" process="@parent" global="false">
+									<h:graphicImage value="../images/plus.png" width="25" height="25"/>
+								</p:commandLink>
+							</p:panelGrid>
+							<p:dataTable id="phoneTable" widgetVar="phoneTable" var="phone" value="#{profileBean.phones}" rows="4"
+								paginator="true" paginatorAlwaysVisible="false" paginatorPosition="bottom" 
+								paginatorTemplate="{PreviousPageLink} {CurrentPageReport} {NextPageLink}"
+								emptyMessage="Nenhum telefone informado" styleClass="no-header" tableStyleClass="no-border" style="margin: 10px 0px 10px 0px;">
+								<f:facet name="header">
+								</f:facet>
+								<p:column style="width: 30%; text-align: right;"><h:outputText value="(#{phone.extension}) #{phone.number}"/></p:column>
+								<p:column><h:outputText value="#{msg[phone.type.label]}"/></p:column>
+								<p:column><h:outputText value="Principal" rendered="#{phone.isPrimary()}"/></p:column>
+								<p:column style="width: 12%; text-align: right;">
+									<p:commandLink title="Excluir este telefone" actionListener="#{profileBean.onPhoneDelete(phone)}" update="phoneTable" partialSubmit="true" process="@this" global="false">
+										<h:graphicImage value="../images/cancel2.png" width="25" height="25" style="vertical-align: middle"/>
+									</p:commandLink>										
+								</p:column>
+							</p:dataTable>
+						</p:fieldset>
 					</p:column>
 				</p:row>
 				<p:row>
@@ -122,21 +130,31 @@
 				</p:row>
 			</p:panelGrid>
 		</h:form>
-		<h:form>
-			<p:panel widgetVar="pwd-panel" header="Alteração de Senha" styleClass="pwd-panel" style="float: right; padding: 0px !important" rendered="false">
-				<p:panelGrid columns="2">
+		
+		<p:dialog id="changePwdDialog" widgetVar="changePwdDialog" modal="true" resizable="false" 
+				  draggable="false" closable="false" visible="false" style="background: #f9f9f9">
+			<f:facet name="header">
+				<p:graphicImage value="../images/lock_white.png" width="22" height="25" style="vertical-align: top; margin-right: 10px;"/>
+				<p:outputLabel value="Alteração de senha" style="vertical-align: top; line-height: 25px;"/>
+			</f:facet>
+			<h:form id="profile-changepwd-form">
+				<p:panelGrid columns="2" styleClass="no-border no-background">
 					<p:outputLabel for="pwd" value="Senha atual"/>
 					<p:password id="pwd" value="#{profileBean.password}" maxlength="8" required="true" requiredMessage="Informe a senha atual"/>
 					<p:outputLabel for="newPwd" value="Nova senha"/>
 					<p:password id="newPwd" value="#{profileBean.newPassword}" maxlength="8" match="confirmPwd" required="true" 
 								requiredMessage="Informe a nova senha" validatorMessage="A confirmação da nova senha não confere"/>
-					<p:outputLabel for="confirmPwd" value="Confirmar senha" style=" white-space: nowrap;"/>
+					<p:outputLabel for="confirmPwd" value="Confirmar nova senha" style=" white-space: nowrap;"/>
 					<p:password id="confirmPwd" value="#{profileBean.newPassword}" maxlength="8" required="true" 
 								requiredMessage="Confirme a nova senha" validatorMessage="A confirmação da nova senha não confere"/>
 				</p:panelGrid>
-				<p:commandButton value="Alterar senha" actionListener="#{profileBean.onPasswordChange}" global="false" style="float: right; margin: 10px"/>
-			</p:panel>
-		</h:form>
+				<p:commandButton value="Cancelar" type="button" onclick="PF('changePwdDialog').hide();" 
+								 global="false" style="float: right; margin: 15px 10px 5px 5px; width: 90px;"/>
+				<p:commandButton value="Alterar" actionListener="#{profileBean.onPasswordChange}" 
+								 oncomplete="if (!args.validationFailed &amp;&amp; !args.exception) {PF('changePwdDialog').hide();}" 
+								 style="float: right;  margin: 15px 5px 5px 5px; width: 90px;"/>
+			</h:form>
+		</p:dialog>
 
 		<p:dialog id="profileUploaderDialog" widgetVar="profileUploaderDialog" resizable="false" 
 				  draggable="false" modal="true" visible="false" style="background: #f9f9f9">

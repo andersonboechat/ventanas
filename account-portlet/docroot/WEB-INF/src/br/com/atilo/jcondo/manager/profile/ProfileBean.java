@@ -11,12 +11,15 @@ import javax.faces.bean.ViewScoped;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.apache.myfaces.commons.util.MessageUtils;
+import org.primefaces.context.RequestContext;
 
 import br.com.abware.jcondo.core.Gender;
 import br.com.abware.jcondo.core.PersonDetail;
 import br.com.abware.jcondo.core.model.Person;
 import br.com.abware.jcondo.core.model.Phone;
 import br.com.abware.jcondo.core.model.PhoneType;
+import br.com.abware.jcondo.exception.ApplicationException;
+import br.com.abware.jcondo.exception.BusinessException;
 
 import br.com.atilo.jcondo.core.service.PersonDetailServiceImpl;
 import br.com.atilo.jcondo.core.service.PersonServiceImpl;
@@ -52,6 +55,8 @@ public class ProfileBean {
 	private String phoneNumber;
 
 	private PhoneType phoneType;
+	
+	private boolean primaryPhone;
 
 	private String password;
 
@@ -76,7 +81,6 @@ public class ProfileBean {
 	
 	public void onSave() {
 		try {
-			//person.setPicture(imageUploadBean.getImage());
 			person = personService.update(person);
 			personDetailService.update(personDetail);
 			MessageUtils.addMessage(FacesMessage.SEVERITY_INFO, "profile.save.success", null);
@@ -87,8 +91,22 @@ public class ProfileBean {
 	}
 
 	public void onPasswordChange() throws Exception {
-		personService.updatePassword(person, password, newPassword);
-		MessageUtils.addMessage(FacesMessage.SEVERITY_INFO, "profile.pwd.change.success", null);
+		try {
+			personService.updatePassword(person, password, newPassword);
+			MessageUtils.addMessage(FacesMessage.SEVERITY_INFO, "profile.pwd.change.success", null);
+		} catch (BusinessException e) {
+			LOGGER.warn("Business failure on password change: " + e.getMessage());
+			MessageUtils.addMessage(FacesMessage.SEVERITY_WARN, e.getMessage(), e.getArgs());
+			RequestContext.getCurrentInstance().addCallbackParam("exception", true);
+		} catch (ApplicationException e) {
+			LOGGER.warn("Application failure on password change: " + e.getMessage());
+			MessageUtils.addMessage(FacesMessage.SEVERITY_WARN, e.getMessage(), e.getArgs());
+			RequestContext.getCurrentInstance().addCallbackParam("exception", true);
+		} catch (Exception e) {
+			LOGGER.error("Unexpected failure on password change", e);
+			MessageUtils.addMessage(FacesMessage.SEVERITY_ERROR, "profile.save.failure", null);
+			RequestContext.getCurrentInstance().addCallbackParam("exception", true);
+		}
 	}
 	
 	public void onPhoneAdd() {
@@ -100,15 +118,27 @@ public class ProfileBean {
 		String number = StringUtils.right(pn, pn.length() - 2);
 
 		Phone phone = new Phone(extension, number, phoneType);
-		phoneNumber = null;
-		phoneType = null;
+		phone.setPrimary(primaryPhone);
 
 		if (phones.contains(phone)) {
-			MessageUtils.addMessage(FacesMessage.SEVERITY_INFO, "profile.phone.already.added", null);
+			MessageUtils.addMessage(FacesMessage.SEVERITY_WARN, "profile.phone.already.added", null);
 			return;
+		}
+		
+		if (primaryPhone) {
+			for (Phone p : phones) {
+				if (p.isPrimary()) {
+					MessageUtils.addMessage(FacesMessage.SEVERITY_WARN, "profile.phone.primary.exists", null);
+					return;
+				}
+			}
 		}
 
 		phones.add(0, phone);
+
+		phoneNumber = null;
+		phoneType = null;
+		primaryPhone = false;
 	}
 
 	public void onPhoneDelete(Phone phone) {
@@ -232,6 +262,14 @@ public class ProfileBean {
 
 	public void setConfirmPassword(String confirmPassword) {
 		this.confirmPassword = confirmPassword;
+	}
+
+	public boolean getPrimaryPhone() {
+		return primaryPhone;
+	}
+
+	public void setPrimaryPhone(boolean primaryPhone) {
+		this.primaryPhone = primaryPhone;
 	}
 
 

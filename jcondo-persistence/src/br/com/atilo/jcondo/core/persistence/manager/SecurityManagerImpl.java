@@ -55,17 +55,17 @@ public class SecurityManagerImpl {
 	}
 
 	public void updatePassword(Person person, String password, String newPassword) throws Exception {
-		try {
-			int result = UserLocalServiceUtil.authenticateByEmailAddress(helper.getCompanyId(), person.getEmailAddress(), password, null, null, null);
+		int result = UserLocalServiceUtil.authenticateByEmailAddress(helper.getCompanyId(), person.getEmailAddress(), password, null, null, null);
 
-			if (result == -1) {
-				throw new ApplicationException("sct.auth.failed");
-			}
-
-			UserLocalServiceUtil.updatePassword(person.getUserId(), newPassword, newPassword, false);
-		} catch (Exception e) {
-			throw new ApplicationException(e, "sct.pwd.update.failed");
+		if (result == -1) {
+			throw new ApplicationException("sct.auth.failed");
 		}
+
+//		try {
+			UserLocalServiceUtil.updatePassword(person.getUserId(), newPassword, newPassword, false);
+//		} catch (Exception e) {
+//			throw new ApplicationException(e, "sct.pwd.update.failed");
+//		}
 	}
 
 	public void addMembership(Person person, Membership membership) throws Exception {
