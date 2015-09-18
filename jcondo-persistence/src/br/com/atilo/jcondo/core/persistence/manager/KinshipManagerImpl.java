@@ -53,7 +53,7 @@ public class KinshipManagerImpl extends JCondoManager<KinshipEntity, Kinship> {
 		String key = generateKey();
 		try {
 			openManager(key);
-			String queryString = "FROM KinshipEntity WHERE person.id = :personId AND relative.id := relativeId";
+			String queryString = "FROM KinshipEntity WHERE person.id = :personId AND relative.id = :relativeId";
 			Query query = em.createQuery(queryString);
 			query.setParameter("personId", person.getId());
 			query.setParameter("relativeId", relative.getId());

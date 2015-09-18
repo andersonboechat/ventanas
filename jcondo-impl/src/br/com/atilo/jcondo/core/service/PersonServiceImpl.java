@@ -15,20 +15,24 @@ import com.liferay.portal.model.User;
 import com.liferay.portal.service.ServiceContext;
 import com.liferay.portal.service.UserLocalServiceUtil;
 
+import br.com.abware.jcondo.core.Gender;
 import br.com.abware.jcondo.core.Permission;
 import br.com.abware.jcondo.core.PersonType;
 import br.com.abware.jcondo.core.model.Administration;
 import br.com.abware.jcondo.core.model.Condominium;
 import br.com.abware.jcondo.core.model.Domain;
 import br.com.abware.jcondo.core.model.Flat;
+import br.com.abware.jcondo.core.model.KinType;
 import br.com.abware.jcondo.core.model.Membership;
 import br.com.abware.jcondo.core.model.Person;
+import br.com.abware.jcondo.core.model.Phone;
 import br.com.abware.jcondo.core.model.Supplier;
 import br.com.abware.jcondo.exception.ApplicationException;
 import br.com.abware.jcondo.exception.BusinessException;
 import br.com.abware.jcondo.exception.ModelExistException;
 import br.com.abware.jcondo.exception.PersistenceException;
 
+import br.com.atilo.jcondo.commons.collections.DomainPredicate;
 import br.com.atilo.jcondo.commons.collections.MembershipPredicate;
 import br.com.atilo.jcondo.commons.collections.PersonTypePredicate;
 import br.com.atilo.jcondo.commons.collections.PersonTypeTransformer;
@@ -41,6 +45,12 @@ public class PersonServiceImpl  {
 	private static final Condominium CONDOMINIUM = new Condominium();
 
 	private PersonManagerImpl personManager = new PersonManagerImpl();
+	
+	private MembershipServiceImpl membershipService = new MembershipServiceImpl();
+	
+	private KinshipServiceImpl kinshipService = new KinshipServiceImpl();
+	
+	private PhoneServiceImpl phoneService = new PhoneServiceImpl();
 
 	private SecurityManagerImpl securityManager = new SecurityManagerImpl();
 	
@@ -144,29 +154,6 @@ public class PersonServiceImpl  {
 		return personManager.findPerson();
 	}
 	
-	/**
-
-	 * Papeis de Apartamento: Proprietario, Morador, Dependente, Convidado, Visitante
-	 * 
-	 * Papeis de Fornecedor: Gerente, Funcionario
-	 * 
-	 * Papeis de membro do condomínio: Alugador (Aluguel de Espaços), 
-	 * 								   Reclamador (livro de reclamações), 
-	 * 								   Comentarista (forum), 
-	 * 								   Provedor de Acesso 
-	 * 
-	 * Se for morador, associa aos papeis: Morador, Alugador, Reclamador, Comentarista, Provedor de Acesso
-	 * Se for dependente, associa aos papeis: Dependente, Provedor de Acesso
-	 * Se for convidado, associa aos papeis: Convidado
-	 * Se for visitante, associa aos papeis: Visitante
-	 * 
-	 * Se for proprietário
-	 * 		Se não existir Locatarios, associa aos papeis: Proprietário, Alugador, Reclamador, Comentarista, Provedor de Acesso
-	 * 		Se existir Locatarios, associa aos papeis: Proprietário
-	 * 
-	 * Se for locatário, associa aos papeis: Locatário, Alugador, Reclamador, Comentarista, Provedor de Acesso
-	 * 				   , associa os proprietários aos papeis: Proprietário
-	 */
 	public Person register(Person person) throws Exception {
 		try {
 			if (!securityManager.hasPermission(person, Permission.ADD)) {
@@ -174,7 +161,7 @@ public class PersonServiceImpl  {
 			}
 
 			if (StringUtils.isEmpty(person.getIdentity())) {
-				if (!hasAnyPersonType(person.getMemberships(), Arrays.asList(PersonType.RESIDENT, PersonType.VISITOR))) {
+				if (!CollectionUtils.exists(person.getMemberships(), new PersonTypePredicate(PersonType.RESIDENT))) {
 					throw new BusinessException("psn.identity.empty");
 				}
 			} else {
@@ -185,7 +172,9 @@ public class PersonServiceImpl  {
 				}
 
 				if (getPerson(person.getIdentity()) != null) {
-					throw new ModelExistException(null, "psn.identity.exists", person.getIdentity());
+					throw new ModelExistException(null, "psn.identity.exists", 
+												  person.getPicture().getPath(), person.getFirstName(), 
+												  person.getLastName(), person.getIdentity());
 				}
 			}
 
@@ -242,14 +231,28 @@ public class PersonServiceImpl  {
 		}
 	}	
 
-	private boolean hasAnyPersonType(List<Membership> memberships, List<PersonType> types) {
-		for (PersonType type : types) {
-			if (CollectionUtils.exists(memberships, new PersonTypePredicate(type))) {
-				return true;
-			}
-		}
+	@SuppressWarnings("unchecked")
+	private void handleAccountAccess(Person person, Membership membership) throws Exception {
+		User user = UserLocalServiceUtil.getUser(person.getUserId());
+		List<Membership> memberships = membershipService.getMemberships(person);
+		List<PersonType> userTypes = Arrays.asList(PersonType.OWNER, PersonType.RENTER, PersonType.RESIDENT, 
+												   PersonType.DEPENDENT, PersonType.ADMIN_ASSISTANT);
+		List<PersonType> originalTypes = (List<PersonType>) CollectionUtils.collect(memberships, new PersonTypeTransformer());
 
-		return false;
+		if (userTypes.contains(membership.getType()) &&
+				!CollectionUtils.containsAny(originalTypes, userTypes)) {
+			UserLocalServiceUtil.updateStatus(person.getUserId(), WorkflowConstants.STATUS_APPROVED);
+
+			if (!user.getAgreedToTermsOfUse()) {
+				notifyUserAccountCreation(person);	
+			}
+		} 
+
+		if (!userTypes.contains(membership.getType()) && 
+				(originalTypes.isEmpty() || CollectionUtils.containsAny(originalTypes, userTypes))) {
+			UserLocalServiceUtil.updateStatus(person.getUserId(), WorkflowConstants.STATUS_DENIED);
+		}
+		
 	}
 	
  	private void notifyUserAccountCreation(Person p) throws Exception {
@@ -269,19 +272,77 @@ public class PersonServiceImpl  {
 		securityManager.updatePassword(person, password, newPassword);
 	}
 	
-	@SuppressWarnings("unchecked")
-	public Person update(Person person) throws Exception {
-		try {
-			if (!securityManager.hasPermission(person, Permission.UPDATE)) {
-				throw new BusinessException("psn.update.denied");
+	public Person add(String identity, String firstName, String lastName, 
+						   Gender gender, Date birthday, String email, Phone phone, 
+						   Domain domain, PersonType personType, KinType kintype) throws Exception {
+		Person person = new Person();
+
+		if (!securityManager.hasPermission(person, Permission.ADD)) {
+			throw new BusinessException("psn.create.denied");
+		}
+
+		if (StringUtils.isEmpty(identity)) {
+			if (personType != PersonType.RESIDENT) {
+				throw new BusinessException("psn.identity.empty");
+			}
+		} else {
+			try {
+				new CPFValidator().assertValid(identity.replaceAll("[^0-9]+", ""));
+			} catch (Exception e) {
+				throw new BusinessException("psn.identity.not.valid", person.getIdentity());
 			}
 
-			Person p;
+			if (getPerson(identity) != null) {
+				throw new ModelExistException(null, "psn.identity.exists", person.getIdentity());
+			}
+		}
 
-			if (StringUtils.isEmpty(person.getIdentity())) {
-				if (!hasAnyPersonType(person.getMemberships(), Arrays.asList(PersonType.RESIDENT, PersonType.VISITOR))) {
-					throw new BusinessException("psn.identity.empty");
-				}
+		//TODO: verificar se o dominio existe
+		
+		person.setIdentity(identity);
+		person.setFirstName(firstName);
+		person.setLastName(lastName);
+		person.setGender(gender);
+		person.setBirthday(birthday);
+		person.setEmailAddress(email);		
+
+		person = personManager.save(person);
+
+		Membership membership = membershipService.add(domain, person, personType);
+
+		if (kintype != null) {
+			kinshipService.add(getPerson(), person, kintype);
+		}
+
+		if (phone != null) {
+			phoneService.add(person, phone.getExtension(), phone.getNumber(), phone.getType(), phone.isPrimary());
+		}
+
+		try {
+			handleAccountAccess(person, membership);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+		return person;
+	}
+
+	public Person update(long id, String identity, String firstName, String lastName, 
+						 Gender gender, Date birthday, String email, Phone phone, 
+						 Domain domain, PersonType personType, KinType kintype) throws Exception {
+		Person person = personManager.findById(id);
+
+		if (person == null) {
+			throw new BusinessException("psn.not.found");
+		}			
+
+		if (!securityManager.hasPermission(person, Permission.UPDATE)) {
+			throw new BusinessException("psn.update.denied");
+		}
+
+		if (!person.getIdentity().equals(identity)) {
+			if (!StringUtils.isEmpty(person.getIdentity())) {
+				throw new BusinessException("psn.identity.change.denied");
 			} else {
 				try {
 					new CPFValidator().assertValid(person.getIdentity().replaceAll("[^0-9]+", ""));
@@ -289,23 +350,81 @@ public class PersonServiceImpl  {
 					throw new BusinessException("psn.identity.not.valid", person.getIdentity());
 				}
 
-				p = getPerson(person.getIdentity());
-				if (p != null && !p.equals(person)) {
+				person = getPerson(person.getIdentity());
+				if (person != null && !person.equals(person)) {
 					throw new ModelExistException(null, "psn.identity.exists", person.getIdentity());
 				}
 			}
+		} else if (StringUtils.isEmpty(identity)) {
+			if (personType == null) {
+				throw new BusinessException("psn.person.type.empty");
+			} else if (personType != PersonType.RESIDENT) {
+				throw new BusinessException("psn.identity.empty");
+			}
+		}
 
-			p = personManager.findById(person.getId());
+		//TODO: verificar se o dominio existe
+		
+		person.setIdentity(identity);
+		person.setFirstName(firstName);
+		person.setLastName(lastName);
+		person.setGender(gender);
+		person.setBirthday(birthday);
+		person.setEmailAddress(email);		
+
+		person = personManager.save(person);
+
+		Membership membership = membershipService.add(domain, person, personType);
+
+		if (kintype != null) {
+			kinshipService.add(getPerson(), person, kintype);
+		}
+
+		if (phone != null) {
+			phoneService.add(person, phone.getExtension(), phone.getNumber(), phone.getType(), phone.isPrimary());
+		}
+
+		try {
+			handleAccountAccess(person, membership);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+		return person;
+	}
+	
+	@SuppressWarnings("unchecked")
+	public Person update(Person person) throws Exception {
+		try {
+			if (!securityManager.hasPermission(person, Permission.UPDATE)) {
+				throw new BusinessException("psn.update.denied");
+			}
+
+			Person p = personManager.findById(person.getId());
+
 			if (p == null) {
 				throw new BusinessException("psn.not.found");
+			}			
+
+			if (!person.getIdentity().equals(p.getIdentity())) {
+				if (!StringUtils.isEmpty(p.getIdentity())) {
+					throw new BusinessException("psn.identity.change.denied");
+				} else {
+					try {
+						new CPFValidator().assertValid(person.getIdentity().replaceAll("[^0-9]+", ""));
+					} catch (Exception e) {
+						throw new BusinessException("psn.identity.not.valid", person.getIdentity());
+					}
+
+					p = getPerson(person.getIdentity());
+					if (p != null && !p.equals(person)) {
+						throw new ModelExistException(null, "psn.identity.exists", person.getIdentity());
+					}
+				}
 			}
 
 			if (person.getBirthday() == null) {
 				person.setBirthday(p.getBirthday());
-			}
-
-			if (person.getEmailAddress() == null) {
-				person.setEmailAddress(p.getEmailAddress());
 			}
 
 			validateDomains(person);
@@ -348,6 +467,7 @@ public class PersonServiceImpl  {
 		
 	}
 
+	@SuppressWarnings("unchecked")
 	private void validateMemberships(Person person) throws Exception {
 		List<Membership> oldMemberships;
 		List<Membership> memberships = person.getMemberships();
@@ -356,6 +476,20 @@ public class PersonServiceImpl  {
 
 		if (p != null) {
 			oldMemberships = p.getMemberships();
+			List<Membership> ms = (List<Membership>) CollectionUtils.union(memberships, oldMemberships);
+
+			// Somente um membership por dominio
+			for (Membership m : ms) {
+				if (CollectionUtils.countMatches(ms, new DomainPredicate(m.getDomain())) > 1) {
+					throw new BusinessException("psn.membership.already.exists", m.getDomain());
+				}
+			}
+
+			// Uma pessoa pode ser morador em somente um apartamento			
+			if (CollectionUtils.countMatches(ms, new PersonTypePredicate(PersonType.RESIDENT)) > 1) {
+				throw new BusinessException("psn.membership.already.resident");
+			}
+			
 		} else {
 			oldMemberships = new ArrayList<Membership>();
 			memberships = new ArrayList<Membership>();
@@ -385,12 +519,6 @@ public class PersonServiceImpl  {
 			}
 		}
 
-		int residents = CollectionUtils.countMatches(memberships, new PersonTypePredicate(PersonType.RESIDENT));
-
-		// Uma pessoa pode ser morador em somente um apartamento			
-		if (residents > 1) {
-			throw new BusinessException("psn.membership.assign.member.denied");
-		}
 	}
 	
 	public void delete(Person person) throws Exception {

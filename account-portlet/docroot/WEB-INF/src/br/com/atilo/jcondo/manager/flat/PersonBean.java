@@ -11,8 +11,12 @@ import java.util.ResourceBundle;
 import javax.faces.application.FacesMessage;
 import javax.faces.bean.ManagedBean;
 import javax.faces.bean.ViewScoped;
+import javax.faces.component.UIComponent;
+import javax.faces.component.UIInput;
+import javax.faces.context.FacesContext;
 import javax.faces.event.AjaxBehaviorEvent;
 import javax.faces.event.ValueChangeEvent;
+import javax.faces.validator.ValidatorException;
 
 import org.apache.commons.beanutils.BeanUtils;
 import org.apache.commons.collections.CollectionUtils;
@@ -21,6 +25,7 @@ import org.apache.log4j.Logger;
 import org.apache.myfaces.commons.util.MessageUtils;
 import org.primefaces.component.selectonemenu.SelectOneMenu;
 import org.primefaces.context.RequestContext;
+import org.primefaces.event.FlowEvent;
 
 import br.com.abware.accountmgm.bean.model.ModelDataModel;
 import br.com.abware.accountmgm.util.DomainPredicate;
@@ -38,6 +43,7 @@ import br.com.abware.jcondo.core.model.Phone;
 import br.com.abware.jcondo.core.model.PhoneType;
 import br.com.abware.jcondo.core.model.Supplier;
 import br.com.abware.jcondo.exception.BusinessException;
+import br.com.abware.jcondo.exception.ModelExistException;
 import br.com.atilo.jcondo.core.service.PersonDetailServiceImpl;
 import br.com.atilo.jcondo.core.service.PersonServiceImpl;
 import br.com.atilo.jcondo.manager.CameraBean;
@@ -87,6 +93,8 @@ public class PersonBean {
 	private List<KinType> kinTypes;
 
 	private List<PhoneType> phoneTypes;
+
+	private String identity;
 
 	public PersonBean() {
 		filters = new HashMap<String, Object>();
@@ -140,17 +148,23 @@ public class PersonBean {
 
 			if (StringUtils.isEmpty(phoneNumber)) {
 				if (phone.getId() > 0) {
-					// TODO delete phone
+					personDetailService.removePhone(phone);
 				}
 			} else {
 				String pn = phoneNumber.replaceAll("[^0-9]+", "");
-				phone.setExtension(pn.substring(0, 3));
-				phone.setNumber(pn.substring(3));
-				personDetailService.savePhone(p, phone);
+				if (!phoneNumber.equals(phone.getExtension() + phone.getNumber())) {
+					phone.setExtension(pn.substring(0, 2));
+					phone.setNumber(pn.substring(2));
+					personDetailService.savePhone(p, phone);
+				}
 			}
 
 			model.update(p);
 			model.filter(filters);
+		} catch (ModelExistException e) {
+			MessageUtils.addMessage(FacesMessage.SEVERITY_WARN, e.getMessage(), e.getArgs(), ":tabs:person-details-form:alertMsg");
+			RequestContext.getCurrentInstance().addCallbackParam("exception", true);
+			RequestContext.getCurrentInstance().addCallbackParam("alert", true);
 		} catch (BusinessException e) {
 			LOGGER.warn("Business failure on person saving: " + e.getMessage());
 			MessageUtils.addMessage(FacesMessage.SEVERITY_WARN, e.getMessage(), e.getArgs());
@@ -201,6 +215,7 @@ public class PersonBean {
 				phoneNumber = phone.getExtension() + phone.getNumber();
 			} else {
 				phone = new Phone();
+				phone.setPrimary(true);
 			}
 
 			kinship = personDetailService.getKinship(logPerson, person);
@@ -319,6 +334,46 @@ public class PersonBean {
 		return person != null && (person.getId() == 0 || person.equals(personService.getPerson()));
 	}
 
+	public void validatePhone(FacesContext context, UIComponent component, Object value) {
+		if (!StringUtils.isEmpty((String) value) && phone.getType() == null) {
+			FacesMessage message = MessageUtils.getMessage(UIInput.REQUIRED_MESSAGE_ID, null);
+			throw new ValidatorException(message);
+		}
+	}
+	
+	public String handleFlow(FlowEvent event) throws Exception {
+		String PERSON_TYPE = "person-type";
+		String PERSON_FOUND = "person-found";
+		String PERSON_DETAILS = "person-details";
+		String newStep = event.getNewStep();
+
+		if (PERSON_FOUND.equals(newStep)) {
+			if (StringUtils.isEmpty(identity)) {
+				return PERSON_DETAILS;
+			}
+
+			person = personService.getPerson(identity);
+			
+			return person != null ? PERSON_FOUND : PERSON_DETAILS;
+		}
+		
+		if (PERSON_DETAILS.equals(newStep)) {
+			phone = personDetailService.getPhone(person);
+
+			if (phone != null) {
+				phoneNumber = phone.getExtension() + phone.getNumber();
+			} else {
+				phone = new Phone();
+				phone.setPrimary(true);
+			}
+
+			kinship = personDetailService.getKinship(logPerson, person);
+		}
+		
+		
+		return null;
+	}
+	
 	public ImageUploadBean getImageUploadBean() {
 		return imageUploadBean;
 	}
@@ -429,6 +484,14 @@ public class PersonBean {
 
 	public void setPhoneTypes(List<PhoneType> phoneTypes) {
 		this.phoneTypes = phoneTypes;
+	}
+
+	public String getIdentity() {
+		return identity;
+	}
+
+	public void setIdentity(String identity) {
+		this.identity = identity;
 	}
 
 }

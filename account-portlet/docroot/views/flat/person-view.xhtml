@@ -76,20 +76,6 @@
 		<h:form id="person-details-form">
 			<p:panelGrid id="model-details" styleClass="no-background no-border" style="margin: 10px 0px 20px 0px;" cellpadding="10">
 				<p:row>
-					<p:column styleClass="my-account-col1">
-						<p:panelGrid columns="1" styleClass="no-margin no-border no-background">
-							<p:panel styleClass="user-image foto no-margin no-background2" style="width: #{imageUploader.width}px !important; height: #{imageUploader.height}px !important">
-								<p:graphicImage id="portrait" value="#{personViewer.person.picture.path}" width="#{imageUploader.width}" height="#{imageUploader.height}"/>
-							</p:panel>
-							<p:panelGrid columns="2" columnClasses="picture" styleClass="pic-cmds no-border no-background" style="text-align: center; float: right">
-								<p:fileUpload label="" fileUploadListener="#{imageUploader.onUpload}" auto="true" update=":tabs:person-picture-form" oncomplete="PF('personPictureDialog').show();" />
-								<p:commandLink title="#{msg['take.picture']}" actionListener="#{personCamera.setRender(true)}" update=":tabs:person-camera-form" oncomplete="PF('personCameraDialog').show();" partialSubmit="true" global="false" process="@this" styleClass="column">
-									<h:graphicImage value="../images/take-pic.png" width="38" height="31"/>
-									<f:setPropertyActionListener target="#{personCamera.image.path}" value=""/>
-								</p:commandLink>
-							</p:panelGrid>
-				        </p:panelGrid>
-					</p:column>
 					<p:column styleClass="my-account-col2">
 						<p:panelGrid columns="3" styleClass="userPanel no-border no-background" style="width: 100%; margin: 0; padding: 0;">
 						<p:row>
@@ -102,6 +88,14 @@
 									<f:selectItems var="type" value="#{personViewer.types}" itemLabel="#{msg[type.label]}"/>
 									<p:ajax event="change" update="person-details-form" global="false"/>
 								</p:selectOneMenu>
+							</p:column>
+						</p:row>
+						<p:row>
+							<p:column styleClass="labelClm"><p:outputLabel for="identity" value="CPF: "/></p:column>
+							<p:column colspan="2" styleClass="fieldClm">
+								<p:inputMask id="identity" value="#{personViewer.person.identity}" mask="999.999.999-99" 
+											 required="#{personViewer.membership.type != 'VISITOR' and personViewer.membership.type != 'RESIDENT'}" 
+											 requiredMessage="#{msg['person.identity.empty']}" readonly="#{!personViewer.canEditInfo()}"/>
 							</p:column>
 						</p:row>
 						<p:row>
@@ -125,14 +119,6 @@
 							</p:column>
 						</p:row>
 						<p:row>
-							<p:column styleClass="labelClm"><p:outputLabel for="identity" value="CPF: "/></p:column>
-							<p:column colspan="2" styleClass="fieldClm">
-								<p:inputMask id="identity" value="#{personViewer.person.identity}" mask="999.999.999-99" 
-											 required="#{personViewer.membership.type != 'VISITOR' and personViewer.membership.type != 'RESIDENT'}" 
-											 requiredMessage="#{msg['person.identity.empty']}" readonly="#{!personViewer.canEditInfo()}"/>
-							</p:column>
-						</p:row>
-						<p:row>
 							<p:column styleClass="labelClm"><p:outputLabel for="male" value="Sexo:"/></p:column>
 							<p:column colspan="2" styleClass="fieldClm">
 								<p:selectOneRadio id="male" value="#{personViewer.person.gender}" required="false" 
@@ -153,13 +139,19 @@
 						<p:row rendered="#{personViewer.membership.type != 'VISITOR' and personViewer.membership.type != 'GUEST' and personViewer.membership.type != 'EMPLOYEE'}">
 							<p:column styleClass="labelClm"><p:outputLabel for="phone" value="Telefone:"/></p:column>
 							<p:column styleClass="fieldClm">
-								<p:selectOneMenu id="phoneType" value="#{personViewer.phone.type}" styleClass="select" style="width: 120px; vertical-align: top;">
+								<p:selectOneMenu id="phoneType" value="#{personViewer.phone.type}" styleClass="select" 
+												 style="width: 120px; vertical-align: top;">
 									<f:selectItem itemLabel="Tipo" noSelectionOption="true"/>
 									<f:selectItems var="type" value="#{personViewer.phoneTypes}" itemLabel="#{msg[type.label]}"/>
+									<p:ajax event="change" global="false">
+										<f:setPropertyActionListener value="#{type}" target="#{personViewer.phone.type}"/>
+									</p:ajax>
 								</p:selectOneMenu>
 							</p:column>
 							<p:column styleClass="fieldClm">
-								<p:inputMask id="phone" value="#{personViewer.phoneNumber}" mask="(99) 9999-9999?9" style="vertical-align: top; width: 91%"/>
+								<p:inputMask id="phone" value="#{personViewer.phoneNumber}" mask="(99) 9999-9999?9" 
+											 validator="#{personViewer.validatePhone}" validatorMessage="#{msg['person.phone.type.empty']}"
+											 style="vertical-align: top; width: 91%"/>
 							</p:column>
 						</p:row>
 						<p:row rendered="#{personViewer.membership.type != 'VISITOR' and personViewer.membership.type != 'GUEST' and personViewer.membership.type != 'EMPLOYEE'}">
@@ -181,17 +173,37 @@
 						</p:row>
 						</p:panelGrid>
 					</p:column>
+					<p:column styleClass="my-account-col1">
+						<p:panelGrid columns="1" styleClass="no-margin no-border no-background">
+							<p:panel styleClass="user-image foto no-margin no-background2" style="width: #{imageUploader.width}px !important; height: #{imageUploader.height}px !important">
+								<p:graphicImage id="portrait" value="#{personViewer.person.picture.path}" width="#{imageUploader.width}" height="#{imageUploader.height}"/>
+							</p:panel>
+							<p:panelGrid columns="2" columnClasses="picture" styleClass="pic-cmds no-border no-background" style="text-align: center; float: right">
+								<p:fileUpload label="" fileUploadListener="#{imageUploader.onUpload}" auto="true" update=":tabs:person-picture-form" oncomplete="PF('personPictureDialog').show();" />
+								<p:commandLink title="#{msg['take.picture']}" actionListener="#{personCamera.setRender(true)}" update=":tabs:person-camera-form" oncomplete="PF('personCameraDialog').show();" partialSubmit="true" global="false" process="@this" styleClass="column">
+									<h:graphicImage value="../images/take-pic.png" width="38" height="31"/>
+									<f:setPropertyActionListener target="#{personCamera.image.path}" value=""/>
+								</p:commandLink>
+							</p:panelGrid>
+				        </p:panelGrid>
+					</p:column>
 				</p:row>
 			</p:panelGrid>
 			<p:commandButton value="Cancelar" type="button" onclick="PF('personDialog').hide();" style="float: right; width: 90px; margin: 0px 0px 10px 0px;"/>
 			<p:commandButton value="Salvar" actionListener="#{personViewer.onPersonSave}" 
 							 update="@widgetVar(personTable),:outputMsg" 
-							 oncomplete="if (!args.validationFailed) { if(!args.exception) {PF('personDialog').hide();} else { if(args.alert) {PF('alertDialog').show();}}}" 
-							 style="float: right; width: 90px; margin: 0px 10px 10px 5px;">
-				<p:confirmDialog >
-					
-				</p:confirmDialog>
-			</p:commandButton>
+							 oncomplete="if (!args.validationFailed) { if(!args.exception) {PF('personDialog').hide();} else { if(args.alert) {PF('personFoundDialog').show();}}}" 
+							 style="float: right; width: 90px; margin: 0px 10px 10px 5px;"/>
+			<p:confirmDialog header="Pessoa encontrada" widgetVar="personFoundDialog" showEffect="fade" hideEffect="fade" 
+							 styleClass="alert no-margin" closable="false" width="300px">
+				<f:facet name="message">
+					<p:messages id="alertMsg" severity="warn" autoUpdate="true" styleClass="no-background no-margin" style="text-align: justify; margin: 0;"/>
+				</f:facet>
+				<p:panel styleClass="no-background no-border" style="text-align: center; width: 200px; margin: 0 auto;">
+					<p:commandButton value="#{msg['no']}" type="button" onclick="PF('alertDialog').hide();" icon="ui-icon-close" style=" float:right;"/>
+					<p:commandButton value="#{msg['yes']}" actionListener="#{vehicleViewer.onVehicleClaim}" update=":outputMsg"	oncomplete="PF('personFoundDialog').hide(); PF('personDialog').hide();" icon="ui-icon-check" style="margin-left: 5px;"/>
+				</p:panel>
+			</p:confirmDialog>
 		</h:form>
 	</p:dialog>
 

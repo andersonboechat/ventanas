@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.math.NumberUtils;
 
 import br.com.abware.jcondo.core.PersonDetail;
@@ -14,6 +13,7 @@ import br.com.abware.jcondo.core.model.Phone;
 import br.com.abware.jcondo.core.model.PhoneType;
 import br.com.abware.jcondo.exception.BusinessException;
 
+import br.com.atilo.jcondo.commons.collections.PhonePredicate;
 import br.com.atilo.jcondo.core.persistence.manager.KinshipManagerImpl;
 import br.com.atilo.jcondo.core.persistence.manager.PhoneManagerImpl;
 
@@ -65,7 +65,13 @@ public class PersonDetailServiceImpl {
 		return detail;
 	}
 	
-	public Phone getPhone(Person person) {
+	public Phone getPhone(Person person) throws Exception {
+		for (Phone phone : phoneManager.findPhones(person)) {
+			if (phone.isPrimary()) {
+				return phone;
+			}
+		}
+
 		return null;
 	}
 	
@@ -96,21 +102,30 @@ public class PersonDetailServiceImpl {
 		return kinshipManager.save(kinship); 
 	}
 
-	public Phone savePhone(Person person, String phone, PhoneType type) throws Exception {
-		if (StringUtils.isEmpty(phone) || StringUtils.length(phone) < 10) {
-			
-		}
-
-		Phone p = new Phone(StringUtils.left(phone, 2), StringUtils.right(phone, 2), type);
-
-		return null;
-	}
-	
 	public Phone savePhone(Person person, Phone phone) throws Exception {
 		if (!NumberUtils.isDigits(phone.getExtension()) || !NumberUtils.isDigits(phone.getNumber())) {
 			throw new BusinessException("pdt.phone.invalid");
 		}
+		
+		Phone p = (Phone) CollectionUtils.find(phoneManager.findPhones(person), new PhonePredicate(phone));
+		
+		if (p != null) {
+			if (p.getId() != phone.getId() && phone.getId() > 0) {
+				phoneManager.delete(p);
+			}
 
-		return phoneManager.save(person, phone);
+			p.setExtension(phone.getExtension());
+			p.setNumber(phone.getNumber());
+			p.setType(phone.getType());
+			p.setPrimary(phone.isPrimary());
+		} else {
+			p = phone;
+		}
+
+		return phoneManager.save(person, p);
+	}
+	
+	public void removePhone(Phone phone) throws Exception {
+		phoneManager.delete(phone);
 	}
 }

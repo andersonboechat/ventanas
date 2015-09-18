@@ -62,8 +62,16 @@ public class PhoneManagerImpl extends LiferayManager<com.liferay.portal.model.Ph
 			}
 		}
 
-		return getModel(PhoneLocalServiceUtil.addPhone(person.getUserId(), Contact.class.getName(), classPK, 
-													   phone.getNumber(), phone.getExtension(), typeId, phone.isPrimary()));
+		Phone p;
+		if (phone.getId() == 0) {
+			p = getModel(PhoneLocalServiceUtil.addPhone(person.getUserId(), Contact.class.getName(), classPK, 
+					   									phone.getNumber(), phone.getExtension(), typeId, phone.isPrimary()));
+		} else {
+			p = getModel(PhoneLocalServiceUtil.updatePhone(phone.getId(), phone.getNumber(),
+														   phone.getExtension(), typeId, phone.isPrimary()));
+		}
+
+		return p;
 	}
 
 	@Override
