@@ -30,6 +30,14 @@ public class MembershipServiceImpl {
 
 	private SecurityManagerImpl securityManager = new SecurityManagerImpl();
 
+	public void requestAuthorization(Domain domain, Person person, PersonType type) {
+		
+	}
+	
+	public Membership getMembership(Person person, Domain domain) {
+		return membershipManager.findByPersonAndDomain(person, domain);
+	}
+
 	public List<Membership> getMemberships(Person person) {
 		return membershipManager.findByPerson(person);
 	}
@@ -170,4 +178,5 @@ public class MembershipServiceImpl {
 	private void addOrganization(Person person, Domain domain) throws Exception {
 		UserLocalServiceUtil.addOrganizationUsers(domain.getRelatedId(), new long[] {person.getUserId()});
 	}
+
 }

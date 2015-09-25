@@ -43,7 +43,7 @@ public class PersonDetailServiceImpl {
 		List<Phone> oldPhones = phoneManager.findPhones(detail.getPerson());
 
 		for (Phone phone : (List<Phone>) CollectionUtils.subtract(oldPhones, detail.getPhones())) {
-			phoneManager.delete(phone);
+			phoneManager.delete(phone.getId());
 			newPhones.remove(phone);
 		}
 
@@ -111,7 +111,7 @@ public class PersonDetailServiceImpl {
 		
 		if (p != null) {
 			if (p.getId() != phone.getId() && phone.getId() > 0) {
-				phoneManager.delete(p);
+				phoneManager.delete(p.getId());
 			}
 
 			p.setExtension(phone.getExtension());
@@ -126,6 +126,6 @@ public class PersonDetailServiceImpl {
 	}
 	
 	public void removePhone(Phone phone) throws Exception {
-		phoneManager.delete(phone);
+		phoneManager.delete(phone.getId());
 	}
 }

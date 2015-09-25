@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+
+<f:view
+	xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:c="http://java.sun.com/jsp/jstl/core"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:ui="http://java.sun.com/jsf/facelets">
+
+	<c:set var="personViewer" value="#{flatView.personListBean.personBean}"/>
+	<c:set var="imageUploader" value="#{flatView.personListBean.personBean.imageUploadBean}"/>
+	<c:set var="personCamera" value="#{flatView.personListBean.personBean.cameraBean}"/>
+
+	<h:form id="person-form">
+		<p:panelGrid columns="3" styleClass="no-border person-cmds" columnClasses="person-cmds-left,person-cmds-left,person-cmds-right">
+			<p:column>
+				<p:inputText id="personName" widgetVar="personName" valueChangeListener="#{personListView.onSearch}" 
+							 placeholder="Buscar pelo nome" styleClass="searchField"/>
+				<p:commandButton value="Buscar" update="@widgetVar(personTable)" partialSubmit="true" 
+								 process="@widgetVar(personName)" styleClass="searchBtn"/>
+			</p:column>
+
+			<p:column>
+				<p:selectOneMenu id="ordering" style="font-size: 13px; float: right;">
+					<f:selectItem itemLabel="Todos" itemValue="all"/>
+					<f:selectItem itemLabel="#{msg['person.type.resident']}" itemValue="resident"/>
+					<f:selectItem itemLabel="#{msg['person.type.guest']}" itemValue="guest"/>
+					<f:selectItem itemLabel="#{msg['person.type.visitor']}" itemValue="visitor"/>
+					<f:selectItem itemLabel="#{msg['person.type.employee']}" itemValue="employee"/>
+					<p:ajax event="change" listener="#{personListView.onPersonTypeSelect}" update="@widgetVar(personTable)"/>
+	    		</p:selectOneMenu>
+			</p:column>
+
+			<p:commandButton value="Cadastrar uma pessoa" actionListener="#{personListView.onCreate}" 
+							 partialSubmit="true" process="@this" update="@widgetVar(personDialog)" oncomplete="PF('personDialog').show();"
+							 style="font-size: 12px; margin: 0; padding:0"/>
+
+			<p:commandButton value="Enviar mensagens a todos desta lista" actionListener="#{personListView.onCreate}" 
+							 partialSubmit="true" process="@this" update="@widgetVar(personDialog)" oncomplete="PF('personDialog').show();"
+							 style="font-size: 12px; margin: 0; padding:0" rendered="false"/>
+		</p:panelGrid>
+
+		<p:dataTable widgetVar="personTable" id="personTable" var="person" value="#{personListView.model}"  
+		             paginator="false" emptyMessage="Nenhum usuário cadastrado" 
+		             rowKey="#{person.id}" disabledSelection="#{!personViewer.canEditPerson(person)}" styleClass="no-header no-border"
+		             tableStyleClass="no-border">
+		    <p:ajax event="page" global="false"/>
+			<p:column style="width: 49px;">
+				<p:panel styleClass="foto no-margin no-background" style="width: 43px !important; height: 66px !important">
+					<p:graphicImage value="#{person.picture.path}" height="66" width="43"/>
+				</p:panel>
+			</p:column>
+			<p:column style="vertical-align: top">
+				<p:panelGrid columns="1" styleClass="no-background no-border">
+	       			<h:outputText value="#{person.firstName} #{person.lastName}" style="font-size: 14px; color: black; font-weight: bold;"/>
+	       			<h:outputText value="#{personListView.displayMembership(person)}" />
+				</p:panelGrid>
+			</p:column>
+			<p:column style="width: 35px">
+				<p:commandLink title="Editar este usuário" actionListener="#{personListView.onEdit}" oncomplete="PF('personDialog').show();" partialSubmit="true" process="@this" update="@widgetVar(personDialog)" global="false" disabled="#{!personViewer.canEditPerson(person)}">
+					<h:graphicImage value="../images/edit.png"/>
+				</p:commandLink>
+			</p:column>
+			<p:column style="width: 35px">
+				<p:commandLink title="Excluir este usuário" actionListener="#{personListView.onDelete}" oncomplete="if (!args.validationFailed &amp;&amp; !args.exception) {PF('personTable').update();}" partialSubmit="true" process="@this" global="false" update="@widgetVar(personTable),:outputMsg" disabled="#{!personViewer.canEditPerson(person)}">
+					<h:graphicImage value="../images/cancel2.png" />
+					<p:confirm header="#{msg['person.delete.confirm']}" message="#{msg['person.delete.message']}" icon="ui-icon-alert"/>
+				</p:commandLink>
+			</p:column>
+		</p:dataTable>
+	</h:form>
+	
+</f:view>

@@ -8,67 +8,8 @@
 	xmlns:p="http://primefaces.org/ui"
 	xmlns:ui="http://java.sun.com/jsf/facelets">
 
-	<h:form id="person-form">
-		<p:panelGrid columns="3" styleClass="no-border person-cmds" columnClasses="person-cmds-left,person-cmds-left,person-cmds-right">
-			<p:column>
-				<p:inputText id="personName" widgetVar="personName" valueChangeListener="#{personViewer.onPersonSearch}" 
-							 placeholder="Buscar pelo nome" styleClass="searchField"/>
-				<p:commandButton value="Buscar" update="@widgetVar(personTable)" partialSubmit="true" 
-								 process="@widgetVar(personName)" styleClass="searchBtn"/>
-			</p:column>
-
-			<p:column>
-				<p:selectOneMenu id="ordering" style="font-size: 13px; float: right;">
-					<f:selectItem itemLabel="Todos" itemValue="all"/>
-					<f:selectItem itemLabel="#{msg['person.type.resident']}" itemValue="resident"/>
-					<f:selectItem itemLabel="#{msg['person.type.guest']}" itemValue="guest"/>
-					<f:selectItem itemLabel="#{msg['person.type.visitor']}" itemValue="visitor"/>
-					<f:selectItem itemLabel="#{msg['person.type.employee']}" itemValue="employee"/>
-					<p:ajax event="change" listener="#{personViewer.onPersonTypeSelect}" update="@widgetVar(personTable)"/>
-	    		</p:selectOneMenu>
-			</p:column>
-
-			<p:commandButton value="Cadastrar uma pessoa" actionListener="#{personViewer.onPersonCreate}" 
-							 partialSubmit="true" process="@this" update="@widgetVar(personDialog)" oncomplete="PF('personDialog').show();"
-							 style="font-size: 12px; margin: 0; padding:0"/>
-
-			<p:commandButton value="Enviar mensagens a todos desta lista" actionListener="#{personViewer.onPersonCreate}" 
-							 partialSubmit="true" process="@this" update="@widgetVar(personDialog)" oncomplete="PF('personDialog').show();"
-							 style="font-size: 12px; margin: 0; padding:0" rendered="false"/>
-		</p:panelGrid>
-
-		<p:dataTable widgetVar="personTable" id="personTable" var="person" value="#{personViewer.model}"  
-		             paginator="false" emptyMessage="Nenhum usuário cadastrado" 
-		             rowKey="#{person.id}" disabledSelection="#{!personViewer.canEditPerson(person)}" styleClass="no-header no-border"
-		             tableStyleClass="no-border">
-		    <p:ajax event="page" global="false"/>
-			<p:column style="width: 49px;">
-				<p:panel styleClass="foto no-margin no-background" style="width: 43px !important; height: 66px !important">
-					<p:graphicImage value="#{person.picture.path}" height="66" width="43"/>
-				</p:panel>
-			</p:column>
-			<p:column style="vertical-align: top">
-				<p:panelGrid columns="1" styleClass="no-background no-border">
-	       			<h:outputText value="#{person.firstName} #{person.lastName}" style="font-size: 14px; color: black; font-weight: bold;"/>
-	       			<h:outputText value="#{personViewer.displayMembership(person)}" />
-				</p:panelGrid>
-			</p:column>
-			<p:column style="width: 35px">
-				<p:commandLink title="Editar este usuário" actionListener="#{personViewer.onPersonEdit}" oncomplete="PF('personDialog').show();" partialSubmit="true" process="@this" update="@widgetVar(personDialog)" global="false" disabled="#{!personViewer.canEditPerson(person)}">
-					<h:graphicImage value="../images/edit.png"/>
-				</p:commandLink>
-			</p:column>
-			<p:column style="width: 35px">
-				<p:commandLink title="Excluir este usuário" actionListener="#{personViewer.onPersonDelete}" oncomplete="if (!args.validationFailed &amp;&amp; !args.exception) {PF('personTable').update();}" partialSubmit="true" process="@this" global="false" update="@widgetVar(personTable),:outputMsg" disabled="#{!personViewer.canEditPerson(person)}">
-					<h:graphicImage value="../images/cancel2.png" />
-					<p:confirm header="#{msg['person.delete.confirm']}" message="#{msg['person.delete.message']}" icon="ui-icon-alert"/>
-				</p:commandLink>
-			</p:column>
-		</p:dataTable>
-	</h:form>
-
 	<p:dialog widgetVar="personDialog" draggable="false" resizable="false" modal="true" closable="false" 
-			  visible="false" style="background: #f9f9f9" dynamic="true">
+			  visible="false" style="background: #f9f9f9" dynamic="false">
 		<f:facet name="header">
 			<p:graphicImage value="../images/user_ico.png" style="vertical-align: top; margin-right: 10px;"/>
 			<p:outputLabel value="#{msg['dlg.user.signon']}" style="vertical-align: top; line-height: 25px;"/>
@@ -81,10 +22,10 @@
 						<p:row>
 							<p:column styleClass="labelClm"><p:outputLabel for="type" value="Tipo: "/></p:column>
 							<p:column colspan="2" styleClass="fieldClm">
-								<h:outputText value="#{msg[personViewer.membership.type.label]}" rendered="#{!personViewer.canChangeType()}"/>
+								<h:outputText value="#{msg[personViewer.membership.type.label]}" rendered="#{!personViewer.canChangeType(personViewer.membership)}"/>
 								<p:selectOneMenu id="type" value="#{personViewer.membership.type}" styleClass="select"
 												 style="vertical-align: middle; width: 100%; margin-right: 0px;" 
-												 rendered="#{personViewer.canChangeType()}">
+												 rendered="#{personViewer.canChangeType(personViewer.membership)}">
 									<f:selectItems var="type" value="#{personViewer.types}" itemLabel="#{msg[type.label]}"/>
 									<p:ajax event="change" update="person-details-form" global="false"/>
 								</p:selectOneMenu>
@@ -93,10 +34,10 @@
 						<p:row>
 							<p:column styleClass="labelClm"><p:outputLabel for="identity" value="CPF: "/></p:column>
 							<p:column colspan="2" styleClass="fieldClm">
-								<h:inputHidden id="identity" value="#{personViewer.person.identity}" required="#{personViewer.membership.type != 'RESIDENT'}" requiredMessage="#{msg['person.identity.empty']}"/>
-								<p:inputMask value="#{personViewer.identity}" mask="999.999.999-99">
-									<p:ajax event="change" listener="#{personViewer.onSearchByCPF}"	
-											update="firstName,lastName,gender,:outputMsg" partialSubmit="true" process="@this"/>
+								<p:inputMask id="identity" value="#{personViewer.person.identity}" mask="999.999.999-99" 
+											 required="#{personViewer.membership.type != 'VISITOR' and personViewer.membership.type != 'RESIDENT'}" 
+											 requiredMessage="#{msg['person.identity.empty']}" readonly="#{!personViewer.canEditInfo()}">
+									<p:ajax event="change" listener="#{personViewer.searchPerson}" update="person-details-form"/>
 								</p:inputMask>
 							</p:column>
 						</p:row>
@@ -104,42 +45,41 @@
 							<p:column styleClass="labelClm"><p:outputLabel for="firstName" value="Nome: "/></p:column>
 							<p:column colspan="2" styleClass="fieldClm">
 								<p:inputText id="firstName" value="#{personViewer.person.firstName}" required="true" lang="pt" 
-											 requiredMessage="#{msg['person.firstname.empty']}"
-											 validatorMessage="O nome deve conter somente letras"
-											 disabled="#{!personViewer.canEditPerson(personViewer.person)}">
+											 requiredMessage="#{msg['person.firstname.empty']}" readonly="#{!personViewer.canEditInfo()}"
+											 validatorMessage="O nome deve conter somente letras">
         							<f:validateRegex pattern="^([\s]*\p{L}[\s]*)+$" />
 								</p:inputText>
 							</p:column>
-						</p:row>
+						</p:row>									
 						<p:row>
 							<p:column styleClass="labelClm"><p:outputLabel for="lastName" value="Sobrenome: "/></p:column>
 							<p:column colspan="2" styleClass="fieldClm">
 								<p:inputText id="lastName" value="#{personViewer.person.lastName}" required="true" 
-											 requiredMessage="#{msg['person.lastname.empty']}"
-											 validatorMessage="O sobrenome deve conter somente letras"
-											 disabled="#{!personViewer.canEditPerson(personViewer.person)}">
+											 requiredMessage="#{msg['person.lastname.empty']}" readonly="#{!personViewer.canEditInfo()}"
+											 validatorMessage="O sobrenome deve conter somente letras">
         							<f:validateRegex pattern="^([\s]*\p{L}[\s]*)+$" />
 								</p:inputText>
 							</p:column>
 						</p:row>
 						<p:row>
-							<p:column styleClass="labelClm"><p:outputLabel for="gender" value="Sexo:"/></p:column>
+							<p:column styleClass="labelClm"><p:outputLabel for="male" value="Sexo:"/></p:column>
 							<p:column colspan="2" styleClass="fieldClm">
-								<p:selectOneRadio id="gender" value="#{personViewer.person.gender}" required="false" 
+								<p:selectOneRadio id="male" value="#{personViewer.person.gender}" required="false" 
 												  styleClass="kintype" style="vertical-align: middle">
 									<f:selectItems var="gender" value="#{personViewer.genders}" itemLabel="#{msg[gender.label]}"/>
 								</p:selectOneRadio>
 							</p:column>
 						</p:row>
-						<p:row rendered="#{personViewer.canEditPerson(personViewer.person) and personViewer.membership.type != 'VISITOR' and personViewer.membership.type != 'GUEST' and personViewer.membership.type != 'EMPLOYEE'}">
+						<p:row rendered="#{personViewer.membership.type != 'VISITOR' and personViewer.membership.type != 'GUEST' and personViewer.membership.type != 'EMPLOYEE'}">
 							<p:column styleClass="labelClm"><p:outputLabel for="birthday" value="Nascimento:"/></p:column>
 							<p:column colspan="2" styleClass="fieldClm">
 								<p:calendar id="birthday" mode="popup" pattern="dd/MM/yyyy" value="#{personViewer.person.birthday}"
 											navigator="true" yearRange="c-100:c+0" mask="true" locale="pt" 
-											required="true" requiredMessage="#{msg['person.birthday.empty']}"/>
+											readonly="#{!personViewer.canEditInfo()}" requiredMessage="#{msg['person.birthday.empty']}"
+											required="true"/>
 							</p:column>
 						</p:row>
-						<p:row rendered="#{personViewer.canEditPerson(personViewer.person) and personViewer.membership.type != 'VISITOR' and personViewer.membership.type != 'GUEST' and personViewer.membership.type != 'EMPLOYEE'}">
+						<p:row rendered="#{personViewer.membership.type != 'VISITOR' and personViewer.membership.type != 'GUEST' and personViewer.membership.type != 'EMPLOYEE'}">
 							<p:column styleClass="labelClm"><p:outputLabel for="phone" value="Telefone:"/></p:column>
 							<p:column styleClass="fieldClm">
 								<p:selectOneMenu id="phoneType" value="#{personViewer.phone.type}" styleClass="select" 
@@ -157,15 +97,15 @@
 											 style="vertical-align: top; width: 91%"/>
 							</p:column>
 						</p:row>
-						<p:row rendered="#{personViewer.canEditPerson(personViewer.person) and personViewer.membership.type != 'VISITOR' and personViewer.membership.type != 'GUEST' and personViewer.membership.type != 'EMPLOYEE'}">
+						<p:row rendered="#{personViewer.membership.type != 'VISITOR' and personViewer.membership.type != 'GUEST' and personViewer.membership.type != 'EMPLOYEE'}">
 							<p:column styleClass="labelClm"><p:outputLabel for="email" value="Email: "/></p:column>
 							<p:column colspan="2" styleClass="fieldClm">
 								<p:inputText id="email" value="#{personViewer.person.emailAddress}"  
-											 required="#{personViewer.membership.type != 'RESIDENT'}" 
-											 requiredMessage="#{msg['person.email.empty']}"/>
+											 readonly="#{!personViewer.canEditInfo()}" requiredMessage="#{msg['person.email.empty']}"
+											 required="#{personViewer.membership.type != 'RESIDENT'}"/>
 							</p:column>
 						</p:row>
-						<p:row rendered="#{personViewer.canEditPerson(personViewer.person) and personViewer.membership.type != 'VISITOR' and personViewer.membership.type != 'EMPLOYEE'}">
+						<p:row rendered="#{personViewer.membership.type != 'VISITOR' and personViewer.membership.type != 'EMPLOYEE'}">
 							<p:column styleClass="labelClm"><p:outputLabel for="kinType" value="Parentesco:"/></p:column>
 							<p:column colspan="2" styleClass="fieldClm">
 								<p:selectOneMenu id="kinType" value="#{personViewer.kinship.type}" styleClass="select" style="width: 100%;">

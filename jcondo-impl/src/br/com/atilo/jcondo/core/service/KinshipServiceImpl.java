@@ -37,4 +37,20 @@ public class KinshipServiceImpl {
 		kinshipManager.delete(new Kinship(person, relative, type));
 	}
 
+	public void update(Person person, Person relative, KinType type) throws Exception {
+		if (person == null || relative == null) {
+			throw new BusinessException("pdt.kinship.invalid");
+		}
+
+		Kinship kinship = getKinship(person, relative);
+
+		if (kinship == null || (type != null && type != kinship.getType())) {
+			kinshipManager.save(new Kinship(person, relative, type));
+		}
+
+		if (kinship != null && type == null) {
+			kinshipManager.delete(kinship);
+		}
+	}
+
 }

@@ -2,6 +2,7 @@ package br.com.atilo.jcondo.core.persistence.manager;
 
 import java.util.List;
 
+import br.com.abware.jcondo.core.model.Domain;
 import br.com.abware.jcondo.core.model.Membership;
 import br.com.abware.jcondo.core.model.Person;
 import br.com.atilo.jcondo.core.persistence.entity.MembershipEntity;
@@ -19,6 +20,11 @@ public class MembershipManagerImpl extends JCondoManager<MembershipEntity, Membe
 	}
 
 	public List<Membership> findByPerson(Person person) {
+		return null;
+	}
+
+	public Membership findByPersonAndDomain(Person person, Domain domain) {
+		// TODO Auto-generated method stub
 		return null;
 	}
 }

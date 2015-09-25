@@ -376,12 +376,11 @@ public class PersonServiceImpl  {
 
 		Membership membership = membershipService.add(domain, person, personType);
 
-		if (kintype != null) {
-			kinshipService.add(getPerson(), person, kintype);
-		}
+		kinshipService.update(getPerson(), person, kintype);
 
 		if (phone != null) {
-			phoneService.add(person, phone.getExtension(), phone.getNumber(), phone.getType(), phone.isPrimary());
+			phoneService.update(phone.getId(), phone.getExtension(), 
+								phone.getNumber(), phone.getType(), phone.isPrimary());
 		}
 
 		try {

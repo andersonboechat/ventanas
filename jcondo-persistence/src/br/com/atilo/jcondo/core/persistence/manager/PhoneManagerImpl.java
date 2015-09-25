@@ -15,8 +15,6 @@ import br.com.abware.jcondo.core.model.PhoneType;
 
 public class PhoneManagerImpl extends LiferayManager<com.liferay.portal.model.Phone, Phone> {
 
-	private PersonManagerImpl personManager = new PersonManagerImpl();
-	
 	private PhoneType getPhoneType(String listTypeName) {
 		if (listTypeName.equalsIgnoreCase("business")) {
 			return PhoneType.WORK;
@@ -52,18 +50,18 @@ public class PhoneManagerImpl extends LiferayManager<com.liferay.portal.model.Ph
 	}
 
 	public Phone save(Person person, Phone phone) throws Exception {
-		long classPK = UserLocalServiceUtil.getUserById(person.getUserId()).getContactId();
+		Phone p;
 		int typeId = 0;
-
+		
 		for (ListType listType : ListTypeServiceUtil.getListTypes(ListTypeConstants.CONTACT_PHONE)) {
 			if (phone.getType() == getPhoneType(listType.getName())) {
 				typeId = listType.getListTypeId();
 				break;
 			}
 		}
-
-		Phone p;
+		
 		if (phone.getId() == 0) {
+			long classPK = UserLocalServiceUtil.getUserById(person.getUserId()).getContactId();
 			p = getModel(PhoneLocalServiceUtil.addPhone(person.getUserId(), Contact.class.getName(), classPK, 
 					   									phone.getNumber(), phone.getExtension(), typeId, phone.isPrimary()));
 		} else {
@@ -76,16 +74,24 @@ public class PhoneManagerImpl extends LiferayManager<com.liferay.portal.model.Ph
 
 	@Override
 	public Phone save(Phone phone) throws Exception {
-		return save(personManager.findPerson(), phone);
+		return save(null, phone);
 	}
 
 	@Override
 	public void delete(Phone phone) throws Exception {
-		PhoneLocalServiceUtil.deletePhone(phone.getId());
+		delete(phone.getId());
 	}
 
+	public void delete(long id) throws Exception {
+		PhoneLocalServiceUtil.deletePhone(id);
+	}
+	
 	public List<Phone> findPhones(Person person) throws Exception {
 		return getModels(PhoneLocalServiceUtil.getPhones(helper.getCompanyId(), Contact.class.getName(), UserLocalServiceUtil.getUserById(person.getUserId()).getContactId()));
+	}
+
+	public Phone findById(long id) throws Exception {
+		return getModel(PhoneLocalServiceUtil.getPhone(id));
 	}
 
 }
