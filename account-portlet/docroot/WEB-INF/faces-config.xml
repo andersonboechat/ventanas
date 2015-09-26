@@ -20,6 +20,11 @@
 		<converter-class>br.com.atilo.jcondo.commons.faces.ModelListConverter</converter-class>
 	</converter>
 	<converter>
+		<display-name>SelectItemsConverter2</display-name>
+		<converter-id>selectItemsConverter2</converter-id>
+		<converter-class>br.com.atilo.jcondo.commons.faces.SelectItemsConverter</converter-class>
+	</converter>
+	<converter>
 		<display-name>JsonConverter</display-name>
 		<converter-id>jsonConverter</converter-id>
 		<converter-class>br.com.atilo.jcondo.commons.faces.JsonConverter</converter-class>

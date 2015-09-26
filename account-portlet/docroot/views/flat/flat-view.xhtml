@@ -19,12 +19,12 @@
 
 		<h:form>
 			<p:panel styleClass="no-background no-border no-margin" style="width: 100%; text-align: right;" rendered="#{flatView.flats.size() > 1}">
-			   	<p:selectOneMenu id="flat" value="#{flatView.flat}" converter="selectItemsConverter">
+			   	<p:selectOneMenu id="flat" value="#{flatView.flat}" converter="selectItemsConverter2">
 					<f:selectItems var="flat" value="#{flatView.flats}" itemLabel="Apartamento #{flat.number} - Bloco #{flat.block}" itemValue="#{flat}"/>
-					<p:ajax event="change" listener="#{flatView.onFlatSelect}" update=":tabs:person-form:personTable,:tabs:vehicle-form:vehicleTable"/>
+					<p:ajax event="change" listener="#{flatView.onFlatSelect}" update="flatName,:flat-form,:tabs:person-form,:tabs:vehicle-form"/>
 			   	</p:selectOneMenu>
 			</p:panel>   		
-			<p:panel styleClass="no-background no-border" style="width: 100%; text-align: center; font-size: 22px">
+			<p:panel id="flatName" styleClass="no-background no-border" style="width: 100%; text-align: center; font-size: 22px">
 				<h:outputText value="Apartamento #{flatView.flat.number} - Bloco #{flatView.flat.block}"/>
 			</p:panel>
 		</h:form>

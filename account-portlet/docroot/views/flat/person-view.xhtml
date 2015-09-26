@@ -86,7 +86,7 @@
 												 style="vertical-align: middle; width: 100%; margin-right: 0px;" 
 												 rendered="#{personViewer.canChangeType()}">
 									<f:selectItems var="type" value="#{personViewer.types}" itemLabel="#{msg[type.label]}"/>
-									<p:ajax event="change" update="person-details-form" global="false"/>
+									<p:ajax event="change" update="person-details-form" global="false" resetValues="true"/>
 								</p:selectOneMenu>
 							</p:column>
 						</p:row>
@@ -192,7 +192,9 @@
 					</p:column>
 				</p:row>
 			</p:panelGrid>
-			<p:commandButton value="Cancelar" type="button" onclick="PF('personDialog').hide();" style="float: right; width: 90px; margin: 0px 0px 10px 0px;"/>
+			<p:commandButton value="Cancelar" process="@this" oncomplete="PF('personDialog').hide();" global="false" style="float: right; width: 90px; margin: 0px 0px 10px 0px;">
+				<p:resetInput target="person-details-form" />
+			</p:commandButton>
 			<p:commandButton value="Salvar" actionListener="#{personViewer.onPersonSave}" 
 							 update="@widgetVar(personTable),:outputMsg" 
 							 oncomplete="if (!args.validationFailed) { if(!args.exception) {PF('personDialog').hide();} else { if(args.alert) {PF('personFoundDialog').show();}}}" 
