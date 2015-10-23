@@ -43,6 +43,7 @@ import br.com.abware.jcondo.core.model.PhoneType;
 import br.com.abware.jcondo.core.model.Supplier;
 import br.com.abware.jcondo.exception.BusinessException;
 import br.com.abware.jcondo.exception.ModelExistException;
+import br.com.atilo.jcondo.commons.collections.PersonTypePredicate;
 import br.com.atilo.jcondo.core.service.KinshipServiceImpl;
 import br.com.atilo.jcondo.core.service.MembershipServiceImpl;
 import br.com.atilo.jcondo.core.service.PersonDetailServiceImpl;
@@ -136,31 +137,41 @@ public class PersonBean {
 	}
 	
 	public void onSearchByCPF(AjaxBehaviorEvent event) throws Exception {
-		Person p = personService.getPerson(identity);
-		if (p != null) {
-			person.setId(p.getId());
-			person.setIdentity(identity);
-			person.setFirstName(p.getFirstName());
-			person.setLastName(p.getLastName());
-			person.setGender(p.getGender());
-			person.setPicture(p.getPicture());
-			MessageUtils.addMessage(FacesMessage.SEVERITY_INFO, "person.found", null);
-		} else if (person.getId() > 0) {
+		if (StringUtils.isEmpty(identity)) {
 			person.setId(0);
+			person.setUserId(0);
 			person.setIdentity(null);
 			person.setFirstName(null);
 			person.setLastName(null);
 			person.setGender(Gender.MALE);
 			person.setPicture(new Image());
 			imageUploadBean.setImage(person.getPicture());
+			return;
 		}
+
+		Person p = personService.getPerson(identity);
+		if (p != null) {
+			person.setId(p.getId());
+			person.setUserId(p.getUserId());
+			person.setFirstName(p.getFirstName());
+			person.setLastName(p.getLastName());
+			person.setGender(p.getGender());
+			person.setPicture(p.getPicture());
+			person.setMemberships(p.getMemberships());
+			if (isResident(p)) {
+				MessageUtils.addMessage(FacesMessage.SEVERITY_INFO, "person.domain.add.request", null, ":tabs:person-form:personMsg");	
+			} else {
+				MessageUtils.addMessage(FacesMessage.SEVERITY_INFO, "person.domain.add", null, ":tabs:person-form:personMsg");
+			}
+		}
+
+		person.setIdentity(identity);
 	}
 
 	public void onPersonSave() {
 		try {
 			if (!canEditPerson(person)) {
-				membershipService.requestAuthorization(membership.getDomain(), person, membership.getType());
-				MessageUtils.addMessage(FacesMessage.SEVERITY_INFO, "person.authorization.request.success", null);
+				onMembershipAdd();
 			} else {
 				Person p;
 
@@ -170,12 +181,14 @@ public class PersonBean {
 					p = personService.register(person);
 					MessageUtils.addMessage(FacesMessage.SEVERITY_INFO, "flats.user.add.success", null);
 				} else {
-					person.getMemberships().add(membership);
+					if (!person.getMemberships().contains(membership)) {
+						person.getMemberships().add(membership);
+					}
 					p = personService.update(person);
 					MessageUtils.addMessage(FacesMessage.SEVERITY_INFO, "flats.user.update.success", null);
 				}
 				
-				kinshipService.update(p, kinship.getRelative(), kinship.getType());
+				kinshipService.update(logPerson, p, kinship.getType());
 	
 				if (StringUtils.isEmpty(phoneNumber)) {
 					if (phone.getId() > 0) {
@@ -197,17 +210,14 @@ public class PersonBean {
 			MessageUtils.addMessage(FacesMessage.SEVERITY_WARN, e.getMessage(), e.getArgs(), ":tabs:person-details-form:alertMsg");
 			RequestContext.getCurrentInstance().addCallbackParam("exception", true);
 			RequestContext.getCurrentInstance().addCallbackParam("alert", true);
-			person.getMemberships().remove(membership);
 		} catch (BusinessException e) {
 			LOGGER.warn("Business failure on person saving: " + e.getMessage());
 			MessageUtils.addMessage(FacesMessage.SEVERITY_WARN, e.getMessage(), e.getArgs());
 			RequestContext.getCurrentInstance().addCallbackParam("exception", true);
-			person.getMemberships().remove(membership);
 		} catch (Exception e) {
 			LOGGER.error("Unexpected failure on person saving", e);
 			MessageUtils.addMessage(FacesMessage.SEVERITY_ERROR, "general.failure", null);
 			RequestContext.getCurrentInstance().addCallbackParam("exception", true);
-			person.getMemberships().remove(membership);
 		}	
 	}
 
@@ -216,6 +226,7 @@ public class PersonBean {
 		person = new Person();
 		person.setPicture(imageUploadBean.getImage());
 		membership = new Membership(PersonType.RESIDENT, flat);
+		identity = null;
 	}
 
 	public void onPersonDelete() throws Exception {
@@ -237,12 +248,9 @@ public class PersonBean {
 	}
 
 	public void onPersonEdit() throws Exception {
-		loadPerson(model.getRowData());
-	}
-	
-	public void loadPerson(Person person) throws Exception {
 		try {
-			BeanUtils.copyProperties(this.person, person);
+			BeanUtils.copyProperties(this.person, model.getRowData());
+			identity = this.person.getIdentity();
 			imageUploadBean.setImage(person.getPicture());
 			Membership m = (Membership) CollectionUtils.find(person.getMemberships(), new DomainPredicate(flat));
 
@@ -303,7 +311,31 @@ public class PersonBean {
 			model.filter(filters);
 		}
 	}
-	
+
+	public void onMembershipAdd() {
+		try {
+			if (isResident(person)) {
+				membershipService.requestAdd(flat, person, membership.getType());
+				MessageUtils.addMessage(FacesMessage.SEVERITY_INFO, "person.domain.add.request.success", null);
+			} else {
+				membership = membershipService.add(flat, person, PersonType.VISITOR);
+				MessageUtils.addMessage(FacesMessage.SEVERITY_INFO, "person.domain.add.success", null);
+			}			
+		} catch (BusinessException e) {
+			LOGGER.warn("Business failure on membership add: " + e.getMessage());
+			Membership m = (Membership) e.getArgs()[0];
+			Flat f = (Flat) m.getDomain();
+			MessageUtils.addMessage(FacesMessage.SEVERITY_WARN, e.getMessage(), 
+									new Object[] {rb.getString(m.getType().getLabel()), 
+												  f.getNumber(), f.getBlock()});
+			RequestContext.getCurrentInstance().addCallbackParam("exception", true);
+		} catch (Exception e) {
+			LOGGER.error("Unexpected failure on membership add", e);
+			MessageUtils.addMessage(FacesMessage.SEVERITY_ERROR, "general.failure", null);
+			RequestContext.getCurrentInstance().addCallbackParam("exception", true);
+		}
+	}
+
 	public String displayMembership(Person person) {
 		if (person != null && !CollectionUtils.isEmpty(person.getMemberships())) {
 			Membership membership = (Membership) CollectionUtils.find(person.getMemberships(), new DomainPredicate(flat));
@@ -374,6 +406,13 @@ public class PersonBean {
 			FacesMessage message = MessageUtils.getMessage(UIInput.REQUIRED_MESSAGE_ID, null);
 			throw new ValidatorException(message);
 		}
+	}
+
+	public boolean isResident(Person person) {
+		return CollectionUtils.exists(person.getMemberships(), new PersonTypePredicate(PersonType.OWNER)) ||
+				CollectionUtils.exists(person.getMemberships(), new PersonTypePredicate(PersonType.RENTER)) ||
+				CollectionUtils.exists(person.getMemberships(), new PersonTypePredicate(PersonType.RESIDENT)) ||
+				CollectionUtils.exists(person.getMemberships(), new PersonTypePredicate(PersonType.DEPENDENT));
 	}
 	
 	public ImageUploadBean getImageUploadBean() {

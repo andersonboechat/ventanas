@@ -468,13 +468,16 @@ public class PersonServiceImpl  {
 
 	@SuppressWarnings("unchecked")
 	private void validateMemberships(Person person) throws Exception {
-		List<Membership> oldMemberships;
-		List<Membership> memberships = person.getMemberships();
+//		List<Membership> oldMemberships;
+//		List<Membership> memberships = person.getMemberships();
+		
+		HashSet<Membership> oldMemberships;
+		HashSet<Membership> memberships = new HashSet<Membership>(person.getMemberships());
 		
 		Person p = personManager.findById(person.getId());
 
 		if (p != null) {
-			oldMemberships = p.getMemberships();
+			oldMemberships = new HashSet<Membership>(p.getMemberships());
 			List<Membership> ms = (List<Membership>) CollectionUtils.union(memberships, oldMemberships);
 
 			// Somente um membership por dominio
@@ -490,8 +493,7 @@ public class PersonServiceImpl  {
 			}
 			
 		} else {
-			oldMemberships = new ArrayList<Membership>();
-			memberships = new ArrayList<Membership>();
+			oldMemberships = new HashSet<Membership>();
 		}
 
 		for (Membership membership : oldMemberships) {

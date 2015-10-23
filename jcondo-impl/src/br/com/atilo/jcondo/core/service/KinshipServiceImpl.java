@@ -44,7 +44,7 @@ public class KinshipServiceImpl {
 
 		Kinship kinship = getKinship(person, relative);
 
-		if (kinship == null || (type != null && type != kinship.getType())) {
+		if (type != null && (kinship == null || type != kinship.getType())) {
 			kinshipManager.save(new Kinship(person, relative, type));
 		}
 

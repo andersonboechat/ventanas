@@ -13,6 +13,7 @@ import com.liferay.portal.service.ResourceLocalServiceUtil;
 import com.liferay.portal.service.RoleLocalServiceUtil;
 import com.liferay.portal.service.UserGroupRoleLocalServiceUtil;
 import com.liferay.portal.service.UserLocalServiceUtil;
+import com.liferay.portal.service.permission.OrganizationPermissionUtil;
 import com.liferay.portal.service.permission.PortalPermissionUtil;
 import com.liferay.portal.service.permission.UserPermissionUtil;
 
@@ -35,6 +36,8 @@ import br.com.abware.jcondo.exception.SystemException;
 public class SecurityManagerImpl {
 	
 	private static PersonManagerImpl personManager = new PersonManagerImpl();
+	
+	private MembershipManagerImpl membershipManager = new MembershipManagerImpl();
 	
 	private LiferayPortletHelper helper = new LiferayPortletHelperImpl();
 	
@@ -257,7 +260,7 @@ public class SecurityManagerImpl {
 		PermissionChecker permissionChecker = helper.getThemeDisplay().getPermissionChecker();
 
 		if (model instanceof Person) {
-			return checkUserPermission(permissionChecker, ((Person) model).getUserId(), permission);
+			return checkUserPermission(permissionChecker, (Person) model, permission);
 		} else if (model instanceof Flat || model instanceof Supplier || model instanceof Administration) {
 			return checkPermission(permissionChecker, (Domain) model, (Domain) model, permission);
 		} else if (model instanceof Membership) {
@@ -298,19 +301,17 @@ public class SecurityManagerImpl {
 		return checkPermission(permissionChecker, model, null, permission);
 	}
 	
-	private boolean checkUserPermission(PermissionChecker permissionChecker, long userId, Permission permission) {
+	private boolean checkUserPermission(PermissionChecker permissionChecker, Person person, Permission permission) {
 		try {
-			String actionkey;
-
-			if (permission == Permission.UPDATE) {
-				actionkey = ActionKeys.UPDATE;
-			} else if (permission == Permission.ADD) { 
+			if (permission == Permission.ADD) { 
 				return PortalPermissionUtil.contains(permissionChecker, ActionKeys.ADD_USER);
-			} else {
-				throw new SystemException("permission.not.supported");
 			}
 
-			return UserPermissionUtil.contains(permissionChecker, userId, actionkey);
+			for (Membership membership : membershipManager.findByPerson(person)) {
+				if (checkPermission(permissionChecker, person, membership.getDomain(), permission)) {
+					return true;
+				}
+			}
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

@@ -21,7 +21,8 @@
 			<p:panel styleClass="no-background no-border no-margin" style="width: 100%; text-align: right;" rendered="#{flatView.flats.size() > 1}">
 			   	<p:selectOneMenu id="flat" value="#{flatView.flat}" converter="selectItemsConverter2">
 					<f:selectItems var="flat" value="#{flatView.flats}" itemLabel="Apartamento #{flat.number} - Bloco #{flat.block}" itemValue="#{flat}"/>
-					<p:ajax event="change" listener="#{flatView.onFlatSelect}" update="flatName,:flat-form,:tabs:person-form,:tabs:vehicle-form"/>
+					<p:ajax event="change" listener="#{flatView.onFlatSelect}" 
+							update="flatName,@widgetVar(personType),@widgetVar(personTable),@widgetVar(vehicleTable),@widgetVar(primaryPerson),@widgetVar(parkings),@widgetVar(flatDetails)" resetValues="true"/>
 			   	</p:selectOneMenu>
 			</p:panel>   		
 			<p:panel id="flatName" styleClass="no-background no-border" style="width: 100%; text-align: center; font-size: 22px">
@@ -132,7 +133,7 @@
 						</p:dataTable>
 					</p:panel>	
 					<p:spacer width="100%" height="1px" style="background: #cccccc"/>
-					<p:panel header="Sobre o apartamento" styleClass="flat-box">
+					<p:panel widgetVar="flatDetails" header="Sobre o apartamento" styleClass="flat-box">
 						<p:panelGrid columns="1" styleClass="no-background no-border no-margin questions">
 							<p:outputLabel for="hasPets" value="Existem animais residindo no apartamento?"/>
 							<p:selectOneRadio id="hasPets" widgetVar="hasPets" value="#{flatView.flat.pets}" required="true" 
@@ -169,50 +170,8 @@
 			<p:tabView id="tabs" style="padding: 0; margin-top: 0px">
 				<p:tab title="Pessoas"><ui:include src="person-view.xhtml"/></p:tab>
 				<p:tab title="Veículos"><ui:include src="vehicle-view.xhtml"/></p:tab>
-				<p:tab title="Documentos" rendered="false">
-					<p:panelGrid columns="2" styleClass="no-border person-cmds" columnClasses="person-cmds-left,person-cmds-right">
-						<p:inputText id="fileName" placeholder="Buscar pelo nome" style="font-style: italic; width: 100%">
-							<p:ajax event="change" listener="#{personViewer.onPersonSearch}" update="documentTable" partialSubmit="true" process="@this"/>
-						</p:inputText>
-			
-						<p:commandButton value="Enviar um documento" actionListener="#{personViewer.onPersonCreate}" 
-										 partialSubmit="true" process="@this" update="@widgetVar(personDialog)" oncomplete="PF('personDialog').show();"
-										 style="font-size: 12px; margin: 0; padding:0"/>
-					</p:panelGrid>			
-					<p:dataTable id="documentTable" widgetVar="documentTable" var="doc" value="#{documentViewer.model}" scrollable="true" 
-						paginator="true" paginatorAlwaysVisible="false" paginatorPosition="bottom" paginatorTemplate="{PreviousPageLink} {CurrentPageReport} {NextPageLink}"
-						emptyMessage="Nenhum documento encontrado" styleClass="no-header">
-						<p:column>
-							<p:commandLink value="#{doc.name}" partialSubmit="true" process="@this" target="blank">
-								<f:setPropertyActionListener target="#{documentViewer.document}" value="#{doc}"/>
-							</p:commandLink>
-						</p:column>
-						<p:column style="width: 29%; text-align: center">
-							<h:outputText value="Apt. #{doc.domain.number} - Bl. #{doc.domain.block}"/>
-						</p:column>						
-					</p:dataTable>
-				</p:tab>
 			</p:tabView>
 		</p:panelGrid>		
-		<p:dialog widgetVar="documentDialog" draggable="true" resizable="false" modal="true" closable="false" visible="false">
-			<f:facet name="header">
-				<p:graphicImage value="../images/picture_ico.png" style="vertical-align: top; margin-right: 10px;"/>
-				<p:outputLabel value="Documentos" style="vertical-align: top; line-height: 22px"/>
-			</f:facet>
-			<h:form id="document-form">
-				<p:panelGrid id="model-details" columns="1" styleClass="no-border" style="margin: 10px 0px 20px 0px; text-align: justify" cellpadding="10">
-			    	<h:outputText value="Escolha o apartamento para o qual deseja alugar esta vaga e confirme clicando no botão Alugar."/>
-			    	<p:selectOneMenu id="parkingDomain" value="#{documentViewer.document}" converter="selectItemsConverter">
-			    		<f:selectItem itemLabel="Selecione" noSelectionOption="true"/>
-						<f:selectItems var="flat" value="#{flatView.flats}" itemLabel="Apartamento #{flat.number} - Bloco #{flat.block}" itemValue="#{flat}"/>
-			    	</p:selectOneMenu>
-				</p:panelGrid>
-				<p:commandButton value="Cancelar" oncomplete="PF('documentDialog').hide();" partialSubmit="true" process="@this" style="float: right; width: 80px; margin: 0px 0px 10px 5px;">
-					<f:setPropertyActionListener target="#{documentViewer.document}" value=""/>
-				</p:commandButton>
-				<p:commandButton value="Enviar" actionListener="#{documentViewer.onSend}" update=":outputMsg" oncomplete="if (!args.validationFailed &amp;&amp; !args.exception) {PF('documentDialog').hide();}" style="float: right; width: 80px; margin: 0px 0px 10px 5px;"/>
-			</h:form>
-		</p:dialog>
 		<p:dialog widgetVar="parkingDialog" draggable="true" resizable="false" modal="true" 
 				  closable="false" visible="false" width="300">
 			<f:facet name="header">
@@ -235,7 +194,7 @@
 			</h:form>
 		</p:dialog>
 		<p:dialog widgetVar="primaryPersonDialog" modal="true" draggable="false" resizable="false" closable="false" 
-				 visible="false" width="500" style="background: #f9f9f9">
+				 visible="false" width="500" style="background: #f9f9f9" dynamic="true">
 			<f:facet name="header">
 				<p:graphicImage value="../images/user_ico.png" style="vertical-align: top; margin-right: 10px;"/>
 				<p:outputLabel value="Alteração do Contrato Principal" style="vertical-align: top; line-height: 22px"/>
@@ -244,7 +203,7 @@
 				<p:panel styleClass="no-background no-border">
 					<h:outputText value="O contato principal é a pessoa que a Administração entrará em contato primeiro, quando necessário."/>
 				</p:panel>
-				<p:dataTable var="person" value="#{personViewer.displayResidents()}" paginator="false" emptyMessage="Nenhum usuário cadastrado" 
+				<p:dataTable var="person" value="#{flatView.personBean.displayResidents()}" paginator="false" emptyMessage="Nenhum usuário cadastrado" 
 				             rowKey="#{person.id}" styleClass="no-header no-border" tableStyleClass="no-border">
 					<p:column style="vertical-align: top">
 						<p:commandLink title="Escolher este usuário" partialSubmit="true" process="@this" 
@@ -252,7 +211,7 @@
 									   oncomplete="if (!args.validationFailed) {PF('primaryPersonDialog').hide();}" 
 									   update="@widgetVar(primaryPerson),:outputMsg" style="text-decoration: none; width: 100%; cursor: pointer !important; cursor: hand !important;">
 			       			<h:outputText value="#{person.firstName} #{person.lastName}" style="font-size: 14px; color: black; font-weight: bold;"/><br/>
-			       			<h:outputText value="#{personViewer.displayMembership(person)}" style="font-size: 13px; color: black; font-weight: normal;"/>
+			       			<h:outputText value="#{flatView.personBean.displayMembership(person)}" style="font-size: 13px; color: black; font-weight: normal;"/>
 						</p:commandLink>
 					</p:column>
 				</p:dataTable>

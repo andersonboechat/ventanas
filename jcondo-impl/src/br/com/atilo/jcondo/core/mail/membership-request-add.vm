@@ -1,0 +1,75 @@
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=ISO-8859-1">
+    <title>[Portal Ventanas]</title>
+  </head>
+  <body text="#000000" bgcolor="#FFFFFF">
+	<p>Prezado(a) $personName</p>
+
+	<p>O morador $residentName solicita a sua autorização para incluí-lo no apartamento $flatNumber - bloco $flatBlock. 
+	Para autorizar a inclusão, clique <a href="http://www.ventanasresidencial.com.br/account-portlet/membershipAddRequest?data=$data">aqui</a>. 
+	Caso não queira autorizar, basta ignorar esse e-mail. Esta solicitação é válida até o dia $deadline.</p>	
+
+	<!-- p>O apartamento $flatNumber - bloco $flatBlock solicita a sua autorização para incluí-lo na lista
+	de pessoas dele. Para autorizar a inclusão, clique no endereço abaixo. Caso não queira
+	autorizar, basta ignorar esse e-mail. Esta solicitação é válida até dia $deadline. Após esta data, 
+	o endereço abaixo servirá mais para autorizar.</p -->
+
+	<p>Esteja ciente que após a inclusão, os moradores deste apartamento poderão alterar seus dados,
+	como: nome, telefone, e-mail, entre outros. Por outro lado, você poderá visualizar as pessoas, 
+	os veículos e qualquer outra informação deste apartamento. Saiba também que 
+	a qualquer momento você poderá excluir a si mesmo deste apartamento.</p>
+	
+	<div class="moz-signature"><br>
+      <div class="moz-signature">
+        <table cellpadding="0" cellspacing="0" width="700px" border="0">
+          <tbody>
+            <tr>
+              <td style="width:100.0%;height:84px;"> 
+				<span style="margin-left:.75pt;margin-bottom: 0px">Atenciosamente,</span>
+                <p style="margin-left:.75pt;margin-top:0px">___________________________________________________________________________</p>
+                <table cellpadding="0" cellspacing="0" width="99%" border="0">
+                  <tbody>
+                    <tr>
+                      <td style="width:17.8%;height:88px;" valign="top">
+                        <p>
+							<img alt="Ventanas Logo" src="http://www.ventanasresidencial.com.br/documents/10179/11610/logo-150x41.png" style="width: 150px; height: 41px;">
+						</p>
+                      </td>
+                      <td style="width:2.08%;height:88px;">
+                        <p>&nbsp;</p>
+                      </td>
+                      <td style="width:80.12%;height:88px;" valign="top">
+                        <table cellpadding="0" cellspacing="0" width="100%" border="0">
+                          <tbody>
+                            <tr>
+                              <td style="width:100.0%;height:13px;">
+                                <p>Portal Ventanas</p>
+                              </td>
+                            </tr>
+                            <tr>
+                              <td style="width:100.0%;height:26px;">
+                                <p>Av. Ruy Antunes Correa, 150 - Rio de Janeiro/RJ - CEP 22793-355</p>
+                                <p>
+									<a href="http://www.ventanasresidencial.com.br">http://www.ventanasresidencial.com.br</a>
+								</p>
+                              </td>
+                            </tr>
+                          </tbody>
+                        </table>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+                <p style="margin-left:.75pt;">
+					<span style="font-size:11px;">Email enviado automaticamente. Favor nÃ£o respondÃª-lo, pois o mesmo nÃ£o Ã© monitorado.</span>
+				</p>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <br>
+    </div>
+  </body>
+</html>
