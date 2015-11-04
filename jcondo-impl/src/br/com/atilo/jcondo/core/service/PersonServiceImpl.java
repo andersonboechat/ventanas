@@ -149,6 +149,10 @@ public class PersonServiceImpl  {
 	public Person getPerson(String identity) throws PersistenceException {
 		return personManager.findPerson(identity);
 	}
+
+	public Person getPerson(long id) throws Exception {
+		return personManager.findById(id);
+	}
 	
 	public Person getPerson() throws Exception {
 		return personManager.findPerson();
@@ -186,17 +190,17 @@ public class PersonServiceImpl  {
 				person.setEmailAddress("");
 			}
 
-			validateDomains(person);
-			validateMemberships(person);
-
 			Person p = personManager.save(person);
 
+			List<Membership> newMemberships = person.getMemberships();
+			List<Membership> oldMemberships = membershipService.getMemberships(p);			
+
+			handleMemberships(newMemberships, oldMemberships);
+
 			try {
-				for (Membership membership : person.getMemberships()) {
-					securityManager.addMembership(p, membership);
+				if (!StringUtils.isEmpty(person.getEmailAddress())) {
+					notifyUserAccountCreation(person);	
 				}
-				
-				handleAccountAccess(p, new ArrayList<Membership>());
 			} catch (Exception e) {
 				// TODO: Log it!
 				e.printStackTrace();
@@ -209,21 +213,21 @@ public class PersonServiceImpl  {
 	}
 
 	@SuppressWarnings("unchecked")
-	private void handleAccountAccess(Person person, List<Membership> memberships) throws Exception {
+	private void handleAccountAccess(Person person, List<Membership> newMemberships, List<Membership> oldMemberships) throws Exception {
 		User user = UserLocalServiceUtil.getUser(person.getUserId());
 		List<PersonType> userTypes = Arrays.asList(PersonType.OWNER, PersonType.RENTER, PersonType.RESIDENT, 
 												   PersonType.DEPENDENT, PersonType.ADMIN_ASSISTANT); 
-		List<PersonType> originalTypes = (List<PersonType>) CollectionUtils.collect(memberships, new PersonTypeTransformer());
-		List<PersonType> updatedTypes = (List<PersonType>) CollectionUtils.collect(person.getMemberships(), new PersonTypeTransformer());
+		List<PersonType> originalTypes = (List<PersonType>) CollectionUtils.collect(oldMemberships, new PersonTypeTransformer());
+		List<PersonType> updatedTypes = (List<PersonType>) CollectionUtils.collect(newMemberships, new PersonTypeTransformer());
 
 		if (CollectionUtils.containsAny(updatedTypes, userTypes) &&
 				!CollectionUtils.containsAny(originalTypes, userTypes)) {
 			UserLocalServiceUtil.updateStatus(person.getUserId(), WorkflowConstants.STATUS_APPROVED);
 
 			if (!user.getAgreedToTermsOfUse()) {
-				notifyUserAccountCreation(person);	
+				notifyUserAccountCreation(person);
 			}
-		} 
+		}
 
 		if (!CollectionUtils.containsAny(updatedTypes, userTypes) && 
 				(originalTypes.isEmpty() || CollectionUtils.containsAny(originalTypes, userTypes))) {
@@ -256,10 +260,15 @@ public class PersonServiceImpl  {
 	}
 	
  	private void notifyUserAccountCreation(Person p) throws Exception {
+ 		User user = UserLocalServiceUtil.getUser(p.getUserId());
+		if (user.getAgreedToTermsOfUse()) {
+			return;
+		}
+
 		ServiceContext sc = new ServiceContext();
 		sc.setAttribute("autoPassword", true);
 		sc.setAttribute("sendEmail", true);
-		UserLocalServiceUtil.completeUserRegistration(UserLocalServiceUtil.getUser(p.getUserId()), sc);
+		UserLocalServiceUtil.completeUserRegistration(user, sc);
 	}
 
 	public void updatePassword(Person person, String password, String newPassword) throws Exception {
@@ -392,21 +401,21 @@ public class PersonServiceImpl  {
 		return person;
 	}
 	
-	@SuppressWarnings("unchecked")
 	public Person update(Person person) throws Exception {
 		try {
 			if (!securityManager.hasPermission(person, Permission.UPDATE)) {
 				throw new BusinessException("psn.update.denied");
 			}
 
-			Person p = personManager.findById(person.getId());
+			Person dbPerson = personManager.findById(person.getId());
 
-			if (p == null) {
+			if (dbPerson == null) {
 				throw new BusinessException("psn.not.found");
 			}			
 
-			if (!person.getIdentity().equals(p.getIdentity())) {
-				if (!StringUtils.isEmpty(p.getIdentity())) {
+			if (!StringUtils.equals(StringUtils.trimToNull(person.getIdentity()), 
+									StringUtils.trimToNull(dbPerson.getIdentity()))) {
+				if (!StringUtils.isEmpty(dbPerson.getIdentity())) {
 					throw new BusinessException("psn.identity.change.denied");
 				} else {
 					try {
@@ -415,42 +424,31 @@ public class PersonServiceImpl  {
 						throw new BusinessException("psn.identity.not.valid", person.getIdentity());
 					}
 
-					p = getPerson(person.getIdentity());
-					if (p != null && !p.equals(person)) {
+					dbPerson = getPerson(person.getIdentity());
+					if (dbPerson != null && !dbPerson.equals(person)) {
 						throw new ModelExistException(null, "psn.identity.exists", person.getIdentity());
 					}
 				}
 			}
 
 			if (person.getBirthday() == null) {
-				person.setBirthday(p.getBirthday());
+				person.setBirthday(dbPerson.getBirthday());
 			}
 
-			validateDomains(person);
-			validateMemberships(person);
-	
-			if (p.getMemberships() == null) {
-				p.setMemberships(new ArrayList<Membership>());
-			}
-	
-			List<Membership> memberships = (List<Membership>) CollectionUtils.subtract(p.getMemberships(), person.getMemberships());
-	
-			for (Membership membership : memberships) {
-				securityManager.removeMembership(person, membership);
-			}
-	
-			memberships = (List<Membership>) CollectionUtils.subtract(person.getMemberships(), p.getMemberships());
-	
-			for (Membership membership : memberships) {
-				securityManager.addMembership(person, membership);
-			}
+			Person p = personManager.save(person);
 
-			memberships = p.getMemberships();
+			List<Membership> newMemberships = person.getMemberships();
+			List<Membership> oldMemberships = membershipService.getMemberships(person);
 
-			p = personManager.save(person);
+			handleMemberships(newMemberships, oldMemberships);
+
+			p.setMemberships(membershipService.getMemberships(p));
 
 			try {
-				handleAccountAccess(p, memberships);
+				if (!StringUtils.isEmpty(person.getEmailAddress()) &&
+						!StringUtils.equals(dbPerson.getEmailAddress(), person.getEmailAddress())) {
+					notifyUserAccountCreation(person);	
+				}
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
@@ -461,24 +459,64 @@ public class PersonServiceImpl  {
 		}
 	}
 
-	private void validateDomains(Person person) throws Exception {
-		// TODO Auto-generated method stub
-		
-	}
+	@SuppressWarnings("unchecked")
+	private void handleMemberships(List<Membership> newMemberships, List<Membership> oldMemberships) throws Exception {
+		if (oldMemberships == null) {
+			oldMemberships = new ArrayList<Membership>();
+		}		
 
+		List<Membership> toRemove = (List<Membership>) CollectionUtils.subtract(oldMemberships, newMemberships);
+		
+		List<Membership> ms = new ArrayList<Membership>(newMemberships); 
+		ms.removeAll(toRemove);
+
+		// Somente um membership por dominio
+		for (Membership m : ms) {
+			if (CollectionUtils.countMatches(ms, new DomainPredicate(m.getDomain())) > 1) {
+				throw new BusinessException("psn.membership.already.exists", m.getDomain());
+			}
+		}
+
+		// Uma pessoa pode ser morador em somente um apartamento			
+		if (CollectionUtils.countMatches(ms, new PersonTypePredicate(PersonType.RESIDENT)) > 1) {
+			throw new BusinessException("psn.membership.already.resident");
+		}
+
+		for (Membership membership : toRemove) {
+			if (!securityManager.hasPermission(membership, Permission.REMOVE_MEMBER)) {
+				throw new BusinessException("psn.membership.remove.member.denied");
+			}
+		}
+
+		List<Membership> toAdd = (List<Membership>) CollectionUtils.subtract(newMemberships, oldMemberships);
+		
+		for (Membership membership : toAdd) {
+			if (!securityManager.hasPermission(membership, Permission.ASSIGN_MEMBER)) {
+				throw new BusinessException("psn.membership.assign.member.denied");
+			}
+		}
+		
+		for (Membership membership : toRemove) {
+			membershipService.remove(membership.getDomain(), membership.getPerson(), membership.getType());
+		}
+
+		for (Membership membership : toAdd) {
+			membershipService.add(membership.getDomain(), membership.getPerson(), membership.getType());
+		}
+	}
+	
+	
 	@SuppressWarnings("unchecked")
 	private void validateMemberships(Person person) throws Exception {
-//		List<Membership> oldMemberships;
-//		List<Membership> memberships = person.getMemberships();
-		
-		HashSet<Membership> oldMemberships;
-		HashSet<Membership> memberships = new HashSet<Membership>(person.getMemberships());
+		List<Membership> oldMemberships;
+		List<Membership> memberships = person.getMemberships();
 		
 		Person p = personManager.findById(person.getId());
 
 		if (p != null) {
-			oldMemberships = new HashSet<Membership>(p.getMemberships());
-			List<Membership> ms = (List<Membership>) CollectionUtils.union(memberships, oldMemberships);
+			oldMemberships = p.getMemberships();
+			List<Membership> ms = new ArrayList<Membership>(person.getMemberships()); 
+			ms.removeAll((List<Membership>) CollectionUtils.subtract(oldMemberships, memberships));
 
 			// Somente um membership por dominio
 			for (Membership m : ms) {
@@ -493,7 +531,7 @@ public class PersonServiceImpl  {
 			}
 			
 		} else {
-			oldMemberships = new HashSet<Membership>();
+			oldMemberships = new ArrayList<Membership>();
 		}
 
 		for (Membership membership : oldMemberships) {

@@ -19,5 +19,6 @@
 	<classpathentry kind="con" path="org.eclipse.jst.j2ee.internal.module.container"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.USER_LIBRARY/LIFERAY_LIB"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.USER_LIBRARY/JCONDO_LIB"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/jcondo-commons"/>
 	<classpathentry kind="output" path="build/classes"/>
 </classpath>

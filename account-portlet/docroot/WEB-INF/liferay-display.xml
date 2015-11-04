@@ -13,5 +13,6 @@
 		<portlet id="vehicle-registration" />
 		<portlet id="person-registration" />
 		<portlet id="quick-search" />
+		<portlet id="membership-auth" />
 	</category>
 </display>

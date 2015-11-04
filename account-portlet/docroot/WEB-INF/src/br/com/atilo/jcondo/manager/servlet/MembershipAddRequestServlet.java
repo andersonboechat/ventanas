@@ -1,59 +1,64 @@
 package br.com.atilo.jcondo.manager.servlet;
 
 import java.io.IOException;
-import java.security.InvalidKeyException;
-import java.security.NoSuchAlgorithmException;
+import java.io.PrintWriter;
+import java.util.Calendar;
+import java.util.Date;
 
-import javax.crypto.BadPaddingException;
-import javax.crypto.Cipher;
-import javax.crypto.IllegalBlockSizeException;
-import javax.crypto.NoSuchPaddingException;
-import javax.crypto.spec.SecretKeySpec;
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.commons.lang.time.DateUtils;
+
+import br.com.abware.jcondo.core.PersonType;
+import br.com.abware.jcondo.exception.BusinessException;
+import br.com.atilo.jcondo.core.service.FlatServiceImpl;
+import br.com.atilo.jcondo.core.service.MembershipServiceImpl;
+import br.com.atilo.jcondo.core.service.PersonServiceImpl;
+
 public class MembershipAddRequestServlet extends HttpServlet {
 
 	private static final long serialVersionUID = 1L;
 	
-	private static final SecretKeySpec KEY = new SecretKeySpec("vtnkey".getBytes(), "AES");
+	private PersonServiceImpl personService = new PersonServiceImpl();
 	
-	private static Cipher CIPHER;
+	private FlatServiceImpl flatService = new FlatServiceImpl();
+	
+	private MembershipServiceImpl membershipService = new MembershipServiceImpl();
 	
 	@Override
 	public void init(ServletConfig config) throws ServletException {
-		super.init(config);
-		
-		try {
-			CIPHER = Cipher.getInstance("AES");
-			CIPHER.init(Cipher.DECRYPT_MODE, KEY);
-		} catch (NoSuchAlgorithmException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (NoSuchPaddingException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (InvalidKeyException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
 	}
 
 	@Override
 	protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 		super.doGet(req, resp);
+		PrintWriter pw = resp.getWriter(); 
+
 		try {
-			CIPHER.doFinal(req.getParameter("data").getBytes());
-		} catch (IllegalBlockSizeException e) {
+			String datas[] = req.getParameter("data").split("p");
+			Date today = DateUtils.truncate(new Date(), Calendar.DAY_OF_MONTH);
+			Date deadline = DateUtils.truncate(new Date(Long.parseLong(datas[0])), Calendar.DAY_OF_MONTH);
+
+			if (today.after(deadline)) {
+				throw new BusinessException("");
+			}
+
+			long personId = Long.parseLong(datas[1]);
+			long flatId = Long.parseLong(datas[2]);
+
+			membershipService.add(flatService.getFlat(flatId), personService.getPerson(personId), PersonType.VISITOR);
+			pw.write("sucesso"); 
+
+		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-		} catch (BadPaddingException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			pw.write("falha"); 
 		}
+		pw.close();
 	}
 	
 	@Override

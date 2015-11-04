@@ -52,7 +52,11 @@
 			<p:column style="vertical-align: top">
 				<p:panelGrid columns="1" styleClass="no-background no-border">
 	       			<h:outputText value="#{person.firstName} #{person.lastName}" style="font-size: 14px; color: black; font-weight: bold;"/>
-	       			<h:outputText value="#{flatView.personBean.displayMembership(person)}" />
+	       			<p:panel styleClass="no-background no-border no-margin" style="width: 30%">
+	       				<h:outputText value="#{msg[flatView.personBean.displayMembership(person)]}" style="vertical-align: top;"/>
+				        <p:graphicImage value="../images/question.png" width="15" height="15" style="margin-left: 5px;"/>
+					    <p:tooltip for="@parent:@child(1)" value="#{msg[flatView.personBean.displayMembership(person).concat('.desc')]}" rendered="true" style="width: 220px; font-size: 12px; "/>
+				    </p:panel>
 				</p:panelGrid>
 			</p:column>
 			<p:column style="width: 35px">
@@ -61,7 +65,7 @@
 				</p:commandLink>
 			</p:column>
 			<p:column style="width: 35px">
-				<p:commandLink title="Excluir este usuário" actionListener="#{flatView.personBean.onPersonDelete}" oncomplete="if (!args.validationFailed &amp;&amp; !args.exception) {PF('personTable').update();}" partialSubmit="true" process="@this" global="false" update="@widgetVar(personTable),:outputMsg" disabled="#{!flatView.personBean.canEditPerson(person)}">
+				<p:commandLink title="Excluir este usuário" actionListener="#{flatView.personBean.onPersonDelete}" oncomplete="if (!args.validationFailed &amp;&amp; !args.exception) {PF('personTable').update();}" partialSubmit="true" process="@this" global="false" update=":outputMsg" disabled="#{!flatView.personBean.canEditPerson(person)}">
 					<h:graphicImage value="../images/cancel2.png" />
 					<p:confirm header="#{msg['person.delete.confirm']}" message="#{msg['person.delete.message']}" icon="ui-icon-alert"/>
 				</p:commandLink>
@@ -115,7 +119,7 @@
 							<p:column styleClass="labelClm"><p:outputLabel for="identity" value="CPF: "/></p:column>
 							<p:column colspan="2" styleClass="fieldClm">
 								<h:inputHidden id="identity" value="#{flatView.personBean.person.identity}" required="#{flatView.personBean.membership.type != 'RESIDENT'}" requiredMessage="#{msg['person.identity.empty']}"/>
-								<p:inputMask value="#{flatView.personBean.identity}" mask="999.999.999-99">
+								<p:inputMask value="#{flatView.personBean.identity}" mask="999.999.999-99" readonly="#{flatView.personBean.person.id > 0 and not empty(flatView.personBean.person.identity)}">
 									<p:ajax event="change" listener="#{flatView.personBean.onSearchByCPF}"	
 											update="person-details-form,@widgetVar(personMsg)" partialSubmit="true" process="@this"
 											oncomplete="if (!args.validationFailed &amp;&amp; args.alert) {PF('personFoundDialog').show();}"/>

@@ -29,25 +29,33 @@ public class ModelDataModel<Model extends BaseModel> extends ListDataModel<Model
 		this.models = models;
 	}
 
+	@SuppressWarnings("unchecked")
 	public void addModel(Model model) {
+		((List<Model>) this.getWrappedData()).add(model);
     	models.add(model);
 	}
    
+	@SuppressWarnings("unchecked")
 	public void removeModel(Model model) {
+		((List<Model>) this.getWrappedData()).remove(model);
     	models.remove(model);
 	}
 
+	@SuppressWarnings("unchecked")
 	public void setModel(Model model) {
     	int index = models.indexOf(model);
     	if (index >= 0) {
+    		((List<Model>) this.getWrappedData()).set(index, model);
     		models.set(index, model);
     	}
 	}
 
+	@SuppressWarnings("unchecked")
 	public void update(Model model) {
 		int index = models.indexOf(model);
 
 		if (index >= 0) {
+			((List<Model>) this.getWrappedData()).set(index, model);
 			models.set(index, model);
 		} else {
 			models.add(model);

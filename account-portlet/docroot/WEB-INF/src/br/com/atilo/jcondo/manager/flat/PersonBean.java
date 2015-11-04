@@ -236,6 +236,9 @@ public class PersonBean {
 			personService.update(person);
 			model.removeModel(person);
 			MessageUtils.addMessage(FacesMessage.SEVERITY_INFO, "flats.user.remove.success", null);
+			if (person.equals(logPerson)) {
+				FacesContext.getCurrentInstance().getExternalContext().redirect("/group/guest/flat");
+			}
 		} catch (BusinessException e) {
 			LOGGER.warn("Business failure on person delete: " + e.getMessage());
 			MessageUtils.addMessage(FacesMessage.SEVERITY_WARN, e.getMessage(), e.getArgs());
@@ -265,6 +268,7 @@ public class PersonBean {
 			} else {
 				phone = new Phone();
 				phone.setPrimary(true);
+				phoneNumber = null;
 			}
 
 			kinship = personDetailService.getKinship(logPerson, person);
@@ -339,7 +343,7 @@ public class PersonBean {
 	public String displayMembership(Person person) {
 		if (person != null && !CollectionUtils.isEmpty(person.getMemberships())) {
 			Membership membership = (Membership) CollectionUtils.find(person.getMemberships(), new DomainPredicate(flat));
-			return membership != null ? rb.getString(membership.getType().getLabel()) : null;				
+			return membership != null ? membership.getType().getLabel() : null;				
 		}
 
 		return null;

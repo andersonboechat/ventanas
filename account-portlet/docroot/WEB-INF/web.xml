@@ -1,28 +1,39 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<web-app xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://java.sun.com/xml/ns/javaee" xmlns:web="http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd" xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd" version="2.5">
-  <context-param>
-    <param-name>com.sun.faces.expressionFactory</param-name>
-    <param-value>org.jboss.el.ExpressionFactoryImpl</param-value>
-  </context-param>
-  <context-param>
-    <param-name>javax.faces.PROJECT_STAGE</param-name>
-    <param-value>Production</param-value>
-  </context-param>
-  <context-param>
-    <param-name>primefaces.FONT_AWESOME</param-name>
-    <param-value>true</param-value>
-  </context-param>
-  <servlet>
-    <servlet-name>Faces Servlet</servlet-name>
-    <servlet-class>javax.faces.webapp.FacesServlet</servlet-class>
-    <load-on-startup>1</load-on-startup>
-  </servlet>
-  <filter>
-    <filter-name>PrimeFaces FileUpload Filter</filter-name>
-    <filter-class>org.primefaces.webapp.filter.FileUploadFilter</filter-class>
-    <init-param>
-      <param-name>uploadDirectory</param-name>
-      <param-value>/upload</param-value>
-    </init-param>
-  </filter>
+<web-app xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns="http://java.sun.com/xml/ns/javaee" xmlns:web="http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd"
+	xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd"
+	version="2.5">
+	<context-param>
+		<param-name>com.sun.faces.expressionFactory</param-name>
+		<param-value>org.jboss.el.ExpressionFactoryImpl</param-value>
+	</context-param>
+	<context-param>
+		<param-name>javax.faces.PROJECT_STAGE</param-name>
+		<param-value>Production</param-value>
+	</context-param>
+	<context-param>
+		<param-name>primefaces.FONT_AWESOME</param-name>
+		<param-value>true</param-value>
+	</context-param>
+	<servlet>
+		<servlet-name>Faces Servlet</servlet-name>
+		<servlet-class>javax.faces.webapp.FacesServlet</servlet-class>
+		<load-on-startup>1</load-on-startup>
+	</servlet>
+	<servlet>
+		<servlet-name>MembershipAddRequest Servlet</servlet-name>
+		<servlet-class>br.com.atilo.jcondo.manager.servlet.MembershipAddRequestServlet</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>MembershipAddRequest Servlet</servlet-name>
+		<url-pattern>/membershipAddRequest</url-pattern>
+	</servlet-mapping>
+	<filter>
+		<filter-name>PrimeFaces FileUpload Filter</filter-name>
+		<filter-class>org.primefaces.webapp.filter.FileUploadFilter</filter-class>
+		<init-param>
+			<param-name>uploadDirectory</param-name>
+			<param-value>/upload</param-value>
+		</init-param>
+	</filter>
 </web-app>

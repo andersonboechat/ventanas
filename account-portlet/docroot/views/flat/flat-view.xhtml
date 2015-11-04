@@ -211,7 +211,7 @@
 									   oncomplete="if (!args.validationFailed) {PF('primaryPersonDialog').hide();}" 
 									   update="@widgetVar(primaryPerson),:outputMsg" style="text-decoration: none; width: 100%; cursor: pointer !important; cursor: hand !important;">
 			       			<h:outputText value="#{person.firstName} #{person.lastName}" style="font-size: 14px; color: black; font-weight: bold;"/><br/>
-			       			<h:outputText value="#{flatView.personBean.displayMembership(person)}" style="font-size: 13px; color: black; font-weight: normal;"/>
+			       			<h:outputText value="#{msg[flatView.personBean.displayMembership(person)]}" style="font-size: 13px; color: black; font-weight: normal;"/>
 						</p:commandLink>
 					</p:column>
 				</p:dataTable>

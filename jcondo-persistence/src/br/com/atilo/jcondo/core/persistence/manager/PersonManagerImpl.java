@@ -91,7 +91,7 @@ public class PersonManagerImpl extends JCondoManager<PersonEntity, Person> {
 			person.setFullName(user.getFullName());
 			person.setFirstName(user.getFirstName());
 			person.setLastName(user.getLastName());
-			person.setEmailAddress(user.getEmailAddress());
+			person.setEmailAddress(user.getEmailAddress().endsWith("ventanasresidencial.com.br") ? null : user.getEmailAddress());
 			person.setGender(user.isMale() ? Gender.MALE : Gender.FEMALE);
 			person.setStatus(user.getStatus() == WorkflowConstants.STATUS_APPROVED ? PersonStatus.ACTIVE : PersonStatus.INACTIVE);
 			person.setPicture(new Image(user.getPortraitId(), 0, getPath(user.getPortraitId()), null, null));
@@ -194,11 +194,11 @@ public class PersonManagerImpl extends JCondoManager<PersonEntity, Person> {
 		}
 	}
 
-	public Person findPerson() throws PersistenceException {
+	public Person findPerson() throws Exception {
 		return findPerson(helper.getUser().getUserId());
 	}
 	
-	public Person findPerson(long userId) throws PersistenceException {
+	public Person findPerson(long userId) throws Exception {
 		String key = generateKey();
 		String queryString = "FROM PersonEntity WHERE userId = :userId";
 
@@ -207,8 +207,8 @@ public class PersonManagerImpl extends JCondoManager<PersonEntity, Person> {
 			Query query = em.createQuery(queryString);
 			query.setParameter("userId", userId);
 			return getModel((PersonEntity) query.getSingleResult());
-		} catch (Exception e) {
-			throw new PersistenceException(e, "psn.mgr.find.person.fail");
+		} catch (NoResultException e) {
+			return null;
 		} finally {
 			closeManager(key);
 		}

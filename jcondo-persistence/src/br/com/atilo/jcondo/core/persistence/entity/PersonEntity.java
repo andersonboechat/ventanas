@@ -28,7 +28,7 @@ public class PersonEntity extends BaseEntity {
 	@Column(nullable=false, columnDefinition="INT(1)")
     private Boolean registerComplete;
 
-    @OneToMany(cascade=CascadeType.ALL, mappedBy="person", orphanRemoval=true)
+    @OneToMany(mappedBy="person", orphanRemoval=true)
     private List<MembershipEntity> memberships;
 
     public PersonEntity() {

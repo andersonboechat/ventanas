@@ -1,10 +1,16 @@
 package br.com.atilo.jcondo.core.persistence.manager;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+
+import org.apache.commons.collections.CollectionUtils;
 
 import com.liferay.faces.portal.context.LiferayPortletHelper;
 import com.liferay.faces.portal.context.LiferayPortletHelperImpl;
+import com.liferay.portal.kernel.workflow.WorkflowConstants;
 import com.liferay.portal.model.Organization;
+import com.liferay.portal.model.User;
 import com.liferay.portal.security.permission.ActionKeys;
 import com.liferay.portal.security.permission.PermissionChecker;
 import com.liferay.portal.service.GroupLocalServiceUtil;
@@ -32,6 +38,7 @@ import br.com.abware.jcondo.core.model.Supplier;
 import br.com.abware.jcondo.core.model.Vehicle;
 import br.com.abware.jcondo.exception.ApplicationException;
 import br.com.abware.jcondo.exception.SystemException;
+import br.com.atilo.jcondo.commons.collections.PersonTypeTransformer;
 
 public class SecurityManagerImpl {
 	
@@ -73,6 +80,12 @@ public class SecurityManagerImpl {
 
 	public void addMembership(Person person, Membership membership) throws Exception {
 		if (membership.getDomain() instanceof Flat) {
+			if (membership.getType() == PersonType.MANAGER) {
+				addRole(person, RoleName.SENIOR_USER);
+				addRole(person, membership.getDomain(), RoleName.FLAT_MANAGER);
+				//addOrganization(person, membership.getDomain());
+			}
+
 			if (membership.getType() == PersonType.OWNER) {
 				List<Person> renters = personManager.findPeopleByType(membership.getDomain(), PersonType.RENTER);
 
@@ -80,7 +93,7 @@ public class SecurityManagerImpl {
 				if (renters.isEmpty()) {
 					addRole(person, RoleName.SENIOR_USER);
 					addRole(person, membership.getDomain(), RoleName.FLAT_MANAGER);
-					addOrganization(person, membership.getDomain());
+					//addOrganization(person, membership.getDomain());
 				}
 			}
 
@@ -92,25 +105,33 @@ public class SecurityManagerImpl {
 						removeRole(person, RoleName.SENIOR_USER);
 					}
 					removeRole(owner, membership.getDomain(), RoleName.FLAT_MANAGER);
-					removeOrganization(owner, membership.getDomain());
+					//removeOrganization(owner, membership.getDomain());
 				}
 
 				addRole(person, RoleName.SENIOR_USER);
 				addRole(person, membership.getDomain(), RoleName.FLAT_MANAGER);
-				addOrganization(person, membership.getDomain());
+				//addOrganization(person, membership.getDomain());
 			}
 
 			if (membership.getType() == PersonType.RESIDENT) {
 				addRole(person, RoleName.SENIOR_USER);
 				addRole(person, membership.getDomain(), RoleName.FLAT_ASSISTANT);
-				addOrganization(person, membership.getDomain());
+				//addOrganization(person, membership.getDomain());
 			}
 
 			if (membership.getType() == PersonType.DEPENDENT) {
 				addRole(person, RoleName.SENIOR_USER);
 				addRole(person, membership.getDomain(), RoleName.FLAT_MEMBER);
-				addOrganization(person, membership.getDomain());
+				//addOrganization(person, membership.getDomain());
 			}
+
+			Person p = personManager.findById(person.getId());
+			List<Membership> memberships = new ArrayList<Membership>(p.getMemberships());
+			memberships.add(membership);
+
+			handleAccountAccess(p, memberships);
+
+			addOrganization(person, membership.getDomain());
 		}
 
 		if (membership.getDomain() instanceof Supplier) {
@@ -176,9 +197,23 @@ public class SecurityManagerImpl {
 					for (Person owner : owners) {
 						addRole(owner, RoleName.SENIOR_USER);
 						addRole(owner, membership.getDomain(), RoleName.FLAT_MANAGER);
-						addOrganization(owner, membership.getDomain());
+						//addOrganization(owner, membership.getDomain());
 					}
 				}
+			}
+
+			List<Membership> memberships = new ArrayList<Membership>(p.getMemberships());
+			memberships.remove(membership);
+
+			List<PersonType> internalTypes = Arrays.asList(PersonType.OWNER, PersonType.RENTER, PersonType.RESIDENT, 
+													   PersonType.DEPENDENT, PersonType.MANAGER); 
+			List<PersonType> personTypes = (List<PersonType>) CollectionUtils.collect(memberships, 
+																			 		  new PersonTypeTransformer());
+
+			if (!CollectionUtils.containsAny(personTypes, internalTypes)) {
+				UserLocalServiceUtil.updateStatus(person.getUserId(), WorkflowConstants.STATUS_DENIED);
+			} else {
+				UserLocalServiceUtil.updateStatus(person.getUserId(), WorkflowConstants.STATUS_APPROVED);
 			}
 		}
 
@@ -264,6 +299,15 @@ public class SecurityManagerImpl {
 		} else if (model instanceof Flat || model instanceof Supplier || model instanceof Administration) {
 			return checkPermission(permissionChecker, (Domain) model, (Domain) model, permission);
 		} else if (model instanceof Membership) {
+			try {
+				if (personManager.findPerson().equals(((Membership) model).getPerson()) && permission == Permission.REMOVE_MEMBER) {
+					return true;
+				}
+			} catch (Exception e) {
+				e.printStackTrace();
+				return false;
+			}
+
 			return checkPermission(permissionChecker, ((Membership) model).getType(), ((Membership) model).getDomain(), permission);
 		} else if (model instanceof Vehicle) {
 			return checkPermission(permissionChecker, model, ((Vehicle) model).getDomain(), permission);
@@ -319,4 +363,16 @@ public class SecurityManagerImpl {
 		return false;
 	}
 	
+	@SuppressWarnings("unchecked")
+	public void handleAccountAccess(Person person, List<Membership> memberships) throws Exception {
+		List<PersonType> internalTypes = Arrays.asList(PersonType.OWNER, PersonType.RENTER, PersonType.RESIDENT, 
+												   	   PersonType.DEPENDENT, PersonType.ADMIN_ASSISTANT); 
+		List<PersonType> personTypes = (List<PersonType>) CollectionUtils.collect(memberships, new PersonTypeTransformer());
+
+		if (CollectionUtils.containsAny(personTypes, internalTypes)) {
+			UserLocalServiceUtil.updateStatus(person.getUserId(), WorkflowConstants.STATUS_APPROVED);
+		} else {
+			UserLocalServiceUtil.updateStatus(person.getUserId(), WorkflowConstants.STATUS_DENIED);
+		}
+	}
 }
