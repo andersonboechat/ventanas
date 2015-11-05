@@ -151,17 +151,22 @@ public class PersonBean {
 
 		Person p = personService.getPerson(identity);
 		if (p != null) {
-			person.setId(p.getId());
-			person.setUserId(p.getUserId());
-			person.setFirstName(p.getFirstName());
-			person.setLastName(p.getLastName());
-			person.setGender(p.getGender());
-			person.setPicture(p.getPicture());
-			person.setMemberships(p.getMemberships());
-			if (isResident(p)) {
-				MessageUtils.addMessage(FacesMessage.SEVERITY_INFO, "person.domain.add.request", null, ":tabs:person-form:personMsg");	
+			if (model.getRowData(String.valueOf(p.getId())) != null) {
+				loadPerson(p);
+				MessageUtils.addMessage(FacesMessage.SEVERITY_INFO, "person.domain.exists", null, ":tabs:person-form:personMsg");
 			} else {
-				MessageUtils.addMessage(FacesMessage.SEVERITY_INFO, "person.domain.add", null, ":tabs:person-form:personMsg");
+				person.setId(p.getId());
+				person.setUserId(p.getUserId());
+				person.setFirstName(p.getFirstName());
+				person.setLastName(p.getLastName());
+				person.setGender(p.getGender());
+				person.setPicture(p.getPicture());
+				person.setMemberships(p.getMemberships());
+				if (isResident(p)) {
+					MessageUtils.addMessage(FacesMessage.SEVERITY_INFO, "person.domain.add.request", null, ":tabs:person-form:personMsg");	
+				} else {
+					MessageUtils.addMessage(FacesMessage.SEVERITY_INFO, "person.domain.add", null, ":tabs:person-form:personMsg");
+				}
 			}
 		}
 
@@ -227,6 +232,7 @@ public class PersonBean {
 		person.setPicture(imageUploadBean.getImage());
 		membership = new Membership(PersonType.RESIDENT, flat);
 		identity = null;
+		phoneNumber = null;
 	}
 
 	public void onPersonDelete() throws Exception {
@@ -251,8 +257,12 @@ public class PersonBean {
 	}
 
 	public void onPersonEdit() throws Exception {
+		loadPerson(model.getRowData());
+	}
+	
+	public void loadPerson(Person person) throws Exception {
 		try {
-			BeanUtils.copyProperties(this.person, model.getRowData());
+			BeanUtils.copyProperties(this.person, person);
 			identity = this.person.getIdentity();
 			imageUploadBean.setImage(person.getPicture());
 			Membership m = (Membership) CollectionUtils.find(person.getMemberships(), new DomainPredicate(flat));

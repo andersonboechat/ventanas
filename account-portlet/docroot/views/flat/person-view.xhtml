@@ -121,7 +121,7 @@
 								<h:inputHidden id="identity" value="#{flatView.personBean.person.identity}" required="#{flatView.personBean.membership.type != 'RESIDENT'}" requiredMessage="#{msg['person.identity.empty']}"/>
 								<p:inputMask value="#{flatView.personBean.identity}" mask="999.999.999-99" readonly="#{flatView.personBean.person.id > 0 and not empty(flatView.personBean.person.identity)}">
 									<p:ajax event="change" listener="#{flatView.personBean.onSearchByCPF}"	
-											update="person-details-form,@widgetVar(personMsg)" partialSubmit="true" process="@this"
+											update="person-details-form,@widgetVar(personMsg)" partialSubmit="true" process="@this" 
 											oncomplete="if (!args.validationFailed &amp;&amp; args.alert) {PF('personFoundDialog').show();}"/>
 								</p:inputMask>
 							</p:column>
