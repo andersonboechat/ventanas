@@ -1,5 +1,7 @@
 package br.com.atilo.jcondo.booking.bean;
 
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Observable;
 import java.util.Observer;
 
@@ -13,6 +15,7 @@ import org.apache.log4j.Logger;
 import br.com.abware.jcondo.booking.model.RoomBooking;
 import br.com.atilo.jcondo.booking.util.BookingEvent;
 import br.com.atilo.jcondo.booking.util.EventType;
+import br.com.atilo.jcondo.commons.collections.BeanSorter;
 
 @ManagedBean
 @ViewScoped
@@ -45,7 +48,8 @@ public class BookingBean extends BaseBean implements Observer {
 				if (object instanceof BookingEvent) {
 					BookingEvent event = (BookingEvent) object;
 					if (event.getType() == EventType.BOOK) {
-						historyBean.getBookings().add((RoomBooking) event.getSource());	
+						historyBean.getBookings().add((RoomBooking) event.getSource());
+						Collections.sort(historyBean.getBookings(), new BeanSorter<RoomBooking>("beginDate", BeanSorter.DESCENDING_ORDER));
 					}
 
 					if (event.getType() == EventType.BOOK_DELETE) {

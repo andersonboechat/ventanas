@@ -14,8 +14,8 @@
 					<p:schedule id="calendar-#{i.index}" value="#{calendarViewer.getModel(i.index)}" editable="true" widgetVar="calendar-#{i.index}" 
 								locale="pt" draggable="false" resizable="false" styleClass="calendar" aspectRatio="1.6" style="width: 100%" 
 								 leftHeaderTemplate="" centerHeaderTemplate="title" rightHeaderTemplate="prev,next"> <!-- timeZone="America/Sao_Paulo"-->
-						<p:ajax event="dateSelect" listener="#{calendarViewer.onDateSelect}" update=":tabs:booking-dialog-form-#{i.index}:bookingDetails-#{i.index}, :outputMsg" oncomplete="if (!args.exception) {PF('bookingDialog-#{i.index}').show();}"/>
-						<p:ajax event="eventSelect" listener="#{calendarViewer.onSelect}" update=":tabs:booking-dialog-form-#{i.index}:bookingDetails-#{i.index}, :outputMsg" oncomplete="if (!args.exception) {PF('bookingDialog-#{i.index}').show();}"/>
+						<p:ajax event="dateSelect" listener="#{calendarViewer.onDateSelect}" update=":tabs:booking-dialog-form-#{i.index}:bookingDetails-#{i.index},:outputMsg" oncomplete="if (!args.exception) {PF('bookingDialog-#{i.index}').show();}"/>
+						<p:ajax event="eventSelect" listener="#{calendarViewer.onSelect}" update=":tabs:booking-dialog-form-#{i.index}:bookingDetails-#{i.index},:outputMsg" oncomplete="if (!args.exception) {PF('bookingDialog-#{i.index}').show();}"/>
 					</p:schedule>
 				</h:form>
 				<ui:include src="booking_dialog.xhtml">

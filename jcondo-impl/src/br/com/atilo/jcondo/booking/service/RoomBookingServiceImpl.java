@@ -4,12 +4,19 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
+import java.util.ResourceBundle;
 
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.time.DateFormatUtils;
 import org.apache.commons.lang.time.DateUtils;
 import org.apache.log4j.Logger;
 import org.joda.time.Interval;
+
+import com.liferay.portal.kernel.io.unsync.UnsyncStringWriter;
+import com.liferay.portal.kernel.velocity.VelocityContext;
+import com.liferay.portal.kernel.velocity.VelocityEngineUtil;
+import com.liferay.util.ContentUtil;
 
 import br.com.abware.jcondo.booking.model.BookingStatus;
 import br.com.abware.jcondo.booking.model.Guest;
@@ -19,11 +26,15 @@ import br.com.abware.jcondo.core.Permission;
 import br.com.abware.jcondo.core.model.Person;
 import br.com.abware.jcondo.exception.BusinessException;
 import br.com.atilo.jcondo.booking.persistence.manager.RoomBookingManagerImpl;
+import br.com.atilo.jcondo.core.persistence.manager.PersonManagerImpl;
 import br.com.atilo.jcondo.core.persistence.manager.SecurityManagerImpl;
+import br.com.atilo.jcondo.util.MailService;
 
 public class RoomBookingServiceImpl {
 
 	public static final Logger LOGGER = Logger.getLogger(RoomBookingServiceImpl.class);
+	
+	private static final ResourceBundle rb = ResourceBundle.getBundle("i18n");
 
 	public static final int BKG_MIN_HOUR = 10;
 
@@ -39,8 +50,12 @@ public class RoomBookingServiceImpl {
 
 	private SecurityManagerImpl securityManager = new SecurityManagerImpl();
 	
+	private PersonManagerImpl personManager = new PersonManagerImpl();
+	
 	private void checkAvailability(RoomBooking booking) throws Exception {
-		List<RoomBooking> bookings = bookingManager.findByPeriod(booking.getResource(), booking.getBeginDate(), booking.getEndDate());
+		Date beginDate = DateUtils.truncate(booking.getBeginDate(), Calendar.DAY_OF_MONTH);
+		Date endDate = DateUtils.truncate(DateUtils.addDays(booking.getBeginDate(), 1), Calendar.DAY_OF_MONTH);
+		List<RoomBooking> bookings = bookingManager.findByPeriod(booking.getResource(), beginDate, endDate);
 
 		if (RoomServiceImpl.CINEMA == booking.getResource().getId()) {
 			List<RoomBooking> overlapCancelledBkgs = new ArrayList<RoomBooking>();
@@ -51,10 +66,10 @@ public class RoomBookingServiceImpl {
 
 				if (interval.overlaps(i)) {
 					if (!BookingStatus.CANCELLED.equals(b.getStatus())) {
-						throw new BusinessException("bkg.room.already.booked", booking.getResource().getName(), 
-													DateFormatUtils.format(booking.getBeginDate(), "dd/MM/yyyy"),
-													DateFormatUtils.format(booking.getBeginDate(), "HH:mm'h'"), 
-													DateFormatUtils.format(booking.getEndDate(), "HH:mm'h'"));
+						throw new BusinessException("bkg.room.already.booked", b.getResource().getName(), 
+													DateFormatUtils.format(b.getBeginDate(), "dd/MM/yyyy"),
+													DateFormatUtils.format(b.getBeginDate(), "HH:mm'h'"), 
+													DateFormatUtils.format(b.getEndDate(), "HH:mm'h'"));
 					} else {
 						overlapCancelledBkgs.add(booking);
 					}
@@ -93,7 +108,13 @@ public class RoomBookingServiceImpl {
 
 		bookingManager.delete(b);
 		LOGGER.info("Booking deleted: " + booking);
-		
+
+		try {
+			notifyBookingDelete(b);
+		} catch (Exception e) {
+			LOGGER.error("booking delete notify failure", e);
+		}
+
 		return b;
 	}
 	
@@ -121,11 +142,18 @@ public class RoomBookingServiceImpl {
 
 		LOGGER.info("Booking cancelled: " + booking);
 
-		Date today = new Date();
-		if (!today.after(DateUtils.addDays(b.getBeginDate(), -BKG_CANCEL_DEADLINE))) {
+		Date today = DateUtils.truncate(new Date(), Calendar.DAY_OF_MONTH);
+		Date bookingDate = DateUtils.truncate(b.getBeginDate(), Calendar.DAY_OF_MONTH);
+
+		if (!today.after(DateUtils.addDays(bookingDate, -BKG_CANCEL_DEADLINE))) {
 			LOGGER.info("Booking cancelled within deadline on " + DateFormatUtils.format(today, "dd/MM/yyyy"));
 			b = delete(b, false);
-			return null;
+		} else {
+			try {
+				notifyBookingCancel(b);
+			} catch (Exception e) {
+				LOGGER.error("booking cancel notify failure", e);
+			}
 		}
 
 		return b;
@@ -184,9 +212,138 @@ public class RoomBookingServiceImpl {
 		checkAvailability(booking);
 
 		booking.setStatus(BookingStatus.BOOKED);
-		return bookingManager.save(booking);
+		RoomBooking b = bookingManager.save(booking);
+		
+		try {
+			notifyBookingCreate(b);
+		} catch (Exception e) {
+			LOGGER.error("booking creation notify failure", e);
+		}
+		
+		return b;
+	}
+	
+	private void notifyBookingCreate(RoomBooking booking) throws Exception {
+		LOGGER.info("booking creation notify begin: " + booking);
+
+		Person p = personManager.findById(booking.getPerson().getId());
+
+		if (p == null) {
+			throw new BusinessException("psn.person.not.found");
+		}
+		
+		if (StringUtils.isEmpty(p.getEmailAddress())) {
+			throw new BusinessException("psn.person.email.invalid", p);
+		}
+
+		String mailBodyTemplate = ContentUtil.get("br/com/atilo/jcondo/booking/mail/booking-created-notify.vm");
+		
+		LOGGER.debug(mailBodyTemplate);
+
+		VelocityContext variables = VelocityEngineUtil.getStandardToolsContext();
+		variables.put("personName", p.getFullName());
+		variables.put("roomName", booking.getResource().getName().toUpperCase());
+		variables.put("date", DateFormatUtils.format(booking.getBeginDate(), "dd/MM/yyyy"));
+		variables.put("startTime", DateFormatUtils.format(booking.getBeginDate(), "HH:mm'h'"));
+		variables.put("endTime", DateFormatUtils.format(booking.getEndDate(), "HH:mm'h'"));
+		variables.put("deadline", DateFormatUtils.format(DateUtils.addDays(booking.getBeginDate(), -BKG_CANCEL_DEADLINE), "dd/MM/yyyy"));
+		variables.put("adm-mail", "adm@ventanasresidencial.com.br");
+		variables.put("support-mail", "suporte@ventanasresidencial.com.br");
+		
+		//String url = helper.getPortalURL() + "/group/guest/membership?p_p_id=membershipauth_WAR_accountportlet&data=" + DateUtils.addDays(new Date(), 3).getTime() + "p" + p.getId()  + "p" + flat.getId();
+		
+		//variables.put("url", url);
+		UnsyncStringWriter writer = new UnsyncStringWriter();
+		VelocityEngineUtil.mergeTemplate("BCN", mailBodyTemplate, variables, writer);
+
+		String mailBody = writer.toString();
+		LOGGER.debug(mailBody);
+
+		String mailTo = p.getEmailAddress();
+		String mailSubject = rb.getString("booking.create.notify");
+
+		MailService.send(mailTo, mailSubject, mailBody);
+
+		LOGGER.info("booking creation notify end: " + booking);
 	}
 
+	private void notifyBookingCancel(RoomBooking booking) throws Exception {
+		LOGGER.info("booking cancel notify begin: " + booking);
+
+		Person p = personManager.findById(booking.getPerson().getId());
+
+		if (p == null) {
+			throw new BusinessException("psn.person.not.found");
+		}
+		
+		if (StringUtils.isEmpty(p.getEmailAddress())) {
+			throw new BusinessException("psn.person.email.invalid", p);
+		}
+
+		String mailBodyTemplate = ContentUtil.get("br/com/atilo/jcondo/booking/mail/booking-cancelled-notify.vm");
+		
+		LOGGER.debug(mailBodyTemplate);
+
+		VelocityContext variables = VelocityEngineUtil.getStandardToolsContext();
+		variables.put("personName", p.getFullName());
+		variables.put("roomName", booking.getResource().getName().toUpperCase());
+		variables.put("date", DateFormatUtils.format(booking.getBeginDate(), "dd/MM/yyyy"));
+		variables.put("startTime", DateFormatUtils.format(booking.getBeginDate(), "HH:mm'h'"));
+		variables.put("endTime", DateFormatUtils.format(booking.getEndDate(), "HH:mm'h'"));
+		variables.put("deadline", DateFormatUtils.format(DateUtils.addDays(booking.getBeginDate(), -BKG_CANCEL_DEADLINE), "dd/MM/yyyy"));
+
+		UnsyncStringWriter writer = new UnsyncStringWriter();
+		VelocityEngineUtil.mergeTemplate("BCAN", mailBodyTemplate, variables, writer);
+
+		String mailBody = writer.toString();
+		LOGGER.debug(mailBody);
+
+		String mailTo = p.getEmailAddress();
+		String mailSubject = rb.getString("booking.cancel.notify");
+
+		MailService.send(mailTo, mailSubject, mailBody);
+
+		LOGGER.info("booking cancel notify end: " + booking);
+	}
+	
+	private void notifyBookingDelete(RoomBooking booking) throws Exception {
+		LOGGER.info("booking delete notify begin: " + booking);
+
+		Person p = personManager.findById(booking.getPerson().getId());
+
+		if (p == null) {
+			throw new BusinessException("psn.person.not.found");
+		}
+		
+		if (StringUtils.isEmpty(p.getEmailAddress())) {
+			throw new BusinessException("psn.person.email.invalid", p);
+		}
+
+		String mailBodyTemplate = ContentUtil.get("br/com/atilo/jcondo/booking/mail/booking-deleted-notify.vm");
+		
+		LOGGER.debug(mailBodyTemplate);
+
+		VelocityContext variables = VelocityEngineUtil.getStandardToolsContext();
+		variables.put("personName", p.getFullName());
+		variables.put("roomName", booking.getResource().getName().toUpperCase());
+		variables.put("date", DateFormatUtils.format(booking.getBeginDate(), "dd/MM/yyyy"));
+		variables.put("startTime", DateFormatUtils.format(booking.getBeginDate(), "HH:mm'h'"));
+		variables.put("endTime", DateFormatUtils.format(booking.getEndDate(), "HH:mm'h'"));
+		
+		UnsyncStringWriter writer = new UnsyncStringWriter();
+		VelocityEngineUtil.mergeTemplate("BDN", mailBodyTemplate, variables, writer);
+
+		String mailBody = writer.toString();
+		LOGGER.debug(mailBody);
+
+		String mailTo = p.getEmailAddress();
+		String mailSubject = rb.getString("booking.cancel.notify");
+
+		MailService.send(mailTo, mailSubject, mailBody);
+
+		LOGGER.info("booking delete notify end: " + booking);
+	}
+	
 	@SuppressWarnings("unchecked")
 	public void updateGuests(RoomBooking booking) throws Exception {
 //		if (!securityManager.hasPermission(booking, Permission.UPDATE)) {

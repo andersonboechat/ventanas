@@ -112,11 +112,11 @@ public class CalendarBean extends BaseBean {
 
 				MessageUtils.addMessage(FacesMessage.SEVERITY_INFO, "bkg.success", null);
 
-				if (isCancelEnable()) {
-					Date deadline = DateUtils.addDays(booking.getBeginDate(), -RoomBookingServiceImpl.BKG_CANCEL_DEADLINE);
-					MessageUtils.addMessage(FacesMessage.SEVERITY_INFO, "bkg.cancel.notify", 
-											new String[] {DateFormatUtils.format(deadline, "dd/MM/yyyy")});
-				}
+//				if (isDeadlineOver()) {
+//					Date deadline = DateUtils.addDays(booking.getBeginDate(), -RoomBookingServiceImpl.BKG_CANCEL_DEADLINE);
+//					MessageUtils.addMessage(FacesMessage.SEVERITY_INFO, "bkg.cancel.notify", 
+//											new String[] {DateFormatUtils.format(deadline, "dd/MM/yyyy")});
+//				}
 
 				deal = false;
 				setChanged();
@@ -199,9 +199,8 @@ public class CalendarBean extends BaseBean {
 
 		if (model.getRoom().getId() == RoomServiceImpl.CINEMA || booking == null || booking.getStatus() == BookingStatus.CANCELLED) {
 			if (bookingDate.before(today)) {
-				MessageUtils.addMessage(FacesMessage.SEVERITY_WARN, "bkg.past.date", new String[] {
-										DateFormatUtils.format(bookingDate, "dd/MM/yyyy"), 
-										DateFormatUtils.format(today, "dd/MM/yyyy")});
+				MessageUtils.addMessage(FacesMessage.SEVERITY_WARN, "bkg.past.date", 
+										new String[] {DateFormatUtils.format(today, "dd/MM/yyyy")});
 				RequestContext.getCurrentInstance().addCallbackParam("exception", true);
 				return;
 			}
@@ -252,9 +251,9 @@ public class CalendarBean extends BaseBean {
 		}
 	}
 
-	public void onGuestRemove(Person person) {
+	public void onGuestRemove(Guest guest) {
 		try {
-			booking.getGuests().remove(person);
+			booking.getGuests().remove(guest);
 		} catch (Exception e) {
 			// TODO: handle exception
 		}
@@ -282,12 +281,12 @@ public class CalendarBean extends BaseBean {
 		}
 	}
 
-	public boolean isCancelEnable() {
+	public boolean isDeadlineOver() {
 		if (booking != null && booking.getBeginDate() != null) {
 			Date today = DateUtils.truncate(new Date(), Calendar.DAY_OF_MONTH);
 			Date bookingDate = DateUtils.truncate(booking.getBeginDate(), Calendar.DAY_OF_MONTH);
 			Date deadline = DateUtils.addDays(bookingDate, -RoomBookingServiceImpl.BKG_CANCEL_DEADLINE);
-			return deadline.after(today);
+			return today.after(deadline);
 		}
 
 		return false;

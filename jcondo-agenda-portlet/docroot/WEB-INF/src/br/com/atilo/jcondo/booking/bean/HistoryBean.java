@@ -59,10 +59,10 @@ public class HistoryBean extends BaseBean {
 			} else if (rb.getStatus() == BookingStatus.DELETED) {
 				bookings.remove(booking);
 			}
-			MessageUtils.addMessage(FacesMessage.SEVERITY_INFO, "booking.cancel.success", null);
+			MessageUtils.addMessage(FacesMessage.SEVERITY_INFO, "bkg.cancel.success", null);
 		} catch (Exception e) {
 			LOGGER.error(e.getMessage(), e);
-			MessageUtils.addMessage(FacesMessage.SEVERITY_FATAL, "booking.cancel.failure", null);
+			MessageUtils.addMessage(FacesMessage.SEVERITY_FATAL, "bkg.cancel.failure", null);
 		}
 	}
 	

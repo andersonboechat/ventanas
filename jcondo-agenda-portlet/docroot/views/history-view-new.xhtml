@@ -41,16 +41,17 @@
 					<h:graphicImage value="../images/list.png" />
 				</p:commandLink>
 			</p:column>
-			<p:column style="width: 35px">
+			<p:column style="width: 35px; font-size: 13px;">
 				<p:commandLink title="#{msg['this.book.cancel']}" actionListener="#{historyViewer.onCancel(booking)}" partialSubmit="true" 
 					process="@this" update="@widgetVar(bookingTable),@widgetVar(tabs),@widgetVar(outputMsg)" disabled="#{not historyViewer.isCancelEnabled(booking)}" rendered="#{historyViewer.hasDeadlineExceeded(booking)}">
 					<h:graphicImage value="../images/cancel2.png" />
 					<p:confirm header="#{msg['booking.cancel.header']}" message="#{msg['bkg.cancel.deadline']}" icon="ui-icon-alert"/>
 				</p:commandLink>
 				<p:commandLink title="#{msg['this.book.cancel']}" actionListener="#{historyViewer.onCancel(booking)}" partialSubmit="true" 
-					process="@this" update="@widgetVar(bookingTable),@widgetVar(tabs),@widgetVar(outputMsg)" disabled="#{not historyViewer.isCancelEnabled(booking)}" rendered="#{not historyViewer.hasDeadlineExceeded(booking)}">
+					process="@this" update="@widgetVar(bookingTable),@widgetVar(tabs),@widgetVar(outputMsg)" 
+					disabled="#{not historyViewer.isCancelEnabled(booking)}" rendered="#{not historyViewer.hasDeadlineExceeded(booking)}">
 					<h:graphicImage value="../images/cancel2.png" />
-					<p:confirm header="#{msg['booking.cancel.header']}" message="#{msg['booking.cancel.confirm']}" icon="ui-icon-alert"/>
+					<p:confirm header="#{msg['booking.cancel.header']}" message="#{msg['bkg.cancel.confirm']}" icon="ui-icon-alert"/>
 				</p:commandLink>
 			</p:column>
 		</p:dataTable>

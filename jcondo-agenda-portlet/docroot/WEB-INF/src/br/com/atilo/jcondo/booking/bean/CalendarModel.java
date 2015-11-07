@@ -4,6 +4,7 @@ import java.util.Date;
 import java.util.PropertyResourceBundle;
 
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang.time.DateFormatUtils;
 import org.primefaces.model.DefaultScheduleEvent;
 import org.primefaces.model.LazyScheduleModel;
 
@@ -51,9 +52,14 @@ public class CalendarModel extends LazyScheduleModel {
 	public DefaultScheduleEvent createEvent(RoomBooking booking) throws Exception {
 		DefaultScheduleEvent event; 
 		StringBuffer sb = new StringBuffer();
-		sb.append(((Flat) booking.getDomain()).getBlock()).append("/")
-		  .append(StringUtils.leftPad(String.valueOf(((Flat) booking.getDomain()).getNumber()), 4, "0"))
-		  .append(" ").append(PropertyResourceBundle.getBundle("Language").getString(booking.getStatus().getLabel())); 
+//		sb.append(((Flat) booking.getDomain()).getBlock()).append("/")
+//		  .append(StringUtils.leftPad(String.valueOf(((Flat) booking.getDomain()).getNumber()), 4, "0"))
+//		  .append(" ").append(PropertyResourceBundle.getBundle("Language").getString(booking.getStatus().getLabel()));
+		sb.append("Apt. ").append(((Flat) booking.getDomain()).getNumber()).append(" - Bl. ")
+		  .append(((Flat) booking.getDomain()).getBlock()).append(" ")
+		  .append(DateFormatUtils.format(booking.getBeginDate(), "HH:mm'h'"))
+		  .append(DateFormatUtils.format(booking.getEndDate(), "'-'HH:mm'h'"));
+		
 
 		event = new DefaultScheduleEvent(sb.toString(), booking.getBeginDate(), booking.getBeginDate(), getBookingStyleClass(booking));
 		event.setData(booking);

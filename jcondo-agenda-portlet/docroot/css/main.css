@@ -248,11 +248,11 @@
 	border: 0px solid black;
 	width: 80px !important;
 	height: 34px;
-	padding: 0px 0px 0px 42px;
+	padding: 1px 0px 0px 34px;
 	font-weight: bold;
-	font-size: 13px;
+	font-size: 11px;
 	overflow: visible;
-	color: grey;
+	color: black;
 }
 
 .agenda .fc-border-separate .ui-widget-header {

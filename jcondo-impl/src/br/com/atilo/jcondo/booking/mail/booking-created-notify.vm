@@ -1,0 +1,79 @@
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=ISO-8859-1">
+    <title>[Portal Ventanas]</title>
+  </head>
+  <body text="#000000" bgcolor="#FFFFFF">
+	<p>Prezado(a) Sr./Sra. $personName</p>
+
+	<p>Confirmamos a sua reserva do espaço $roomName para o dia $date das $startTime às $endTime. Caso
+	deseje cancelar a reserva, pedimos para que faça até o dia $deadline, assim evitando possíveis ônus 
+	para o(a) senhor(a).</p>
+
+	<p>Não se esqueça de preencher a lista de seus convidados para que a entrada destes possa ser liberada
+	rapidamente e sem quaisquer transtornos.</p>
+
+	<p>Qualquer dúvida sobre como cancelar a reserva, preencher a lista de convidados, baixar o	termo de 
+	responsabilidade de uso do espaço, entre outras, acesse a nossa central de ajuda, clicando 
+	<a href="">aqui</a>. Se não 
+	conseguir achar a resposta para sua dúvida, entre em contato com a administração através do e-mail 
+	<a href="mailto:$adm-mail">$adm-mail</a></p>
+
+	<p>Qualquer dificuldade de uso do sistema, entre em contato com nosso suporte através do e-mail 
+	<a href="mailto:$support-mail">$support-mail</a></p>
+
+	<p>Tenha uma ótima festa.</p>
+
+	<div class="moz-signature"><br>
+      <div class="moz-signature">
+        <table cellpadding="0" cellspacing="0" width="700px" border="0">
+          <tbody>
+            <tr>
+              <td style="width:100.0%;height:84px;"> 
+				<span style="margin-left:.75pt;margin-bottom: 0px">Atenciosamente,</span>
+                <p style="margin-left:.75pt;margin-top:0px">___________________________________________________________________________</p>
+                <table cellpadding="0" cellspacing="0" width="99%" border="0">
+                  <tbody>
+                    <tr>
+                      <td style="width:17.8%;height:88px;" valign="top">
+                        <p>
+							<img alt="Ventanas Logo" src="http://www.ventanasresidencial.com.br/documents/10179/11610/logo-150x41.png" style="width: 150px; height: 41px;">
+						</p>
+                      </td>
+                      <td style="width:2.08%;height:88px;">
+                        <p>&nbsp;</p>
+                      </td>
+                      <td style="width:80.12%;height:88px;" valign="top">
+                        <table cellpadding="0" cellspacing="0" width="100%" border="0">
+                          <tbody>
+                            <tr>
+                              <td style="width:100.0%;height:13px;">
+                                <p>Portal Ventanas</p>
+                              </td>
+                            </tr>
+                            <tr>
+                              <td style="width:100.0%;height:26px;">
+                                <p>Av. Ruy Antunes Correa, 150 - Rio de Janeiro/RJ - CEP 22793-355</p>
+                                <p>
+									<a href="http://www.ventanasresidencial.com.br">http://www.ventanasresidencial.com.br</a>
+								</p>
+                              </td>
+                            </tr>
+                          </tbody>
+                        </table>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+                <p style="margin-left:.75pt;">
+					<span style="font-size:11px;">Email enviado automaticamente. Favor não respondê-lo, pois o mesmo não é monitorado.</span>
+				</p>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <br>
+    </div>
+  </body>
+</html>

@@ -97,7 +97,7 @@
 			
 			.ui-state-default {border-bottom: 1px solid grey !important;}
 			.ui-tabs-selected {border-bottom: 1px solid transparent !important;}
-			.ui-tabs-nav {background: none !important; position: absolute; top: -.85cm;}
+			.ui-tabs-nav {background: none !important; position: absolute; top: -34px;}
 			.ui-tabs {margin-top: .8cm; padding: 0 !important; border: 0px !important;}
 			.ui-tabs-panel {margin: 0 !important; padding: 15px !important; border: 1px solid grey !important;}
 
@@ -130,6 +130,28 @@
 			.guest-name input {width: 360px; font-style: italic; font-size: 12px; font-family: sans-serif;}
 			
 			.panel .ui-panel-content  {margin: 0px !important; padding: 0px !important;}
+			
+			.ui-dialog-titlebar {
+				background: url("/account-portlet/images/dockbar_bg.png") !important; 
+				color: #fafafa;
+				text-shadow: 1px 1px 5px rgba(84, 84, 84, 1);
+				line-height: 25px;
+				border: 1px solid #335a85 !important;
+			}
+			
+			.ui-dialog {
+				border: none !important;
+			}
+			
+			.ui-dialog-titlebar-close {margin: 4px !important; border: 0px solid white}
+			
+			.ui-dialog-content2 {padding: 0 !important}
+			
+			.ui-dialog-buttonpane {background: #f9f9f9 !important}
+			
+			.ui-growl {font-size: 13px;}
+			
+			
 		</style>
 	</h:head>
 	<h:body>
@@ -140,9 +162,9 @@
 		<c:set var="historyViewer" value="#{bookingBean.historyBean}"/>
 		<c:set var="roomViewer" value="#{bookingBean.roomBean}"/>
 
-		<p:ajaxStatus id="status" onstart="PF('status').show();" oncomplete="PF('status').hide();"/>
+		<p:ajaxStatus id="status2" onstart="PF('status2').show();" oncomplete="PF('status2').hide();"/>
 	
-		<p:dialog widgetVar="status" fitViewport="true" closable="false" modal="true" draggable="false" resizable="false" visible="false" styleClass="status">
+		<p:dialog widgetVar="status2" fitViewport="true" closable="false" modal="true" draggable="false" resizable="false" visible="false" styleClass="status">
 			<p:graphicImage value="../images/loader.gif" style="margin: 5px; vertical-align: middle;"/><h:outputText value="Processando, aguarde." style="font-size: 13px; font-weight: bold; margin: 15px"/>
 		</p:dialog>
 
