@@ -1,0 +1,5 @@
+eclipse.preferences.version=1
+encoding//src/br/com/atilo/jcondo/booking/mail/booking-cancelled-notify.vm=UTF-8
+encoding//src/br/com/atilo/jcondo/booking/mail/booking-created-notify.vm=UTF-8
+encoding//src/br/com/atilo/jcondo/booking/mail/booking-deleted-notify.vm=UTF-8
+encoding//src/br/com/atilo/jcondo/core/mail/membership-request-add.vm=UTF-8
