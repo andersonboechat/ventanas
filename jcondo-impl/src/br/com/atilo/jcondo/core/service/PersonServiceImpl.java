@@ -195,7 +195,9 @@ public class PersonServiceImpl  {
 			List<Membership> newMemberships = person.getMemberships();
 			List<Membership> oldMemberships = membershipService.getMemberships(p);			
 
-			handleMemberships(newMemberships, oldMemberships);
+			handleMemberships(p, newMemberships, oldMemberships);
+			
+			p.setMemberships(membershipService.getMemberships(p));
 
 			try {
 				if (!StringUtils.isEmpty(person.getEmailAddress())) {
@@ -440,7 +442,7 @@ public class PersonServiceImpl  {
 			List<Membership> newMemberships = person.getMemberships();
 			List<Membership> oldMemberships = membershipService.getMemberships(person);
 
-			handleMemberships(newMemberships, oldMemberships);
+			handleMemberships(p, newMemberships, oldMemberships);
 
 			p.setMemberships(membershipService.getMemberships(p));
 
@@ -460,7 +462,7 @@ public class PersonServiceImpl  {
 	}
 
 	@SuppressWarnings("unchecked")
-	private void handleMemberships(List<Membership> newMemberships, List<Membership> oldMemberships) throws Exception {
+	private void handleMemberships(Person person, List<Membership> newMemberships, List<Membership> oldMemberships) throws Exception {
 		if (oldMemberships == null) {
 			oldMemberships = new ArrayList<Membership>();
 		}		
@@ -497,11 +499,11 @@ public class PersonServiceImpl  {
 		}
 		
 		for (Membership membership : toRemove) {
-			membershipService.remove(membership.getDomain(), membership.getPerson(), membership.getType());
+			membershipService.remove(membership.getDomain(), person, membership.getType());
 		}
 
 		for (Membership membership : toAdd) {
-			membershipService.add(membership.getDomain(), membership.getPerson(), membership.getType());
+			membershipService.add(membership.getDomain(), person, membership.getType());
 		}
 	}
 	

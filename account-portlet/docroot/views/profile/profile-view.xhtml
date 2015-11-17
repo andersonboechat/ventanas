@@ -9,7 +9,7 @@
 	xmlns:ui="http://java.sun.com/jsf/facelets">
 <ui:composition template="../main-template.xhtml">
 	<ui:define name="app-view">
-		<p:growl id="messages" showDetail="false" autoUpdate="true"/>
+		<p:growl id="messages" showDetail="false" autoUpdate="true" rendered="false"/>
 		
 		<c:set var="profileUploader" value="#{profileBean.imageUploadBean}"/>
 		<c:set var="profileCamera" value="#{profileBean.cameraBean}"/>
@@ -19,7 +19,8 @@
 				<p:row>
 					<p:column colspan="2">
 						<p:commandLink type="button" title="Alterar senha de acesso" onclick="PF('changePwdDialog').show();" 
-									   style="float: right; margin: 10px -10px 0px 5px; text-decoration: none">
+									   style="float: right; margin: 10px -10px 0px 5px; text-decoration: none"
+									   partialSubmit="true" process="@this">
 							<h:outputText value="Alterar senha de acesso"/>
 							<h:graphicImage value="../images/lock_black.png" style="vertical-align: bottom; margin: 0px 0px 0px 5px"/>
 						</p:commandLink>
@@ -60,7 +61,7 @@
 							<p:column styleClass="labelClm"><p:outputLabel for="identity" value="CPF: "/></p:column>
 							<p:column styleClass="fieldClm">
 								<p:inputMask id="identity" value="#{profileBean.person.identity}" mask="999.999.999-99"
-											 required="true" requiredMessage="#{msg['person.email.empty']}"/>
+											 required="true" requiredMessage="#{msg['person.identity.empty']}"/>
 							</p:column>
 						</p:row>
 						<p:row>
@@ -76,8 +77,8 @@
 							<p:column style="padding-right: 0px;"><p:outputLabel for="birthday" value="Nascimento:"/></p:column>
 							<p:column styleClass="fieldClm">
 								<p:calendar id="birthday" mode="popup" pattern="dd/MM/yyyy" value="#{profileBean.person.birthday}"
-											navigator="true" yearRange="c-100:c+0" mask="true" locale="pt"
-											required="true" requiredMessage="#{msg['person.birthday.empty']}"/>
+											navigator="true" yearRange="c-100:c+100" mask="true" locale="pt"
+											required="true" requiredMessage="#{msg['person.birthday.empty']}" maxdate=""/>
 							</p:column>
 						</p:row>
 						<p:row>

@@ -231,6 +231,7 @@ public class PersonBean {
 		person = new Person();
 		person.setPicture(imageUploadBean.getImage());
 		membership = new Membership(PersonType.RESIDENT, flat);
+		membership.setPerson(person);
 		identity = null;
 		phoneNumber = null;
 	}

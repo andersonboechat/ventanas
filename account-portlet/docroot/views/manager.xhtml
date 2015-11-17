@@ -20,7 +20,7 @@
 				<p:tab id="welcome">
 					<p:panelGrid columns="1" styleClass="no-border no-background no-margin" style="width: 100%; height: 100%;">
 						<p:panel styleClass="no-border" style="width: 100%; height: 230px;">
-							<p>Prezado morador, seja bem vindo.</p>
+							<p>Prezado condômino/morador, seja bem vindo.</p>
 							<p style="text-align: justify;">
 							Algumas informações do seu cadastro ou do cadastro dos seus apartamentos estão incompletas ou precisam ser revisadas.
 							Por favor, clique no botão Iniciar para concluir esse processo e ter acesso a todos os serviços de nosso portal.
@@ -57,28 +57,27 @@
 						</p:column>
 						<p:column styleClass="labelClm"><p:outputLabel for="male" value="Sexo:"/></p:column>
 						<p:column>
-							<p:selectOneMenu id="male" value="#{managerBean.person.gender}" required="true" 
-											 requiredMessage="#{msg['person.gender.empty']}" style="vertical-align: middle">
-								<f:selectItem itemLabel="Selecione" noSelectionOption="true"/>
-								<f:selectItems var="gender" value="#{managerBean.genders}" itemLabel="#{msg[gender.label]}"/>
-							</p:selectOneMenu>
+							<p:selectOneRadio id="male" value="#{profileBean.person.gender}" required="false" 
+											  styleClass="kintype" style="vertical-align: middle">
+								<f:selectItems var="gender" value="#{profileBean.genders}" itemLabel="#{msg[gender.label]}"/>
+							</p:selectOneRadio>
 						</p:column>
 						<p:column styleClass="labelClm"><p:outputLabel for="birthday" value="Nascimento:"/></p:column>
 						<p:column styleClass="fieldClm">
 							<p:calendar id="birthday" mode="popup" pattern="dd/MM/yyyy" value="#{managerBean.person.birthday}"
 										navigator="true" yearRange="c-100:c+0" styleClass="birthday" mask="true" locale="pt" 
-										requiredMessage="A data de nascimento deve ser informada" required="true"/>
+										requiredMessage="#{msg['person.birthday.empty']}" required="true"/>
 						</p:column>
 					</p:panelGrid>
 					<p:column>
 						<p:commandButton value="#{msg.forward}" actionListener="#{managerBean.onSavePerson}" 
 										 update=":outputMsg" rendered="#{not empty managerBean.flats}" 
 										 oncomplete="if (!args.validationFailed &amp;&amp; !args.exception) {PF('wiz').next();}" 
-										 style="float: right; padding: 2px; width: 90px; margin: 10px 10px 0px;"/>
+										 style="float: right; padding: 2px; width: 90px; margin: 10px 0px 0px;"/>
 						<p:commandButton value="#{msg.finish}" actionListener="#{managerBean.onFinish}" 
 										 update="wiz,:outputMsg" rendered="#{empty managerBean.flats}"
 										 oncomplete="if (!args.validationFailed &amp;&amp; !args.exception) {PF('registerCompleteDialog').hide();}" 
-										 style="float: right; padding: 2px; width: 90px; margin: 10px 10px 0px;"/>
+										 style="float: right; padding: 2px; width: 90px; margin: 10px 0px 0px;"/>
 						<p:commandButton value="Voltar" type="button" onclick="PF('wiz').back();" style="float: right; padding: 2px; width: 85px; margin-right: 8px;" rendered="false"/>
 					</p:column>
 					</p:panelGrid>

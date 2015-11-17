@@ -16,5 +16,6 @@
 	</classpathentry>
 	<classpathentry kind="con" path="org.eclipse.jdt.USER_LIBRARY/LIFERAY_LIB"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.USER_LIBRARY/JCONDO_LIB"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.junit.JUNIT_CONTAINER/4"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

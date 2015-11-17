@@ -16,9 +16,12 @@ import br.com.atilo.jcondo.booking.persistence.entity.GuestEntity;
 import br.com.atilo.jcondo.booking.persistence.entity.RoomBookingEntity;
 import br.com.atilo.jcondo.commons.BeanUtils;
 import br.com.atilo.jcondo.core.persistence.manager.JCondoManager;
+import br.com.atilo.jcondo.core.persistence.manager.PersonManagerImpl;
 
 public class RoomBookingManagerImpl extends JCondoManager<RoomBookingEntity, RoomBooking> {
 
+	private PersonManagerImpl personManager = new PersonManagerImpl();
+	
 	@Override
 	protected Class<RoomBooking> getModelClass() {
 		return RoomBooking.class;
@@ -66,6 +69,7 @@ public class RoomBookingManagerImpl extends JCondoManager<RoomBookingEntity, Roo
 				guests.add(model);
 			}
 			roomBooking.setGuests(guests);
+			roomBooking.setPerson(personManager.findById(entity.getPerson().getId()));
 			
 			return roomBooking;
 		} catch (Exception e) {

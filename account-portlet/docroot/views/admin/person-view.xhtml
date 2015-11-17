@@ -1,0 +1,287 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+
+<f:view
+	xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:c="http://java.sun.com/jsp/jstl/core"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:ui="http://java.sun.com/jsf/facelets">
+
+	<h:form id="person-form">
+		<p:growl id="personMsg" widgetVar="personMsg" sticky="true"/>
+	
+		<p:panelGrid columns="3" styleClass="no-border person-cmds" columnClasses="person-cmds-left,person-cmds-left,person-cmds-right">
+			<p:column>
+				<p:inputText id="personName" widgetVar="personName" valueChangeListener="#{admFlatBean.personBean.onPersonSearch}" 
+							 placeholder="Buscar pelo nome" styleClass="searchField"/>
+				<p:commandButton value="Buscar" update="@widgetVar(personTable)" partialSubmit="true" 
+								 process="@widgetVar(personName)" styleClass="searchBtn"/>
+			</p:column>
+
+			<p:column>
+				<p:selectOneMenu id="personType" widgetVar="personType" style="font-size: 13px; float: right;">
+					<f:selectItem itemLabel="Todos" itemValue="all" noSelectionOption="true"/>
+					<f:selectItem itemLabel="#{msg['person.type.resident']}" itemValue="resident"/>
+					<f:selectItem itemLabel="#{msg['person.type.guest']}" itemValue="guest"/>
+					<f:selectItem itemLabel="#{msg['person.type.visitor']}" itemValue="visitor"/>
+					<f:selectItem itemLabel="#{msg['person.type.employee']}" itemValue="employee"/>
+					<p:ajax event="change" listener="#{admFlatBean.personBean.onPersonTypeSelect}" update="@widgetVar(personTable)"/>
+	    		</p:selectOneMenu>
+			</p:column>
+
+			<p:commandButton value="Cadastrar uma pessoa" actionListener="#{admFlatBean.personBean.onPersonCreate}" 
+							 partialSubmit="true" process="@this" update="@widgetVar(personDialog)" oncomplete="PF('personDialog').show();"
+							 style="font-size: 12px; margin: 0; padding:0"/>
+
+			<p:commandButton value="Enviar mensagens a todos desta lista" actionListener="#{admFlatBean.personBean.onPersonCreate}" 
+							 partialSubmit="true" process="@this" update="@widgetVar(personDialog)" oncomplete="PF('personDialog').show();"
+							 style="font-size: 12px; margin: 0; padding:0" rendered="false"/>
+		</p:panelGrid>
+
+		<p:dataTable widgetVar="personTable" id="personTable" var="person" value="#{admFlatBean.personBean.model}"  
+		             paginator="false" emptyMessage="Nenhum usuário cadastrado" 
+		             rowKey="#{person.id}" disabledSelection="#{!admFlatBean.personBean.canEditPerson(person)}" styleClass="no-header no-border"
+		             tableStyleClass="no-border">
+		    <p:ajax event="page" global="false"/>
+			<p:column style="width: 49px;">
+				<p:panel styleClass="foto no-margin no-background" style="width: 43px !important; height: 66px !important">
+					<p:graphicImage value="#{person.picture.path}" height="66" width="43"/>
+				</p:panel>
+			</p:column>
+			<p:column style="vertical-align: top">
+				<p:panelGrid columns="1" styleClass="no-background no-border">
+	       			<h:outputText value="#{person.firstName} #{person.lastName}" style="font-size: 14px; color: black; font-weight: bold;"/>
+	       			<p:panel styleClass="no-background no-border no-margin" style="width: 30%">
+	       				<h:outputText value="#{msg[admFlatBean.personBean.displayMembership(person)]}" style="vertical-align: top;"/>
+				        <p:graphicImage value="../images/question.png" width="15" height="15" style="margin-left: 5px;"/>
+					    <p:tooltip for="@parent:@child(1)" value="#{msg[admFlatBean.personBean.displayMembership(person).concat('.desc')]}" rendered="true" style="width: 220px; font-size: 12px; "/>
+				    </p:panel>
+				</p:panelGrid>
+			</p:column>
+			<p:column style="width: 35px">
+				<p:commandLink title="Editar este usuário" actionListener="#{admFlatBean.personBean.onPersonEdit}" oncomplete="PF('personDialog').show();" partialSubmit="true" process="@this" update="@widgetVar(personDialog)" global="false" disabled="#{!admFlatBean.personBean.canEditPerson(person)}">
+					<h:graphicImage value="../images/edit.png"/>
+				</p:commandLink>
+			</p:column>
+			<p:column style="width: 35px">
+				<p:commandLink title="Excluir este usuário" actionListener="#{admFlatBean.personBean.onPersonDelete}" oncomplete="if (!args.validationFailed &amp;&amp; !args.exception) {PF('personTable').update();}" partialSubmit="true" process="@this" global="false" update=":outputMsg" disabled="#{!admFlatBean.personBean.canEditPerson(person)}">
+					<h:graphicImage value="../images/cancel2.png" />
+					<p:confirm header="#{msg['person.delete.confirm']}" message="#{msg['person.delete.message']}" icon="ui-icon-alert"/>
+				</p:commandLink>
+			</p:column>
+		</p:dataTable>
+		<p:confirmDialog widgetVar="personFoundDialog" showEffect="fade" hideEffect="fade" 
+						 styleClass="alert no-margin" closable="false" width="300px">
+			<f:facet name="header">
+				<p:graphicImage value="../images/user_ico.png" style="vertical-align: top; margin-right: 10px;"/>
+				<p:outputLabel value="Pessoa encontrada" style="vertical-align: top; line-height: 25px;"/>
+			</f:facet>
+			<f:facet name="message">
+				<p:messages id="alertMsg" severity="info" autoUpdate="true" 
+							styleClass="no-background no-margin" style="text-align: justify; margin: 0;"/>
+			</f:facet>
+			<p:panel styleClass="no-background no-border" style="text-align: center; width: 200px; margin: 0 auto;">
+				<p:commandButton value="#{msg['no']}" type="button" onclick="PF('personFoundDialog').hide();" 
+								 icon="ui-icon-close" style=" float:right;"/>
+				<p:commandButton value="#{msg['yes']}" actionListener="#{admFlatBean.personBean.onMembershipAdd}" 
+								 update=":outputMsg" oncomplete="PF('personDialog').hide();" 
+								 icon="ui-icon-check" style="margin-left: 5px;"/>
+			</p:panel>
+		</p:confirmDialog>
+	</h:form>
+
+	<p:dialog widgetVar="personDialog" draggable="false" resizable="false" modal="true" closable="false" 
+			  visible="false" style="background: #f9f9f9" dynamic="true">
+		<f:facet name="header">
+			<p:graphicImage value="../images/user_ico.png" style="vertical-align: top; margin-right: 10px;"/>
+			<p:outputLabel value="#{msg['dlg.user.signon']}" style="vertical-align: top; line-height: 25px;"/>
+		</f:facet>
+		<h:form id="person-details-form">
+			<p:panelGrid id="model-details" styleClass="no-background no-border" style="margin: 10px 0px 20px 0px;" cellpadding="10">
+				<p:row>
+					<p:column styleClass="my-account-col2">
+						<p:panelGrid columns="3" styleClass="userPanel no-border no-background" style="width: 100%; margin: 0; padding: 0;">
+						<p:row>
+							<p:column styleClass="labelClm"><p:outputLabel for="type" value="Tipo: "/></p:column>
+							<p:column colspan="2" styleClass="fieldClm">
+								<h:outputText value="#{msg[admFlatBean.personBean.membership.type.label]}" rendered="#{!admFlatBean.personBean.canChangeType()}"/>
+								<p:selectOneMenu id="type" value="#{admFlatBean.personBean.membership.type}" styleClass="select"
+												 style="vertical-align: middle; width: 100%; margin-right: 0px;" 
+												 rendered="#{admFlatBean.personBean.canChangeType()}"
+												 disabled="#{!admFlatBean.personBean.canEditPerson(admFlatBean.personBean.person)}">
+									<f:selectItems var="type" value="#{admFlatBean.personBean.types}" itemLabel="#{msg[type.label]}"/>
+									<p:ajax event="change" update="person-details-form" global="false" resetValues="true"/>
+								</p:selectOneMenu>
+							</p:column>
+						</p:row>
+						<p:row>
+							<p:column styleClass="labelClm"><p:outputLabel for="identity" value="CPF: "/></p:column>
+							<p:column colspan="2" styleClass="fieldClm">
+								<h:inputHidden id="identity" value="#{admFlatBean.personBean.person.identity}" required="#{admFlatBean.personBean.membership.type != 'RESIDENT'}" requiredMessage="#{msg['person.identity.empty']}"/>
+								<p:inputMask value="#{admFlatBean.personBean.identity}" mask="999.999.999-99" readonly="#{admFlatBean.personBean.person.id > 0 and not empty(admFlatBean.personBean.person.identity)}">
+									<p:ajax event="change" listener="#{admFlatBean.personBean.onSearchByCPF}"	
+											update="person-details-form,@widgetVar(personMsg)" partialSubmit="true" process="@this" 
+											oncomplete="if (!args.validationFailed &amp;&amp; args.alert) {PF('personFoundDialog').show();}"/>
+								</p:inputMask>
+							</p:column>
+						</p:row>
+						<p:row>
+							<p:column styleClass="labelClm"><p:outputLabel for="firstName" value="Nome: "/></p:column>
+							<p:column colspan="2" styleClass="fieldClm">
+								<p:inputText id="firstName" value="#{admFlatBean.personBean.person.firstName}" required="true" lang="pt" 
+											 requiredMessage="#{msg['person.firstname.empty']}"
+											 validatorMessage="O nome deve conter somente letras">
+        							<f:validateRegex pattern="^([\s]*\p{L}[\s]*)+$" />
+								</p:inputText>
+							</p:column>
+						</p:row>
+						<p:row>
+							<p:column styleClass="labelClm"><p:outputLabel for="lastName" value="Sobrenome: "/></p:column>
+							<p:column colspan="2" styleClass="fieldClm">
+								<p:inputText id="lastName" value="#{admFlatBean.personBean.person.lastName}" required="true" 
+											 requiredMessage="#{msg['person.lastname.empty']}"
+											 validatorMessage="O sobrenome deve conter somente letras">
+        							<f:validateRegex pattern="^([\s]*\p{L}[\s]*)+$" />
+								</p:inputText>
+							</p:column>
+						</p:row>
+						<p:row>
+							<p:column styleClass="labelClm"><p:outputLabel for="gender" value="Sexo:"/></p:column>
+							<p:column colspan="2" styleClass="fieldClm">
+								<p:selectOneRadio id="gender" value="#{admFlatBean.personBean.person.gender}" required="false" 
+												  styleClass="kintype" style="vertical-align: middle"
+												  disabled="#{!admFlatBean.personBean.canEditPerson(admFlatBean.personBean.person)}">
+									<f:selectItems var="gender" value="#{admFlatBean.personBean.genders}" itemLabel="#{msg[gender.label]}"/>
+								</p:selectOneRadio>
+							</p:column>
+						</p:row>
+						<p:row rendered="#{admFlatBean.personBean.membership.type != 'VISITOR' and admFlatBean.personBean.membership.type != 'GUEST' and admFlatBean.personBean.membership.type != 'EMPLOYEE'}">
+							<p:column styleClass="labelClm"><p:outputLabel for="birthday" value="Nascimento:"/></p:column>
+							<p:column colspan="2" styleClass="fieldClm">
+								<p:calendar id="birthday" mode="popup" pattern="dd/MM/yyyy" value="#{admFlatBean.personBean.person.birthday}"
+											navigator="true" yearRange="c-100:c+0" mask="true" locale="pt" 
+											required="true" requiredMessage="#{msg['person.birthday.empty']}"/>
+							</p:column>
+						</p:row>
+						<p:row rendered="#{admFlatBean.personBean.membership.type != 'VISITOR' and admFlatBean.personBean.membership.type != 'GUEST' and admFlatBean.personBean.membership.type != 'EMPLOYEE'}">
+							<p:column styleClass="labelClm"><p:outputLabel for="phone" value="Telefone:"/></p:column>
+							<p:column styleClass="fieldClm">
+								<p:selectOneMenu id="phoneType" value="#{admFlatBean.personBean.phone.type}" styleClass="select" 
+												 style="width: 120px; vertical-align: top;">
+									<f:selectItem itemLabel="Tipo" noSelectionOption="true"/>
+									<f:selectItems var="type" value="#{admFlatBean.personBean.phoneTypes}" itemLabel="#{msg[type.label]}"/>
+									<p:ajax event="change" global="false">
+										<f:setPropertyActionListener value="#{type}" target="#{admFlatBean.personBean.phone.type}"/>
+									</p:ajax>
+								</p:selectOneMenu>
+							</p:column>
+							<p:column styleClass="fieldClm">
+								<p:inputMask id="phone" value="#{admFlatBean.personBean.phoneNumber}" mask="(99) 9999-9999?9" 
+											 validator="#{admFlatBean.personBean.validatePhone}" validatorMessage="#{msg['person.phone.type.empty']}"
+											 style="vertical-align: top; width: 91%"/>
+							</p:column>
+						</p:row>
+						<p:row rendered="#{admFlatBean.personBean.membership.type != 'VISITOR' and admFlatBean.personBean.membership.type != 'GUEST' and admFlatBean.personBean.membership.type != 'EMPLOYEE'}">
+							<p:column styleClass="labelClm"><p:outputLabel for="email" value="Email: "/></p:column>
+							<p:column colspan="2" styleClass="fieldClm">
+								<p:inputText id="email" value="#{admFlatBean.personBean.person.emailAddress}"  
+											 required="#{admFlatBean.personBean.membership.type != 'RESIDENT'}" 
+											 requiredMessage="#{msg['person.email.empty']}"/>
+							</p:column>
+						</p:row>
+						<p:row rendered="#{admFlatBean.personBean.membership.type != 'VISITOR' and admFlatBean.personBean.membership.type != 'EMPLOYEE'}">
+							<p:column styleClass="labelClm"><p:outputLabel for="kinType" value="Parentesco:"/></p:column>
+							<p:column colspan="2" styleClass="fieldClm">
+								<p:selectOneMenu id="kinType" value="#{admFlatBean.personBean.kinship.type}" 
+												 styleClass="select" style="width: 100%;">
+									<f:selectItem itemLabel="Nenhum" noSelectionOption="true"/>
+									<f:selectItems var="kinType" value="#{admFlatBean.personBean.kinTypes}" itemLabel="#{msg[kinType.label]}"/>
+								</p:selectOneMenu>
+							</p:column>
+						</p:row>
+						</p:panelGrid>
+					</p:column>
+					<p:column styleClass="my-account-col1">
+						<p:panelGrid columns="1" styleClass="no-margin no-border no-background">
+							<p:panel styleClass="user-image foto no-margin no-background2" style="width: #{imageUploader.width}px !important; height: #{imageUploader.height}px !important">
+								<p:graphicImage id="portrait" value="#{admFlatBean.personBean.person.picture.path}" width="#{imageUploader.width}" height="#{imageUploader.height}"/>
+							</p:panel>
+							<p:panelGrid columns="2" columnClasses="picture" styleClass="pic-cmds no-border no-background" style="text-align: center; float: right">
+								<p:fileUpload label="" fileUploadListener="#{imageUploader.onUpload}" auto="true" 
+											  update=":tabs:person-picture-form" oncomplete="PF('personPictureDialog').show();"
+											  disabled="#{!admFlatBean.personBean.canEditPerson(admFlatBean.personBean.person)}" />
+								<p:commandLink title="#{msg['take.picture']}" actionListener="#{personCamera.setRender(true)}" 
+											   update=":tabs:person-camera-form" oncomplete="PF('personCameraDialog').show();" 
+											   partialSubmit="true" global="false" process="@this" styleClass="column"
+											   disabled="#{!admFlatBean.personBean.canEditPerson(admFlatBean.personBean.person)}">
+									<h:graphicImage value="../images/take-pic.png" width="38" height="31"/>
+									<f:setPropertyActionListener target="#{personCamera.image.path}" value=""/>
+								</p:commandLink>
+							</p:panelGrid>
+				        </p:panelGrid>
+					</p:column>
+				</p:row>
+			</p:panelGrid>
+			<p:commandButton value="#{msg['cancel']}" process="@this" oncomplete="PF('personDialog').hide();" global="false" style="float: right; width: 90px; margin: 0px 0px 10px 0px;">
+				<p:resetInput target="person-details-form" />
+			</p:commandButton>
+			<p:commandButton value="#{msg['finish']}" actionListener="#{admFlatBean.personBean.onPersonSave}" 
+							 update="@widgetVar(personTable),@widgetVar(outputMsg)" 
+							 oncomplete="if (!args.validationFailed &amp;&amp; !args.exception) {PF('personDialog').hide();}" 
+							 style="float: right; width: 90px; margin: 0px 10px 10px 5px;"/>
+		</h:form>
+	</p:dialog>
+
+	<p:dialog id="personPictureDialog" widgetVar="personPictureDialog" resizable="false" draggable="false" modal="true" visible="false" width="400">
+		<f:facet name="header">
+			<p:graphicImage value="../images/picture_ico.png" style="vertical-align: top; margin-right: 10px;"/>
+			<p:outputLabel value="Envio de Foto" style="vertical-align: top; line-height: 22px"/>
+		</f:facet>			
+		<h:form id="person-picture-form" enctype="multipart/form-data">
+			<p:panelGrid columns="1" columnClasses="cropper" styleClass="no-margin no-border" style="width: 100%;">
+				<p:outputPanel style="width: #{imageUploader.image.width}px; height: #{imageUploader.image.height}px;" styleClass="foto">
+					<p:imageCropper value="#{imageUploader.croppedImage}" image="#{imageUploader.image.path}" initialCoords="0,0,#{imageUploader.width},#{imageUploader.height}" minSize="#{imageUploader.width},#{imageUploader.height}" maxSize="#{imageUploader.width},#{imageUploader.height}"/>
+				</p:outputPanel>
+				<p:panel style="text-align: center; padding: 10px 0px;" styleClass="no-border no-margin">
+					<p:commandButton value="Recortar" actionListener="#{imageUploader.onCropp}" 
+									 update=":tabs:person-details-form:portrait" oncomplete="PF('personPictureDialog').hide();"
+									 style="margin-right: 5px;">
+						<f:setPropertyActionListener value="#{imageUploader.image}" target="#{admFlatBean.personBean.person.picture}"/>
+					</p:commandButton>
+					<p:commandButton value="Cancelar" oncomplete="PF('personPictureDialog').hide();" partialSubmit="true" process="@this" 
+									 global="false" style="margin-left: 5px;">
+						<f:setPropertyActionListener target="#{imageUploader.image.path}" value=""/>
+					</p:commandButton>
+				</p:panel>
+			</p:panelGrid>
+		</h:form>
+	</p:dialog>
+	
+	<p:dialog id="personCameraDialog" widgetVar="personCameraDialog" resizable="false" 
+			  draggable="false" modal="true" closeOnEscape="true" visible="false" style="background: #f9f9f9">
+		<f:facet name="header">
+			<p:graphicImage value="../images/picture_ico.png" style="vertical-align: top; margin-right: 10px;"/>
+			<p:outputLabel value="Captura de Imagem" style="vertical-align: top; line-height: 22px"/>
+		</f:facet>
+		<h:form id="person-camera-form">
+			<p:panelGrid columns="2" styleClass="no-border no-background">
+				<p:photoCam widgetVar="photoCam1" listener="#{personCamera.onCapture}" update="croppedPhoto" styleClass="foto" rendered="#{personCamera.render}"/>
+				<p:outputPanel id="croppedPhoto" style="width: 320px; height: 240px" styleClass="foto">
+					<p:imageCropper value="#{personCamera.croppedImage}" image="#{personCamera.image.path}" 
+									initialCoords="0,0,#{personCamera.width},#{personCamera.height}" 
+									minSize="#{personCamera.width},#{personCamera.height}" 
+									maxSize="#{personCamera.width},#{personCamera.height}"/>
+				</p:outputPanel>
+			</p:panelGrid>
+			<p:commandButton value="Recortar" actionListener="#{personCamera.onCropp}" 
+							 update=":tabs:person-details-form:portrait" global="false" oncomplete="PF('personCameraDialog').hide();"
+							 style="float: right; padding: 2px; margin: 15px 5px;">
+				<f:setPropertyActionListener value="#{personCamera.image}" target="#{admFlatBean.personBean.person.picture}"/>
+			</p:commandButton>
+			<p:commandButton value="Capturar" type="button" onclick="PF('photoCam1').capture();" style="float: right; padding: 2px; margin: 15px 5px;"/>
+		</h:form>
+	</p:dialog>
+
+
+</f:view>

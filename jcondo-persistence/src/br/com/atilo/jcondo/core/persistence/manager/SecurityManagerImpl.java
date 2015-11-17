@@ -126,7 +126,13 @@ public class SecurityManagerImpl {
 			}
 
 			Person p = personManager.findById(person.getId());
-			List<Membership> memberships = new ArrayList<Membership>(p.getMemberships());
+			List<Membership> memberships;
+			if (p != null) {
+				memberships = new ArrayList<Membership>(p.getMemberships()); 
+			} else {
+				memberships = new ArrayList<Membership>();
+			}
+			
 			memberships.add(membership);
 
 			handleAccountAccess(p, memberships);
@@ -202,7 +208,12 @@ public class SecurityManagerImpl {
 				}
 			}
 
-			List<Membership> memberships = new ArrayList<Membership>(p.getMemberships());
+			List<Membership> memberships;
+			if (p != null) {
+				memberships = new ArrayList<Membership>(p.getMemberships()); 
+			} else {
+				memberships = new ArrayList<Membership>();
+			}
 			memberships.remove(membership);
 
 			List<PersonType> internalTypes = Arrays.asList(PersonType.OWNER, PersonType.RENTER, PersonType.RESIDENT, 

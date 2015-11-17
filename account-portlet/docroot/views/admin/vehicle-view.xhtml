@@ -1,0 +1,166 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+
+<f:view
+	xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:c="http://java.sun.com/jsp/jstl/core"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:ui="http://java.sun.com/jsf/facelets">
+	<h:form id="vehicle-form">
+		<p:panelGrid columns="2" styleClass="no-border person-cmds" columnClasses="person-cmds-left,person-cmds-right">
+			<p:column>
+				<p:inputText id="carLicense" widgetVar="carLicense" valueChangeListener="#{admFlatBean.vehicleBean.onVehicleSearch}" 
+							 placeholder="Buscar pela placa" styleClass="searchField"/>
+				<p:commandButton value="Buscar" update="@widgetVar(vehicleTable)" partialSubmit="true" 
+								 process="@widgetVar(carLicense)" styleClass="searchBtn"/>
+			</p:column>
+
+			<p:commandButton value="Cadastrar um veículo" actionListener="#{admFlatBean.vehicleBean.onVehicleCreate}" 
+							 partialSubmit="true" process="@this" update=":tabs:vehicle-details-form" oncomplete="PF('vehicleDialog').show();"
+							 style="font-size: 12px" global="false"/>
+		</p:panelGrid>
+		<p:dataGrid id="vehicleTable" widgetVar="vehicleTable" var="vehicle" value="#{admFlatBean.vehicleBean.model}" 
+					columns="4" layout="grid" paginator="false" emptyMessage="Nenhum veículo cadastrado" 
+					styleClass="no-border no-header">
+	        <p:panel header="#{msg[vehicle.type.label]}" styleClass="vehicle-box">
+	            <h:panelGrid columns="1" style="width:100%">
+					<p:panel styleClass="car-image foto no-margin no-background" style="width: 100px !important; height: 90px !important; background-size: 100px 90px; margin: 0 auto 5px !important;"  rendered="#{vehicle.type == 'CAR'}">
+				        <p:graphicImage value="#{vehicle.image.path}" width="100" height="90"/>
+					</p:panel>
+					<p:panel styleClass="moto-image foto no-margin no-background" style="width: 100px !important; height: 90px !important; background-size: 100px 90px; margin: 0 auto 5px !important;" rendered="#{vehicle.type == 'MOTO'}">
+				        <p:graphicImage value="#{vehicle.image.path}" width="100" height="90"/>
+					</p:panel>
+					<p:panel styleClass="bike-image foto no-margin no-background" style="width: 100px !important; height: 90px !important; background-size: 100px 90px; margin: 0 auto 5px !important;" rendered="#{vehicle.type == 'BIKE'}">
+				        <p:graphicImage value="#{vehicle.image.path}" style="margin: 0px" width="100" height="90"/>
+					</p:panel>
+
+					<p:outputLabel value="#{vehicle.license} - #{msg[admFlatBean.vehicleBean.displayLabel(vehicle)]}" rendered="#{vehicle.type != 'BIKE'}"/>
+					<p:outputLabel value="#{vehicle.license}" rendered="#{vehicle.type == 'BIKE'}"/>
+
+	 				<h:panelGrid columns="2" style="width:100%;">
+						<p:commandLink update=":tabs:vehicle-details-form" 
+									   actionListener="#{admFlatBean.vehicleBean.onVehicleEdit}" oncomplete="PF('vehicleDialog').show();" 
+									   partialSubmit="true" process="@this" title="Alterar dados deste veículo">
+							<h:graphicImage value="../images/edit.png" style="float: right; margin-right: 5px;"/>
+						</p:commandLink>
+						<p:commandLink actionListener="#{admFlatBean.vehicleBean.onVehicleDelete}" update="vehicleTable,:outputMsg" 
+									   partialSubmit="true" process="@this" title="Excluir este veículo">
+							<h:graphicImage value="../images/cancel2.png" style="float: left; margin-left: 5px;" />
+							<p:confirm header="Exclusão de veículo" message="Você confirma a exclusão do veículo, deste apartamento?" icon="ui-icon-alert"/>
+						</p:commandLink>
+					</h:panelGrid>
+	            </h:panelGrid>
+	        </p:panel>
+	    </p:dataGrid>
+		<p:confirmDialog global="true" showEffect="fade" hideEffect="fade" visible="false" closable="false"
+						  style="padding: 0px; font-size: 13px;">
+			<p:panel style="width: 220px; margin: 0 auto;" styleClass="no-border no-background">
+				<p:commandButton value="#{msg['no']}" type="button" styleClass="ui-confirmdialog-no" icon="ui-icon-close" style="float: right; width: 85px;" />
+				<p:commandButton value="#{msg['yes']}" type="button" styleClass="ui-confirmdialog-yes" icon="ui-icon-check" style="width: 85px;"/>
+			</p:panel>
+		</p:confirmDialog>
+	</h:form>
+
+	<h:form id="vehicle-details-form" enctype="multipart/form-data">
+		<p:dialog widgetVar="vehicleDialog" draggable="false" resizable="false" modal="true" 
+				 visible="false" closable="false" style="background: #f9f9f9">
+			<f:facet name="header">
+				<p:graphicImage value="../images/vehicle.png" style="vertical-align: top; margin-right: 10px;"/>
+				<p:outputLabel value="Cadastro de Veículo" style="vertical-align: top; line-height: 20px"/>
+			</f:facet>			
+			<p:panelGrid id="vehicle-details" columns="1" styleClass="no-border no-background" style="width: 100%;">
+				<p:panel id="portrait" styleClass="no-border no-margin no-background">
+					<p:panel styleClass="foto no-margin no-background" style="width: 364px !important; height: 300px !important; background-size: 364px 300px; margin: 0 auto 5px !important;"  rendered="#{admFlatBean.vehicleBean.vehicle.type == null}">
+				        <p:graphicImage value="#{admFlatBean.vehicleBean.vehicle.image.path}" width="364" height="300"/>
+					</p:panel>
+					<p:panel styleClass="car-image foto no-margin no-background" style="width: 364px !important; height: 300px !important; background-size: 364px 300px; margin: 0 auto 5px !important;"  rendered="#{admFlatBean.vehicleBean.vehicle.type == 'CAR'}">
+				        <p:graphicImage value="#{admFlatBean.vehicleBean.vehicle.image.path}" width="364" height="300"/>
+					</p:panel>
+					<p:panel styleClass="moto-image foto no-margin no-background" style="width: 364px !important; height: 300px !important; background-size: 364px 300px; margin: 0 auto 5px !important;" rendered="#{admFlatBean.vehicleBean.vehicle.type == 'MOTO'}">
+				        <p:graphicImage value="#{admFlatBean.vehicleBean.vehicle.image.path}" width="364" height="300"/>
+					</p:panel>
+					<p:panel styleClass="bike-image foto no-margin no-background" style="width: 364px !important; height: 300px !important; background-size: 364px 300px; margin: 0 auto 5px !important;" rendered="#{admFlatBean.vehicleBean.vehicle.type == 'BIKE'}">
+				        <p:graphicImage value="#{admFlatBean.vehicleBean.vehicle.image.path}" style="margin: 0px" width="364" height="300"/>
+					</p:panel>			
+				</p:panel>
+				<p:panelGrid columns="3" styleClass="no-border no-background" style="width: 100%;">
+					<p:selectOneMenu widgetVar="vehicleType" id="vehicleType" value="#{admFlatBean.vehicleBean.vehicle.type}" required="true" 
+									 requiredMessage="Selecione o tipo do veículo" style="width: 115px; float: left; margin-left: 5px;">
+						<f:selectItem itemLabel="Tipo" noSelectionOption="true"/>
+						<f:selectItems var="type" value="#{admFlatBean.vehicleBean.types}" itemValue="#{type}" itemLabel="#{msg[type.label]}"/>
+						<p:ajax event="change" update="vehicle-details" global="false"/>
+					</p:selectOneMenu>
+			    	<p:inputMask widgetVar="license" id="license" mask="aaa?-9999" value="#{admFlatBean.vehicleBean.vehicle.license}" 
+			    				 style="width: 120px; text-transform: uppercase;" readonly="#{admFlatBean.vehicleBean.vehicle.id > 0}" 
+			    				 rendered="#{admFlatBean.vehicleBean.vehicle.type != 'BIKE'}" required="true" requiredMessage="Informe a placa do veículo"
+			    				 placeholder="Placa"/>
+			        <p:inputText id="serial" value="#{admFlatBean.vehicleBean.vehicle.license}" maxlength="15" 
+			        			 style="width: 120px; text-transform: uppercase;" placeholder="Número de Serie" 
+			        			 readonly="#{admFlatBean.vehicleBean.vehicle.id > 0}" rendered="#{admFlatBean.vehicleBean.vehicle.type == 'BIKE'}"/>
+			        <p:fileUpload label="" fileUploadListener="#{vehiclePictureUploader.onUpload}" auto="true" 
+			        			  update=":tabs:vehicle-picture-form" oncomplete="PF('vehiclePictureDialog').show();" styleClass="vehicle-picture"/>
+				</p:panelGrid>
+				<p:column>
+					<p:commandButton value="Cancelar" type="button" onclick="PF('vehicleDialog').hide();" 
+									 style="float: right; width: 90px; margin: 5px 12px 10px 0px;" global="false"/>
+					<p:commandButton value="Salvar" oncomplete="if (!args.validationFailed) {PF('confirmData').show();}"
+									 style="float: right; width: 90px; margin: 5px 12px 10px 0px;" update=":outputMsg"/>
+				</p:column>
+			</p:panelGrid>
+		</p:dialog>
+		<p:confirmDialog id="confirmData" widgetVar="confirmData" message="Os dados abaixo estão corretos?" header="Confirmação de dados" 
+						 severity="alert" showEffect="fade" hideEffect="fade" style="background: #f9f9f9">
+			<p:outputPanel autoUpdate="true" style="text-align: center">
+				<p:panelGrid columns="2" styleClass="no-border no-background" style="margin: 0 auto;">
+					<h:outputText value="Veículo:" rendered="#{admFlatBean.vehicleBean.vehicle.type != null}"/>
+					<h:outputText value="#{msg[admFlatBean.vehicleBean.vehicle.type.label]}" rendered="#{admFlatBean.vehicleBean.vehicle.type != null}"/>
+					<h:outputText value="Placa:" rendered="#{admFlatBean.vehicleBean.vehicle.type != 'BIKE'}"/>
+					<h:outputText value="Número de Serie:" rendered="#{admFlatBean.vehicleBean.vehicle.type == 'BIKE'}"/>
+					<h:outputText value="#{admFlatBean.vehicleBean.vehicle.license}" style="text-transform: uppercase;"/>
+				</p:panelGrid>
+			</p:outputPanel>
+			<p:panel style="text-align: center; border: 0px solid black; width: 200px; margin: 0 auto;" styleClass="no-background">
+				<p:commandButton value="#{msg['no']}" type="button" onclick="PF('confirmData').hide();" icon="ui-icon-close" style=" float:right;"/>
+				<p:commandButton value="#{msg['yes']}" actionListener="#{admFlatBean.vehicleBean.onVehicleSave}" update="@widgetVar(parkingTable),@widgetVar(vehicleTable),:outputMsg" 
+								 oncomplete="PF('confirmData').hide(); if (!args.validationFailed) { if(!args.exception) {PF('vehicleDialog').hide();} else { if(args.alert) {PF('alertDialog').show();}}}" 
+								 icon="ui-icon-check" style="margin-left: 5px;"/>
+			</p:panel>
+		</p:confirmDialog>
+		<p:confirmDialog header="Veículo encontrado" widgetVar="alertDialog" showEffect="fade" hideEffect="fade" 
+						 styleClass="alert no-margin" closable="false" width="300px">
+			<f:facet name="message">
+				<p:messages id="alertMsg" severity="warn" autoUpdate="true" styleClass="no-background no-margin" style="text-align: justify; margin: 0;"/>
+			</f:facet>
+			<p:panel styleClass="no-background no-border" style="text-align: center; width: 200px; margin: 0 auto;">
+				<p:commandButton value="#{msg['no']}" type="button" onclick="PF('alertDialog').hide();" icon="ui-icon-close" style=" float:right;"/>
+				<p:commandButton value="#{msg['yes']}" actionListener="#{admFlatBean.vehicleBean.onVehicleClaim}" update=":outputMsg"	oncomplete="PF('alertDialog').hide(); PF('vehicleDialog').hide();" icon="ui-icon-check" style="margin-left: 5px;"/>
+			</p:panel>
+		</p:confirmDialog>
+	</h:form>
+	
+	<p:dialog id="vehiclePictureDialog" widgetVar="vehiclePictureDialog" modal="true" resizable="false" style="background: #f9f9f9">
+		<f:facet name="header">
+			<p:graphicImage value="../images/picture_ico.png" style="vertical-align: top; margin-right: 10px;"/>
+			<p:outputLabel value="Envio de Foto" style="vertical-align: top; line-height: 22px"/>
+		</f:facet>			
+		<h:form id="vehicle-picture-form" enctype="multipart/form-data">
+			<p:panelGrid columns="1" columnClasses="cropper" styleClass="no-margin no-border no-background" style="width: 100%;">
+				<p:outputPanel style="width: #{vehiclePictureUploader.image.width}px; height: #{vehiclePictureUploader.image.height}px;" styleClass="foto">
+					<p:imageCropper value="#{vehiclePictureUploader.croppedImage}" image="#{vehiclePictureUploader.image.path}" initialCoords="0,0,#{vehiclePictureUploader.width},#{vehiclePictureUploader.height}" minSize="#{vehiclePictureUploader.width},#{vehiclePictureUploader.height}" maxSize="#{vehiclePictureUploader.width},#{vehiclePictureUploader.height}"/>
+				</p:outputPanel>
+				<p:panel style="text-align: center; padding: 10px 0px;" styleClass="no-border no-margin no-background">
+					<p:commandButton value="Recortar" actionListener="#{vehiclePictureUploader.onCropp}" 
+									 update=":tabs:vehicle-details-form:portrait" oncomplete="PF('vehiclePictureDialog').hide();"
+									 style="margin-right: 5px;">
+						<f:setPropertyActionListener value="#{vehiclePictureUploader.image}" target="#{admFlatBean.vehicleBean.vehicle.image}"/>
+					</p:commandButton>
+					<p:commandButton value="Cancelar" oncomplete="PF('vehiclePictureDialog').hide();" partialSubmit="true" process="@this" 
+									 global="false" style="margin-left: 5px;">
+						<f:setPropertyActionListener target="#{vehiclePictureUploader.image.path}" value=""/>
+					</p:commandButton>
+				</p:panel>
+			</p:panelGrid>
+		</h:form>
+	</p:dialog>
+</f:view>

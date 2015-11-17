@@ -51,7 +51,7 @@ public class PersonDetailServiceImpl {
 			if (!NumberUtils.isDigits(phone.getExtension()) || !NumberUtils.isDigits(phone.getNumber())) {
 				throw new BusinessException("pdt.phone.invalid");
 			}
-			newPhones.add(phoneManager.save(phone));
+			newPhones.add(phoneManager.save(detail.getPerson(), phone));
 		}
 
 		detail.setPhones(newPhones);

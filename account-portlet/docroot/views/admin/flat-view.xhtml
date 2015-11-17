@@ -1,0 +1,223 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+
+<f:view
+	xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:c="http://java.sun.com/jsp/jstl/core"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:ui="http://java.sun.com/jsf/facelets">
+<ui:composition template="../main-template.xhtml">
+	<ui:define name="app-view">
+		<c:set var="personViewer" value="#{admFlatBean.personBean}"/>
+		<c:set var="imageUploader" value="#{admFlatBean.personBean.imageUploadBean}"/>
+		<c:set var="personCamera" value="#{admFlatBean.personBean.cameraBean}"/>
+		<c:set var="vehicleViewer" value="#{admFlatBean.vehicleBean}"/>
+		<c:set var="vehiclePictureUploader" value="#{admFlatBean.vehicleBean.imageUploadBean}"/>	
+		<c:set var="documentViewer" value="#{admFlatBean.documentBean}"/>
+		<c:set var="parkingViewer" value="#{admFlatBean.parkingBean}"/>
+
+		<h:form>
+			<p:panel styleClass="no-background no-border no-margin" style="width: 100%; text-align: right;" rendered="#{admFlatBean.flats.size() > 1}">
+			   	<p:selectOneMenu id="flat" value="#{admFlatBean.flat}" filter="true" filterMatchMode="contains" converter="selectItemsConverter2">
+					<f:selectItems var="flat" value="#{admFlatBean.flats}" itemLabel="Apartamento #{flat.number} - Bloco #{flat.block}" itemValue="#{flat}"/>
+					<p:ajax event="change" listener="#{admFlatBean.onFlatSelect}" 
+							update="flatName,@widgetVar(personType),@widgetVar(personTable),@widgetVar(vehicleTable),@widgetVar(primaryPerson),@widgetVar(parkings),@widgetVar(flatDetails)" resetValues="true"/>
+			   	</p:selectOneMenu>
+			</p:panel>   		
+			<p:panel id="flatName" styleClass="no-background no-border" style="width: 100%; text-align: center; font-size: 22px">
+				<h:outputText value="Apartamento #{admFlatBean.flat.number} - Bloco #{admFlatBean.flat.block}"/>
+			</p:panel>
+		</h:form>
+		<p:panelGrid columns="2" columnClasses="flat-left,flat-right" styleClass="no-background no-border">
+			<h:form id="flat-form">
+				<p:panelGrid id="flat-filters" columns="1" styleClass="no-background no-border flats" columnClasses="menu-cmds-col3">
+			    	<p:fieldset legend="Contato Principal" styleClass="no-background" style="width: 400px;" widgetVar="primaryPerson">
+			    		<p:panelGrid columns="2" columnClasses="primary-left,primary-right" styleClass="no-background no-border" style="width: 100%">
+							<p:panel styleClass="user-image foto no-margin no-background" style="width: 52px; height: 80px; background-size: 52px 80px;">
+						        <p:graphicImage value="#{admFlatBean.flat.person.picture.path}" width="52" height="80"/>
+							</p:panel>
+							<p:panelGrid columns="2" columnClasses="primary-left,primary-right" styleClass="no-background no-border" style="float: left; width: 100%" rendered="#{not empty admFlatBean.flat.person}">
+								<h:outputText value="Nome:" style="font-size: 14px; color: black; font-weight: bold;"/>
+								<h:outputText value="#{admFlatBean.flat.person.fullName}" style="font-size: 14px; color: black; font-weight: bold;"/>
+				       			<h:outputText value="Celular:" style="font-size: 14px; color: black; font-weight: bold;"/>
+				       			<p:dataList var="phone" value="#{admFlatBean.phones}" paginator="false" 
+				       						emptyMessage="não definido" type="definition" styleClass="no-background phones">
+									<h:outputText value="+55 #{phone.extension} #{phone.number}" style="font-size: 14px; color: black; font-weight: bold;"/>
+				       			</p:dataList>
+							</p:panelGrid>
+							<p:panelGrid columns="2" columnClasses="primary-left,primary-right" styleClass="no-background no-border" style="float: left; width: 100%" rendered="#{empty admFlatBean.flat.person}">
+								<p:outputLabel value="Nome:" style="font-size: 14px; color: black; font-weight: bold;"/>
+								<h:outputText value="não definido" style="font-size: 14px; color: black; font-weight: bold;"/>
+								<p:outputLabel value="Celular:" style="font-size: 14px; color: black; font-weight: bold;"/>
+								<p:panelGrid columns="1" columnClasses="primary-left,primary-right" styleClass="no-background no-border no-margin" style="float: left; width: 100%">
+									<h:outputText value="não definido" style="font-size: 14px; color: black; font-weight: bold;"/>
+								</p:panelGrid>
+							</p:panelGrid>
+						</p:panelGrid>
+						<p:commandButton value="Alterar" type="button" onclick="PF('primaryPersonDialog').show();" style="float: right; width: 90px; margin: 0px 0px 5px 5px;"/>
+					</p:fieldset>
+					<p:spacer width="100%" height="1px" style="background: #cccccc"/>
+		    		<p:panel id="parkings" widgetVar="parkings" header="Vagas" styleClass="flat-box">
+						<p:panelGrid columns="2" styleClass="no-background no-border" style="width: 100%">
+							<p:panelGrid styleClass="no-background no-border no-margin" style="width: 100%; vertical-align: top">
+								<p:row>
+									<p:column style="width: 80px; text-align: right;">
+										<h:outputText value="#{parkingViewer.ownedParkings.size()}" style="margin-right: 5px;"/>
+									</p:column>
+									<p:column>
+										<h:outputText value="vagas escrituradas"/>
+									</p:column>
+								</p:row>
+								<p:row>
+									<p:column style="width: 80px; text-align: right;">
+										<h:outputText value="+ #{parkingViewer.rentedParkings.size()}" style="margin-right: 5px;"/>
+									</p:column>
+									<p:column>
+										<h:outputText value="vagas alugadas"/>
+									</p:column>
+								</p:row>
+								<p:row>
+									<p:column style="width: 80px; text-align: right;">
+										<h:outputText value="- #{parkingViewer.grantedParkings.size()}" style="margin-right: 5px;"/>
+									</p:column>
+									<p:column>
+										<h:outputText value="vagas concedidas"/>
+									</p:column>
+								</p:row>
+								<p:row>
+									<p:column colspan="2"  style="line-height: 5px; vertical-align: top">
+										<p:spacer width="100%" height="1px" style="background: #cccccc; vertical-align: top"/>
+									</p:column>
+								</p:row>
+								<p:row>
+									<p:column style="width: 80px; text-align: right;">
+										<h:outputText value="#{parkingViewer.displayTotalParkings()}" style="margin-right: 5px;"/>
+									</p:column>
+									<p:column>
+										<h:outputText value="vagas disponíveis"/>
+									</p:column>
+								</p:row>
+							</p:panelGrid>
+							<p:commandButton type="button" value="Conceder uma vaga" onclick="PF('parkingDialog').show();" style="float: right;"/>
+						</p:panelGrid>
+						<p:dataTable id="rentedParkingTable" widgetVar="rentedParkingTable" var="parking" value="#{parkingViewer.rentedParkings}" 
+									 paginator="true" paginatorAlwaysVisible="false" paginatorPosition="bottom" 
+									 paginatorTemplate="{PreviousPageLink} {NextPageLink}" rows="1" scrollable="false"
+									 rendered="#{parkingViewer.rentedParkings.size() > 0}" styleClass="no-header" tableStyleClass="no-border"
+									 style="margin: 0px 5px 15px;">
+							<f:facet name="header">
+								<h:outputText value="Alugadas" />
+							</f:facet>
+							<p:column>
+								<h:outputText value="Apartamento #{parking.ownerDomain.number} - bloco #{parking.ownerDomain.block}"/>
+							</p:column>
+						</p:dataTable>
+						<p:dataTable id="parkingTable" widgetVar="parkingTable" var="parking" value="#{parkingViewer.grantedParkings}" 
+									 paginator="true" paginatorAlwaysVisible="false" paginatorPosition="bottom" 
+									 paginatorTemplate="{PreviousPageLink} {NextPageLink}" rows="1" scrollable="false"
+									 rendered="#{parkingViewer.grantedParkings.size() > 0}" styleClass="no-header" tableStyleClass="no-border"
+									 style="margin: 0px 5px 15px;">
+							<f:facet name="header">
+								<h:outputText value="Concedidas" />
+							</f:facet>
+							<p:column>
+								<h:outputText value="Apartamento #{parking.renterDomain.number} - bloco #{parking.renterDomain.block}"/>
+							</p:column>
+							<p:column style="width: 30px">
+								<p:commandLink actionListener="#{parkingViewer.onParkingUnrent(parking)}" update="@widgetVar(parkings),:outputMsg" partialSubmit="true" process="@this" title="Cancelar a concessão desta vaga">
+									<h:graphicImage value="../images/cancel2.png" style="float: left; margin-left: 5px;" width="25" height="25"/>
+									<p:confirm header="Cancelamento de concessão" message="Você confirma o cancelamento da concessão desta vaga para o apartamento?" icon="ui-icon-alert"/>
+								</p:commandLink>
+							</p:column>
+						</p:dataTable>
+					</p:panel>	
+					<p:spacer width="100%" height="1px" style="background: #cccccc"/>
+					<p:panel widgetVar="flatDetails" header="Sobre o apartamento" styleClass="flat-box">
+						<p:panelGrid columns="1" styleClass="no-background no-border no-margin questions">
+							<p:outputLabel for="hasPets" value="Existem animais residindo no apartamento?"/>
+							<p:selectOneRadio id="hasPets" widgetVar="hasPets" value="#{admFlatBean.flat.pets}" required="true" 
+											  requiredMessage="Informe se existem animais residindo no apartamento." style="margin-left: 5px;">
+								<f:selectItem itemLabel="Sim" itemValue="true"/>
+								<f:selectItem itemLabel="Não" itemValue="false"/>
+								<p:ajax event="change" listener="#{admFlatBean.onOptionSelect}" update="ptLabel" oncomplete="if ((args.value &amp;&amp; PF('pets').cfg.collapsed) || (!args.value &amp;&amp; !PF('pets').cfg.collapsed) ) {PF('pets').toggle();}" global="false"/>
+							</p:selectOneRadio>
+							<p:panel id="pets" widgetVar="pets" toggleable="true" collapsed="#{not admFlatBean.flat.pets}" styleClass="no-border no-background no-margin">
+								<p:panelGrid columns="1" styleClass="no-background no-border">
+									<p:outputLabel id="ptLabel" for="petTypes" value="Quais tipos de animais?" style="margin-left: 0px;"/>
+									<p:selectManyCheckbox id="petTypes" value="#{admFlatBean.flat.petTypes}" required="#{admFlatBean.flat.pets}" requiredMessage="Informe os tipos de animais" converter="jsonConverter">
+										<f:selectItems var="type" value="#{admFlatBean.petTypes}" itemLabel="#{msg[type.label]}" itemValue="#{type}"/>
+									</p:selectManyCheckbox>
+								</p:panelGrid>
+							</p:panel>
+							<p:outputLabel for="hasDisables" value="Existem moradores com dificuldade de locomoção?"/>
+							<p:selectOneRadio id="hasDisables" value="#{admFlatBean.flat.disables}" required="true" requiredMessage="Informe se existem moradores com dificuldade de locomoção" style="margin-left: 5px;">
+								<f:selectItem itemLabel="Sim" itemValue="true"/>
+								<f:selectItem itemLabel="Não" itemValue="false"/>
+							</p:selectOneRadio>
+							<p:outputLabel for="hasBrigade" value="Há moradores com treinamento de brigada contra incêndio?"/>
+							<p:selectOneRadio id="hasBrigade" value="#{admFlatBean.flat.brigade}" required="true" requiredMessage="Informe se há moradores com treinamento de brigada contra incêndio" style="margin-left: 5px;">
+								<f:selectItem itemLabel="Sim" itemValue="true"/>
+								<f:selectItem itemLabel="Não" itemValue="false"/>
+							</p:selectOneRadio>
+							<p:commandButton value="Salvar" actionListener="#{admFlatBean.onFlatSave}" update=":outputMsg" 
+											 style="float: right; width: 90px; margin: 0px 5px 10px 5px;"/>
+						</p:panelGrid>
+					</p:panel>
+				</p:panelGrid>
+			</h:form>
+	
+			<p:tabView id="tabs" style="padding: 0; margin-top: 0px">
+				<p:tab title="Pessoas"><ui:include src="person-view.xhtml"/></p:tab>
+				<p:tab title="Veículos"><ui:include src="vehicle-view.xhtml"/></p:tab>
+			</p:tabView>
+		</p:panelGrid>		
+		<p:dialog widgetVar="parkingDialog" draggable="true" resizable="false" modal="true" 
+				  closable="false" visible="false" width="300">
+			<f:facet name="header">
+				<p:graphicImage value="../images/picture_ico.png" style="vertical-align: top; margin-right: 10px;"/>
+				<p:outputLabel value="Concessão de uso de vaga" style="vertical-align: top; line-height: 22px"/>
+			</f:facet>
+			<h:form id="parking-grant-form">
+				<p:panelGrid columns="1" styleClass="no-border" style="margin: 10px 0px 20px 0px; text-align: justify" cellpadding="10">
+			    	<h:outputText value="Escolha o apartamento para o qual você deseja conceder o uso de uma vaga e confirme clicando no botão Conceder."/>
+			    	<p:selectOneMenu id="parkingDomain" value="#{parkingViewer.renterFlat}" filter="true" filterMatchMode="contains" converter="selectItemsConverter">
+			    		<f:selectItem itemLabel="Selecione" noSelectionOption="true"/>
+						<f:selectItems var="flat" value="#{admFlatBean.showFlats()}" itemLabel="Apartamento #{flat.number} - Bloco #{flat.block}" itemValue="#{flat}"/>
+			    	</p:selectOneMenu>
+				</p:panelGrid>
+				<p:commandButton value="Cancelar" type="button" onclick="PF('parkingDialog').hide();" 
+								 style="float: right; width: 95px; margin: 0px 0px 10px 5px;"/>
+				<p:commandButton value="Conceder" actionListener="#{parkingViewer.onParkingRent}" update="@widgetVar(parkings),:outputMsg" 
+								 oncomplete="if (!args.validationFailed &amp;&amp; !args.exception) {PF('parkingDialog').hide();}" 
+								 style="float: right; width: 95px; margin: 0px 0px 10px 5px;"/>
+			</h:form>
+		</p:dialog>
+		<p:dialog widgetVar="primaryPersonDialog" modal="true" draggable="false" resizable="false" closable="false" 
+				 visible="false" width="500" style="background: #f9f9f9" dynamic="true">
+			<f:facet name="header">
+				<p:graphicImage value="../images/user_ico.png" style="vertical-align: top; margin-right: 10px;"/>
+				<p:outputLabel value="Alteração do Contrato Principal" style="vertical-align: top; line-height: 22px"/>
+			</f:facet>
+			<h:form id="primary-person-form">
+				<p:panel styleClass="no-background no-border">
+					<h:outputText value="O contato principal é a pessoa que a Administração entrará em contato primeiro, quando necessário."/>
+				</p:panel>
+				<p:dataTable var="person" value="#{admFlatBean.personBean.displayResidents()}" paginator="false" emptyMessage="Nenhum usuário cadastrado" 
+				             rowKey="#{person.id}" styleClass="no-header no-border" tableStyleClass="no-border">
+					<p:column style="vertical-align: top">
+						<p:commandLink title="Escolher este usuário" partialSubmit="true" process="@this" 
+									   actionListener="#{admFlatBean.onPrimaryPersonSelect(person)}" 
+									   oncomplete="if (!args.validationFailed) {PF('primaryPersonDialog').hide();}" 
+									   update="@widgetVar(primaryPerson),:outputMsg" style="text-decoration: none; width: 100%; cursor: pointer !important; cursor: hand !important;">
+			       			<h:outputText value="#{person.firstName} #{person.lastName}" style="font-size: 14px; color: black; font-weight: bold;"/><br/>
+			       			<h:outputText value="#{msg[admFlatBean.personBean.displayMembership(person)]}" style="font-size: 13px; color: black; font-weight: normal;"/>
+						</p:commandLink>
+					</p:column>
+				</p:dataTable>
+				<p:commandButton value="Cancelar" type="button" onclick="PF('primaryPersonDialog').hide();" style="float: right; width: 95px; margin: 10px 0px 10px 5px;"/>
+			</h:form>
+		</p:dialog>
+	</ui:define>
+</ui:composition>
+</f:view>

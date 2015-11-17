@@ -3,7 +3,6 @@ package br.com.atilo.jcondo.booking.bean;
 import java.util.Date;
 import java.util.PropertyResourceBundle;
 
-import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.time.DateFormatUtils;
 import org.primefaces.model.DefaultScheduleEvent;
 import org.primefaces.model.LazyScheduleModel;

@@ -158,19 +158,18 @@
 		<p:growl id="outputMsg" widgetVar="outputMsg"/>
 		<f:loadBundle basename="Language" var="msg"/>
 
-		<c:set var="calendarViewer" value="#{bookingBean.calendarBean}"/>
-		<c:set var="historyViewer" value="#{bookingBean.historyBean}"/>
-		<c:set var="roomViewer" value="#{bookingBean.roomBean}"/>
+		<c:set var="calendarViewer" value="#{admCalendarBean}"/>
+		<c:set var="roomViewer" value="#{roomBean}"/>
 
 		<p:ajaxStatus id="status2" onstart="PF('status2').show();" oncomplete="PF('status2').hide();"/>
 	
 		<p:dialog widgetVar="status2" fitViewport="true" closable="false" modal="true" draggable="false" resizable="false" visible="false" styleClass="status">
-			<p:graphicImage value="../../images/loader.gif" style="margin: 5px; vertical-align: middle;"/><h:outputText value="Processando, aguarde." style="font-size: 13px; font-weight: bold; margin: 15px"/>
+			<p:graphicImage value="../images/loader.gif" style="margin: 5px; vertical-align: middle;"/><h:outputText value="Processando, aguarde." style="font-size: 13px; font-weight: bold; margin: 15px"/>
 		</p:dialog>
 
 		<p:panelGrid columns="2" columnClasses="leftClm,rightClm" styleClass="no-border agenda no-background">
-			<p:column><ui:include src="rooms-view.xhtml"/><ui:include src="history-view-new.xhtml"/></p:column>
-			<p:column><ui:include src="calendar-view-new.xhtml"/></p:column>
+			<p:column><ui:include src="rooms-view.xhtml"/></p:column>
+			<p:column><ui:include src="calendar-view.xhtml"/></p:column>
 		</p:panelGrid>
 
 		
