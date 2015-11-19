@@ -139,12 +139,13 @@
 		</p:confirmDialog>
 	</h:form>
 	
-	<p:dialog id="vehiclePictureDialog" widgetVar="vehiclePictureDialog" modal="true" resizable="false" style="background: #f9f9f9">
+	<p:dialog id="vehiclePictureDialog" widgetVar="vehiclePictureDialog" modal="true" resizable="false" width="500" style="background: #f9f9f9">
 		<f:facet name="header">
 			<p:graphicImage value="../images/picture_ico.png" style="vertical-align: top; margin-right: 10px;"/>
 			<p:outputLabel value="Envio de Foto" style="vertical-align: top; line-height: 22px"/>
 		</f:facet>			
 		<h:form id="vehicle-picture-form" enctype="multipart/form-data">
+			<p style="text-align: justify;"><h:outputText value="#{msg['vehicle.picture.instructions']}"/></p>
 			<p:panelGrid columns="1" columnClasses="cropper" styleClass="no-margin no-border no-background" style="width: 100%;">
 				<p:outputPanel style="width: #{vehiclePictureUploader.image.width}px; height: #{vehiclePictureUploader.image.height}px;" styleClass="foto">
 					<p:imageCropper value="#{vehiclePictureUploader.croppedImage}" image="#{vehiclePictureUploader.image.path}" initialCoords="0,0,#{vehiclePictureUploader.width},#{vehiclePictureUploader.height}" minSize="#{vehiclePictureUploader.width},#{vehiclePictureUploader.height}" maxSize="#{vehiclePictureUploader.width},#{vehiclePictureUploader.height}"/>
@@ -152,11 +153,11 @@
 				<p:panel style="text-align: center; padding: 10px 0px;" styleClass="no-border no-margin no-background">
 					<p:commandButton value="Recortar" actionListener="#{vehiclePictureUploader.onCropp}" 
 									 update=":tabs:vehicle-details-form:portrait" oncomplete="PF('vehiclePictureDialog').hide();"
-									 style="margin-right: 5px;">
+									 style="margin-top: 10px; margin-bottom: 10px; margin-right: 5px;">
 						<f:setPropertyActionListener value="#{vehiclePictureUploader.image}" target="#{admFlatBean.vehicleBean.vehicle.image}"/>
 					</p:commandButton>
 					<p:commandButton value="Cancelar" oncomplete="PF('vehiclePictureDialog').hide();" partialSubmit="true" process="@this" 
-									 global="false" style="margin-left: 5px;">
+									 global="false" style="margin-top: 10px; margin-bottom: 10px; margin-left: 5px;">
 						<f:setPropertyActionListener target="#{vehiclePictureUploader.image.path}" value=""/>
 					</p:commandButton>
 				</p:panel>

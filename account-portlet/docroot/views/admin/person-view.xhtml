@@ -239,6 +239,7 @@
 			<p:outputLabel value="Envio de Foto" style="vertical-align: top; line-height: 22px"/>
 		</f:facet>			
 		<h:form id="person-picture-form" enctype="multipart/form-data">
+			<p style="text-align: justify;"><h:outputText value="#{msg['person.picture.instructions']}"/></p>
 			<p:panelGrid columns="1" columnClasses="cropper" styleClass="no-margin no-border" style="width: 100%;">
 				<p:outputPanel style="width: #{imageUploader.image.width}px; height: #{imageUploader.image.height}px;" styleClass="foto">
 					<p:imageCropper value="#{imageUploader.croppedImage}" image="#{imageUploader.image.path}" initialCoords="0,0,#{imageUploader.width},#{imageUploader.height}" minSize="#{imageUploader.width},#{imageUploader.height}" maxSize="#{imageUploader.width},#{imageUploader.height}"/>
@@ -246,11 +247,11 @@
 				<p:panel style="text-align: center; padding: 10px 0px;" styleClass="no-border no-margin">
 					<p:commandButton value="Recortar" actionListener="#{imageUploader.onCropp}" 
 									 update=":tabs:person-details-form:portrait" oncomplete="PF('personPictureDialog').hide();"
-									 style="margin-right: 5px;">
+									 style="margin-top: 10px; margin-bottom: 10px; margin-right: 5px;">
 						<f:setPropertyActionListener value="#{imageUploader.image}" target="#{admFlatBean.personBean.person.picture}"/>
 					</p:commandButton>
 					<p:commandButton value="Cancelar" oncomplete="PF('personPictureDialog').hide();" partialSubmit="true" process="@this" 
-									 global="false" style="margin-left: 5px;">
+									 global="false" style="margin-top: 10px; margin-bottom: 10px; margin-left: 5px;">
 						<f:setPropertyActionListener target="#{imageUploader.image.path}" value=""/>
 					</p:commandButton>
 				</p:panel>
@@ -259,12 +260,14 @@
 	</p:dialog>
 	
 	<p:dialog id="personCameraDialog" widgetVar="personCameraDialog" resizable="false" 
-			  draggable="false" modal="true" closeOnEscape="true" visible="false" style="background: #f9f9f9">
+			  draggable="false" modal="true" closeOnEscape="true" visible="false" width="725" 
+			  style="background: #f9f9f9">
 		<f:facet name="header">
 			<p:graphicImage value="../images/picture_ico.png" style="vertical-align: top; margin-right: 10px;"/>
 			<p:outputLabel value="Captura de Imagem" style="vertical-align: top; line-height: 22px"/>
 		</f:facet>
 		<h:form id="person-camera-form">
+			<p style="text-align: justify;"><h:outputText value="#{msg['person.camera.instructions']}"/></p>
 			<p:panelGrid columns="2" styleClass="no-border no-background">
 				<p:photoCam widgetVar="photoCam1" listener="#{personCamera.onCapture}" update="croppedPhoto" styleClass="foto" rendered="#{personCamera.render}"/>
 				<p:outputPanel id="croppedPhoto" style="width: 320px; height: 240px" styleClass="foto">
