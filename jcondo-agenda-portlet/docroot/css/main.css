@@ -43,8 +43,14 @@
 /* ---------- Booking Icons ---------- */
 
 .agenda	.barbe {
-	background: url("../images/barbe.png") no-repeat 0px 0px; 
+	background: url("../images/barbe.png") no-repeat 0px 0px;
+	z-index: 9999999999999999;
 }
+
+.agenda	.barbe:houver {
+	background-color: #ab4856; 
+}
+
 
 .agenda	.cinema {
 	background: url("../images/cinema.png") no-repeat 0px 0px;
@@ -254,6 +260,10 @@
 	overflow: visible;
 	color: black;
 	cursor: pointer;
+}
+
+.agenda .fc-event:hover {
+	background-color: #cccccc;
 }
 
 .agenda .fc-border-separate .ui-widget-header {

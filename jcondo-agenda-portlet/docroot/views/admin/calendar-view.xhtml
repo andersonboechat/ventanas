@@ -47,18 +47,18 @@
 								</h:outputText>
 							</h:panelGrid>
 							<h:panelGrid columns="2" style="width: 100%; overflow: hidden; margin: 20px 0px 20px 0px;">
-								<p:commandButton id="cancelBkgConfirmBtn" value="#{msg['book.cancel']}" actionListener="#{calendarViewer.onCancel(i.index)}" oncomplete="if (!args.validationFailed) {if(PF('calendar-#{i.index}').update) {PF('calendar-#{i.index}').update();} PF('eventDialog-#{i.index}').hide();}" update=":outputMsg" style="float: right; margin: 0px 5px 5px; width: 145px" rendered="#{calendarViewer.booking.status != 'CANCELLED' and not(calendarViewer.isDeadlineOver())}">
+								<p:commandButton id="cancelBkgConfirmBtn" value="#{msg['book.cancel']}" actionListener="#{calendarViewer.onCancel(i.index)}" oncomplete="if (!args.validationFailed) {if(PF('calendar-#{i.index}').update) {PF('calendar-#{i.index}').update();} PF('eventDialog-#{i.index}').hide();}" update=":outputMsg" style="float: right; margin: 0px 5px 5px; width: 145px" rendered="#{calendarViewer.booking.status != 'CANCELLED' and calendarViewer.isDeadlineOver()}">
 									<p:confirm header="#{msg['confirm.dialog.header']}" message="#{msg['bkg.cancel.deadline']}" icon="ui-icon-alert"/>
 								</p:commandButton>
-								<p:commandButton id="cancelBkgBtn" value="#{msg['book.cancel']}" actionListener="#{calendarViewer.onCancel(i.index)}" oncomplete="if (!args.validationFailed) {if(PF('calendar-#{i.index}').update) {PF('calendar-#{i.index}').update();} PF('eventDialog-#{i.index}').hide();}" update=":outputMsg" style="float: right; margin: 0px 5px 5px; width: 145px" rendered="#{calendarViewer.booking.status != 'CANCELLED' and calendarViewer.isDeadlineOver()}"/>
+								<p:commandButton id="cancelBkgBtn" value="#{msg['book.cancel']}" actionListener="#{calendarViewer.onCancel(i.index)}" oncomplete="if (!args.validationFailed) {if(PF('calendar-#{i.index}').update) {PF('calendar-#{i.index}').update();} PF('eventDialog-#{i.index}').hide();}" update=":outputMsg" style="float: right; margin: 0px 5px 5px; width: 145px" rendered="#{calendarViewer.booking.status != 'CANCELLED' and not(calendarViewer.isDeadlineOver())}"/>
 								<p:commandButton id="deleteBkgBtn" value="#{msg['book.delete']}" actionListener="#{calendarViewer.onDelete(i.index)}" oncomplete="if (!args.validationFailed &amp;&amp; !args.exception) {if(PF('calendar-#{i.index}').update) {PF('calendar-#{i.index}').update();} PF('eventDialog-#{i.index}').hide();}" update=":outputMsg" style="float: right; margin: 0px 5px 5px; width: 145px" rendered="#{calendarViewer.booking.status == 'CANCELLED'}"/>
 								<p:commandButton id="closeBtn" type="button" value="#{msg['close']}" onclick="PF('eventDialog-#{i.index}').hide();" style="float: left; margin: 0px 0px 5px 5px; width: 145px" global="false" />
 							</h:panelGrid>
 						</h:panelGrid>
 					</p:dialog>
-					<p:confirmDialog global="true" width="600" style="padding: 0px; font-size: 13px;" showEffect="fade" hideEffect="fade" visible="false">
-						<p:commandButton value="#{msg['no']}" type="button" styleClass="ui-confirmdialog-no" icon="ui-icon-close" style="float: left; width: 200px; margin-left: 14%" />
-						<p:commandButton value="#{msg['yes']}" type="button" styleClass="ui-confirmdialog-yes" icon="ui-icon-check" style="float: right; width: 200px; margin-right: 14%"/>
+					<p:confirmDialog global="true" width="400" style="padding: 0px; font-size: 13px" showEffect="fade" hideEffect="fade" visible="false">
+						<p:commandButton value="#{msg['no']}" type="button" styleClass="ui-confirmdialog-no" icon="ui-icon-close" style="float: right; padding: 2px 6px; margin-left: 3px; margin-right: 27%" />
+						<p:commandButton value="#{msg['yes']}" type="button" styleClass="ui-confirmdialog-yes" icon="ui-icon-check" style="float: right; padding: 2px 6px; margin-right: 3px; margin-left: 27%"/>
 					</p:confirmDialog>
 				</h:form>
 			</p:tab>
