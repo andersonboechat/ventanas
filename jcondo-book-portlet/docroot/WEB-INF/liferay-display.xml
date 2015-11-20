@@ -4,5 +4,6 @@
 <display>
 	<category name="category.jcondo">
 		<portlet id="jcondo-book" />
+		<portlet id="jcondo-book-admin" />
 	</category>
 </display>

@@ -43,7 +43,13 @@ public class AnswerBean extends BaseBean {
 			List<Occurrence> occurrences = occurrenceService.getAllOccurrences(person);
 			model = new OccurrenceDataModel(occurrences);
 			occurrence = CollectionUtils.isEmpty(occurrences) ? new Occurrence(OccurrenceType.COMPLAINT, person) : model.getRowData();
-			answer = occurrence.getAnswer();
+
+			if (occurrence.getAnswer() == null) {
+				occurrence.setAnswer(new Answer(person));
+			}
+
+			answer = occurrence.getAnswer();	
+			
 			types = Arrays.asList(OccurrenceType.values());
 		} catch (Exception e) {
 			LOGGER.fatal("failure on occurrence loading", e);
