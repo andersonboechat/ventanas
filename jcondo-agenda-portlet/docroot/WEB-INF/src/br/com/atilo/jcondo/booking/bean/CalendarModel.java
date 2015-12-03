@@ -10,6 +10,7 @@ import org.primefaces.model.LazyScheduleModel;
 import br.com.abware.jcondo.booking.model.BookingStatus;
 import br.com.abware.jcondo.booking.model.Room;
 import br.com.abware.jcondo.booking.model.RoomBooking;
+import br.com.abware.jcondo.core.model.Administration;
 import br.com.abware.jcondo.core.model.Flat;
 
 import br.com.atilo.jcondo.booking.service.RoomBookingServiceImpl;
@@ -54,13 +55,17 @@ public class CalendarModel extends LazyScheduleModel {
 //		sb.append(((Flat) booking.getDomain()).getBlock()).append("/")
 //		  .append(StringUtils.leftPad(String.valueOf(((Flat) booking.getDomain()).getNumber()), 4, "0"))
 //		  .append(" ").append(PropertyResourceBundle.getBundle("Language").getString(booking.getStatus().getLabel()));
-		sb.append("Apt. ").append(((Flat) booking.getDomain()).getNumber()).append(" - Bl. ")
-		  .append(((Flat) booking.getDomain()).getBlock()).append(" ")
-		  .append(DateFormatUtils.format(booking.getBeginDate(), "HH:mm'h'"))
-		  .append(DateFormatUtils.format(booking.getEndDate(), "'-'HH:mm'h'"));
+		if (booking.getDomain() instanceof Flat) {
+			sb.append("Apt. ").append(((Flat) booking.getDomain()).getNumber()).append(" - Bl. ")
+			  .append(((Flat) booking.getDomain()).getBlock()).append(" ")
+			  .append(DateFormatUtils.format(booking.getBeginDate(), "HH:mm'h'"))
+			  .append(DateFormatUtils.format(booking.getEndDate(), "'-'HH:mm'h'"));
+		} else {
+			sb.append("Indisponível");
+		}
 		
 
-		event = new DefaultScheduleEvent(sb.toString(), booking.getBeginDate(), booking.getBeginDate(), getBookingStyleClass(booking));
+		event = new DefaultScheduleEvent(sb.toString(), booking.getBeginDate(), booking.getEndDate(), getBookingStyleClass(booking));
 		event.setData(booking);
 		return event;
 	}

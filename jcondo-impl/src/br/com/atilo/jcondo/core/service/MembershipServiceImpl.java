@@ -76,7 +76,7 @@ public class MembershipServiceImpl {
 		variables.put("flatBlock", flat.getBlock());
 		variables.put("deadline", DateFormatUtils.format(DateUtils.addDays(new Date(), 3), "dd/MM/yyyy"));
 		
-		String url = helper.getPortalURL() + "/group/guest/membership?p_p_id=membershipauth_WAR_accountportlet&data=" + DateUtils.addDays(new Date(), 3).getTime() + "p" + p.getId()  + "p" + flat.getId();
+		String url = helper.getPortalURL() + "/group/portal/membership?p_p_id=membershipauth_WAR_accountportlet&data=" + DateUtils.addDays(new Date(), 3).getTime() + "p" + p.getId()  + "p" + flat.getId();
 		
 		variables.put("url", url);
 		UnsyncStringWriter writer = new UnsyncStringWriter();

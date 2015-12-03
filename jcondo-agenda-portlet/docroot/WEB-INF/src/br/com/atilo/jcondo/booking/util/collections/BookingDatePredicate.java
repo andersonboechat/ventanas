@@ -18,9 +18,9 @@ public class BookingDatePredicate implements Predicate {
 	@Override
 	public boolean evaluate(Object obj) {
 		if (obj != null && obj instanceof ScheduleEvent) {
-			Date date = ((ScheduleEvent) obj).getStartDate();
-			date = DateUtils.truncate(date, Calendar.DAY_OF_MONTH);
-			return date.equals(bookingDate);
+			Date startDate = DateUtils.truncate(((ScheduleEvent) obj).getStartDate(), Calendar.DAY_OF_MONTH);
+			Date endDate = DateUtils.truncate(((ScheduleEvent) obj).getEndDate(), Calendar.DAY_OF_MONTH);
+			return bookingDate.getTime() >= startDate.getTime() && bookingDate.getTime() <= endDate.getTime();
 		}
 
 		return false;

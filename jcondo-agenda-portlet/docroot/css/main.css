@@ -247,12 +247,12 @@
 	
 .agenda .fc-event {
 	border: none;
-	width: 120px !important;
+	background-color: #cccccc;
+
 }
 
 .agenda .fc-event-inner {
 	border: 0px solid black;
-	width: 80px !important;
 	height: 34px;
 	padding: 1px 0px 0px 34px;
 	font-weight: bold;
@@ -263,7 +263,6 @@
 }
 
 .agenda .fc-event:hover {
-	background-color: #cccccc;
 }
 
 .agenda .fc-border-separate .ui-widget-header {

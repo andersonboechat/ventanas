@@ -176,16 +176,41 @@ public class CalendarBean extends BaseBean {
 	}
 
 	public void onSelect(SelectEvent event) {
+		Date today = DateUtils.truncate(new Date(), Calendar.DAY_OF_MONTH);
 		ScheduleEvent e = (ScheduleEvent) event.getObject();
 		RoomBooking booking = (RoomBooking) e.getData();
+
 		if (booking.getResource().getId() == RoomServiceImpl.CINEMA || booking.getStatus() == BookingStatus.CANCELLED) {
+			if (e.getStartDate().before(today)) {
+				MessageUtils.addMessage(FacesMessage.SEVERITY_WARN, "bkg.past.date", 
+										new String[] {DateFormatUtils.format(today, "dd/MM/yyyy")});
+				RequestContext.getCurrentInstance().addCallbackParam("exception", true);
+				return;
+			}
 			createBooking(e.getStartDate());
 		} else {
-			MessageUtils.addMessage(FacesMessage.SEVERITY_WARN, "bkg.room.already.booked", 
-									new String[] {booking.getResource().getName(), 
-									DateFormatUtils.format(booking.getBeginDate(), "dd/MM/yyyy"), 
-									DateFormatUtils.format(booking.getBeginDate(), "HH:mm"),
-									DateFormatUtils.format(booking.getEndDate(), "HH:mm")});
+			if (booking.getDomain() instanceof Flat) {
+				MessageUtils.addMessage(FacesMessage.SEVERITY_WARN, "bkg.room.already.booked", 
+						new String[] {booking.getResource().getName(), 
+						DateFormatUtils.format(booking.getBeginDate(), "dd/MM/yyyy"), 
+						DateFormatUtils.format(booking.getBeginDate(), "HH:mm"),
+						DateFormatUtils.format(booking.getEndDate(), "HH:mm")});
+			} else {
+				Date beginDate = DateUtils.truncate(booking.getBeginDate(), Calendar.DAY_OF_MONTH);
+				Date endDate = DateUtils.truncate(booking.getEndDate(), Calendar.DAY_OF_MONTH);
+				
+				if (beginDate.equals(endDate)) {
+					MessageUtils.addMessage(FacesMessage.SEVERITY_WARN, "bkg.room.unavailable", 
+											new String[] {booking.getResource().getName(), 
+											DateFormatUtils.format(booking.getBeginDate(), "dd/MM/yyyy")});
+				} else {
+					MessageUtils.addMessage(FacesMessage.SEVERITY_WARN, "bkg.room.unavailable.range", 
+											new String[] {booking.getResource().getName(), 
+											DateFormatUtils.format(booking.getBeginDate(), "dd/MM/yyyy"),
+											DateFormatUtils.format(booking.getEndDate(), "dd/MM/yyyy")});
+				}
+			}
+
 			RequestContext.getCurrentInstance().addCallbackParam("exception", true);
 		}
 	}
@@ -207,11 +232,28 @@ public class CalendarBean extends BaseBean {
 
 			createBooking(bookingDate);
 		} else {
-			MessageUtils.addMessage(FacesMessage.SEVERITY_WARN, "bkg.room.already.booked", 
-									new String[] {booking.getResource().getName(), 
-									DateFormatUtils.format(booking.getBeginDate(), "dd/MM/yyyy"), 
-									DateFormatUtils.format(booking.getBeginDate(), "HH:mm"),
-									DateFormatUtils.format(booking.getEndDate(), "HH:mm")});
+			if (booking.getDomain() instanceof Flat) {
+				MessageUtils.addMessage(FacesMessage.SEVERITY_WARN, "bkg.room.already.booked", 
+						new String[] {booking.getResource().getName(), 
+						DateFormatUtils.format(booking.getBeginDate(), "dd/MM/yyyy"), 
+						DateFormatUtils.format(booking.getBeginDate(), "HH:mm"),
+						DateFormatUtils.format(booking.getEndDate(), "HH:mm")});
+			} else {
+				Date beginDate = DateUtils.truncate(booking.getBeginDate(), Calendar.DAY_OF_MONTH);
+				Date endDate = DateUtils.truncate(booking.getEndDate(), Calendar.DAY_OF_MONTH);
+				
+				if (beginDate.equals(endDate)) {
+					MessageUtils.addMessage(FacesMessage.SEVERITY_WARN, "bkg.room.unavailable", 
+											new String[] {booking.getResource().getName(), 
+											DateFormatUtils.format(booking.getBeginDate(), "dd/MM/yyyy")});
+				} else {
+					MessageUtils.addMessage(FacesMessage.SEVERITY_WARN, "bkg.room.unavailable.range", 
+											new String[] {booking.getResource().getName(), 
+											DateFormatUtils.format(booking.getBeginDate(), "dd/MM/yyyy"),
+											DateFormatUtils.format(booking.getEndDate(), "dd/MM/yyyy")});
+				}
+			}
+
 			RequestContext.getCurrentInstance().addCallbackParam("exception", true);
 		}
 	}
