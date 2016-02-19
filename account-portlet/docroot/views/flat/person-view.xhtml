@@ -65,7 +65,7 @@
 				</p:commandLink>
 			</p:column>
 			<p:column style="width: 35px">
-				<p:commandLink title="Excluir este usuário" actionListener="#{flatView.personBean.onPersonDelete}" oncomplete="if (!args.validationFailed &amp;&amp; !args.exception) {PF('personTable').update();}" partialSubmit="true" process="@this" global="false" update=":outputMsg" disabled="#{!flatView.personBean.canEditPerson(person)}">
+				<p:commandLink title="Excluir este usuário" actionListener="#{flatView.personBean.onPersonDelete}" oncomplete="if (!args.validationFailed &amp;&amp; !args.exception) {PF('personTable').update();}" partialSubmit="true" process="@this" global="false" update=":outputMsg" disabled="#{!flatView.personBean.canDeletePerson(person)}">
 					<h:graphicImage value="../images/cancel2.png" />
 					<p:confirm header="#{msg['person.delete.confirm']}" message="#{msg['person.delete.message']}" icon="ui-icon-alert"/>
 				</p:commandLink>
@@ -275,7 +275,7 @@
 		<h:form id="person-camera-form">
 			<p style="text-align: justify;"><h:outputText value="#{msg['person.camera.instructions']}"/></p>
 			<p:panelGrid columns="2" styleClass="no-border no-background">
-				<p:photoCam widgetVar="photoCam1" listener="#{personCamera.onCapture}" update="croppedPhoto" styleClass="foto" rendered="#{personCamera.render}"/>
+				<p:photoCam widgetVar="photoCam1" listener="#{personCamera.onCapture}" update="croppedPhoto" styleClass="foto" rendered="#{personCamera.render}" forceFlash="true"/>
 				<p:outputPanel id="croppedPhoto" style="width: 320px; height: 240px" styleClass="foto">
 					<p:imageCropper value="#{personCamera.croppedImage}" image="#{personCamera.image.path}" 
 									initialCoords="0,0,#{personCamera.width},#{personCamera.height}" 

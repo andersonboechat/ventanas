@@ -65,7 +65,7 @@
 				</p:commandLink>
 			</p:column>
 			<p:column style="width: 35px">
-				<p:commandLink title="Excluir este usuário" actionListener="#{admFlatBean.personBean.onPersonDelete}" oncomplete="if (!args.validationFailed &amp;&amp; !args.exception) {PF('personTable').update();}" partialSubmit="true" process="@this" global="false" update=":outputMsg" disabled="#{!admFlatBean.personBean.canEditPerson(person)}">
+				<p:commandLink title="Excluir este usuário" actionListener="#{admFlatBean.personBean.onPersonDelete}" oncomplete="if (!args.validationFailed &amp;&amp; !args.exception) {PF('personTable').update();}" partialSubmit="true" process="@this" global="false" update=":outputMsg" disabled="#{!admFlatBean.personBean.canDeletePerson(person)}">
 					<h:graphicImage value="../images/cancel2.png" />
 					<p:confirm header="#{msg['person.delete.confirm']}" message="#{msg['person.delete.message']}" icon="ui-icon-alert"/>
 				</p:commandLink>
@@ -190,16 +190,6 @@
 											 requiredMessage="#{msg['person.email.empty']}"/>
 							</p:column>
 						</p:row>
-						<p:row rendered="#{admFlatBean.personBean.membership.type != 'VISITOR' and admFlatBean.personBean.membership.type != 'EMPLOYEE'}">
-							<p:column styleClass="labelClm"><p:outputLabel for="kinType" value="Parentesco:"/></p:column>
-							<p:column colspan="2" styleClass="fieldClm">
-								<p:selectOneMenu id="kinType" value="#{admFlatBean.personBean.kinship.type}" 
-												 styleClass="select" style="width: 100%;">
-									<f:selectItem itemLabel="Nenhum" noSelectionOption="true"/>
-									<f:selectItems var="kinType" value="#{admFlatBean.personBean.kinTypes}" itemLabel="#{msg[kinType.label]}"/>
-								</p:selectOneMenu>
-							</p:column>
-						</p:row>
 						</p:panelGrid>
 					</p:column>
 					<p:column styleClass="my-account-col1">
@@ -269,7 +259,7 @@
 		<h:form id="person-camera-form">
 			<p style="text-align: justify;"><h:outputText value="#{msg['person.camera.instructions']}"/></p>
 			<p:panelGrid columns="2" styleClass="no-border no-background">
-				<p:photoCam widgetVar="photoCam1" listener="#{personCamera.onCapture}" update="croppedPhoto" styleClass="foto" rendered="#{personCamera.render}"/>
+				<p:photoCam widgetVar="photoCam1" listener="#{personCamera.onCapture}" update="croppedPhoto" styleClass="foto" rendered="#{personCamera.render}" forceFlash="true"/>
 				<p:outputPanel id="croppedPhoto" style="width: 320px; height: 240px" styleClass="foto">
 					<p:imageCropper value="#{personCamera.croppedImage}" image="#{personCamera.image.path}" 
 									initialCoords="0,0,#{personCamera.width},#{personCamera.height}" 

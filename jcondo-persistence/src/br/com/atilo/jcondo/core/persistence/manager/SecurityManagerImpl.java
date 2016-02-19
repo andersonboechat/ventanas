@@ -362,11 +362,12 @@ public class SecurityManagerImpl {
 				return PortalPermissionUtil.contains(permissionChecker, ActionKeys.ADD_USER);
 			}
 
-			for (Membership membership : membershipManager.findByPerson(person)) {
-				if (checkPermission(permissionChecker, person, membership.getDomain(), permission)) {
-					return true;
-				}
+			Domain domain = CollectionUtils.isEmpty(person.getMemberships()) ? null : person.getMemberships().get(0).getDomain();
+			
+			if (checkPermission(permissionChecker, person, domain, permission)) {
+				return true;
 			}
+
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

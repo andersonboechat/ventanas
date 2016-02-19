@@ -17,16 +17,16 @@
 		<parameterDescription><![CDATA[java:comp/env/jdbc/aperte-reports]]></parameterDescription>
 	</parameter>
 	<queryString>
-		<![CDATA[SELECT CONCAT(f.block, '/', LPAD(f.number, 4, '0')) Apartamento, r.name Espaço, DATE_FORMAT(b.beginDate, '%Y-%m-%d') Data,
+		<![CDATA[SELECT CONCAT(f.block, '/', LPAD(f.number, 4, '0')) Apartamento, r.name Espaço, b.beginDate Data,
 DATE_FORMAT(b.beginDate, '%H:%i') Inicio, DATE_FORMAT(b.endDate, '%H:%i') Termino
 FROM jcondo.jco_booking b, jcondo.jco_flat f, jcondo.jco_resource r WHERE b.domainId = f.id AND b.resourceId = r.id AND
-b.beginDate >= DATE_FORMAT(STR_TO_DATE($P{startDate},'%d-%m-%Y %H:%i'), '%Y-%m-%d') AND
-b.endDate <= DATE_FORMAT(STR_TO_DATE($P{endDate},'%d-%m-%Y %H:%i'), '%Y-%m-%d')
+DATE_FORMAT(b.beginDate, '%Y-%m-%d') >= DATE_FORMAT(STR_TO_DATE($P{startDate},'%d-%m-%Y %H:%i'), '%Y-%m-%d') AND
+DATE_FORMAT(b.endDate, '%Y-%m-%d') <= DATE_FORMAT(STR_TO_DATE($P{endDate},'%d-%m-%Y %H:%i'), '%Y-%m-%d')
 ORDER BY b.beginDate, r.name]]>
 	</queryString>
 	<field name="Apartamento" class="java.lang.String"/>
 	<field name="Espaço" class="java.lang.String"/>
-	<field name="Data" class="java.lang.String"/>
+	<field name="Data" class="java.sql.Timestamp"/>
 	<field name="Inicio" class="java.lang.String"/>
 	<field name="Termino" class="java.lang.String"/>
 	<group name="day">
@@ -76,7 +76,7 @@ ORDER BY b.beginDate, r.name]]>
 			</textField>
 			<image>
 				<reportElement x="439" y="2" width="115" height="40"/>
-				<imageExpression><![CDATA["http://www.ventanasresidencial.com.br/documents/10179/11610/logo-150x41.png"]]></imageExpression>
+				<imageExpression><![CDATA["http://www.ventanasresidencial.com.br/documents/10179/0/logo-150x41.png"]]></imageExpression>
 			</image>
 		</band>
 	</title>

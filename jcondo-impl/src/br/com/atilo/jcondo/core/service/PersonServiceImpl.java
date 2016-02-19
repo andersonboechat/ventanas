@@ -10,11 +10,6 @@ import java.util.Set;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 
-import com.liferay.portal.kernel.workflow.WorkflowConstants;
-import com.liferay.portal.model.User;
-import com.liferay.portal.service.ServiceContext;
-import com.liferay.portal.service.UserLocalServiceUtil;
-
 import br.com.abware.jcondo.core.Gender;
 import br.com.abware.jcondo.core.Permission;
 import br.com.abware.jcondo.core.PersonType;
@@ -31,7 +26,6 @@ import br.com.abware.jcondo.exception.ApplicationException;
 import br.com.abware.jcondo.exception.BusinessException;
 import br.com.abware.jcondo.exception.ModelExistException;
 import br.com.abware.jcondo.exception.PersistenceException;
-
 import br.com.atilo.jcondo.commons.collections.DomainPredicate;
 import br.com.atilo.jcondo.commons.collections.MembershipPredicate;
 import br.com.atilo.jcondo.commons.collections.PersonTypePredicate;
@@ -39,6 +33,11 @@ import br.com.atilo.jcondo.commons.collections.PersonTypeTransformer;
 import br.com.atilo.jcondo.core.persistence.manager.PersonManagerImpl;
 import br.com.atilo.jcondo.core.persistence.manager.SecurityManagerImpl;
 import br.com.caelum.stella.validation.CPFValidator;
+
+import com.liferay.portal.kernel.workflow.WorkflowConstants;
+import com.liferay.portal.model.User;
+import com.liferay.portal.service.ServiceContext;
+import com.liferay.portal.service.UserLocalServiceUtil;
 
 public class PersonServiceImpl  {
 
@@ -583,5 +582,31 @@ public class PersonServiceImpl  {
 		}
 	}
 
+	public boolean hasPermission(Person person, Permission permission) throws Exception {
+		if (personManager.findPerson().equals(person)) {
+			return true;
+		}
+
+		if (securityManager.hasPermission(person, permission)) {
+			boolean hasPersonTypePermission = true;
+			Permission p;
+			
+			if (permission == Permission.UPDATE || permission == Permission.ADD) {
+				p = Permission.ASSIGN_MEMBER;
+			} else if (permission == Permission.DELETE) {
+				p = Permission.REMOVE_MEMBER;
+			} else {
+				p = Permission.VIEW;
+			}
+
+			for (Membership membership : person.getMemberships()) {
+				hasPersonTypePermission = hasPersonTypePermission && securityManager.hasPermission(membership, p);
+			}
+
+			return hasPersonTypePermission;
+		}
+		
+		return false;
+	}
 
 }

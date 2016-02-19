@@ -32,8 +32,8 @@
 								<h:outputText value="#{calendarViewer.booking.beginDate}"><f:convertDateTime pattern="EEEEE, dd/MM/yyyy" /></h:outputText>
 								<h:outputLabel value="#{msg['time']}:"/>
 								<p:outputPanel>
-									<h:outputText value="#{calendarViewer.booking.beginDate}"><f:convertDateTime pattern=" 'das' HH:mm'h'" /></h:outputText>
-									<h:outputText value="#{calendarViewer.booking.endDate}"><f:convertDateTime pattern=" 'às' HH:mm'h'" /></h:outputText>
+									<h:outputText value="#{calendarViewer.booking.beginDate}"><f:convertDateTime pattern=" 'das' HH:mm'h'" /> <!-- timeZone="America/Sao_Paulo" /--></h:outputText>
+									<h:outputText value="#{calendarViewer.booking.endDate}"><f:convertDateTime pattern=" 'às' HH:mm'h'" /><!-- timeZone="America/Sao_Paulo" /--></h:outputText>
 								</p:outputPanel>
 								<h:outputLabel value="#{msg['flat']}:"/>
 								<h:outputText value="#{calendarViewer.booking.domain.number} - Bloco #{calendarViewer.booking.domain.block}"/>

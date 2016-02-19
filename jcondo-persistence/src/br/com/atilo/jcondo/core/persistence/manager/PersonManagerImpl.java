@@ -127,9 +127,10 @@ public class PersonManagerImpl extends JCondoManager<PersonEntity, Person> {
 				person.setUserId(user.getUserId());
 			} else {
 				calendar.setTime(person.getBirthday() == null ? user.getBirthday() : person.getBirthday());
+				String emailAddress = StringUtils.isEmpty(person.getEmailAddress()) ? user.getEmailAddress() : person.getEmailAddress();
 				user = UserLocalServiceUtil.updateUser(person.getUserId(), user.getPassword(), StringUtils.EMPTY, StringUtils.EMPTY, false, 
 													   user.getReminderQueryQuestion(), user.getReminderQueryAnswer(), user.getScreenName(), 
-													   person.getEmailAddress(), user.getFacebookId(), user.getOpenId(), user.getLanguageId(), 
+													   emailAddress, user.getFacebookId(), user.getOpenId(), user.getLanguageId(), 
 													   user.getTimeZoneId(), user.getGreeting(), user.getComments(), person.getFirstName(), 
 													   StringUtils.EMPTY, person.getLastName(), 0, 0, isMale, calendar.get(Calendar.MONTH), 
 													   calendar.get(Calendar.DAY_OF_MONTH), calendar.get(Calendar.YEAR), StringUtils.EMPTY, StringUtils.EMPTY, 

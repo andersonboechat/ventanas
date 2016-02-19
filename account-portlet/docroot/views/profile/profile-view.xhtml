@@ -191,7 +191,7 @@
 			</f:facet>
 			<h:form id="profile-camera-form">
 				<p:panelGrid columns="2" styleClass="no-border no-background">
-					<p:photoCam widgetVar="pc" listener="#{profileCamera.onCapture}" update="ci" styleClass="foto"/>
+					<p:photoCam widgetVar="pc" listener="#{profileCamera.onCapture}" update="ci" styleClass="foto" forceFlash="true"/>
 					<p:outputPanel id="ci" style="width: 320px; height: 240px" styleClass="foto">
 						<p:imageCropper value="#{profileCamera.croppedImage}" image="#{profileCamera.image.path}" 
 										initialCoords="0,0,#{profileCamera.width},#{profileCamera.height}" 

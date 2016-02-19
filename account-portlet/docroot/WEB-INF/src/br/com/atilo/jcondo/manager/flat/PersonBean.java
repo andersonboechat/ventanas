@@ -29,6 +29,7 @@ import org.primefaces.context.RequestContext;
 import br.com.abware.accountmgm.bean.model.ModelDataModel;
 import br.com.abware.accountmgm.util.DomainPredicate;
 import br.com.abware.jcondo.core.Gender;
+import br.com.abware.jcondo.core.Permission;
 import br.com.abware.jcondo.core.PersonType;
 import br.com.abware.jcondo.core.model.Administration;
 import br.com.abware.jcondo.core.model.Domain;
@@ -234,6 +235,8 @@ public class PersonBean {
 		membership.setPerson(person);
 		identity = null;
 		phoneNumber = null;
+		person.setMemberships(new ArrayList<Membership>());
+		person.getMemberships().add(membership);
 	}
 
 	public void onPersonDelete() throws Exception {
@@ -400,18 +403,13 @@ public class PersonBean {
 	}
 
 	public boolean canEditPerson(Person person) throws Exception {
-		boolean canEdit = false;
-
-		if (person.getId() == 0 || person.equals(personService.getPerson())) {
-			canEdit = true;
-		} else {
-			Membership membership = (Membership) CollectionUtils.find(person.getMemberships(), new DomainPredicate(flat));
-			canEdit = membership != null && types != null ? types.contains(membership.getType()) : false;
-		}
-
-		return canEdit;
+		return personService.hasPermission(person, Permission.UPDATE);
 	}
 
+	public boolean canDeletePerson(Person person) throws Exception {
+		return personService.hasPermission(person, Permission.DELETE);
+	}
+	
 	public boolean canEditInfo() throws Exception {
 		return person != null && (person.getId() == 0 || person.equals(personService.getPerson()));
 	}

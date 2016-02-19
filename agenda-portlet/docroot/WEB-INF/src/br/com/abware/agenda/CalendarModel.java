@@ -36,10 +36,16 @@ public class CalendarModel extends LazyScheduleModel {
 	}
 	
 	public DefaultScheduleEvent createEvent(BookingModel booking) throws Exception {
+		String bookingName;
+		
+		if (booking.getFlatId() == 0) {
+			bookingName = "Indisponível";
+		} else {
+			bookingName = booking.getFlat().getName() + " " + booking.getStatus().getLabel();
+		}
+
 		DefaultScheduleEvent event; 
-		event = new DefaultScheduleEvent(booking.getFlat().getName() + " " + booking.getStatus().getLabel(), 
-										 booking.getDate(), 
-										 booking.getDate(), 
+		event = new DefaultScheduleEvent(bookingName, booking.getDate(), booking.getDate(), 
 										 ScheduleBean.getBookingStyleClass(booking));
 		event.setData(booking);
 		return event;
