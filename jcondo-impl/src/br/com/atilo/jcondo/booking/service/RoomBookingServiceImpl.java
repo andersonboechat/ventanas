@@ -212,6 +212,7 @@ public class RoomBookingServiceImpl {
 		checkAvailability(booking);
 
 		booking.setStatus(BookingStatus.BOOKED);
+		booking.setPrice(booking.getResource().getPrice());
 		RoomBooking b = bookingManager.save(booking);
 		
 		try {

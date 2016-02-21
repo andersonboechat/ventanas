@@ -5,6 +5,7 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Observable;
 import java.util.Set;
 
 import org.apache.commons.collections.CollectionUtils;
@@ -30,6 +31,7 @@ import br.com.atilo.jcondo.commons.collections.DomainPredicate;
 import br.com.atilo.jcondo.commons.collections.MembershipPredicate;
 import br.com.atilo.jcondo.commons.collections.PersonTypePredicate;
 import br.com.atilo.jcondo.commons.collections.PersonTypeTransformer;
+import br.com.atilo.jcondo.core.listener.PersonServiceListener;
 import br.com.atilo.jcondo.core.persistence.manager.PersonManagerImpl;
 import br.com.atilo.jcondo.core.persistence.manager.SecurityManagerImpl;
 import br.com.caelum.stella.validation.CPFValidator;
@@ -39,7 +41,7 @@ import com.liferay.portal.model.User;
 import com.liferay.portal.service.ServiceContext;
 import com.liferay.portal.service.UserLocalServiceUtil;
 
-public class PersonServiceImpl  {
+public class PersonServiceImpl extends Observable  {
 
 	private static final Condominium CONDOMINIUM = new Condominium();
 
@@ -59,6 +61,7 @@ public class PersonServiceImpl  {
 
 	public PersonServiceImpl() {
 		CONDOMINIUM.setRelatedId(10179);
+		addObserver(new PersonServiceListener());
 	}
 
 	public boolean isAccessAuthorized(Person person) throws Exception {
@@ -202,6 +205,9 @@ public class PersonServiceImpl  {
 				if (!StringUtils.isEmpty(person.getEmailAddress())) {
 					notifyUserAccountCreation(person);	
 				}
+
+				setChanged();
+				notifyObservers(p);
 			} catch (Exception e) {
 				// TODO: Log it!
 				e.printStackTrace();
@@ -450,6 +456,9 @@ public class PersonServiceImpl  {
 						!StringUtils.equals(dbPerson.getEmailAddress(), person.getEmailAddress())) {
 					notifyUserAccountCreation(person);	
 				}
+				
+				setChanged();
+				notifyObservers(p);
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
