@@ -1,7 +1,6 @@
 package br.com.atilo.jcondo.booking.bean;
 
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.Observable;
 import java.util.Observer;
 

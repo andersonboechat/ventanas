@@ -82,11 +82,15 @@ public class RoomBookingServiceImpl {
 		} else {
 			RoomBooking b = CollectionUtils.isEmpty(bookings) ? null : bookings.get(0);
 
-			if (b != null && !BookingStatus.CANCELLED.equals(b.getStatus())) {
+			if (b != null) { 
+				if (!BookingStatus.CANCELLED.equals(b.getStatus())) {
 				throw new BusinessException("bkg.room.already.booked", booking.getResource().getName(), 
 											DateFormatUtils.format(booking.getBeginDate(), "dd/MM/yyyy"),
 											DateFormatUtils.format(booking.getBeginDate(), "HH:mm'h'"), 
 											DateFormatUtils.format(booking.getEndDate(), "HH:mm'h'"));
+				} else {
+					delete(b, false);
+				}
 			}
 		}
 	}
@@ -99,7 +103,15 @@ public class RoomBookingServiceImpl {
 		RoomBooking b = bookingManager.findById(booking.getId());
 
 		if (b == null || !BookingStatus.CANCELLED.equals(b.getStatus())) {
-			throw new BusinessException("bkg.not.cancelled");			
+			throw new BusinessException("bkg.not.cancelled");
+		}
+
+		if (checkPermission) {
+			if (booking.getNote() == null || StringUtils.isEmpty(booking.getNote().getText())) {
+				throw new BusinessException("bkg.note.empty");
+			} else {
+				b.setNote(booking.getNote());
+			}
 		}
 
 		b.setStatus(BookingStatus.DELETED);

@@ -8,6 +8,7 @@ import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
+import javax.persistence.OneToOne;
 import javax.persistence.Table;
 
 /**
@@ -27,6 +28,10 @@ public class RoomBookingEntity extends BookingEntity {
 	@OneToMany(cascade=CascadeType.ALL, mappedBy="booking", orphanRemoval=true)
 	private List<GuestEntity> guests;
 
+	@OneToOne
+	@JoinColumn(name="noteId")
+	private BookingNoteEntity note;
+
 	public RoomBookingEntity() {
 		this.guests = new ArrayList<GuestEntity>();
 	}
@@ -45,6 +50,14 @@ public class RoomBookingEntity extends BookingEntity {
 
 	public void setGuests(List<GuestEntity> guests) {
 		this.guests = guests;
+	}
+
+	public BookingNoteEntity getNote() {
+		return note;
+	}
+
+	public void setNote(BookingNoteEntity note) {
+		this.note = note;
 	}
 
 }

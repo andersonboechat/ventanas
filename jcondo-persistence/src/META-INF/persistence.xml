@@ -25,10 +25,13 @@
 		<class>br.com.atilo.jcondo.booking.persistence.entity.GuestEntity</class>
 		<class>br.com.atilo.jcondo.core.persistence.entity.PhysicalDeficiencyEntity</class>
 		<class>br.com.atilo.jcondo.core.persistence.entity.PetEntity</class>
+		<class>br.com.atilo.jcondo.booking.persistence.entity.BookingNoteEntity</class>
 		<properties>
 			<property name="hibernate.dialect" value="org.hibernate.dialect.MySQLDialect"/>  
 			<property name="hibernate.query.substitutions" value="true 1,false 0"/>
 			<property name="hibernate.hbm2ddl.auto" value="validate"/>
+            <property name="hibernate.show_sql" value="false"/>
+            <property name="hibernate.format_sql" value="false"/>
 		</properties>
 	</persistence-unit>	
 </persistence>

@@ -7,11 +7,13 @@ import java.util.List;
 import javax.persistence.NoResultException;
 import javax.persistence.Query;
 
+import br.com.abware.jcondo.booking.model.BookingNote;
 import br.com.abware.jcondo.booking.model.Guest;
 import br.com.abware.jcondo.booking.model.Room;
 import br.com.abware.jcondo.booking.model.RoomBooking;
 import br.com.abware.jcondo.core.model.Person;
 import br.com.abware.jcondo.exception.PersistenceException;
+import br.com.atilo.jcondo.booking.persistence.entity.BookingNoteEntity;
 import br.com.atilo.jcondo.booking.persistence.entity.GuestEntity;
 import br.com.atilo.jcondo.booking.persistence.entity.RoomBookingEntity;
 import br.com.atilo.jcondo.commons.BeanUtils;
@@ -20,6 +22,18 @@ import br.com.atilo.jcondo.core.persistence.manager.PersonManagerImpl;
 
 public class RoomBookingManagerImpl extends JCondoManager<RoomBookingEntity, RoomBooking> {
 
+	private JCondoManager<BookingNoteEntity, BookingNote> bookingNoteManager = new JCondoManager<BookingNoteEntity, BookingNote>() {
+		@Override
+		protected Class<BookingNote> getModelClass() {
+			return BookingNote.class;
+		}
+
+		@Override
+		protected Class<BookingNoteEntity> getEntityClass() {
+			return BookingNoteEntity.class;
+		}
+	};
+	
 	private PersonManagerImpl personManager = new PersonManagerImpl();
 	
 	@Override
@@ -75,6 +89,15 @@ public class RoomBookingManagerImpl extends JCondoManager<RoomBookingEntity, Roo
 		} catch (Exception e) {
 			throw new PersistenceException(e, "psn.mgr.get.model.failed");
 		}
+	}
+	
+	@Override
+	public RoomBooking save(RoomBooking model) throws Exception {
+		if (model.getNote() != null) {
+			model.setNote(bookingNoteManager.save(model.getNote()));
+		}
+
+		return super.save(model);
 	}
 
 	@SuppressWarnings("unchecked")

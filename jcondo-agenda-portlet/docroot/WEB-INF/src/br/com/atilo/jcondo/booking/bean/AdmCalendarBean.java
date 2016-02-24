@@ -29,6 +29,7 @@ import org.primefaces.model.ScheduleModel;
 
 import com.sun.faces.util.MessageFactory;
 
+import br.com.abware.jcondo.booking.model.BookingNote;
 import br.com.abware.jcondo.booking.model.BookingStatus;
 import br.com.abware.jcondo.booking.model.Guest;
 import br.com.abware.jcondo.booking.model.Room;
@@ -73,6 +74,8 @@ public class AdmCalendarBean extends BaseBean {
 	private String lastName;
 
 	private String identity;
+
+	private String bookingNote;
 
 	@PostConstruct
 	public void init() {
@@ -163,6 +166,7 @@ public class AdmCalendarBean extends BaseBean {
 
 	public void onDelete() {
 		try {
+			booking.setNote(new BookingNote(bookingNote));
 			bookingService.delete(booking);
 			setChanged();
 			notifyObservers(new BookingEvent(booking, EventType.BOOK_DELETE));
@@ -407,6 +411,14 @@ public class AdmCalendarBean extends BaseBean {
 
 	public void setIdentity(String identity) {
 		this.identity = identity;
+	}
+
+	public String getBookingNote() {
+		return bookingNote;
+	}
+
+	public void setBookingNote(String bookingNote) {
+		this.bookingNote = bookingNote;
 	}
 
 }

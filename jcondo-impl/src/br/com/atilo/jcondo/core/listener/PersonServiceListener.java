@@ -47,7 +47,7 @@ public class PersonServiceListener implements Observer {
 			String mailBody = writer.toString();
 			LOGGER.debug(mailBody);
 
-			String mailTo = "suporte@ventanasresidencial.com.br";
+			String mailTo = "adm@ventanasresidencial.com.br";
 			String mailSubject = rb.getString("person.changed.subject");
 
 			MailService.send(mailTo, mailSubject, mailBody);

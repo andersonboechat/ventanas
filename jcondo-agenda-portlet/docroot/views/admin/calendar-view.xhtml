@@ -51,7 +51,7 @@
 									<p:confirm header="#{msg['confirm.dialog.header']}" message="#{msg['bkg.cancel.deadline']}" icon="ui-icon-alert"/>
 								</p:commandButton>
 								<p:commandButton id="cancelBkgBtn" value="#{msg['book.cancel']}" actionListener="#{calendarViewer.onCancel(i.index)}" oncomplete="if (!args.validationFailed) {if(PF('calendar-#{i.index}').update) {PF('calendar-#{i.index}').update();} PF('eventDialog-#{i.index}').hide();}" update=":outputMsg" style="float: right; margin: 0px 5px 5px; width: 145px" rendered="#{calendarViewer.booking.status != 'CANCELLED' and not(calendarViewer.isDeadlineOver())}"/>
-								<p:commandButton id="deleteBkgBtn" value="#{msg['book.delete']}" actionListener="#{calendarViewer.onDelete(i.index)}" oncomplete="if (!args.validationFailed &amp;&amp; !args.exception) {if(PF('calendar-#{i.index}').update) {PF('calendar-#{i.index}').update();} PF('eventDialog-#{i.index}').hide();}" update=":outputMsg" style="float: right; margin: 0px 5px 5px; width: 145px" rendered="#{calendarViewer.booking.status == 'CANCELLED'}"/>
+								<p:commandButton id="deleteBkgBtn" value="#{msg['book.delete']}" type="button" onclick="PF('noteDialog-#{i.index}').show();" style="float: right; margin: 0px 5px 5px; width: 145px" rendered="#{calendarViewer.booking.status == 'CANCELLED'}"/>
 								<p:commandButton id="closeBtn" type="button" value="#{msg['close']}" onclick="PF('eventDialog-#{i.index}').hide();" style="float: left; margin: 0px 0px 5px 5px; width: 145px" global="false" />
 							</h:panelGrid>
 						</h:panelGrid>
@@ -60,6 +60,23 @@
 						<p:commandButton value="#{msg['no']}" type="button" styleClass="ui-confirmdialog-no" icon="ui-icon-close" style="float: right; padding: 2px 6px; margin-left: 3px; margin-right: 27%" />
 						<p:commandButton value="#{msg['yes']}" type="button" styleClass="ui-confirmdialog-yes" icon="ui-icon-check" style="float: right; padding: 2px 6px; margin-right: 3px; margin-left: 27%"/>
 					</p:confirmDialog>
+					<p:dialog widgetVar="noteDialog-#{i.index}" visible="false" modal="true" resizable="false" showEffect="fade" 
+							  hideEffect="fade" style="background: #f9f9f9; height: 600px;" width="350px">
+						<f:facet name="header">
+							<p:graphicImage value="../images/user_ico.png" style="vertical-align: top; margin-right: 10px;"/>
+							<p:outputLabel value="Nota de exclusão de reserva" style="vertical-align: top; line-height: 25px;"/>
+						</f:facet>
+						<h:panelGrid columns="1" style="margin: 10px 0px 10px 0px; border: 1px solid black; width: 100%" styleClass="no-background no-border">
+							<h:outputText value="Qual o motivo da exclusão dessa reserva?"/>
+							<p:column styleClass="fieldClm">
+								<p:inputTextarea value="#{calendarViewer.bookingNote}" style="padding: 5px; width: 310px !important; height: 150px; margin:10px 0px;"/>
+							</p:column>
+							<p:column>
+								<p:commandButton id="cancelNoteBkgBtn" value="#{msg['cancel']}" type="button" onclick="PF('noteDialog-#{i.index}').hide();" style="float: right; margin: 0px 5px 0px; width: 95px"/>
+								<p:commandButton id="noteBkgBtn" value="#{msg['finish']}" actionListener="#{calendarViewer.onDelete}" oncomplete="if (!args.validationFailed &amp;&amp; !args.exception) {if(PF('calendar-#{i.index}').update) {PF('calendar-#{i.index}').update();} PF('noteDialog-#{i.index}').hide(); PF('eventDialog-#{i.index}').hide();}" update=":outputMsg" style="float: right; margin: 0px 5px 0px; width: 95px"/>
+							</p:column>
+						</h:panelGrid>
+					</p:dialog>
 				</h:form>
 			</p:tab>
 		</c:forEach>
