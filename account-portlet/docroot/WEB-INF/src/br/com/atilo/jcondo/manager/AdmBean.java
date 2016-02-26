@@ -17,7 +17,6 @@ import org.primefaces.context.RequestContext;
 
 import br.com.abware.jcondo.core.PersonType;
 import br.com.abware.jcondo.core.model.Administration;
-import br.com.abware.jcondo.exception.BusinessException;
 import br.com.atilo.jcondo.core.service.AdministrationServiceImpl;
 
 @ViewScoped
@@ -51,10 +50,10 @@ public class AdmBean {
 		try {
 
 			MessageUtils.addMessage(FacesMessage.SEVERITY_INFO, "flats.success", null);
-		} catch (BusinessException e) { 
-			LOGGER.warn("Business failure on flat update: " + e.getMessage());
-			MessageUtils.addMessage(FacesMessage.SEVERITY_WARN, e.getMessage(), e.getArgs());
-			RequestContext.getCurrentInstance().addCallbackParam("exception", true);
+//		} catch (BusinessException e) { 
+//			LOGGER.warn("Business failure on flat update: " + e.getMessage());
+//			MessageUtils.addMessage(FacesMessage.SEVERITY_WARN, e.getMessage(), e.getArgs());
+//			RequestContext.getCurrentInstance().addCallbackParam("exception", true);
 		} catch (Exception e) {
 			LOGGER.error("Failure on flat update", e);
 			MessageUtils.addMessage(FacesMessage.SEVERITY_FATAL, "general.failure", null);

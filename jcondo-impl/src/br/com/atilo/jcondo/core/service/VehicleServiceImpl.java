@@ -152,15 +152,13 @@ public class VehicleServiceImpl implements BaseService<Vehicle> {
 			if(vehicle.getType() == VehicleType.CAR) {
 				List<Parking> parkings = parkingService.getFreeParkings(vehicle.getDomain());
 	
-				if (CollectionUtils.isEmpty(parkings)) {
-					throw new BusinessException("vhc.parking.unavailable");
+				if (!CollectionUtils.isEmpty(parkings)) {
+					v = vehicleManager.save(vehicle);
+		
+					Parking parking = parkings.get(0);
+					parking.setVehicle(v);
+					parkingService.update(parking);
 				}
-	
-				v = vehicleManager.save(vehicle);
-	
-				Parking parking = parkings.get(0);
-				parking.setVehicle(v);
-				parkingService.update(parking);
 			} else {
 				v = vehicleManager.save(vehicle);
 			}

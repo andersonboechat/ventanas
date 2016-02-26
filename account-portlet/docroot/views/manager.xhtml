@@ -8,6 +8,9 @@
 	xmlns:p="http://primefaces.org/ui"
 	xmlns:ui="http://java.sun.com/jsf/facelets">
 
+	<p:growl id="outputMsg2" widgetVar="outputMsg2" globalOnly="false" sticky="false"/>
+	<f:loadBundle basename="Language" var="msg2"/>
+
 	<p:dialog id="registerCompleteDialog" widgetVar="registerCompleteDialog" modal="true" closable="false" 
 			  resizable="false" draggable="false" visible="#{not managerBean.person.registerComplete}"
 			  width="430" height="300">
@@ -28,7 +31,7 @@
 							<p>Obrigado.</p>
 							<p style="text-align: right;">Administração</p>
 						</p:panel>
-						<p:commandButton value="#{msg.start}" type="button" onclick="PF('wiz').next();" style="float: right; padding: 2px; width: 90px; margin: 10px 10px 0px;"/>
+						<p:commandButton value="#{msg2.start}" type="button" onclick="PF('wiz').next();" style="float: right; padding: 2px; width: 90px; margin: 10px 10px 0px;"/>
 					</p:panelGrid>	
 				</p:tab>
 				<p:tab id="person-details" title="Informações Pessoais">
@@ -38,14 +41,14 @@
 						<p:column styleClass="labelClm"><p:outputLabel for="firstName" value="Nome: "/></p:column>
 						<p:column styleClass="fieldClm">
 							<p:inputText id="firstName" value="#{managerBean.person.firstName}" required="true" lang="pt" 
-										 requiredMessage="#{msg['person.firstname.empty']}" validatorMessage="O nome deve conter somente letras">
+										 requiredMessage="#{msg2['person.firstname.empty']}" validatorMessage="O nome deve conter somente letras">
        							<f:validateRegex pattern="^([\s]*\p{L}[\s]*)+$" />
 							</p:inputText>
 						</p:column>
 						<p:column styleClass="labelClm"><p:outputLabel for="lastName" value="Sobrenome: "/></p:column>
 						<p:column styleClass="fieldClm">
 							<p:inputText id="lastName" value="#{managerBean.person.lastName}" required="true" 
-										 requiredMessage="#{msg['person.lastname.empty']}"
+										 requiredMessage="#{msg2['person.lastname.empty']}"
 										 validatorMessage="O sobrenome deve conter somente letras">
        							<f:validateRegex pattern="^([\s]*\p{L}[\s]*)+$" />
 							</p:inputText>
@@ -53,29 +56,29 @@
 						<p:column styleClass="labelClm"><p:outputLabel for="identity" value="CPF: "/></p:column>
 						<p:column styleClass="fieldClm">
 							<p:inputMask id="identity" value="#{managerBean.person.identity}" mask="999.999.999-99" 
-										 required="true" requiredMessage="#{msg['person.identity.empty']}" />
+										 required="true" requiredMessage="#{msg2['person.identity.empty']}" />
 						</p:column>
 						<p:column styleClass="labelClm"><p:outputLabel for="male" value="Sexo:"/></p:column>
 						<p:column>
 							<p:selectOneRadio id="male" value="#{profileBean.person.gender}" required="false" 
 											  styleClass="kintype" style="vertical-align: middle">
-								<f:selectItems var="gender" value="#{profileBean.genders}" itemLabel="#{msg[gender.label]}"/>
+								<f:selectItems var="gender" value="#{profileBean.genders}" itemLabel="#{msg2[gender.label]}"/>
 							</p:selectOneRadio>
 						</p:column>
 						<p:column styleClass="labelClm"><p:outputLabel for="birthday" value="Nascimento:"/></p:column>
 						<p:column styleClass="fieldClm">
 							<p:calendar id="birthday" mode="popup" pattern="dd/MM/yyyy" value="#{managerBean.person.birthday}"
 										navigator="true" yearRange="c-100:c+0" styleClass="birthday" mask="true" locale="pt" 
-										requiredMessage="#{msg['person.birthday.empty']}" required="true"/>
+										requiredMessage="#{msg2['person.birthday.empty']}" required="true"/>
 						</p:column>
 					</p:panelGrid>
 					<p:column>
-						<p:commandButton value="#{msg.forward}" actionListener="#{managerBean.onSavePerson}" 
-										 update=":outputMsg" rendered="#{not empty managerBean.flats}" 
+						<p:commandButton value="#{msg2.forward}" actionListener="#{managerBean.onSavePerson}" 
+										 update=":outputMsg2" rendered="#{not empty managerBean.flats}" 
 										 oncomplete="if (!args.validationFailed &amp;&amp; !args.exception) {PF('wiz').next();}" 
 										 style="float: right; padding: 2px; width: 90px; margin: 10px 0px 0px;"/>
-						<p:commandButton value="#{msg.finish}" actionListener="#{managerBean.onFinish}" 
-										 update="wiz,:outputMsg" rendered="#{empty managerBean.flats}"
+						<p:commandButton value="#{msg2.finish}" actionListener="#{managerBean.onFinish}" 
+										 update="wiz,:outputMsg2" rendered="#{empty managerBean.flats}"
 										 oncomplete="if (!args.validationFailed &amp;&amp; !args.exception) {PF('registerCompleteDialog').hide();}" 
 										 style="float: right; padding: 2px; width: 90px; margin: 10px 0px 0px;"/>
 						<p:commandButton value="Voltar" type="button" onclick="PF('wiz').back();" style="float: right; padding: 2px; width: 85px; margin-right: 8px;" rendered="false"/>
@@ -89,43 +92,43 @@
 							<p:outputLabel for="hasPets" value="Existem animais residindo no apartamento?"/>
 							<p:selectOneRadio id="hasPets" widgetVar="hasPets" value="#{managerBean.flat.pets}" required="true" 
 											  requiredMessage="Informe se existem animais residindo no apartamento." style="margin-left: 5px;">
-								<f:selectItem itemLabel="#{msg.yes}" itemValue="true"/>
-								<f:selectItem itemLabel="#{msg.no}" itemValue="false"/>
+								<f:selectItem itemLabel="#{msg2.yes}" itemValue="true"/>
+								<f:selectItem itemLabel="#{msg2.no}" itemValue="false"/>
 								<p:ajax event="change" listener="#{managerBean.onPetSelect}" update="ptLabel" oncomplete="if (!args.validationFailed) {if ((args.value &amp;&amp; PF('pets').cfg.collapsed) || (!args.value &amp;&amp; !PF('pets').cfg.collapsed) ) {PF('pets').toggle();}}" global="false"/>
 							</p:selectOneRadio>
 							<p:panel id="pets" widgetVar="pets" toggleable="true" collapsed="#{not managerBean.flat.pets}" styleClass="no-border no-background no-margin">
 								<p:panelGrid columns="1" styleClass="no-background no-border">
 									<p:outputLabel id="ptLabel" for="petTypes" value="Quais tipos de animais?" style="margin-left: 0px;"/>
 									<p:selectManyCheckbox id="petTypes" value="#{managerBean.flat.petTypes}" required="#{managerBean.flat.pets}" requiredMessage="Informe os tipos de animais" converter="jsonConverter">
-										<f:selectItems var="type" value="#{managerBean.petTypes}" itemLabel="#{msg[type.label]}" itemValue="#{type}"/>
+										<f:selectItems var="type" value="#{managerBean.petTypes}" itemLabel="#{msg2[type.label]}" itemValue="#{type}"/>
 									</p:selectManyCheckbox>
 								</p:panelGrid>
 							</p:panel>
 							<p:outputLabel for="hasDisables" value="Existem moradores com dificuldade de locomoção?"/>
 							<p:selectOneRadio id="hasDisables" value="#{managerBean.flat.disables}" required="true" requiredMessage="Informe se existem moradores com dificuldade de locomoção" style="margin-left: 5px;">
-								<f:selectItem itemLabel="#{msg.yes}" itemValue="true"/>
-								<f:selectItem itemLabel="#{msg.no}" itemValue="false"/>
+								<f:selectItem itemLabel="#{msg2.yes}" itemValue="true"/>
+								<f:selectItem itemLabel="#{msg2.no}" itemValue="false"/>
 							</p:selectOneRadio>
 							<p:outputLabel for="hasBrigade" value="Há moradores com treinamento de brigada contra incêndio?"/>
 							<p:selectOneRadio id="hasBrigade" value="#{managerBean.flat.brigade}" required="true" requiredMessage="Informe se há moradores com treinamento de brigada contra incêndio" style="margin-left: 5px;">
-								<f:selectItem itemLabel="#{msg.yes}" itemValue="true"/>
-								<f:selectItem itemLabel="#{msg.no}" itemValue="false"/>
+								<f:selectItem itemLabel="#{msg2.yes}" itemValue="true"/>
+								<f:selectItem itemLabel="#{msg2.no}" itemValue="false"/>
 							</p:selectOneRadio>
 						</p:panelGrid>
 						<p:column>
-							<p:commandButton value="#{msg.finish}" actionListener="#{managerBean.onFinish}" 
-											 update="wiz,:outputMsg" rendered="#{not(managerBean.hasNextFlat())}"
+							<p:commandButton value="#{msg2.finish}" actionListener="#{managerBean.onFinish}" 
+											 update="wiz,:outputMsg2" rendered="#{not(managerBean.hasNextFlat())}"
 											 oncomplete="if (!args.validationFailed &amp;&amp; !args.exception) {PF('registerCompleteDialog').hide();}" 
 											 style="float: right; padding: 2px; width: 90px; margin: 10px 10px 0px;"/>
-							<p:commandButton value="#{msg.forward}" actionListener="#{managerBean.onNext}" 
-											 update="wiz,:outputMsg" rendered="#{managerBean.hasNextFlat()}"
+							<p:commandButton value="#{msg2.forward}" actionListener="#{managerBean.onNext}" 
+											 update="wiz,:outputMsg2" rendered="#{managerBean.hasNextFlat()}"
 											 oncomplete="if (!args.validationFailed) {if ((args.value &amp;&amp; PF('pets').cfg.collapsed) || (!args.value &amp;&amp; !PF('pets').cfg.collapsed)) {PF('pets').toggle();}}"
 											 style="float: right; padding: 2px; width: 90px; margin: 10px 10px 0px;"/>
-							<p:commandButton value="#{msg.backward}" type="button" onclick="PF('wiz').back();" 
+							<p:commandButton value="#{msg2.backward}" type="button" onclick="PF('wiz').back();" 
 											 rendered="#{not(managerBean.hasPreviousFlat())}"
 											 style="float: right; padding: 2px; width: 90px; margin: 10px 5px 0px;"/>
-							<p:commandButton value="#{msg.backward}" actionListener="#{managerBean.onPrevious}" 
-											 update="wiz,:outputMsg" rendered="#{managerBean.hasPreviousFlat()}" 
+							<p:commandButton value="#{msg2.backward}" actionListener="#{managerBean.onPrevious}" 
+											 update="wiz,:outputMsg2" rendered="#{managerBean.hasPreviousFlat()}" 
 											 oncomplete="if (!args.validationFailed) {if ((args.value &amp;&amp; PF('pets').cfg.collapsed) || (!args.value &amp;&amp; !PF('pets').cfg.collapsed)) {PF('pets').toggle();}}"
 											 style="float: right; padding: 2px; width: 90px; margin: 10px 5px 0px;"/>
 						</p:column>

@@ -5,7 +5,7 @@
   </head>
   <body text="#000000" bgcolor="#FFFFFF" style="font-family: sans-serif;">
 	<p>ATENÇÃO!</p>
-	<p>Uma pessoa foi cadastrada/alterada no portal do condomínio. Favor fazer as devidas modifiações no 
+	<p>Uma pessoa foi cadastrada/alterada no portal do condomínio. Favor fazer as devidas modificações no 
 	sistema de controle de acesso. Seguem os dados da pessoa.</p>
 	<p>
         <table>
@@ -30,7 +30,7 @@
 						</tr>
 						#foreach($membership in $person.memberships)
 						<tr>
-							<td style="border-right: 1px solid black;">$membership.domain.number. - bloco $membership.domain.block</td>
+							<td style="border-right: 1px solid black;">$membership.domain.number - bloco $membership.domain.block</td>
 							<td>$props.getString($membership.type.label)</td>
 						</tr>
 						#end

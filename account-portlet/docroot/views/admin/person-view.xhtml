@@ -46,7 +46,7 @@
 		    <p:ajax event="page" global="false"/>
 			<p:column style="width: 49px;">
 				<p:panel styleClass="foto no-margin no-background" style="width: 43px !important; height: 66px !important">
-					<p:graphicImage value="#{person.picture.path}" height="66" width="43"/>
+					<p:graphicImage value="#{person.picture.path}" height="66" width="43" cache="false"/>
 				</p:panel>
 			</p:column>
 			<p:column style="vertical-align: top">
@@ -195,7 +195,7 @@
 					<p:column styleClass="my-account-col1">
 						<p:panelGrid columns="1" styleClass="no-margin no-border no-background">
 							<p:panel styleClass="user-image foto no-margin no-background2" style="width: #{imageUploader.width}px !important; height: #{imageUploader.height}px !important">
-								<p:graphicImage id="portrait" value="#{admFlatBean.personBean.person.picture.path}" width="#{imageUploader.width}" height="#{imageUploader.height}"/>
+								<p:graphicImage id="portrait" value="#{admFlatBean.personBean.person.picture.path}" width="#{imageUploader.width}" height="#{imageUploader.height}" cache="false"/>
 							</p:panel>
 							<p:panelGrid columns="2" columnClasses="picture" styleClass="pic-cmds no-border no-background" style="text-align: center; float: right">
 								<p:fileUpload label="" fileUploadListener="#{imageUploader.onUpload}" auto="true" 
@@ -216,10 +216,18 @@
 			<p:commandButton value="#{msg['cancel']}" process="@this" oncomplete="PF('personDialog').hide();" global="false" style="float: right; width: 90px; margin: 0px 0px 10px 0px;">
 				<p:resetInput target="person-details-form" />
 			</p:commandButton>
-			<p:commandButton value="#{msg['finish']}" actionListener="#{admFlatBean.personBean.onPersonSave}" 
+			<p:commandButton value="#{msg['save']}" actionListener="#{admFlatBean.personBean.onPersonSave}" 
 							 update="@widgetVar(personTable),@widgetVar(outputMsg)" 
 							 oncomplete="if (!args.validationFailed &amp;&amp; !args.exception) {PF('personDialog').hide();}" 
-							 style="float: right; width: 90px; margin: 0px 10px 10px 5px;"/>
+							 style="float: right; width: 90px; margin: 0px 10px 10px 5px;"
+							 rendered="#{not empty admFlatBean.personBean.person.identity}"/>
+			<p:commandButton value="#{msg['save']}" actionListener="#{admFlatBean.personBean.onPersonSave}" 
+							 update="@widgetVar(personTable),@widgetVar(outputMsg)" 
+							 oncomplete="if (!args.validationFailed &amp;&amp; !args.exception) {PF('personDialog').hide();}" 
+							 style="float: right; width: 90px; margin: 0px 10px 10px 5px;"
+							 rendered="#{empty admFlatBean.personBean.person.identity}">
+				<p:confirm header="#{msg['attention']}" message="#{msg['person.save.message']}" icon="ui-icon-alert"/>
+			</p:commandButton>
 		</h:form>
 	</p:dialog>
 

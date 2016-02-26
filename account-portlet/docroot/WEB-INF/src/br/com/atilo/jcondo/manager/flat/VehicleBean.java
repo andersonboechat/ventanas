@@ -105,7 +105,10 @@ public class VehicleBean {
 				}
 				onVehicleSave();
 			} else {
-				MessageUtils.addMessage(FacesMessage.SEVERITY_WARN, e.getMessage(), e.getArgs(), ":tabs:vehicle-details-form:alertMsg");
+				int number = ((Flat) v.getDomain()).getNumber();
+				int block = ((Flat) v.getDomain()).getBlock();
+				MessageUtils.addMessage(FacesMessage.SEVERITY_WARN, e.getMessage(), 
+										new Object[]{number, block}, ":tabs:vehicle-details-form:alertMsg");
 				RequestContext.getCurrentInstance().addCallbackParam("alert", true);
 				RequestContext.getCurrentInstance().addCallbackParam("exception", true);
 			}
@@ -191,11 +194,11 @@ public class VehicleBean {
 
 	public void validateVehicleType(FacesContext context, UIComponent component, Object value) {
 		if (! (value instanceof VehicleType)) {
-			FacesMessage message = MessageFactory.getMessage(UIInput.REQUIRED_MESSAGE_ID, null);
+			FacesMessage message = MessageFactory.getMessage(UIInput.REQUIRED_MESSAGE_ID);
 			throw new ValidatorException(message);  
 		}
 
-		VehicleType type = (VehicleType) value;
+		//VehicleType type = (VehicleType) value;
 	}  
 
 	public ImageUploadBean getImageUploadBean() {
