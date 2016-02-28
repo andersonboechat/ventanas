@@ -68,6 +68,8 @@
 				</p:tab>
 				<p:tab id="guests">
 					<p:panelGrid id="bookingGuests-#{tabId}" columns="1" styleClass="no-margin no-border" style="width: 700px;">
+						<p:outputLabel style="text-align: justify; width: 100%" value="Não é preciso informar seus convidados para concluir a reserva. A lista poderá ser informada posteriormente, até o horário de ínicio do evento."/>
+						
 						<p:panelGrid id="guest-search" columns="5" styleClass="no-border no-background no-margin2" style="width: 100%; margin: 10px 0px 10px 0px;">
 							<p:outputLabel value="#{msg['name']}: "/>
 							<p:inputText id="firstName" value="#{calendarBean.firstName}" style="width: 200px; font-style: italic;"/>
@@ -78,7 +80,7 @@
 							</p:commandLink>
 						</p:panelGrid>
 
-						<p:panel header="#{msg['guest.list.header']}" style="height: 405px; padding: 0px" styleClass="no-margin2 panel">
+						<p:panel header="#{msg['guest.list.header']}" style="height: 370px; padding: 0px" styleClass="no-margin2 panel">
 							<p:dataTable widgetVar="guestTable" id="guestTable" var="guest" value="#{calendarBean.booking.guests}"  
 							             rowKey="#{guest.id}" style="margin: 0px 0px 0px; width: 100%;" 
 							             scrollable="true" scrollHeight="370" emptyMessage="" styleClass="no-header no-margin">

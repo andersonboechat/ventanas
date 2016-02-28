@@ -150,17 +150,14 @@ public class VehicleServiceImpl implements BaseService<Vehicle> {
 			// Visitantes podem acessar o condominio apenas para deixar/buscar passageiros
 			// Motos e Bicicletas são veículos extras
 			if(vehicle.getType() == VehicleType.CAR) {
+				v = vehicleManager.save(vehicle);
 				List<Parking> parkings = parkingService.getFreeParkings(vehicle.getDomain());
 	
 				if (!CollectionUtils.isEmpty(parkings)) {
-					v = vehicleManager.save(vehicle);
-		
 					Parking parking = parkings.get(0);
 					parking.setVehicle(v);
 					parkingService.update(parking);
 				}
-			} else {
-				v = vehicleManager.save(vehicle);
 			}
 		} else {
 			v = vehicleManager.save(vehicle);
@@ -200,13 +197,11 @@ public class VehicleServiceImpl implements BaseService<Vehicle> {
 			if(v.getType() != VehicleType.CAR && vehicle.getType() == VehicleType.CAR) {
 				List<Parking> parkings = parkingService.getFreeParkings(vehicle.getDomain());
 
-				if (CollectionUtils.isEmpty(parkings)) {
-					throw new BusinessException("vhc.parking.unavailable");
+				if (!CollectionUtils.isEmpty(parkings)) {
+					Parking parking = parkings.get(0);
+					parking.setVehicle(v);
+					parkingService.update(parking);
 				}
-
-				Parking parking = parkings.get(0);
-				parking.setVehicle(v);
-				parkingService.update(parking);
 			}
 
 			if(v.getDomain() != null && v.getType() == VehicleType.CAR && vehicle.getType() != VehicleType.CAR) {
@@ -276,13 +271,11 @@ public class VehicleServiceImpl implements BaseService<Vehicle> {
 				if(vehicle.getType() == VehicleType.CAR) {
 					List<Parking> parkings = parkingService.getFreeParkings(domain);
 					
-					if (CollectionUtils.isEmpty(parkings)) {
-						throw new BusinessException("vhc.parking.unavailable");
+					if (!CollectionUtils.isEmpty(parkings)) {
+						Parking parking = parkings.get(0);
+						parking.setVehicle(v);
+						parkingService.update(parking);
 					}
-
-					Parking parking = parkings.get(0);
-					parking.setVehicle(v);
-					parkingService.update(parking);
 				}
 			}
 		}  
