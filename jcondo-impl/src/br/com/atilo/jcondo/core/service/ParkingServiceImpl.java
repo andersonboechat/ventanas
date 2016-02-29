@@ -1,8 +1,15 @@
 package br.com.atilo.jcondo.core.service;
 
 import java.util.List;
+import java.util.ResourceBundle;
 
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.log4j.Logger;
+
+import com.liferay.portal.kernel.io.unsync.UnsyncStringWriter;
+import com.liferay.portal.kernel.velocity.VelocityContext;
+import com.liferay.portal.kernel.velocity.VelocityEngineUtil;
+import com.liferay.util.ContentUtil;
 
 import br.com.abware.jcondo.core.Permission;
 import br.com.abware.jcondo.core.model.Domain;
@@ -15,8 +22,13 @@ import br.com.abware.jcondo.exception.BusinessException;
 import br.com.atilo.jcondo.core.persistence.manager.ParkingManagerImpl;
 import br.com.atilo.jcondo.core.persistence.manager.SecurityManagerImpl;
 import br.com.atilo.jcondo.core.persistence.manager.VehicleManagerImpl;
+import br.com.atilo.jcondo.util.MailService;
 
 public class ParkingServiceImpl implements BaseService<Parking> {
+
+	private static final Logger LOGGER = Logger.getLogger(ParkingServiceImpl.class);	
+	
+	private static final ResourceBundle rb = ResourceBundle.getBundle("i18n");
 
 	private ParkingManagerImpl parkingManager = new ParkingManagerImpl();
 	
@@ -41,6 +53,82 @@ public class ParkingServiceImpl implements BaseService<Parking> {
 			return 0;
 		}
 	}
+
+	private void notifyParkingRent(Parking parking) throws Exception {
+		LOGGER.info("parking rent notify begin: " + parking);
+
+		Parking p = parkingManager.findById(parking.getId());
+
+		if (p == null) {
+			throw new BusinessException("parking.not.exists");
+		}
+
+		if (p.getOwnerDomain() == null) {
+			throw new BusinessException("parking.not.owned", p);
+		}		
+
+		if (p.getRenterDomain() == null) {
+			throw new BusinessException("parking.not.rented", p);
+		}
+
+		String mailBodyTemplate = ContentUtil.get("br/com/atilo/jcondo/core/mail/parking-rented-notify.vm");
+		
+		LOGGER.debug(mailBodyTemplate);
+
+		VelocityContext variables = VelocityEngineUtil.getStandardToolsContext();
+		variables.put("parking", p);
+		UnsyncStringWriter writer = new UnsyncStringWriter();
+		VelocityEngineUtil.mergeTemplate("PRTN", mailBodyTemplate, variables, writer);
+
+		String mailBody = writer.toString();
+		LOGGER.debug(mailBody);
+
+		String mailTo = "adm@ventanasresidencial.com.br";
+		String mailSubject = rb.getString("parking.rent.notify");
+
+		MailService.send(mailTo, mailSubject, mailBody);
+
+		LOGGER.info("parking rent notify end: " + parking);
+	}	
+	
+	private void notifyParkingUnrent(Parking parking) throws Exception {
+		LOGGER.info("parking unrent notify begin: " + parking);
+
+		Parking p = parkingManager.findById(parking.getId());
+
+		if (p == null) {
+			throw new BusinessException("parking.not.exists");
+		}
+
+		if (p.getOwnerDomain() == null) {
+			throw new BusinessException("parking.not.owned", p);
+		}		
+
+		if (p.getRenterDomain() != null) {
+			throw new BusinessException("parking.is.rented", p);
+		}
+
+		p.setRenterDomain(parking.getRenterDomain());
+
+		String mailBodyTemplate = ContentUtil.get("br/com/atilo/jcondo/core/mail/parking-unrented-notify.vm");
+		
+		LOGGER.debug(mailBodyTemplate);
+
+		VelocityContext variables = VelocityEngineUtil.getStandardToolsContext();
+		variables.put("parking", p);
+		UnsyncStringWriter writer = new UnsyncStringWriter();
+		VelocityEngineUtil.mergeTemplate("PUTN", mailBodyTemplate, variables, writer);
+
+		String mailBody = writer.toString();
+		LOGGER.debug(mailBody);
+
+		String mailTo = "adm@ventanasresidencial.com.br";
+		String mailSubject = rb.getString("parking.unrent.notify");
+
+		MailService.send(mailTo, mailSubject, mailBody);
+
+		LOGGER.info("parking unrent notify end: " + parking);
+	}	
 
 	public List<Parking> getRentedParkings(Domain renterDomain) throws Exception {
 		return parkingManager.findRentedParkings(renterDomain);
@@ -106,25 +194,21 @@ public class ParkingServiceImpl implements BaseService<Parking> {
 	}
 
 	public Parking update(Parking parking) throws Exception {
-		if (parking.getId() <= 0) {
-			throw new BusinessException("pkg.not.exists", parking);
-		}
-
 		Parking p = parkingManager.findById(parking.getId());
 
 		if (p == null) {
-			throw new BusinessException("pkg.not.found", parking);
+			throw new BusinessException("parking.not.exists", parking);
 		}
 
 		if (parking.getOwnerDomain() != null) {
 			if (p.getOwnerDomain() != null && !p.getOwnerDomain().equals(parking.getOwnerDomain())) {
-				throw new BusinessException("pkg.already.owned");
+				throw new BusinessException("parking.already.owned");
 			}
 		}
 
 		if (parking.getRenterDomain() != null) {
 			if (p.getRenterDomain() != null && !p.getRenterDomain().equals(parking.getRenterDomain())) {
-				throw new BusinessException("pkg.already.rented");
+				throw new BusinessException("parking.already.rented");
 			}
 		}
 
@@ -142,35 +226,52 @@ public class ParkingServiceImpl implements BaseService<Parking> {
 			throw new BusinessException("no.parking.for.domain", ownerDomain);
 		}
 
+		if (renterDomain.getId() == 0) {
+			throw new BusinessException("parking.domain.not.found", renterDomain);
+		}
+
 		for(Parking parking : ownedParkings){
-			if (parking.getVehicle() == null) {
+			if (parking.getRenterDomain() == null) {
 				parking.setRenterDomain(renterDomain);
-				return parkingManager.save(parking);
+				Parking p = parkingManager.save(parking);
+				try {
+					notifyParkingRent(p);
+				} catch (Exception e) {
+					LOGGER.error(e.getMessage());
+				}
+				return p;				
 			}
 		}
 
 		throw new BusinessException("no.parking.to.rent", ownerDomain);
 	}
 
-	public Parking unrent(long parkingId) throws Exception {
-		Parking p = parkingManager.findById(parkingId);
+	public Parking unrent(Parking parking) throws Exception {
+		Parking p = parkingManager.findById(parking.getId());
 
 		if (p == null) {
-			throw new BusinessException("parking.not.exists", parkingId);
+			throw new BusinessException("parking.not.exists", parking);
 		}
 
-		if (!securityManager.hasPermission(p.getOwnerDomain(), Permission.UNRENT_PARKING)) {
+		if (p.getRenterDomain() == null) {
+			throw new BusinessException("parking.not.rented", parking);
+		}
+
+		if (!securityManager.hasPermission(parking.getOwnerDomain(), Permission.UNRENT_PARKING)) {
 			throw new BusinessException("parking.unrent.denied");
 		}
 
-		if (p.getVehicle() != null) {
-			Vehicle vehicle = vehicleManager.findById(p.getVehicle().getId());
-			vehicle.setDomain(null);
-			vehicleManager.save(vehicle);
+		parking.setOwnerDomain(p.getOwnerDomain());
+		parking.setRenterDomain(p.getRenterDomain());
+		p.setRenterDomain(null);
+		p = parkingManager.save(p);
+
+		try {
+			notifyParkingUnrent(parking);
+		} catch (Exception e) {
+			LOGGER.error(e.getMessage());
 		}
 
-		p.setRenterDomain(null);
-		p.setVehicle(null);
-		return parkingManager.save(p);
+		return p;
 	}
 }

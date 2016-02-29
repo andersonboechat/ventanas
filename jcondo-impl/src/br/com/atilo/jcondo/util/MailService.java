@@ -7,7 +7,7 @@ import com.liferay.portal.kernel.mail.MailMessage;
 
 public class MailService {
 
-	private static final String PORTAL_MAIL = "administracao@ventanasresidencial.com.br";
+	private static final String PORTAL_MAIL = "naoresponda@ventanasresidencial.com.br";
 
 	private static final String PORTAL_NAME = "Portal Ventanas";
 

@@ -25,7 +25,7 @@
 				<p:column>
 					<h:outputText value="Valor: "/><h:outputText value="#{room.price}"><f:convertNumber type="currency" /></h:outputText>
 				</p:column>
-				<p:column>
+				<p:column rendered="#{room.capacity > 0}">
 					<h:outputText value="Capacidade: " style="font-weight: bold"/>
 					<h:outputText value="#{room.capacity} pessoas"/>
 				</p:column>

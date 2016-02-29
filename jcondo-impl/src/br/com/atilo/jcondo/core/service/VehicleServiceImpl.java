@@ -2,10 +2,16 @@ package br.com.atilo.jcondo.core.service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.ResourceBundle;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
+
+import com.liferay.portal.kernel.io.unsync.UnsyncStringWriter;
+import com.liferay.portal.kernel.velocity.VelocityContext;
+import com.liferay.portal.kernel.velocity.VelocityEngineUtil;
+import com.liferay.util.ContentUtil;
 
 import br.com.abware.jcondo.exception.ModelExistException;
 import br.com.abware.jcondo.core.model.Parking;
@@ -13,6 +19,7 @@ import br.com.abware.jcondo.core.model.Vehicle;
 import br.com.abware.jcondo.core.model.VehicleType;
 import br.com.atilo.jcondo.core.persistence.manager.SecurityManagerImpl;
 import br.com.atilo.jcondo.core.persistence.manager.VehicleManagerImpl;
+import br.com.atilo.jcondo.util.MailService;
 import br.com.abware.jcondo.core.Permission;
 import br.com.abware.jcondo.core.model.Domain;
 import br.com.abware.jcondo.core.model.Flat;
@@ -24,6 +31,8 @@ import br.com.abware.jcondo.exception.BusinessException;
 public class VehicleServiceImpl implements BaseService<Vehicle> {
 	
 	private static final Logger LOGGER = Logger.getLogger(VehicleServiceImpl.class);
+	
+	private static final ResourceBundle rb = ResourceBundle.getBundle("i18n");
 	
 	public static final String LICENSE_PATTERN = "[A-Za-z]{3,3}[0-9]{4,4}";
 
@@ -134,34 +143,17 @@ public class VehicleServiceImpl implements BaseService<Vehicle> {
 
 		if (v != null) {
 			throw new ModelExistException(null, "vhc.exists", v);
-		}
-
-		vehicle.setLicense(license);
-
-		if (vehicle.getDomain() != null) {
-			if (!(vehicle.getDomain() instanceof Flat)) {
-				throw new BusinessException("vhc.domain.not.flat");
-			}
-			if (flatService.getFlat(vehicle.getDomain().getId()) == null) {
-				throw new BusinessException("vhc.domain.unknown", vehicle.getDomain().getId());
-			}
-
-			// Verifica se tem vaga para o apartamento especificado
-			// Visitantes podem acessar o condominio apenas para deixar/buscar passageiros
-			// Motos e Bicicletas são veículos extras
-			if(vehicle.getType() == VehicleType.CAR) {
-				v = vehicleManager.save(vehicle);
-				List<Parking> parkings = parkingService.getFreeParkings(vehicle.getDomain());
-	
-				if (!CollectionUtils.isEmpty(parkings)) {
-					Parking parking = parkings.get(0);
-					parking.setVehicle(v);
-					parkingService.update(parking);
-				}
-			}
 		} else {
-			v = vehicleManager.save(vehicle);
+			v = new Vehicle();
 		}
+
+		v.setLicense(license);
+		v.setType(vehicle.getType());
+		v.setImage(vehicle.getImage());
+
+		v = vehicleManager.save(v);
+
+		assignTo(v, vehicle.getDomain());
 
 		return v;
 	}
@@ -171,8 +163,10 @@ public class VehicleServiceImpl implements BaseService<Vehicle> {
 			throw new BusinessException("vhc.update.denied");
 		}
 
-		if(vehicle.getType() != VehicleType.BIKE && !vehicle.getLicense().replaceAll("[^A-Za-z0-9]", "").matches(LICENSE_PATTERN)) {
-			throw new BusinessException("vhc.license.invalid");
+		String license = vehicle.getLicense().replaceAll("[^A-Za-z0-9]", "");
+		
+		if(vehicle.getType() != VehicleType.BIKE && !license.matches(LICENSE_PATTERN)) {
+			throw new BusinessException("vhc.license.invalid", vehicle.getLicense());
 		}
 
 		Vehicle v = getVehicle(vehicle.getLicense());
@@ -181,54 +175,25 @@ public class VehicleServiceImpl implements BaseService<Vehicle> {
 			throw new ModelExistException(null, "vehicle.not.exists");
 		}
 
-		if (vehicle.getDomain() != null) {
-			// o dominio foi alterado
-			if (!vehicle.getDomain().equals(v.getDomain())) {
-				// o veículo já esta associado a um dominio
-				if (v.getDomain() != null) {
-					throw new Exception("vhc.domain.exists");
-				} else if (!(vehicle.getDomain() instanceof Flat)) {
-					throw new BusinessException("vhc.domain.not.flat");
-				} else if (flatService.getFlat(vehicle.getDomain().getId()) == null) {
-					throw new BusinessException("vhc.domain.unknown", vehicle.getDomain().getId());
-				}
-			}
+		v.setType(vehicle.getType());
+		v.setImage(vehicle.getImage());
+		v = vehicleManager.save(v);
 
-			if(v.getType() != VehicleType.CAR && vehicle.getType() == VehicleType.CAR) {
-				List<Parking> parkings = parkingService.getFreeParkings(vehicle.getDomain());
-
-				if (!CollectionUtils.isEmpty(parkings)) {
-					Parking parking = parkings.get(0);
-					parking.setVehicle(v);
-					parkingService.update(parking);
-				}
-			}
-
-			if(v.getDomain() != null && v.getType() == VehicleType.CAR && vehicle.getType() != VehicleType.CAR) {
-				for (Parking parking : parkingService.getBusyParkings(v.getDomain())) {
-					if (parking.getVehicle().equals(v)) {
-						parking.setVehicle(null);
-						parkingService.update(parking);
-					}
-				}
-			}
-		} else { 
-			if (v.getDomain() != null) {
-				for (Parking parking : parkingService.getBusyParkings(v.getDomain())) {
-					if (parking.getVehicle().equals(v)) {
-						parking.setVehicle(null);
-						parkingService.update(parking);
-					}
-				}
+		if (!v.getImage().getPath().equalsIgnoreCase(vehicle.getImage().getPath())) {
+			try {
+				notifyVehicleUpdate(vehicle, "image");
+			} catch (Exception e) {
+				LOGGER.error(e.getMessage());
 			}
 		}
 
-		vehicle.setId(v.getId());
+		assignTo(v, vehicle.getDomain());
 
-		return vehicleManager.save(vehicle);
+		return v;
 	}
 
 	public void assignTo(Vehicle vehicle, Domain domain) throws Exception {
+		String event;
 		Vehicle v = getVehicle(vehicle.getId());
 
 		if (v == null) {
@@ -244,14 +209,7 @@ public class VehicleServiceImpl implements BaseService<Vehicle> {
 				throw new BusinessException("vhc.domain.assign.denied", domain);
 			}
 
-			if (v.getType() == VehicleType.CAR) {
-				for (Parking parking : parkingService.getBusyParkings(v.getDomain())) {
-					if (parking.getVehicle().equals(v)) {
-						parking.setVehicle(null);
-						parkingService.update(parking);
-					}
-				}
-			}
+			event = "remove";
 		} else {
 			if (domain.equals(v.getDomain())) {
 				return;
@@ -263,25 +221,26 @@ public class VehicleServiceImpl implements BaseService<Vehicle> {
 
 			if (v.getDomain() != null) {
 				throw new Exception("vhc.domain.exists");
-			} else if (!(vehicle.getDomain() instanceof Flat)) {
+			} else if (!(domain instanceof Flat)) {
 				throw new BusinessException("vhc.domain.not.flat");
-			} else if (flatService.getFlat(vehicle.getDomain().getId()) == null) {
-				throw new BusinessException("vhc.domain.unknown", vehicle.getDomain().getId());
-			} else {
-				if(vehicle.getType() == VehicleType.CAR) {
-					List<Parking> parkings = parkingService.getFreeParkings(domain);
-					
-					if (!CollectionUtils.isEmpty(parkings)) {
-						Parking parking = parkings.get(0);
-						parking.setVehicle(v);
-						parkingService.update(parking);
-					}
-				}
+			} else if (flatService.getFlat(domain.getId()) == null) {
+				throw new BusinessException("vhc.domain.unknown", domain.getId());
 			}
+
+			event = "assign";
 		}  
 
+		Domain d = v.getDomain();
 		v.setDomain(domain);
 		vehicleManager.save(v);
+
+		try {
+			v.setDomain(domain == null ? d : domain);
+			notifyVehicleUpdate(v, event);
+		} catch (Exception e) {
+			LOGGER.error(e.getMessage());
+		}
+
 		vehicle.setDomain(domain);
 	}
 
@@ -295,6 +254,43 @@ public class VehicleServiceImpl implements BaseService<Vehicle> {
 
 		v = vehicleManager.save(v);
 		vehicle.setImage(v.getImage());
+		
+		try {
+			notifyVehicleUpdate(vehicle, "image");
+		} catch (Exception e) {
+			LOGGER.error(e.getMessage());
+		}
+	}
+	
+	private void notifyVehicleUpdate(Vehicle vehicle, String event) throws Exception {
+		LOGGER.info("vehicle update notify begin: " + vehicle);
+
+		Vehicle v = getVehicle(vehicle.getId());
+
+		if (v == null) {
+			throw new ModelExistException(null, "vehicle.not.exists");
+		}
+
+		String mailBodyTemplate = ContentUtil.get("br/com/atilo/jcondo/core/mail/vehicle-updated-notify.vm");
+		
+		LOGGER.debug(mailBodyTemplate);
+
+		VelocityContext variables = VelocityEngineUtil.getStandardToolsContext();
+		variables.put("vehicle", vehicle);
+		variables.put("event", event);
+		variables.put("props", rb);
+		UnsyncStringWriter writer = new UnsyncStringWriter();
+		VelocityEngineUtil.mergeTemplate("VUN", mailBodyTemplate, variables, writer);
+
+		String mailBody = writer.toString();
+		LOGGER.debug(mailBody);
+
+		String mailTo = rb.getString("admin.mail");
+		String mailSubject = rb.getString("vehicle.update.subject");
+
+		MailService.send(mailTo, mailSubject, mailBody);
+
+		LOGGER.info("vehicle update notify end: " + vehicle);
 	}
 
 	public void claim(Vehicle vehicle) {

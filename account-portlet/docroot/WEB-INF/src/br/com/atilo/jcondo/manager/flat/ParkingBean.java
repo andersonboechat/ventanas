@@ -105,7 +105,7 @@ public class ParkingBean {
 
 	public void onParkingUnrent(Parking parking) {
 		try {
-			parkingService.unrent(parking.getId());
+			parkingService.unrent(parking);
 			grantedParkings.remove(parking);
 			MessageUtils.addMessage(FacesMessage.SEVERITY_INFO, "parking.unrent.success", null);
 		} catch (BusinessException e) {

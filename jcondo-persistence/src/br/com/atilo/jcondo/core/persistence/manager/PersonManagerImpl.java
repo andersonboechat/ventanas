@@ -91,7 +91,7 @@ public class PersonManagerImpl extends JCondoManager<PersonEntity, Person> {
 			person.setFullName(user.getFullName());
 			person.setFirstName(user.getFirstName());
 			person.setLastName(user.getLastName());
-			person.setEmailAddress(user.getEmailAddress().endsWith("ventanasresidencial.com.br") ? null : user.getEmailAddress());
+			person.setEmailAddress(user.getEmailAddress().endsWith("no.ventanasresidencial.com.br") ? null : user.getEmailAddress());
 			person.setGender(user.isMale() ? Gender.MALE : Gender.FEMALE);
 			person.setStatus(user.getStatus() == WorkflowConstants.STATUS_APPROVED ? PersonStatus.ACTIVE : PersonStatus.INACTIVE);
 			person.setPicture(new Image(user.getPortraitId(), 0, getPath(user.getPortraitId()), null, null));
