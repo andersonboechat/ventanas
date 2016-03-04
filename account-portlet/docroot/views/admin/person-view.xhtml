@@ -186,7 +186,6 @@
 							<p:column styleClass="labelClm"><p:outputLabel for="email" value="Email: "/></p:column>
 							<p:column colspan="2" styleClass="fieldClm">
 								<p:inputText id="email" value="#{admFlatBean.personBean.person.emailAddress}"  
-											 required="#{admFlatBean.personBean.membership.type != 'RESIDENT'}" 
 											 requiredMessage="#{msg['person.email.empty']}"/>
 							</p:column>
 						</p:row>

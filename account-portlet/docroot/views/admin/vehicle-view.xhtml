@@ -25,14 +25,14 @@
 					styleClass="no-border no-header">
 	        <p:panel header="#{msg[vehicle.type.label]}" styleClass="vehicle-box">
 	            <h:panelGrid columns="1" style="width:100%">
-					<p:panel styleClass="car-image foto no-margin no-background" style="width: 100px !important; height: 90px !important; background-size: 100px 90px; margin: 0 auto 5px !important;"  rendered="#{vehicle.type == 'CAR'}">
-				        <p:graphicImage value="#{vehicle.image.path}" width="100" height="90" cache="false"/>
+					<p:panel styleClass="car-image foto no-margin no-background" style="width: 138px !important; height: 90px !important; background-size: 100px 90px; margin: 0 auto 5px !important;"  rendered="#{vehicle.type == 'CAR'}">
+				        <p:graphicImage value="#{vehicle.image.path}" width="138" height="90" cache="false"/>
 					</p:panel>
-					<p:panel styleClass="moto-image foto no-margin no-background" style="width: 100px !important; height: 90px !important; background-size: 100px 90px; margin: 0 auto 5px !important;" rendered="#{vehicle.type == 'MOTO'}">
-				        <p:graphicImage value="#{vehicle.image.path}" width="100" height="90" cache="false"/>
+					<p:panel styleClass="moto-image foto no-margin no-background" style="width: 138px !important; height: 90px !important; background-size: 100px 90px; margin: 0 auto 5px !important;" rendered="#{vehicle.type == 'MOTO'}">
+				        <p:graphicImage value="#{vehicle.image.path}" width="138" height="90" cache="false"/>
 					</p:panel>
-					<p:panel styleClass="bike-image foto no-margin no-background" style="width: 100px !important; height: 90px !important; background-size: 100px 90px; margin: 0 auto 5px !important;" rendered="#{vehicle.type == 'BIKE'}">
-				        <p:graphicImage value="#{vehicle.image.path}" style="margin: 0px" width="100" height="90" cache="false"/>
+					<p:panel styleClass="bike-image foto no-margin no-background" style="width: 138px !important; height: 90px !important; background-size: 100px 90px; margin: 0 auto 5px !important;" rendered="#{vehicle.type == 'BIKE'}">
+				        <p:graphicImage value="#{vehicle.image.path}" style="margin: 0px" width="138" height="90" cache="false"/>
 					</p:panel>
 
 					<p:outputLabel value="#{vehicle.license}"/>
@@ -70,17 +70,17 @@
 			</f:facet>			
 			<p:panelGrid id="vehicle-details" columns="1" styleClass="no-border no-background" style="width: 100%;">
 				<p:panel id="portrait" styleClass="no-border no-margin no-background">
-					<p:panel styleClass="foto no-margin no-background" style="width: 364px !important; height: 300px !important; background-size: 364px 300px; margin: 0 auto 5px !important;"  rendered="#{admFlatBean.vehicleBean.vehicle.type == null}">
-				        <p:graphicImage value="#{admFlatBean.vehicleBean.vehicle.image.path}" width="364" height="300" cache="false"/>
+					<p:panel styleClass="foto no-margin no-background" style="width: 400px !important; height: 270px !important; background-size: 327px 270px; margin: 0 auto 5px !important;"  rendered="#{admFlatBean.vehicleBean.vehicle.type == null}">
+				        <p:graphicImage value="#{admFlatBean.vehicleBean.vehicle.image.path}" width="400" height="270" cache="false"/>
 					</p:panel>
-					<p:panel styleClass="car-image foto no-margin no-background" style="width: 364px !important; height: 300px !important; background-size: 364px 300px; margin: 0 auto 5px !important;"  rendered="#{admFlatBean.vehicleBean.vehicle.type == 'CAR'}">
-				        <p:graphicImage value="#{admFlatBean.vehicleBean.vehicle.image.path}" width="364" height="300" cache="false"/>
+					<p:panel styleClass="car-image foto no-margin no-background" style="width: 400px !important; height: 270px !important; background-size: 327px 270px; margin: 0 auto 5px !important;"  rendered="#{admFlatBean.vehicleBean.vehicle.type == 'CAR'}">
+				        <p:graphicImage value="#{admFlatBean.vehicleBean.vehicle.image.path}" width="400" height="270" cache="false"/>
 					</p:panel>
-					<p:panel styleClass="moto-image foto no-margin no-background" style="width: 364px !important; height: 300px !important; background-size: 364px 300px; margin: 0 auto 5px !important;" rendered="#{admFlatBean.vehicleBean.vehicle.type == 'MOTO'}">
-				        <p:graphicImage value="#{admFlatBean.vehicleBean.vehicle.image.path}" width="364" height="300" cache="false"/>
+					<p:panel styleClass="moto-image foto no-margin no-background" style="width: 400px !important; height: 270px !important; background-size: 327px 270px; margin: 0 auto 5px !important;" rendered="#{admFlatBean.vehicleBean.vehicle.type == 'MOTO'}">
+				        <p:graphicImage value="#{admFlatBean.vehicleBean.vehicle.image.path}" width="400" height="270" cache="false"/>
 					</p:panel>
-					<p:panel styleClass="bike-image foto no-margin no-background" style="width: 364px !important; height: 300px !important; background-size: 364px 300px; margin: 0 auto 5px !important;" rendered="#{admFlatBean.vehicleBean.vehicle.type == 'BIKE'}">
-				        <p:graphicImage value="#{admFlatBean.vehicleBean.vehicle.image.path}" style="margin: 0px" width="364" height="300" cache="false"/>
+					<p:panel styleClass="bike-image foto no-margin no-background" style="width: 400px !important; height: 270px !important; background-size: 327px 270px; margin: 0 auto 5px !important;" rendered="#{admFlatBean.vehicleBean.vehicle.type == 'BIKE'}">
+				        <p:graphicImage value="#{admFlatBean.vehicleBean.vehicle.image.path}" style="margin: 0px" width="400" height="270" cache="false"/>
 					</p:panel>			
 				</p:panel>
 				<p:panelGrid columns="3" styleClass="no-border no-background" style="width: 100%;">

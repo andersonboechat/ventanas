@@ -69,7 +69,7 @@ public class VehicleBean {
 			vehicle.setDomain(flat);
 			vehicle.setImage(new Image());
 			filters = new HashMap<String, Object>();
-			imageUploadBean = new ImageUploadBean(364, 300);
+			imageUploadBean = new ImageUploadBean(400, 260);
 		} catch (Exception e) {
 			LOGGER.fatal("Failure on vehicle initialization", e);
 			MessageUtils.addMessage(FacesMessage.SEVERITY_FATAL, "general.failure", null);
