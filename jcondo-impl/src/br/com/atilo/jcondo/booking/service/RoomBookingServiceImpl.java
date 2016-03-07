@@ -25,6 +25,7 @@ import br.com.abware.jcondo.booking.model.RoomBooking;
 import br.com.abware.jcondo.core.Permission;
 import br.com.abware.jcondo.core.model.Person;
 import br.com.abware.jcondo.exception.BusinessException;
+import br.com.atilo.jcondo.booking.persistence.manager.GuestManagerImpl;
 import br.com.atilo.jcondo.booking.persistence.manager.RoomBookingManagerImpl;
 import br.com.atilo.jcondo.core.persistence.manager.PersonManagerImpl;
 import br.com.atilo.jcondo.core.persistence.manager.SecurityManagerImpl;
@@ -47,6 +48,8 @@ public class RoomBookingServiceImpl {
 	public static final int BKG_MAX_DAYS = 90;
 	
 	private RoomBookingManagerImpl bookingManager = new RoomBookingManagerImpl();
+	
+	private GuestManagerImpl guestManager = new GuestManagerImpl();
 
 	private SecurityManagerImpl securityManager = new SecurityManagerImpl();
 	
@@ -380,5 +383,33 @@ public class RoomBookingServiceImpl {
 		}
 
 		bookingManager.save(rb);
+	}
+
+	public Guest checkInGuest(Guest guest) throws Exception {
+		Guest g = guestManager.findById(guest.getId());
+		
+		if (g == null) {
+			throw new BusinessException("bkg.guest.not.found");
+		}
+		
+		g.setCheckIn(g.getCheckIn() != null && g.getCheckIn() ? false : true);
+
+		return guestManager.save(g);
+	}
+	
+	public void addGuest(Guest guest) throws Exception {
+		if (!securityManager.hasPermission(guest.getBooking(), Permission.UPDATE)) {
+			throw new BusinessException("bkg.edit.denied");
+		}
+		
+		guestManager.save(guest);
+	}	
+	
+	public void deleteGuest(Guest guest) throws Exception {
+		if (!securityManager.hasPermission(guest.getBooking(), Permission.UPDATE)) {
+			throw new BusinessException("bkg.edit.denied");
+		}
+		
+		guestManager.delete(guest);
 	}
 }

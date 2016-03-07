@@ -9,7 +9,7 @@
 	<p style="font-style: italic; text-align: justify">$occurrence</p>
 	<p style="font-style: italic;">$resident<br/>Apartamento $flatNumber - Bloco $flatBlock</p>
 	<p>
-	<a href="http://www.ventanasresidencial.com.br/group/control_panel/manage?p_p_id=bookadmin_WAR_bookportlet&p_p_lifecycle=0&p_p_state=maximized&p_p_mode=view&doAsGroupId=10179">Clique aqui para responder a ocorrência</a>
+	<a href="http://admin.ventanasresidencial.com.br/occurrence">Clique aqui para responder a ocorrência</a>
 	</p>
 	<div class="moz-signature"><br>
       <div class="moz-signature">

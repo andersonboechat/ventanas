@@ -56,7 +56,7 @@
 						<p:column styleClass="labelClm"><p:outputLabel for="identity" value="CPF: "/></p:column>
 						<p:column styleClass="fieldClm">
 							<p:inputMask id="identity" value="#{managerBean.person.identity}" mask="999.999.999-99" 
-										 required="true" requiredMessage="#{msg2['person.identity.empty']}" />
+										 required="#{flatView.personBean.membership.type != 'RESIDENT'}" requiredMessage="#{msg2['person.identity.empty']}" />
 						</p:column>
 						<p:column styleClass="labelClm"><p:outputLabel for="male" value="Sexo:"/></p:column>
 						<p:column>

@@ -17,6 +17,7 @@ import com.liferay.portal.kernel.velocity.VelocityContext;
 import com.liferay.portal.kernel.velocity.VelocityEngineUtil;
 import com.liferay.util.ContentUtil;
 
+import br.com.abware.jcondo.core.Permission;
 import br.com.abware.jcondo.core.PersonType;
 import br.com.abware.jcondo.core.model.Domain;
 import br.com.abware.jcondo.core.model.Flat;
@@ -124,6 +125,10 @@ public class MembershipServiceImpl {
 		Membership membership = membershipManager.findByPersonAndDomain(person, domain);
 		securityManager.removeMembership(person, membership);
 		membershipManager.delete(membership);
+	}
+
+	public boolean hasPermission(Membership membership, Permission permission) {
+		return securityManager.hasPermission(membership, permission);
 	}
 	
 }

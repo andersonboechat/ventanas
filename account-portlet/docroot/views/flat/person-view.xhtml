@@ -65,7 +65,9 @@
 				</p:commandLink>
 			</p:column>
 			<p:column style="width: 35px">
-				<p:commandLink title="Excluir este usuário" actionListener="#{flatView.personBean.onPersonDelete}" oncomplete="if (!args.validationFailed &amp;&amp; !args.exception) {PF('personTable').update();}" partialSubmit="true" process="@this" global="false" update=":outputMsg" disabled="#{!flatView.personBean.canDeletePerson(person)}">
+				<p:commandLink title="Excluir este usuário" actionListener="#{flatView.personBean.onPersonDelete}" 
+							   partialSubmit="true" process="@this" global="false" update="@widgetVar(personTable),@widgetVar(outputMsg)" 
+							   disabled="#{!flatView.personBean.canDeletePerson(person)}">
 					<h:graphicImage value="../images/cancel2.png" />
 					<p:confirm header="#{msg['person.delete.confirm']}" message="#{msg['person.delete.message']}" icon="ui-icon-alert"/>
 				</p:commandLink>
@@ -105,10 +107,10 @@
 						<p:row>
 							<p:column styleClass="labelClm"><p:outputLabel for="type" value="Tipo: "/></p:column>
 							<p:column colspan="2" styleClass="fieldClm">
-								<h:outputText value="#{msg[flatView.personBean.membership.type.label]}" rendered="#{!flatView.personBean.canChangeType()}"/>
+								<h:outputText value="#{msg[flatView.personBean.membership.type.label]}" rendered="#{flatView.personBean.types.size() == 1}"/>
 								<p:selectOneMenu id="type" value="#{flatView.personBean.membership.type}" styleClass="select"
 												 style="vertical-align: middle; width: 100%; margin-right: 0px;" 
-												 rendered="#{flatView.personBean.canChangeType()}"
+												 rendered="#{flatView.personBean.types.size() > 1}"
 												 disabled="#{!flatView.personBean.canEditPerson(flatView.personBean.person)}">
 									<f:selectItems var="type" value="#{flatView.personBean.types}" itemLabel="#{msg[type.label]}"/>
 									<p:ajax event="change" update="person-details-form" global="false" resetValues="true"/>

@@ -7,3 +7,6 @@ encoding//src/br/com/atilo/jcondo/core/mail/parking-rented-notify.vm=UTF-8
 encoding//src/br/com/atilo/jcondo/core/mail/parking-unrented-notify.vm=UTF-8
 encoding//src/br/com/atilo/jcondo/core/mail/person-changed-notify.vm=UTF-8
 encoding//src/br/com/atilo/jcondo/core/mail/vehicle-updated-notify.vm=UTF-8
+encoding//src/br/com/atilo/jcondo/occurrence/mail/occurrence-answered-notify.vm=UTF-8
+encoding//src/br/com/atilo/jcondo/occurrence/mail/occurrence-created-confirm.vm=UTF-8
+encoding//src/br/com/atilo/jcondo/occurrence/mail/occurrence-created-notify.vm=UTF-8

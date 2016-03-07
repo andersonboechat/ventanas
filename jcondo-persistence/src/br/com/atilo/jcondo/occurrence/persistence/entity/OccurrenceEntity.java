@@ -47,7 +47,7 @@ public class OccurrenceEntity extends BaseEntity {
 	private PersonEntity person;
 
 	@OneToOne
-	@JoinColumn(name="answerId", updatable=false)
+	@JoinColumn(name="answerId")
 	private AnswerEntity answer;
 
 	public OccurrenceEntity() {

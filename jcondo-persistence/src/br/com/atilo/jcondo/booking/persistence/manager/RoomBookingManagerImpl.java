@@ -33,7 +33,7 @@ public class RoomBookingManagerImpl extends JCondoManager<RoomBookingEntity, Roo
 			return BookingNoteEntity.class;
 		}
 	};
-	
+
 	private PersonManagerImpl personManager = new PersonManagerImpl();
 	
 	@Override

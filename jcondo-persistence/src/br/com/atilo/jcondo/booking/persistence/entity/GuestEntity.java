@@ -1,5 +1,6 @@
 package br.com.atilo.jcondo.booking.persistence.entity;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
@@ -30,6 +31,12 @@ public class GuestEntity extends BaseEntity {
 	private String firstName;
 
 	private String lastName;
+
+	@Column(nullable=true, columnDefinition="INT(1)")
+	private Boolean checkIn;
+
+	@Column(nullable=true, columnDefinition="INT(1)")
+	private Boolean checkOut;
 
 	@ManyToOne
 	@JoinColumn(name="bookingId")
@@ -65,6 +72,22 @@ public class GuestEntity extends BaseEntity {
 
 	public void setLastName(String lastName) {
 		this.lastName = lastName;
+	}
+
+	public Boolean getCheckIn() {
+		return checkIn;
+	}
+
+	public void setCheckIn(Boolean checkIn) {
+		this.checkIn = checkIn;
+	}
+
+	public Boolean getCheckOut() {
+		return checkOut;
+	}
+
+	public void setCheckOut(Boolean checkOut) {
+		this.checkOut = checkOut;
 	}
 
 	public RoomBookingEntity getBooking() {

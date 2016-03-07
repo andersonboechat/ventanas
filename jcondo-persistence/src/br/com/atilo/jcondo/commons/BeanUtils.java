@@ -82,7 +82,7 @@ public class BeanUtils extends org.apache.commons.beanutils.BeanUtils {
 		 
 		 cub.register(new PersonStatusConverter(), PersonStatus.class);
 		 
-		 cub.register(new BooleanConverter(null), Boolean.class);
+		 //cub.register(new BooleanConverter(null), Boolean.class);
 	}
 	
 	public static void copyProperties(Object dest, Object orig) throws IllegalAccessException, InvocationTargetException {
