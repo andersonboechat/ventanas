@@ -36,6 +36,7 @@ import br.com.atilo.jcondo.core.persistence.manager.PersonManagerImpl;
 import br.com.atilo.jcondo.core.persistence.manager.SecurityManagerImpl;
 import br.com.caelum.stella.validation.CPFValidator;
 
+import com.liferay.portal.DuplicateUserEmailAddressException;
 import com.liferay.portal.kernel.workflow.WorkflowConstants;
 import com.liferay.portal.model.User;
 import com.liferay.portal.service.ServiceContext;
@@ -214,6 +215,8 @@ public class PersonServiceImpl extends Observable  {
 			}
 
 			return p;
+		} catch (DuplicateUserEmailAddressException e) {
+			throw new BusinessException("psn.email.already.exists", person.getEmailAddress());
 		} catch (PersistenceException e) {
 			throw new ApplicationException(e, "psn.register.fail");
 		}
@@ -464,6 +467,8 @@ public class PersonServiceImpl extends Observable  {
 			}
 
 			return p;
+		} catch (DuplicateUserEmailAddressException e) {
+			throw new BusinessException("psn.email.already.exists", person.getEmailAddress());
 		} catch (PersistenceException e) {
 			throw new ApplicationException(e, "psn.update.fail");
 		}
