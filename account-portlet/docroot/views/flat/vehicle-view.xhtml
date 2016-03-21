@@ -112,9 +112,11 @@
 		<h:form id="vehicle-picture-form" enctype="multipart/form-data">
 			<p style="text-align: justify;"><h:outputText value="#{msg['vehicle.picture.instructions']}"/></p>
 			<p:panelGrid columns="1" columnClasses="cropper" styleClass="no-margin no-border no-background" style="width: 100%;">
-				<p:outputPanel style="width: #{vehiclePictureUploader.image.width}px; height: #{vehiclePictureUploader.image.height}px;" styleClass="foto">
-					<p:imageCropper value="#{vehiclePictureUploader.croppedImage}" image="#{vehiclePictureUploader.image.path}" initialCoords="0,0,#{vehiclePictureUploader.width},#{vehiclePictureUploader.height}" minSize="#{vehiclePictureUploader.width},#{vehiclePictureUploader.height}" maxSize="#{vehiclePictureUploader.width},#{vehiclePictureUploader.height}"/>
-				</p:outputPanel>
+				<p:scrollPanel style="width: 480px; height: 330px; padding: 0 auto;" styleClass="no-margin no-border no-background cropper" mode="native">
+					<p:outputPanel style="width: #{vehiclePictureUploader.image.width}px; height: #{vehiclePictureUploader.image.height}px;" styleClass="foto">
+						<p:imageCropper value="#{vehiclePictureUploader.croppedImage}" image="#{vehiclePictureUploader.image.path}" initialCoords="0,0,#{vehiclePictureUploader.width},#{vehiclePictureUploader.height}" minSize="#{vehiclePictureUploader.width},#{vehiclePictureUploader.height}" maxSize="#{vehiclePictureUploader.width},#{vehiclePictureUploader.height}"/>
+					</p:outputPanel>
+				</p:scrollPanel>
 				<p:panel style="text-align: center; padding: 10px 0px;" styleClass="no-border no-margin no-background">
 					<p:commandButton value="Recortar" actionListener="#{vehiclePictureUploader.onCropp}" 
 									 update=":tabs:vehicle-details-form:portrait" oncomplete="PF('vehiclePictureDialog').hide();"

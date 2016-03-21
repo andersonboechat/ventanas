@@ -14,6 +14,7 @@ import org.primefaces.model.CroppedImage;
 
 import br.com.abware.jcondo.core.model.Image;
 
+
 public class PortraitBean {
 
 	protected static final String TEMP_DIR = "/temp/";

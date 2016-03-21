@@ -102,15 +102,20 @@
 		<h:form id="person-details-form">
 			<p:panelGrid id="model-details" styleClass="no-background no-border" style="margin: 10px 0px 20px 0px;" cellpadding="10">
 				<p:row>
+					<p:column colspan="2">
+						<h:outputText value="Os campos marcados com asterisco são de preenchimento obrigatório." style="font-size: 11px;"/>
+					</p:column>
+				</p:row>
+				<p:row>
 					<p:column styleClass="my-account-col2">
 						<p:panelGrid columns="3" styleClass="userPanel no-border no-background" style="width: 100%; margin: 0; padding: 0;">
 						<p:row>
 							<p:column styleClass="labelClm"><p:outputLabel for="type" value="Tipo: "/></p:column>
 							<p:column colspan="2" styleClass="fieldClm">
-								<h:outputText value="#{msg[flatView.personBean.membership.type.label]}" rendered="#{flatView.personBean.types.size() == 1}"/>
+								<h:outputText value="#{msg[flatView.personBean.membership.type.label]}" rendered="#{!flatView.personBean.canChangeType()}"/>
 								<p:selectOneMenu id="type" value="#{flatView.personBean.membership.type}" styleClass="select"
 												 style="vertical-align: middle; width: 100%; margin-right: 0px;" 
-												 rendered="#{flatView.personBean.types.size() > 1}"
+												 rendered="#{flatView.personBean.canChangeType()}"
 												 disabled="#{!flatView.personBean.canEditPerson(flatView.personBean.person)}">
 									<f:selectItems var="type" value="#{flatView.personBean.types}" itemLabel="#{msg[type.label]}"/>
 									<p:ajax event="change" update="person-details-form" global="false" resetValues="true"/>
@@ -245,7 +250,6 @@
 							 style="float: right; width: 90px; margin: 0px 10px 10px 5px;" rendered="#{empty flatView.personBean.person.identity}">
 				<p:confirm header="#{msg['attention']}" message="#{msg['person.save.message']}" icon="ui-icon-alert"/>
 			</p:commandButton>
-			<h:outputText value="Os campos marcados com asterisco são de preenchimento obrigatório." style="font-size: 11px;"/>
 		</h:form>
 	</p:dialog>
 

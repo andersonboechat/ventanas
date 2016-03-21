@@ -457,6 +457,12 @@
 
 	<c:choose>
 		<c:when test="#{not empty nextBookingsBean.bookings}">
+			<p:panel>
+				<h:outputText value="Reservas de hoje, " style="width: 100%; text-align: center;"/>
+				<h:outputText value="#{nextBookingsBean.bookings.get(0).beginDate}" style="width: 100%; text-align: center;">
+					<f:convertDateTime dateStyle="long"/>
+				</h:outputText>
+			</p:panel>
 			<p:tabView id="tabs" widgetVar="tabs" dynamic="true" var="booking" value="#{nextBookingsBean.bookings}">
 				<p:ajax event="tabChange" listener="#{nextBookingsBean.onTabChange}" global="false" update="booking-form"/>
 				<p:tab title="${booking.resource.name}">
@@ -474,13 +480,12 @@
 										</p:panel>
 									</p:panel>
 									<h:outputText value="#{nextBookingsBean.booking.person.fullName}"/>
-									<h:outputText value="#{nextBookingsBean.booking.person.identity}" style="font-size: 14px"/>
 								</p:panelGrid>
 							</p:column>
 							<p:column>
 							<p:dataTable id="guestTable" widgetVar="guestTable" var="guest" value="#{nextBookingsBean.booking.guests}"  
-										 rowKey="#{guest.id}" paginator="true" paginatorPosition="top" paginatorAlwaysVisible="false"
-										 emptyMessage="Nenhum convidado informado" rows="10" styleClass="no-header no-border" style="">
+										 rowKey="#{guest.id}" paginator="false" emptyMessage="Nenhum convidado informado" 
+										 styleClass="no-header no-border" style="">
 								<f:facet name="header">
 									<p:panelGrid columns="1" columnClasses="docs-header" styleClass="no-background no-border no-margin" style="width: 100%; height: 25px">
 										<h:outputText value="Convidados"/>
