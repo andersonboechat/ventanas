@@ -60,9 +60,13 @@
 	
 	.occurrence .portrait {vertical-align: top; width: 160px; text-align: center}
 	
-	.occurrence .answered {font-weight: bold;}
+	.occurrence .answered {font-weight: normal;}
 	
-	.occurrence .not-answered {}
+	.occurrence .not-answered {font-weight: bold;}
+	
+	.occurrence .orange-alert {color: orange;}
+	
+	.occurrence .red-alert {color: red;}
 	
 			.picture {margin: 0px !important; padding: 0px !important; vertical-align: top;}
 			.picture td {margin: 0px !important; padding: 0px !important; vertical-align: top;}
@@ -514,15 +518,7 @@
 							<h:outputText value="Ocorrências"/>
 						</p:panelGrid>
 					</f:facet>
-					<p:column rendered="#{occurrence.answer != null and occurrence.answer.date != null}" styleClass="answered">
-						<h:outputText value="#{occurrence.date}" style="float: right; display: block;">
-							<f:convertDateTime pattern="dd/MM/yyyy 'às' HH:mm" /><!-- timeZone="America/Sao_Paulo"-->
-						</h:outputText>
-						<h:outputText value="#{msg[occurrence.type.label]} - #{occurrence.code}" style="display: block;"/>
-						<h:outputText value="#{occurrence.person.fullName}" style="display: block;"/>
-						<h:outputText value="#{answerBean.displayFlat(occurrence.person)}" style="display: block;"/>
-					</p:column>
-					<p:column rendered="#{occurrence.answer == null or occurrence.answer.date == null}" styleClass="not-answered">
+					<p:column styleClass="#{answerBean.showStyleClass(occurrence)}">
 						<h:outputText value="#{occurrence.date}" style="float: right; display: block;">
 							<f:convertDateTime pattern="dd/MM/yyyy 'às' HH:mm" /><!-- timeZone="America/Sao_Paulo"-->
 						</h:outputText>

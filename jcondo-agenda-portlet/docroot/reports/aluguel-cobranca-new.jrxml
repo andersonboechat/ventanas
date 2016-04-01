@@ -64,7 +64,7 @@
 	</parameter>
 	<queryString>
 		<![CDATA[SELECT CONCAT(f.block, '/', LPAD(f.number, 4, '0')) Apartamento, r.name Espaço, DATE_FORMAT(b.beginDate, '%d/%m/%Y') Data,
-concat(DATE_FORMAT(b.beginDate, '%H:%i'), '-', DATE_FORMAT(b.endDate, '%H:%i')) Horário, r.price Valor FROM jcondo.jco_booking b, jcondo.jco_flat f, jcondo.jco_resource r WHERE  b.domainId = f.id AND b.resourceId = r.id AND b.beginDate >= $P{month} - INTERVAL 30 DAY AND b.beginDate < $P{month} + INTERVAL 1 DAY order by 1,3]]>
+concat(DATE_FORMAT(b.beginDate, '%H:%i'), '-', DATE_FORMAT(b.endDate, '%H:%i')) Horário, r.price Valor FROM jcondo.jco_booking b, jcondo.jco_flat f, jcondo.jco_resource r WHERE  b.domainId = f.id AND b.resourceId = r.id AND b.beginDate > $P{month} - INTERVAL 1 MONTH AND b.beginDate < $P{month} order by 1,3]]>
 	</queryString>
 	<field name="Apartamento" class="java.lang.String"/>
 	<field name="Espaço" class="java.lang.String"/>

@@ -2,6 +2,7 @@ package br.com.atilo.jcondo.occurrence.bean;
 
 import java.text.MessageFormat;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 
 import javax.annotation.PostConstruct;
@@ -10,6 +11,7 @@ import javax.faces.bean.ManagedBean;
 import javax.faces.bean.ViewScoped;
 
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang.time.DateUtils;
 import org.apache.log4j.Logger;
 import org.apache.myfaces.commons.util.MessageUtils;
 import org.primefaces.event.SelectEvent;
@@ -104,7 +106,21 @@ public class AnswerBean extends BaseBean {
 			return "";
 		}
 	}
+	
+	public String showStyleClass(Occurrence occurrence) {
+		if (occurrence != null && (occurrence.getAnswer() == null || occurrence.getAnswer().getDate() == null)) {
+			if (new Date().after(occurrence.getDate())) {
+				return "not-answered red-alert";
+			} else if (DateUtils.addDays(occurrence.getDate(), -3).before(new Date())) {
+				return "not-answered orange-alert";
+			} else {
+				return "not-answered";
+			}
+		}
 
+		return "answered";
+	}
+	
 	public Occurrence getOccurrence() {
 		return occurrence;
 	}
