@@ -35,7 +35,7 @@
 			    	<p:fieldset legend="Contato Principal" styleClass="no-background" style="width: 400px;" widgetVar="primaryPerson">
 			    		<p:panelGrid columns="2" columnClasses="primary-left,primary-right" styleClass="no-background no-border" style="width: 100%">
 							<p:panel styleClass="user-image foto no-margin no-background" style="width: 52px; height: 80px; background-size: 52px 80px;">
-						        <p:graphicImage value="#{flatView.flat.person.picture.path}" width="52" height="80"/>
+						        <p:graphicImage value="#{flatView.flat.person.picture.path}" width="52" height="80" cache="false"/>
 							</p:panel>
 							<p:panelGrid columns="2" columnClasses="primary-left,primary-right" styleClass="no-background no-border" style="float: left; width: 100%" rendered="#{not empty flatView.flat.person}">
 								<h:outputText value="Nome:" style="font-size: 14px; color: black; font-weight: bold;"/>

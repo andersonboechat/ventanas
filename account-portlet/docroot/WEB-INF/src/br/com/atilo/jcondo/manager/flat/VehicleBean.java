@@ -113,9 +113,11 @@ public class VehicleBean {
 				RequestContext.getCurrentInstance().addCallbackParam("exception", true);
 			}
 		} catch (BusinessException e) {
+			LOGGER.warn("Failure on vehicle save", e);
 			MessageUtils.addMessage(FacesMessage.SEVERITY_WARN, e.getMessage(), e.getArgs());
 			RequestContext.getCurrentInstance().addCallbackParam("exception", true);
 		} catch (Exception e) {
+			LOGGER.error("Failure on vehicle save", e);
 			MessageUtils.addMessage(FacesMessage.SEVERITY_ERROR, "general.failure", null);
 			RequestContext.getCurrentInstance().addCallbackParam("exception", true);
 		}
@@ -146,6 +148,7 @@ public class VehicleBean {
 				model.removeModel(vehicle);
 			}
 		} catch (BusinessException e) {
+			LOGGER.warn("Failure on vehicle delete", e);
 			MessageUtils.addMessage(FacesMessage.SEVERITY_WARN, e.getMessage(), e.getArgs());
 			RequestContext.getCurrentInstance().addCallbackParam("exception", true);
 		} catch (Exception e) {
@@ -161,6 +164,7 @@ public class VehicleBean {
 			model.removeModel(model.getRowData());
 			MessageUtils.addMessage(FacesMessage.SEVERITY_INFO, "vehicle.delete.success", null);
 		} catch (BusinessException e) {
+			LOGGER.warn("Failure on vehicle delete", e);
 			MessageUtils.addMessage(FacesMessage.SEVERITY_WARN, e.getMessage(), e.getArgs());
 			RequestContext.getCurrentInstance().addCallbackParam("exception", true);
 		} catch (Exception e) {

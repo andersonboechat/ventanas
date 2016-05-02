@@ -434,8 +434,8 @@ public class PersonServiceImpl extends Observable  {
 						throw new BusinessException("psn.identity.not.valid", person.getIdentity());
 					}
 
-					dbPerson = getPerson(person.getIdentity());
-					if (dbPerson != null && !dbPerson.equals(person)) {
+					Person p = getPerson(person.getIdentity());
+					if (p != null && !p.equals(person)) {
 						throw new ModelExistException(null, "psn.identity.exists", person.getIdentity());
 					}
 				}

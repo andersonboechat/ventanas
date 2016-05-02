@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="Aluguel de Espaços - Relatório de Cobranca" language="groovy" pageWidth="595" pageHeight="842" whenNoDataType="AllSectionsNoDetail" columnWidth="555" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="ac22e1d9-ea68-4e07-8733-b1aee4c6eab5">
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="Aluguel de Espaços - Relatório de Cobranca" language="groovy" pageWidth="595" pageHeight="842" whenNoDataType="AllSectionsNoDetail" columnWidth="555" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20">
 	<property name="ireport.zoom" value="1.5"/>
 	<property name="ireport.x" value="0"/>
 	<property name="ireport.y" value="0"/>
@@ -58,14 +58,13 @@
 	</parameter>
 	<parameter name="month" class="java.lang.String">
 		<property name="input_type" value="select"/>
-		<property name="dict_query" value="java:comp/env/jdbc/aperte-reports; SELECT date, month FROM calendar order by 1"/>
+		<property name="dict_query" value="java:comp/env/jdbc/aperte-reports; SELECT date, month FROM jcondo.calendar ORDER BY date ASC"/>
 		<property name="required" value="true"/>
 		<property name="label" value="Mês"/>
 	</parameter>
 	<queryString>
-		<![CDATA[SELECT o.name Apartamento, r.name Espaço, DATE_FORMAT(b.date,'%d/%m/%Y') Data,
-concat(DATE_FORMAT(b.startTime,'%H:%i'), '-', DATE_FORMAT(b.endTime,'%H:%i')) Horário, r.price Valor FROM rb_booking b, Organization_ o, rb_room r
-where b.flatId = o.organizationId and b.roomId = r.id and b.date >= $P{month} - INTERVAL 30 DAY and b.date <= $P{month} order by 1, 3]]>
+		<![CDATA[SELECT CONCAT(f.block, '/', LPAD(f.number, 4, '0')) Apartamento, r.name Espaço, DATE_FORMAT(b.beginDate, '%d/%m/%Y') Data,
+concat(DATE_FORMAT(b.beginDate, '%H:%i'), '-', DATE_FORMAT(b.endDate, '%H:%i')) Horário, r.price Valor FROM jcondo.jco_booking b, jcondo.jco_flat f, jcondo.jco_resource r WHERE  b.domainId = f.id AND b.resourceId = r.id AND b.beginDate >= $P{month} - INTERVAL 1 MONTH AND b.beginDate < $P{month} + INTERVAL 1 DAY order by 1,3]]>
 	</queryString>
 	<field name="Apartamento" class="java.lang.String"/>
 	<field name="Espaço" class="java.lang.String"/>
@@ -79,20 +78,20 @@ where b.flatId = o.organizationId and b.roomId = r.id and b.date >= $P{month} - 
 	<title>
 		<band height="58" splitType="Stretch">
 			<line>
-				<reportElement x="0" y="57" width="556" height="1" uuid="048fe432-8ba1-4acc-9e72-9a17aa5e89e5">
+				<reportElement x="0" y="57" width="556" height="1">
 					<property name="local_mesure_unitheight" value="pixel"/>
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 				</reportElement>
 			</line>
 			<textField pattern="dd &apos;de&apos; MMMMM &apos;de&apos; yyyy">
-				<reportElement x="55" y="40" width="365" height="15" uuid="52fa5dae-55db-456d-a6ca-0de65ed28867"/>
+				<reportElement x="55" y="40" width="365" height="15"/>
 				<textElement>
 					<font size="8"/>
 				</textElement>
 				<textFieldExpression><![CDATA[new java.util.Date()]]></textFieldExpression>
 			</textField>
 			<staticText>
-				<reportElement x="0" y="0" width="420" height="25" uuid="82c6fa15-4c5d-4eb6-9968-ff8e79594791">
+				<reportElement x="0" y="0" width="420" height="25">
 					<property name="local_mesure_unitheight" value="pixel"/>
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 				</reportElement>
@@ -102,25 +101,25 @@ where b.flatId = o.organizationId and b.roomId = r.id and b.date >= $P{month} - 
 				<text><![CDATA[Aluguel de Espaços - Relatório de Cobrança]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="0" y="25" width="55" height="15" uuid="1ba862ea-0288-49f6-b3cc-3a590f9ab0cb"/>
+				<reportElement x="0" y="25" width="55" height="15"/>
 				<textElement>
 					<font size="8"/>
 				</textElement>
 				<text><![CDATA[Período:]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="0" y="40" width="55" height="15" uuid="bdb0cd18-8849-422d-8ebb-1cf5f08f3451"/>
+				<reportElement x="0" y="40" width="55" height="15"/>
 				<textElement>
 					<font size="8"/>
 				</textElement>
 				<text><![CDATA[Gerado em:]]></text>
 			</staticText>
 			<image>
-				<reportElement x="439" y="0" width="115" height="40" uuid="d72ea916-c94d-4a72-b804-c1580e3c0a43"/>
-				<imageExpression><![CDATA["http://www.ventanasresidencial.com.br/documents/10179/11610/logo-150x41.png"]]></imageExpression>
+				<reportElement x="439" y="0" width="115" height="40"/>
+				<imageExpression><![CDATA["http://www.ventanasresidencial.com.br/documents/10179/0/logo-150x41.png"]]></imageExpression>
 			</image>
 			<textField pattern="dd &apos;de&apos; MMMMM &apos;de&apos; yyyy">
-				<reportElement x="55" y="25" width="365" height="15" uuid="f2707255-0b3f-4c90-abf8-dd041793aee4"/>
+				<reportElement x="55" y="25" width="365" height="15"/>
 				<textElement>
 					<font size="8"/>
 				</textElement>
@@ -135,35 +134,35 @@ new java.text.SimpleDateFormat("' a 20 de' MMMMM 'de' yyyy").format(java.sql.Dat
 	<columnHeader>
 		<band height="20" splitType="Stretch">
 			<staticText>
-				<reportElement style="Column header" positionType="Float" x="0" y="0" width="112" height="20" forecolor="#000000" uuid="d8ab6751-b324-4db4-8c5f-57540ef15ce5"/>
+				<reportElement style="Column header" positionType="Float" x="0" y="0" width="112" height="20" forecolor="#000000"/>
 				<textElement>
 					<font fontName="SansSerif" size="13"/>
 				</textElement>
 				<text><![CDATA[Apartamento]]></text>
 			</staticText>
 			<staticText>
-				<reportElement style="Column header" positionType="Float" x="112" y="0" width="182" height="20" forecolor="#000000" uuid="428ef154-d01a-43b1-912a-cd7be89f41ed"/>
+				<reportElement style="Column header" positionType="Float" x="112" y="0" width="182" height="20" forecolor="#000000"/>
 				<textElement>
 					<font fontName="SansSerif" size="13"/>
 				</textElement>
 				<text><![CDATA[Espaço]]></text>
 			</staticText>
 			<staticText>
-				<reportElement style="Column header" positionType="Float" x="294" y="0" width="90" height="20" forecolor="#000000" uuid="ee31de39-ed77-4daf-8951-57f9d2e9a415"/>
+				<reportElement style="Column header" positionType="Float" x="294" y="0" width="90" height="20" forecolor="#000000"/>
 				<textElement>
 					<font fontName="SansSerif" size="13"/>
 				</textElement>
 				<text><![CDATA[Data]]></text>
 			</staticText>
 			<staticText>
-				<reportElement style="Column header" positionType="Float" x="384" y="0" width="92" height="20" forecolor="#000000" uuid="9b8f2a67-300f-45d1-93c7-5555ce35cc14"/>
+				<reportElement style="Column header" positionType="Float" x="384" y="0" width="92" height="20" forecolor="#000000"/>
 				<textElement>
 					<font fontName="SansSerif" size="13"/>
 				</textElement>
 				<text><![CDATA[Horário]]></text>
 			</staticText>
 			<staticText>
-				<reportElement style="Column header" positionType="Float" x="476" y="0" width="79" height="20" forecolor="#000000" uuid="2d45f790-7054-4cfa-af4a-22549be5b811"/>
+				<reportElement style="Column header" positionType="Float" x="476" y="0" width="79" height="20" forecolor="#000000"/>
 				<textElement>
 					<font fontName="SansSerif" size="13"/>
 				</textElement>
@@ -174,35 +173,35 @@ new java.text.SimpleDateFormat("' a 20 de' MMMMM 'de' yyyy").format(java.sql.Dat
 	<detail>
 		<band height="22" splitType="Stretch">
 			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-				<reportElement style="Row" positionType="Float" x="0" y="1" width="112" height="20" uuid="91480383-129e-43b5-8134-a70e2d2471b3"/>
+				<reportElement style="Row" positionType="Float" x="0" y="1" width="112" height="20"/>
 				<textElement verticalAlignment="Middle">
 					<font fontName="Arial" size="12" isBold="false" pdfFontName="Helvetica"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{Apartamento}]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-				<reportElement style="Row" positionType="Float" x="112" y="1" width="182" height="20" uuid="cf7124f0-7d2d-4702-9722-ffc87881ab48"/>
+				<reportElement style="Row" positionType="Float" x="112" y="1" width="182" height="20"/>
 				<textElement verticalAlignment="Middle">
 					<font fontName="Arial" size="12" isBold="false" pdfFontName="Helvetica"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{Espaço}]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-				<reportElement style="Row" positionType="Float" x="294" y="1" width="90" height="20" uuid="fe980c14-11a9-4782-a5f3-193c270ef8b2"/>
+				<reportElement style="Row" positionType="Float" x="294" y="1" width="90" height="20"/>
 				<textElement verticalAlignment="Middle">
 					<font fontName="Arial" size="12" isBold="false" pdfFontName="Helvetica"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{Data}]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-				<reportElement style="Row" positionType="Float" x="384" y="1" width="92" height="20" uuid="5e2f4b6b-c4f8-4cc0-9993-4022e37db4af"/>
+				<reportElement style="Row" positionType="Float" x="384" y="1" width="92" height="20"/>
 				<textElement verticalAlignment="Middle">
 					<font fontName="Arial" size="12" isBold="false" pdfFontName="Helvetica"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{Horário}]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-				<reportElement style="Row" positionType="Float" x="476" y="1" width="79" height="20" uuid="8439710d-e7d2-4aa2-b20d-87eea15b063a"/>
+				<reportElement style="Row" positionType="Float" x="476" y="1" width="79" height="20"/>
 				<textElement verticalAlignment="Middle">
 					<font fontName="Arial" size="12" isBold="false" pdfFontName="Helvetica"/>
 				</textElement>
@@ -216,13 +215,13 @@ new java.text.SimpleDateFormat("' a 20 de' MMMMM 'de' yyyy").format(java.sql.Dat
 	<pageFooter>
 		<band height="37" splitType="Stretch">
 			<line>
-				<reportElement x="0" y="2" width="555" height="1" uuid="cae9ecb9-34d8-43a8-8b30-fab6762fbb8d">
+				<reportElement x="0" y="2" width="555" height="1">
 					<property name="local_mesure_unitheight" value="pixel"/>
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 				</reportElement>
 			</line>
 			<staticText>
-				<reportElement x="90" y="5" width="370" height="31" uuid="397ade94-145d-4ead-b96e-e1df97afb3bb"/>
+				<reportElement x="90" y="5" width="370" height="31"/>
 				<textElement textAlignment="Center">
 					<font size="8"/>
 				</textElement>

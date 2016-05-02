@@ -179,7 +179,8 @@ public class VehicleServiceImpl implements BaseService<Vehicle> {
 		v.setImage(vehicle.getImage());
 		v = vehicleManager.save(v);
 
-		if (!v.getImage().getPath().equalsIgnoreCase(vehicle.getImage().getPath())) {
+		if (v.getImage().getPath() != null && 
+				!v.getImage().getPath().equalsIgnoreCase(vehicle.getImage().getPath())) {
 			try {
 				notifyVehicleUpdate(vehicle, "image");
 			} catch (Exception e) {
