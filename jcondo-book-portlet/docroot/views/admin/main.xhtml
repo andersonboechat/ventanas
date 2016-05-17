@@ -8,6 +8,7 @@
 	xmlns:p="http://primefaces.org/ui"
 	xmlns:ui="http://java.sun.com/jsf/facelets">
 <h:head>
+	<script type="text/javascript" src="/jcondo-book-portlet/js/textarea-workaround.js"/>
 	<style>
 	.occurrence .leftClm {width: 35%; vertical-align: top}
 	.occurrence .rightClm {vertical-align: top;}
@@ -564,9 +565,11 @@
 							</p:column>
 							<p:column>
 								<p:inputTextarea id="answerText" required="true" requiredMessage="#{msg['empty.answer']}"
-												 counter="remaining-chars" counterTemplate="#{msg['text.counter']} {0}" maxlength="1000"
-												 styleClass="textarea" value="#{answerBean.answer.text}"  
-												 readonly="#{answerBean.answer.date != null}"/>
+												 counter="remaining-chars" counterTemplate="#{msg['text.counter']} {0}" maxlength="1500"
+												 styleClass="textarea" value="#{answerBean.answer.text}" validatorMessage="O texto inserido ultrapassou a quantidade máxima."  
+												 readonly="#{answerBean.answer.date != null}">
+									<f:validateLength maximum="1500"/>
+								</p:inputTextarea>
 								<h:outputLabel id="remaining-chars" style="float:right; width: 100%" rendered="#{answerBean.answer.date == null}"/>
 							</p:column>
 						</h:panelGrid>
